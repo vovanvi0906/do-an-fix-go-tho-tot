@@ -125,9 +125,8 @@ async function main() {
   console.log('         FIXGO PRO - SEEDING DỮ LIỆU KIỂM THỬ THỰC TẾ');
   console.log('================================================================\n');
 
-  // Mật khẩu chung đã hash
+  // Mật khẩu chung 123456 đã hash
   const defaultPasswordHash = await bcrypt.hash('123456', 10);
-  const adminPasswordHash = await bcrypt.hash('Admin@123', 10);
 
   // ------------------------------------------------------------------
   // 1. SEED SUPER ADMIN
@@ -136,7 +135,8 @@ async function main() {
   const admin = await prisma.user.upsert({
     where: { email: adminEmail },
     update: {
-      passwordHash: adminPasswordHash,
+      name: 'Super Administrator',
+      passwordHash: defaultPasswordHash,
       role: UserRole.ADMIN,
       status: UserStatus.ACTIVE,
     },
@@ -144,12 +144,12 @@ async function main() {
       email: adminEmail,
       phone: '0900000000',
       name: 'Super Administrator',
-      passwordHash: adminPasswordHash,
+      passwordHash: defaultPasswordHash,
       role: UserRole.ADMIN,
       status: UserStatus.ACTIVE,
     },
   });
-  console.log(`✓ [Admin] Đã sẵn sàng: ${admin.email} (Pass: Admin@123)`);
+  console.log(`✓ [Admin] Đã sẵn sàng: ${admin.email} (Pass: 123456)`);
 
   // ------------------------------------------------------------------
   // 2. SEED CATALOG: 4 NHÓM DANH MỤC & DỊCH VỤ

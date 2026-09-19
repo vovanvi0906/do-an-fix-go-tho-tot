@@ -203,10 +203,8 @@ export default function RegisterWorkerScreen() {
   }, [step, countdown]);
 
   // ─── Password Security Checklist Rules (Figma) ──────────────────────────────
-  const hasMinLength = password.length >= 8;
-  const hasLetter = /[a-zA-Z]/.test(password);
-  const hasDigit = /[0-9]/.test(password);
-  const isPasswordValid = hasMinLength && hasLetter && hasDigit;
+  const hasMinLength = password.length >= 6;
+  const isPasswordValid = hasMinLength;
   const isPasswordMatch = confirmPassword.length > 0 && password === confirmPassword;
 
   // ─── Step 1: Submit Phone Number ────────────────────────────────────────────
@@ -659,7 +657,7 @@ export default function RegisterWorkerScreen() {
               <View style={styles.stepContainer}>
                 <Text style={styles.headerTitle}>Tạo mật khẩu</Text>
                 <Text style={styles.headerSubtitle}>
-                  Mật khẩu phải có ít nhất 8 ký tự, bao gồm ít nhất một chữ cái và một chữ số
+                  Mật khẩu phải có ít nhất 6 ký tự
                 </Text>
 
                 {/* Input: Nhập mật khẩu */}
@@ -706,39 +704,7 @@ export default function RegisterWorkerScreen() {
                         hasMinLength && styles.checklistTextValid,
                       ]}
                     >
-                      Có ít nhất 8 ký tự
-                    </Text>
-                  </View>
-
-                  <View style={styles.checklistItem}>
-                    <Ionicons
-                      name={hasLetter ? 'checkmark-circle' : 'close-circle'}
-                      size={18}
-                      color={hasLetter ? COLORS.green : COLORS.red}
-                    />
-                    <Text
-                      style={[
-                        styles.checklistText,
-                        hasLetter && styles.checklistTextValid,
-                      ]}
-                    >
-                      Có một chữ cái
-                    </Text>
-                  </View>
-
-                  <View style={styles.checklistItem}>
-                    <Ionicons
-                      name={hasDigit ? 'checkmark-circle' : 'close-circle'}
-                      size={18}
-                      color={hasDigit ? COLORS.green : COLORS.red}
-                    />
-                    <Text
-                      style={[
-                        styles.checklistText,
-                        hasDigit && styles.checklistTextValid,
-                      ]}
-                    >
-                      Có một chữ số
+                      Có ít nhất 6 ký tự
                     </Text>
                   </View>
                 </View>
