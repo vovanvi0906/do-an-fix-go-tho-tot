@@ -27,6 +27,10 @@ export default function ErrorState({
       <Text style={styles.title}>Đã có lỗi xảy ra</Text>
       <Text style={styles.description}>{message}</Text>
       <Pressable
+        accessible={true}
+        accessibilityRole="button"
+        accessibilityLabel="Thử lại kết nối"
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         style={({ pressed }) => [styles.retryBtn, pressed && styles.retryBtnPressed]}
         onPress={onRetry}
       >
@@ -73,6 +77,8 @@ const styles = StyleSheet.create({
   retryBtn: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 44,
     paddingHorizontal: 18,
     paddingVertical: 9,
     borderRadius: 20,

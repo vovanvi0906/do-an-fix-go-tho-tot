@@ -1,6 +1,7 @@
 /**
  * @file VoucherTickets.tsx
  * @description Thẻ voucher ưu đãi phong cách vé răng cưa / khoét khuyết tròn hai bên mép cho React Native FixGo.
+ * Đảm bảo tiêu chuẩn Touch Target >= 44x44px và Accessibility WCAG AA.
  */
 
 import React from 'react';
@@ -31,25 +32,29 @@ export default function VoucherTickets({
 }: VoucherTicketsProps) {
   return (
     <View style={styles.container}>
-      {/* Header */}
+      {/* ── 1. Header Row ─────────────────────────────────────── */}
       <View style={styles.headerRow}>
         <View style={styles.titleGroup}>
           <Ionicons name="pricetag" size={16} color="#EA580C" style={{ marginRight: 6 }} />
-          <Text style={styles.title}>Ưu đãi cho bạn</Text>
+          <Text style={styles.title}>Ưu đãi dành cho bạn</Text>
         </View>
 
         {onOpenWallet && (
           <Pressable
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel="Mở danh sách ví voucher"
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             style={({ pressed }) => [styles.walletBtn, pressed && styles.pressed]}
             onPress={onOpenWallet}
           >
             <Text style={styles.walletText}>Ví voucher</Text>
-            <Ionicons name="arrow-forward" size={12} color="#0284C7" />
+            <Ionicons name="arrow-forward" size={13} color="#0284C7" />
           </Pressable>
         )}
       </View>
 
-      {/* Horizontal Voucher List */}
+      {/* ── 2. Horizontal Voucher List ────────────────────────── */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -93,9 +98,13 @@ export default function VoucherTickets({
                 {/* Dashed Separator */}
                 <View style={styles.dashedLine} />
 
-                {/* Right Action Button */}
+                {/* Right Action Button (Touch Target >= 44x44px) */}
                 <View style={styles.ticketRightAction}>
                   <Pressable
+                    accessible={true}
+                    accessibilityRole="button"
+                    accessibilityLabel={voucher.isClaimed ? `Mã ${voucher.code} đã lưu` : `Lưu mã ${voucher.code}`}
+                    hitSlop={{ top: 12, bottom: 12, left: 10, right: 10 }}
                     style={({ pressed }) => [
                       styles.claimBtn,
                       voucher.isClaimed && styles.claimBtnClaimed,
@@ -142,23 +151,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '800',
     color: '#0F172A',
   },
   walletBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 2,
+    gap: 3,
+    minHeight: 44,
+    justifyContent: 'center',
   },
   walletText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#0284C7',
   },
   scrollContent: {
-    paddingRight: 16,
+    paddingRight: 20,
     gap: 12,
+    paddingVertical: 2,
   },
   ticketOuterWrapper: {
     width: 275,
@@ -251,9 +263,12 @@ const styles = StyleSheet.create({
   },
   claimBtn: {
     backgroundColor: '#FFFFFF',
-    paddingHorizontal: 12,
-    paddingVertical: 7,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
     borderRadius: 16,
+    minHeight: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
