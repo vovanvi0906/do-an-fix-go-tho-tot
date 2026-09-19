@@ -1,0 +1,528 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis, btree_gist]
+}
+
+// ========================================================
+// ENUMS
+// ========================================================
+
+enum UserRole {
+  CUSTOMER
+  WORKER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+}
+
+enum WorkerApprovalStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum KycStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum OrderStatus {
+  PENDING_AI
+  AWAITING_CONFIRM
+  SEARCHING_WORKER
+  MATCHED
+  WORKER_EN_ROUTE
+  IN_PROGRESS
+  AWAITING_ACCEPTANCE
+  DISPUTED
+  COMPLETED
+  PAID
+  CANCELLED
+
+  // Compatibility aliases
+  CREATED
+  SEARCHING
+  ASSIGNED
+  WORKER_ARRIVING
+  ARRIVED
+  AWAITING_CONFIRMATION
+  AWAITING_PAYMENT
+}
+
+enum OrderImageType {
+  ISSUE
+  BEFORE
+  AFTER
+}
+
+enum WalletTransactionType {
+  PAYOUT
+  WITHDRAW
+}
+
+// ========================================================
+// USER & WORKER PROFILES
+// ========================================================
+
+model User {
+  id           String     @id @default(uuid())
+  phone        String?    @unique
+  name         String?
+  email        String?    @unique
+  passwordHash String?
+  role         UserRole   @default(CUSTOMER)
+  avatarUrl    String?
+  status       UserStatus @default(ACTIVE)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  customerOrders  Order[]          @relation("CustomerOrders")
+  customerProfile CustomerProfile?
+  workerProfile   WorkerProfile?
+
+  @@map("users")
+}
+
+model CustomerProfile {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName  String?
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  addresses Address[]
+  orders    Order[]   @relation("CustomerProfileOrders")
+  reviews   Review[]
+  wallet    Wallet?
+
+  @@map("customer_profiles")
+}
+
+model WorkerProfile {
+  id                 String               @id @default(uuid())
+  userId             String               @unique
+  user               User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  faceVerifiedAt     DateTime?
+  rating             Float                @default(5.0)
+  isOnline           Boolean              @default(false)
+  currentLat         Float?
+  currentLng         Float?
+  serviceCategoryIds String[]             @default([])
+  kycStatus          KycStatus            @default(PENDING)
+
+  fullName           String?
+  avatarUrl          String?
+  approvalStatus     WorkerApprovalStatus @default(DRAFT)
+  idCardNumber       String?
+  idCardVerified     Boolean              @default(false)
+  skills             String[]             @default([])
+  bio                String?
+  experienceYears    Int?
+  ratingAvg          Float                @default(5.0)
+  totalReviews       Int                  @default(0)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+
+  orders             Order[]              @relation("WorkerOrders")
+  workerWallet       WorkerWallet?
+  wallet             Wallet?
+  reviews            Review[]             @relation("WorkerReviews")
+  workerServices     WorkerService[]
+  faceProfile        FaceProfile?
+
+  currentLocation    Unsupported("geometry(Point, 4326)")?
+
+  @@index([currentLocation], type: Gist)
+  @@index([currentLat, currentLng])
+  @@map("worker_profiles")
+}
+
+model Address {
+  id         String          @id @default(uuid())
+  customerId String
+  customer   CustomerProfile @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  title      String?
+  street     String
+  ward       String?
+  district   String?
+  city       String?
+  latitude   Float
+  longitude  Float
+  isDefault  Boolean         @default(false)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  orders Order[]
+
+  @@map("addresses")
+}
+
+// ========================================================
+// SERVICE CATEGORY & CATALOG
+// ========================================================
+
+model ServiceCategory {
+  id               String   @id @default(uuid())
+  name             String
+  basePrice        Decimal  @default(100000) @db.Decimal(12, 2)
+  unit             String   @default("lần")
+  estimatedMinutes Int      @default(60)
+  warrantyDays     Int      @default(30)
+  slug             String?  @unique
+  description      String?
+  icon             String?
+  iconUrl          String?
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  orders             Order[]  @relation("CategoryOrders")
+  aiSuggestedOrders Order[]  @relation("AISuggestedCategoryOrders")
+  services           Service[]
+
+  @@map("service_categories")
+}
+
+model Service {
+  id                   String          @id @default(uuid())
+  categoryId           String
+  category             ServiceCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name                 String
+  description          String?
+  basePrice            Decimal         @db.Decimal(12, 2)
+  unit                 String?
+  estimatedDurationMin Int?
+  isActive             Boolean         @default(true)
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  workerServices WorkerService[]
+  orders         Order[]
+
+  @@map("services")
+}
+
+model WorkerService {
+  id          String        @id @default(uuid())
+  workerId    String
+  worker      WorkerProfile @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  serviceId   String
+  service     Service       @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  customPrice Decimal?      @db.Decimal(12, 2)
+  isAvailable Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@unique([workerId, serviceId])
+  @@map("worker_services")
+}
+
+// ========================================================
+// ORDER & WORKFLOW AGGREGATE
+// ========================================================
+
+model Order {
+  id                    String           @id @default(uuid())
+  customerId            String
+  customer              User             @relation("CustomerOrders", fields: [customerId], references: [id])
+  workerId              String?
+  worker                WorkerProfile?   @relation("WorkerOrders", fields: [workerId], references: [id])
+  categoryId            String
+  category              ServiceCategory  @relation("CategoryOrders", fields: [categoryId], references: [id])
+  status                OrderStatus      @default(PENDING_AI)
+  addressText           String
+  lat                   Float
+  lng                   Float
+  note                  String?
+  aiSuggestedCategoryId String?
+  aiSuggestedCategory   ServiceCategory? @relation("AISuggestedCategoryOrders", fields: [aiSuggestedCategoryId], references: [id])
+  aiConfidence          Float?
+  estimatedPrice        Decimal          @db.Decimal(12, 2)
+  finalPrice            Decimal?         @db.Decimal(12, 2)
+  commissionPercent     Float            @default(15.0)
+  scheduledAt           DateTime?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+
+  // Compatibility fields
+  pickupAddress      String?
+  pickupLat          Float?
+  pickupLng          Float?
+  totalPrice         Decimal?            @db.Decimal(12, 2)
+  commissionRate     Float?              @default(0.15)
+  serviceId          String?
+  service            Service?            @relation(fields: [serviceId], references: [id])
+  customerProfileId  String?
+  customerProfile    CustomerProfile?    @relation("CustomerProfileOrders", fields: [customerProfileId], references: [id])
+  addressId          String?
+  address            Address?            @relation(fields: [addressId], references: [id])
+  cancellationReason String?
+  cancelledBy        String?
+  startedAt          DateTime?
+  completedAt        DateTime?
+
+  // Aggregate relations
+  statusHistory      OrderStatusHistory[]
+  images             OrderImage[]
+  payment            Payment?
+  review             Review?
+  walletTransactions WalletTransaction[]
+  faceVerifications  FaceVerification[]
+  aiAnalyses         AIAnalysis[]
+  commissionRecord   CommissionRecord?
+
+  @@index([status])
+  @@index([workerId])
+  @@index([customerId])
+  @@index([categoryId])
+  @@map("orders")
+}
+
+model OrderStatusHistory {
+  id        String      @id @default(uuid())
+  orderId   String
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status    OrderStatus
+  note      String?
+  changedBy String?
+  createdAt DateTime    @default(now())
+
+  @@index([orderId])
+  @@map("order_status_histories")
+}
+
+model OrderImage {
+  id           String         @id @default(uuid())
+  orderId      String
+  order        Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  type         OrderImageType @default(ISSUE)
+  url          String
+  aiMatchScore Float?
+  uploadedAt   DateTime       @default(now())
+
+  // Compatibility fields
+  imageUrl    String?
+  imageType   String?
+  description String?
+  createdAt   DateTime     @default(now())
+  aiAnalyses  AIAnalysis[]
+
+  @@index([orderId])
+  @@map("order_images")
+}
+
+// ========================================================
+// AI & FACE VERIFICATION
+// ========================================================
+
+model FaceProfile {
+  id            String        @id @default(uuid())
+  workerId      String        @unique
+  worker        WorkerProfile @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  facePhotoUrl  String
+  faceEmbedding Json?
+  isRegistered  Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  verifications FaceVerification[]
+
+  @@map("face_profiles")
+}
+
+model FaceVerification {
+  id               String      @id @default(uuid())
+  faceProfileId    String
+  faceProfile      FaceProfile @relation(fields: [faceProfileId], references: [id], onDelete: Cascade)
+  orderId          String?
+  order            Order?      @relation(fields: [orderId], references: [id])
+  capturedPhotoUrl String
+  similarityScore  Float
+  isMatched        Boolean
+  verifiedAt       DateTime    @default(now())
+
+  @@map("face_verifications")
+}
+
+model AIAnalysis {
+  id            String      @id @default(uuid())
+  orderId       String
+  order         Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderImageId  String?
+  orderImage    OrderImage? @relation(fields: [orderImageId], references: [id])
+  analysisType  String
+  resultSummary String?
+  rawResult     Json?
+  confidence    Float?
+  createdAt     DateTime    @default(now())
+
+  @@map("ai_analyses")
+}
+
+// ========================================================
+// PAYMENT, WALLETS & COMMISSION
+// ========================================================
+
+model Payment {
+  id                 String    @id @default(uuid())
+  orderId            String    @unique
+  order              Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amount             Decimal   @db.Decimal(12, 2)
+  commissionAmount   Decimal   @default(0) @db.Decimal(12, 2)
+  workerPayoutAmount Decimal   @default(0) @db.Decimal(12, 2)
+  method             String    @default("VNPAY")
+  status             String    @default("PENDING")
+  paidAt             DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  // Compatibility fields
+  paymentMethod    String?
+  transactionCode  String?
+  commissionRecord CommissionRecord?
+
+  @@map("payments")
+}
+
+model CommissionRecord {
+  id               String   @id @default(uuid())
+  orderId          String   @unique
+  order            Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  paymentId        String?  @unique
+  payment          Payment? @relation(fields: [paymentId], references: [id])
+  grossAmount      Decimal  @db.Decimal(12, 2)
+  commissionRate   Float
+  commissionAmount Decimal  @db.Decimal(12, 2)
+  workerEarnings   Decimal  @db.Decimal(12, 2)
+  createdAt        DateTime @default(now())
+
+  @@map("commission_records")
+}
+
+model WorkerWallet {
+  id        String        @id @default(uuid())
+  workerId  String        @unique
+  worker    WorkerProfile @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  balance   Decimal       @default(0) @db.Decimal(12, 2)
+  updatedAt DateTime      @updatedAt
+
+  transactions WalletTransaction[]
+
+  @@map("worker_wallets")
+}
+
+model Wallet {
+  id         String           @id @default(uuid())
+  workerId   String?          @unique
+  worker     WorkerProfile?   @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  customerId String?          @unique
+  customer   CustomerProfile? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  balance    Decimal          @default(0) @db.Decimal(12, 2)
+  currency   String           @default("VND")
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  transactions WalletTransaction[]
+
+  @@map("wallets")
+}
+
+model WalletTransaction {
+  id             String                @id @default(uuid())
+  walletId       String
+  workerWallet   WorkerWallet?         @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  legacyWallet   Wallet?               @relation(fields: [legacyWalletId], references: [id], onDelete: Cascade)
+  legacyWalletId String?
+  orderId        String?
+  order          Order?                @relation(fields: [orderId], references: [id])
+  amount         Decimal               @db.Decimal(12, 2)
+  type           WalletTransactionType @default(PAYOUT)
+  createdAt      DateTime              @default(now())
+
+  // Compatibility fields
+  description   String?
+  balanceBefore Decimal? @db.Decimal(12, 2)
+  balanceAfter  Decimal? @db.Decimal(12, 2)
+
+  @@index([walletId])
+  @@index([orderId])
+  @@map("wallet_transactions")
+}
+
+// ========================================================
+// REVIEW
+// ========================================================
+
+model Review {
+  id        String   @id @default(uuid())
+  orderId   String   @unique
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+
+  // Compatibility fields
+  customerId String?
+  customer   CustomerProfile? @relation(fields: [customerId], references: [id])
+  workerId   String?
+  worker     WorkerProfile?   @relation("WorkerReviews", fields: [workerId], references: [id])
+  updatedAt  DateTime?        @updatedAt
+
+  @@map("reviews")
+}
+
+// ========================================================
+// SYSTEM SETTINGS & PROMOTIONS
+// ========================================================
+
+model SystemSetting {
+  id                    String   @id @default(uuid())
+  siteName              String   @default("FixGo - Nền tảng Dịch vụ Cứu hộ & Sửa chữa")
+  supportEmail          String   @default("support@fixgo.vn")
+  supportHotline        String   @default("1900-8888")
+  maxSearchRadiusKm     Float    @default(15.0)
+  defaultCommissionRate Float    @default(15.0)
+  orderTimeoutSeconds   Int      @default(60)
+  autoMatching          Boolean  @default(true)
+  notifyOnArrival       Boolean  @default(true)
+  smsOtpEnabled         Boolean  @default(true)
+  maintenanceMode       Boolean  @default(false)
+  maintenanceMessage    String?  @default("Hệ thống đang bảo trì nâng cấp định kỳ. Xin vui lòng quay lại sau ít phút!")
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("system_settings")
+}
+
+model Voucher {
+  id            String   @id @default(uuid())
+  code          String   @unique
+  title         String
+  description   String?
+  discountType  String   @default("PERCENTAGE")
+  discountValue Decimal  @db.Decimal(12, 2)
+  minOrderValue Decimal? @db.Decimal(12, 2)
+  maxDiscount   Decimal? @db.Decimal(12, 2)
+  isActive      Boolean  @default(true)
+  startDate     DateTime @default(now())
+  endDate       DateTime
+  usageLimit    Int?
+  usedCount     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("vouchers")
+}

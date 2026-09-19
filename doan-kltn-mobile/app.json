@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "doan-kltn-mobile",
+    "slug": "doan-kltn-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icons/icon.png",
+    "scheme": "doankltn",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icons/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-asset",
+      "expo-font",
+      "expo-secure-store"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

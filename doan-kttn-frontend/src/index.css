@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg-base: #0A0B10;
+  --color-bg-surface: #14161F;
+  --color-border-subtle: #232633;
+  --color-text-primary: #F5F5F7;
+  --color-text-secondary: #9CA3AF;
+  --color-accent-blue: #3B82F6;
+  --color-accent-purple: #8B5CF6;
+  --color-accent-green: #22C55E;
+  --color-accent-amber: #F59E0B;
+  --color-accent-red: #EF4444;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Smooth transition when switching themes */
+html {
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: #020617;
+}
+
+/* Ẩn hoàn toàn thanh cuộn trình duyệt trên toàn bộ giao diện quản trị FixGo Pro */
+.no-scrollbar::-webkit-scrollbar,
+.custom-scrollbar::-webkit-scrollbar,
+main *::-webkit-scrollbar,
+main::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.no-scrollbar,
+.custom-scrollbar,
+main,
+main * {
+  -ms-overflow-style: none !important; /* IE and Edge */
+  scrollbar-width: none !important; /* Firefox */
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 16s linear infinite;
+}
+
+/* ========================================================
+   MOUSE-FOLLOWING SPOTLIGHT GLOW EFFECT (LINEAR / VERCEL STYLE)
+   ======================================================== */
+.spotlight-card {
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.spotlight-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    500px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    var(--spotlight-color, rgba(59, 130, 246, 0.14)),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.spotlight-card:hover::before {
+  opacity: 1;
+}
+
+.spotlight-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.spotlight-item::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    220px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(59, 130, 246, 0.15),
+    transparent 65%
+  );
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.spotlight-item:hover::before {
+  opacity: 1;
+}
