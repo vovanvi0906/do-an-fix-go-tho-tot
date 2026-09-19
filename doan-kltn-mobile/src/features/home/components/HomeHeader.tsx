@@ -19,6 +19,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { UserProfile } from '../types/home.types';
 
 interface HomeHeaderProps {
@@ -58,6 +59,7 @@ export default function HomeHeader({
   onDistrictChange,
   onOpenNotifications,
 }: HomeHeaderProps) {
+  const insets = useSafeAreaInsets();
   const [isDistrictModalOpen, setIsDistrictModalOpen] = useState(false);
   const [isRewardsModalOpen, setIsRewardsModalOpen] = useState(false);
 
@@ -84,7 +86,7 @@ export default function HomeHeader({
       colors={['#0284C7', '#0EA5E9']}
       start={{ x: 0, y: 0 }}
       end={{ x: 0, y: 1 }}
-      style={styles.container}
+      style={[styles.container, { paddingTop: Math.max(insets.top, 16) }]}
     >
       {/* ── 1. Top Row: Greeting, District Selector & Action Icons ── */}
       <View style={styles.topRow}>
