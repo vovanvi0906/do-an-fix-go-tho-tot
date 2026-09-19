@@ -4,8 +4,19 @@ import Constants from 'expo-constants';
 import { tokenStorage } from '../storage/tokenStorage';
 
 const getSocketUrl = () => {
-  if (process.env.EXPO_PUBLIC_API_URL) {
+  if (
+    process.env.EXPO_PUBLIC_API_URL &&
+    !process.env.EXPO_PUBLIC_API_URL.includes('localhost') &&
+    !process.env.EXPO_PUBLIC_API_URL.includes('127.0.0.1')
+  ) {
     return process.env.EXPO_PUBLIC_API_URL.replace('/api', '');
+  }
+  if (
+    process.env.EXPO_PUBLIC_SOCKET_URL &&
+    !process.env.EXPO_PUBLIC_SOCKET_URL.includes('localhost') &&
+    !process.env.EXPO_PUBLIC_SOCKET_URL.includes('127.0.0.1')
+  ) {
+    return process.env.EXPO_PUBLIC_SOCKET_URL;
   }
 
   // Tự động lấy IP máy tính chủ từ Expo server để thiết bị thật kết nối thẳng vào Backend

@@ -5,7 +5,11 @@ import { tokenStorage } from '../storage/tokenStorage';
 
 // Tự động nhận diện Base URL API tùy theo môi trường (Điện thoại thật qua Wi-Fi, Android Emulator, Web/iOS)
 const getDefaultBaseUrl = () => {
-  if (process.env.EXPO_PUBLIC_API_URL) {
+  if (
+    process.env.EXPO_PUBLIC_API_URL &&
+    !process.env.EXPO_PUBLIC_API_URL.includes('localhost') &&
+    !process.env.EXPO_PUBLIC_API_URL.includes('127.0.0.1')
+  ) {
     return process.env.EXPO_PUBLIC_API_URL;
   }
   // Tự động lấy IP máy tính chủ từ Expo server để điện thoại thật kết nối thẳng vào Backend
