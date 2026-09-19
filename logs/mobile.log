@@ -9,7 +9,18 @@ Warning: Ignoring extra certs from `C:\Users\VI\AppData\Roaming\9router\mitm\roo
 [2mStarting Metro Bundler[22m
 [33mThe following packages should be updated for best compatibility with the installed [1mexpo[22m version:[39m
 [33m  [1mreact-native-maps[22m[36m@[39m[33m[31m1.29.0[39m[33m - expected version: [32m1.18.0[39m[33m[39m
+[33m  [1mjest[22m[36m@[39m[33m[31m30.5.2[39m[33m - expected version: [32m~29.7.0[39m[33m[39m
 [33mYour project may not work correctly until you install the expected versions of the packages.[39m
 Waiting on [4mhttp://localhost:8081[24m
 Logs for your project will appear below.
+[33m|[39m Warning: Ignoring extra certs from `C:\Users\VI\AppData\Roaming\9router\mitm\rootCA.crt`, load failed: error:80000003:system library::No such process
+[33m|[39m Warning: Ignoring extra certs from `C:\Users\VI\AppData\Roaming\9router\mitm\rootCA.crt`, load failed: error:80000003:system library::No such process
+[33m|[39m Warning: Ignoring extra certs from `C:\Users\VI\AppData\Roaming\9router\mitm\rootCA.crt`, load failed: error:80000003:system library::No such process
+[33m|[39m Warning: Ignoring extra certs from `C:\Users\VI\AppData\Roaming\9router\mitm\rootCA.crt`, load failed: error:80000003:system library::No such process
+[33m|[39m Warning: Ignoring extra certs from `C:\Users\VI\AppData\Roaming\9router\mitm\rootCA.crt`, load failed: error:80000003:system library::No such process
+[33m|[39m Warning: Ignoring extra certs from `C:\Users\VI\AppData\Roaming\9router\mitm\rootCA.crt`, load failed: error:80000003:system library::No such process
+[33m|[39m Warning: Ignoring extra certs from `C:\Users\VI\AppData\Roaming\9router\mitm\rootCA.crt`, load failed: error:80000003:system library::No such process
+[33m|[39m Warning: Ignoring extra certs from `C:\Users\VI\AppData\Roaming\9router\mitm\rootCA.crt`, load failed: error:80000003:system library::No such process
+[32m[1mWeb[22m Bundled [39m[2m16598ms[22m[0m[2m node_modules\expo-router\entry.js (959 modules)[22m[0m
+[7m[37m[1m LOG [22m[39m[27m [web] Logs will appear in the browser console
 Terminate batch job (Y/N)? 

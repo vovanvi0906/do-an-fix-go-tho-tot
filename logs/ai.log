@@ -1,12 +1,12 @@
 INFO:     Will watch for changes in these directories: ['G:\\project-school\\ai-service']
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO:     Started reloader process [22088] using WatchFiles
+INFO:     Started reloader process [21092] using WatchFiles
 WARNING:ai-service:Ultralytics YOLO not available ([WinError 1114] A dynamic link library (DLL) initialization routine failed. Error loading "G:\project-school\ai-service\.venv\Lib\site-packages\torch\lib\c10.dll" or one of its dependencies.), operating in lightweight fallback mode.
-INFO:     Started server process [10432]
+INFO:     Started server process [19004]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Shutting down
 INFO:     Waiting for application shutdown.
 INFO:     Application shutdown complete.
-INFO:     Finished server process [10432]
-INFO:     Stopping reloader process [22088]
+INFO:     Finished server process [19004]
+INFO:     Stopping reloader process [21092]

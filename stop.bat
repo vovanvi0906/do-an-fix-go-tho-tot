@@ -1,25 +1,17 @@
 @echo off
-title FixGo Pro - Stop Development Environment
-
+title FixGo Pro - Stop All Services
 echo ================================================================
-echo          FIXGO PRO - DUNG TOAN BO HE THONG DEV
+echo           DANG DUNG TOAN BO HE THONG FIXGO PRO...
 echo ================================================================
 echo.
+echo [1/2] Dang giai phong cac tien trinh Node.js va Python...
+taskkill /F /IM node.exe >nul 2>&1
+taskkill /F /IM python.exe >nul 2>&1
+taskkill /F /IM uvicorn.exe >nul 2>&1
 
-echo [1/2] Dang tat Docker Database & Redis...
-docker compose down
-
-echo [2/2] Dang giai phong cac tien trinh Node/Python local...
-:: Tim va tat cac process chiem cong 3000 & 8000 neu can
-for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":3000" ^| findstr "LISTENING"') do (
-    taskkill /F /PID %%a >nul 2>&1
-)
-for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":8000" ^| findstr "LISTENING"') do (
-    taskkill /F /PID %%a >nul 2>&1
-)
+echo [2/2] Dang dung Docker Postgres va Redis...
+docker compose down >nul 2>&1
 
 echo.
-echo ================================================================
-echo  Toan bo he thong da dung va giai phong RAM thanh cong!
-echo ================================================================
-pause
+echo [OK] Toan bo he thong da duoc tat va giai phong tai nguyen sach se!
+timeout /t 2 >nul
