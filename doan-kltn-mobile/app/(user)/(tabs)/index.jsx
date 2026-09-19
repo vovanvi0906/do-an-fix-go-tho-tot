@@ -1,33 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import HomeScreen from '../../../src/features/home/screens/HomeScreen';
 
-export default function TrangchKhchhngScreen() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Màn hình: Trang chủ Khách hàng</Text>
-      <Text style={styles.subtitle}>Danh sách danh mục dịch vụ, banner, thợ nổi bật</Text>
-    </View>
-  );
+export default function UserHomeScreen() {
+  return <HomeScreen />;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    padding: 20,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#0F172A',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#64748B',
-    textAlign: 'center',
-  },
-});
