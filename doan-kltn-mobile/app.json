@@ -7,7 +7,7 @@
     "icon": "./assets/icons/icon.png",
     "scheme": "doankltn",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",

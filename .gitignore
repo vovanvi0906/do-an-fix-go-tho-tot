@@ -28,8 +28,9 @@ web-build/
 */.expo/
 
 # Logs
-logs/
+/logs/
 *.log
+!doan-kltn-backend/src/modules/logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

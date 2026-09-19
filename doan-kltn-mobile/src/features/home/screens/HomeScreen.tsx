@@ -11,7 +11,7 @@
  * 7. Ưu đãi dành cho bạn (Voucher Tickets ở cuối)
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -30,11 +30,13 @@ import EmptyState from '../components/EmptyState';
 import ErrorState from '../components/ErrorState';
 import HomeHeader from '../components/HomeHeader';
 import AiBanner from '../components/AiBanner';
+import AiScanModal from '../components/AiScanModal';
 import WorkerMapSection from '../components/WorkerMapSection';
 import CategoryGrid from '../components/CategoryGrid';
 import PopularServicesCarousel from '../components/PopularServicesCarousel';
 import VoucherTickets from '../components/VoucherTickets';
 import type { ServiceItem, WorkerItem } from '../types/home.types';
+import type { AiDiagnosisResponse } from '../../../services/api/aiService';
 
 /**
  * Component `HomeScreen`
@@ -42,6 +44,7 @@ import type { ServiceItem, WorkerItem } from '../types/home.types';
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const [isAiScanModalOpen, setIsAiScanModalOpen] = useState(false);
 
   // =========================================================================
   // HOOK QUẢN LÝ DỮ LIỆU & STATE TRANG CHỦ
@@ -109,18 +112,29 @@ export default function HomeScreen() {
   };
 
   const handleScanPress = () => {
+    setIsAiScanModalOpen(true);
+  };
+
+  const handleConfirmAiBooking = (diagnosis: AiDiagnosisResponse) => {
     Alert.alert(
-      'AI Scan & Chẩn đoán 2.0',
-      'Mở camera để chụp ảnh sự cố hỏng hóc trong nhà (ống nước, máy lạnh, chập điện...) và nhận báo giá tự động từ FixGo AI.',
+      'Xác nhận đặt lịch qua AI',
+      `Bạn đang đặt thợ cho dịch vụ "${diagnosis.categoryName}"\n• Khoảng giá ước tính: ${diagnosis.estimatedPrice.min.toLocaleString('vi-VN')} đ - ${diagnosis.estimatedPrice.max.toLocaleString('vi-VN')} đ\n• Thời gian thợ tới: ~15 phút`,
       [
+        { text: 'Để sau', style: 'cancel' },
         {
-          text: 'Chụp ảnh ngay',
+          text: 'Tiếp tục đặt lịch',
           onPress: () => {
-            // @ts-expect-error - dynamic route
-            router.push('/(user)/image-analysis');
+            router.push({
+              pathname: '/(user)/booking',
+              params: {
+                categoryId: diagnosis.suggestedCategoryId,
+                categoryName: diagnosis.categoryName,
+                price: diagnosis.estimatedPrice.min,
+                note: diagnosis.notes,
+              },
+            });
           },
         },
-        { text: 'Để sau', style: 'cancel' },
       ]
     );
   };
@@ -147,7 +161,7 @@ export default function HomeScreen() {
       <StatusBar style="light" translucent />
 
       {/* ── 1. Header Gradient & Thanh tìm kiếm với Safe Area Top ─────────── */}
-      <View style={[styles.headerSafeAreaWrap, { paddingTop: Math.max(insets.top, 12) }]}>
+      <View style={styles.headerSafeAreaWrap}>
         <HomeHeader
           user={data.user}
           searchQuery={searchQuery}
@@ -189,11 +203,9 @@ export default function HomeScreen() {
             onSelectCategory={handleCategorySelect}
           />
 
-          {/* ── 5. Thợ trực tuyến quanh bạn (Radar Map) ───────────────── */}
+          {/* ── 5. Thợ trực tuyến quanh bạn (Radar Map & PostGIS Integration) ── */}
           <WorkerMapSection
-            workers={data.nearbyWorkers}
             userDistrict={selectedDistrict}
-            onOpenMap={() => Alert.alert('Bản đồ thợ', 'Đang kết nối GPS hiển thị toàn bộ mạng lưới thợ.')}
             onSelectWorker={handleSelectWorker}
           />
 
@@ -224,6 +236,13 @@ export default function HomeScreen() {
           />
         </View>
       </ScrollView>
+
+      {/* ── Modal Quét & Chẩn đoán Sự cố AI 2.0 ───────────────────── */}
+      <AiScanModal
+        visible={isAiScanModalOpen}
+        onClose={() => setIsAiScanModalOpen(false)}
+        onConfirmBooking={handleConfirmAiBooking}
+      />
     </View>
   );
 }

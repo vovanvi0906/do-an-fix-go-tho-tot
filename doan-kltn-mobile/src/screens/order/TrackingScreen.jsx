@@ -20,16 +20,7 @@ import { useOrderStore } from '../../store/useOrderStore';
 import { socketService } from '../../services/socket/socketService';
 import { orderService } from '../../services/api/orderService';
 
-// Dynamic import or safe fallback for react-native-maps
-let MapView, Marker, Polyline;
-try {
-  const Maps = require('react-native-maps');
-  MapView = Maps.default;
-  Marker = Maps.Marker;
-  Polyline = Maps.Polyline;
-} catch (e) {
-  console.warn('⚠️ [TrackingScreen] react-native-maps not loaded natively:', e.message);
-}
+import { WebView } from 'react-native-webview';
 
 /**
  * Screen 4: TrackingScreen
@@ -344,75 +335,91 @@ export default function TrackingScreen({ navigation, onNext, onCancel }) {
         </View>
       )}
 
-      {/* Khu vực Bản đồ MapView */}
+      {/* Khu vực Bản đồ Leaflet OpenStreetMap qua WebView */}
       <View style={styles.mapContainer}>
-        {MapView && Platform.OS !== 'web' ? (
-          <MapView
-            ref={mapRef}
-            style={styles.map}
-            initialRegion={{
-              latitude: (customerCoord.latitude + currentWorkerCoord.latitude) / 2,
-              longitude: (customerCoord.longitude + currentWorkerCoord.longitude) / 2,
-              latitudeDelta: 0.025,
-              longitudeDelta: 0.025,
-            }}
-          >
-            {/* Marker Khách hàng */}
-            <Marker coordinate={customerCoord} title="Vị trí của bạn" pinColor="#EF4444">
-              <View style={styles.customerPin}>
-                <Ionicons name="home" size={18} color="#FFF" />
-              </View>
-            </Marker>
+        <WebView
+          originWhitelist={['*']}
+          source={{
+            html: `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body, html, #map { width: 100%; height: 100%; background: #0F172A; overflow: hidden; }
+    .customer-pin {
+      width: 32px; height: 32px; background: #EF4444;
+      border: 3px solid #FFFFFF; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4); font-size: 14px; text-align: center; line-height: 26px;
+    }
+    .worker-pin-wrap {
+      position: relative; width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .worker-pulse {
+      position: absolute; width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(2, 132, 199, 0.45); animation: pulse 2s infinite ease-out;
+    }
+    .worker-pin {
+      position: relative; width: 32px; height: 32px; background: #0284C7;
+      border: 3px solid #FFFFFF; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4); font-size: 15px; text-align: center; line-height: 26px; z-index: 2;
+    }
+    @keyframes pulse {
+      0% { transform: scale(0.6); opacity: 0.9; }
+      100% { transform: scale(2.4); opacity: 0; }
+    }
+    .leaflet-control-attribution { display: none !important; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <script>
+    const custLat = ${customerCoord.latitude};
+    const custLng = ${customerCoord.longitude};
+    const workLat = ${currentWorkerCoord.latitude};
+    const workLng = ${currentWorkerCoord.longitude};
+    const midLat = (custLat + workLat) / 2;
+    const midLng = (custLng + workLng) / 2;
 
-            {/* Marker Thợ di chuyển */}
-            <Marker
-              coordinate={currentWorkerCoord}
-              title={activeWorker.fullName}
-              description="Vị trí thời gian thực"
-            >
-              <View style={styles.workerPin}>
-                <Ionicons name="bicycle" size={20} color="#FFF" />
-              </View>
-            </Marker>
+    const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([midLat, midLng], 14);
+    
+    // 1. Lớp ảnh vệ tinh độ nét cao Esri World Imagery
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 19,
+      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+    }).addTo(map);
 
-            {/* Đường nối giữa Khách và Thợ */}
-            {Polyline && (
-              <Polyline
-                coordinates={[customerCoord, currentWorkerCoord]}
-                strokeColor="#0284C7"
-                strokeWidth={4}
-                lineDashPattern={[6, 4]}
-              />
-            )}
-          </MapView>
-        ) : (
-          /* Mock Visual Map Fallback (cho web/môi trường dev) */
-          <View style={styles.mapFallback}>
-            <View style={styles.fallbackGrid}>
-              <View style={styles.routeLine} />
+    // 2. Lớp nhãn đường phố & địa danh (Satellite Hybrid Labels)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19,
+      subdomains: 'abcd'
+    }).addTo(map);
 
-              {/* Thợ Marker */}
-              <View style={[styles.workerPin, styles.mockWorkerPin]}>
-                <Ionicons name="bicycle" size={22} color="#FFF" />
-              </View>
+    const custIcon = L.divIcon({ className: '', html: '<div class="customer-pin">🏠</div>', iconSize: [32, 32], iconAnchor: [16, 16] });
+    L.marker([custLat, custLng], { icon: custIcon }).addTo(map);
 
-              {/* Khách Marker */}
-              <View style={[styles.customerPin, styles.mockCustomerPin]}>
-                <Ionicons name="home" size={20} color="#FFF" />
-              </View>
-            </View>
+    const workIcon = L.divIcon({ className: '', html: '<div class="worker-pin-wrap"><div class="worker-pulse"></div><div class="worker-pin">🛵</div></div>', iconSize: [36, 36], iconAnchor: [18, 18] });
+    L.marker([workLat, workLng], { icon: workIcon }).addTo(map);
 
-            <View style={styles.mapOverlayInfo}>
-              <View style={styles.liveIndicator}>
-                <View style={styles.liveDot} />
-                <Text style={styles.liveText}>GPS REALTIME TRACKING</Text>
-              </View>
-              <Text style={styles.mapCoordsText}>
-                Thợ: {currentWorkerCoord.latitude.toFixed(4)}, {currentWorkerCoord.longitude.toFixed(4)}
-              </Text>
-            </View>
-          </View>
-        )}
+    L.polyline([[custLat, custLng], [workLat, workLng]], { color: '#0284C7', weight: 4, dashArray: '6, 8', opacity: 0.9 }).addTo(map);
+
+    const bounds = L.latLngBounds([[custLat, custLng], [workLat, workLng]]);
+    map.fitBounds(bounds, { padding: [40, 40] });
+  </script>
+</body>
+</html>`
+          }}
+          style={styles.map}
+          javaScriptEnabled={true}
+          domStorageEnabled={true}
+          scrollEnabled={false}
+        />
 
         {/* Floating Tag khoảng cách & thời gian */}
         <View style={styles.etaFloatingBadge}>

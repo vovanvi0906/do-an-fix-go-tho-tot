@@ -23,4 +23,8 @@ Logs for your project will appear below.
 [33m|[39m Warning: Ignoring extra certs from `C:\Users\VI\AppData\Roaming\9router\mitm\rootCA.crt`, load failed: error:80000003:system library::No such process
 [32m[1mWeb[22m Bundled [39m[2m16598ms[22m[0m[2m node_modules\expo-router\entry.js (959 modules)[22m[0m
 [7m[37m[1m LOG [22m[39m[27m [web] Logs will appear in the browser console
-Terminate batch job (Y/N)? 
+Terminate batch job (Y/N)? [ 2026-09-19T17:32:10.833Z ] [MOBILE-SYSTEM] [INFO]: Remote Logger initialized successfully
+-----------------------------------
+[2026-09-20 01:55:44] [MOBILE-SYSTEM] [INFO]: Health Check verification from agent
+Stack: No stack trace
+-----------------------------------
