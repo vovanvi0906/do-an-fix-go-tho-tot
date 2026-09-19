@@ -1,18 +1,29 @@
 /**
  * @file HomeScreen.tsx
- * @description Màn hình Trang Chủ chính (Home Screen) cho ứng dụng React Native / Expo Router FixGo.
- * Tuân thủ chuẩn mực 8pt Grid System, Linear/Apple iOS aesthetics, xử lý triệt để Safe Area Insets.
+ * @description Màn hình Trang Chủ chính (Home Screen) cho ứng dụng React Native FixGo Mobile.
+ * Cấu trúc thông tin phân cấp khoa học, loại bỏ quá tải màu sắc theo nguyên tắc 60-30-10:
+ * 1. Header & Search
+ * 2. Micro Trust Line (1 dòng tinh tế)
+ * 3. AI Banner (Primary Hero CTA duy nhất)
+ * 4. Danh mục dịch vụ (Above-the-Fold - nhìn thấy ngay không cần cuộn)
+ * 5. Thợ trực tuyến quanh bạn (Radar Map rút gọn)
+ * 6. Dịch vụ phổ biến
+ * 7. Ưu đãi dành cho bạn (Voucher Tickets ở cuối)
  */
 
 import React from 'react';
 import {
   View,
+  Text,
   StyleSheet,
   ScrollView,
   Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+
 import { useHomeData } from '../hooks/useHomeData';
 import HomeSkeleton from '../components/HomeSkeleton';
 import EmptyState from '../components/EmptyState';
@@ -24,7 +35,6 @@ import CategoryGrid from '../components/CategoryGrid';
 import PopularServicesCarousel from '../components/PopularServicesCarousel';
 import VoucherTickets from '../components/VoucherTickets';
 import type { ServiceItem, WorkerItem } from '../types/home.types';
-import { useRouter } from 'expo-router';
 
 /**
  * Component `HomeScreen`
@@ -32,6 +42,10 @@ import { useRouter } from 'expo-router';
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+
+  // =========================================================================
+  // HOOK QUẢN LÝ DỮ LIỆU & STATE TRANG CHỦ
+  // =========================================================================
   const {
     data,
     isLoading,
@@ -51,7 +65,7 @@ export default function HomeScreen() {
   const handleBookService = (service: ServiceItem) => {
     Alert.alert(
       'Đặt dịch vụ FixGo',
-      `Bạn có muốn đặt dịch vụ "${service.name}" với giá ${service.basePrice.toLocaleString('vi-VN')} đ?`,
+      `Bạn có muốn đặt dịch vụ "${service.name}" với giá niêm yết ${service.basePrice.toLocaleString('vi-VN')} đ?`,
       [
         { text: 'Hủy', style: 'cancel' },
         {
@@ -69,9 +83,20 @@ export default function HomeScreen() {
 
   const handleSelectWorker = (worker: WorkerItem) => {
     Alert.alert(
-      'Thông tin Thợ',
-      `Thợ: ${worker.fullName}\nChuyên môn: ${worker.specialty}\nĐánh giá: ⭐ ${worker.rating.toFixed(1)} (${worker.totalReviews} đánh giá)\nKhoảng cách: ${worker.distanceKm} km`,
-      [{ text: 'Đóng' }]
+      'Hồ sơ Thợ trực tuyến',
+      `Thợ: ${worker.fullName}\nChuyên môn: ${worker.specialty}\nĐánh giá: ⭐ ${worker.rating.toFixed(1)} (${worker.totalReviews} đánh giá)\nĐã hoàn thành: ${worker.completedJobs} đơn\nKhoảng cách: ~${worker.distanceKm} km`,
+      [
+        {
+          text: 'Đặt lịch thợ này',
+          onPress: () => {
+            router.push({
+              pathname: '/(user)/booking',
+              params: { workerId: worker.id, workerName: worker.fullName },
+            });
+          },
+        },
+        { text: 'Đóng', style: 'cancel' },
+      ]
     );
   };
 
@@ -85,9 +110,18 @@ export default function HomeScreen() {
 
   const handleScanPress = () => {
     Alert.alert(
-      'AI Scan & Chẩn đoán',
+      'AI Scan & Chẩn đoán 2.0',
       'Mở camera để chụp ảnh sự cố hỏng hóc trong nhà (ống nước, máy lạnh, chập điện...) và nhận báo giá tự động từ FixGo AI.',
-      [{ text: 'Chụp ảnh' }, { text: 'Để sau', style: 'cancel' }]
+      [
+        {
+          text: 'Chụp ảnh ngay',
+          onPress: () => {
+            // @ts-expect-error - dynamic route
+            router.push('/(user)/image-analysis');
+          },
+        },
+        { text: 'Để sau', style: 'cancel' },
+      ]
     );
   };
 
@@ -101,7 +135,9 @@ export default function HomeScreen() {
     return (
       <View style={styles.rootContainer}>
         <StatusBar style="light" translucent />
-        <HomeSkeleton />
+        <View style={{ paddingTop: insets.top, flex: 1, backgroundColor: '#0284c7' }}>
+          <HomeSkeleton />
+        </View>
       </View>
     );
   }
@@ -111,7 +147,7 @@ export default function HomeScreen() {
       <StatusBar style="light" translucent />
 
       {/* ── 1. Header Gradient & Thanh tìm kiếm với Safe Area Top ─────────── */}
-      <View style={{ backgroundColor: '#0284C7', paddingTop: Math.max(insets.top, 12) }}>
+      <View style={[styles.headerSafeAreaWrap, { paddingTop: Math.max(insets.top, 12) }]}>
         <HomeHeader
           user={data.user}
           searchQuery={searchQuery}
@@ -120,9 +156,6 @@ export default function HomeScreen() {
           onSearchChange={setSearchQuery}
           onDistrictChange={setSelectedDistrict}
           onOpenNotifications={() => router.push('/(user)/(tabs)/notifications')}
-          onOpenRewards={() =>
-            Alert.alert('Điểm thưởng FixCoins', `Số dư hiện tại: ${data.user.rewardPoints} điểm`)
-          }
         />
       </View>
 
@@ -138,30 +171,38 @@ export default function HomeScreen() {
             <ErrorState message={errorMessage || undefined} onRetry={refetch} />
           )}
 
-          {/* ── 2. Banner AI Hero ──────────────────────────── */}
+          {/* ── 2. Micro Trust Line (1 dòng tinh tế, chữ xám nhẹ #64748B) ── */}
+          <View style={styles.microTrustRow}>
+            <Ionicons name="shield-checkmark" size={13} color="#059669" style={{ marginRight: 4 }} />
+            <Text style={styles.microTrustText}>
+              100% thợ xác thực CCCD • Bảo hành dịch vụ 30 ngày
+            </Text>
+          </View>
+
+          {/* ── 3. AI Banner: Primary Hero CTA duy nhất của màn hình ──── */}
           <AiBanner onScanPress={handleScanPress} />
 
-          {/* ── 3. Khu vực làm việc (Bản đồ thợ) ───────────── */}
-          <WorkerMapSection
-            workers={data.nearbyWorkers}
-            userDistrict={selectedDistrict}
-            onOpenMap={() => Alert.alert('Bản đồ', 'Mở bản đồ toàn màn hình')}
-            onSelectWorker={handleSelectWorker}
-          />
-
-          {/* ── 4. Danh mục dịch vụ (Grid 4x2) ──────────────── */}
+          {/* ── 4. Danh mục dịch vụ: Above-the-Fold (Nhìn thấy ngay) ───── */}
           <CategoryGrid
             categories={data.categories}
             selectedCategoryId={selectedCategoryId}
             onSelectCategory={handleCategorySelect}
           />
 
-          {/* ── 5. Dịch vụ phổ biến (Horizontal Snap Scroll) ─── */}
+          {/* ── 5. Thợ trực tuyến quanh bạn (Radar Map) ───────────────── */}
+          <WorkerMapSection
+            workers={data.nearbyWorkers}
+            userDistrict={selectedDistrict}
+            onOpenMap={() => Alert.alert('Bản đồ thợ', 'Đang kết nối GPS hiển thị toàn bộ mạng lưới thợ.')}
+            onSelectWorker={handleSelectWorker}
+          />
+
+          {/* ── 6. Dịch vụ phổ biến (Horizontal Snap Scroll) ──────────── */}
           {filteredPopularServices.length > 0 ? (
             <PopularServicesCarousel
               services={filteredPopularServices}
               onBookService={handleBookService}
-              onViewAll={() => Alert.alert('Dịch vụ', 'Xem tất cả dịch vụ')}
+              onViewAll={() => Alert.alert('Dịch vụ', 'Xem tất cả hơn 40 danh mục dịch vụ')}
             />
           ) : (
             <EmptyState
@@ -175,7 +216,7 @@ export default function HomeScreen() {
             />
           )}
 
-          {/* ── 6. Ưu đãi cho bạn (Voucher Tickets) ──────────── */}
+          {/* ── 7. Ưu đãi cho bạn (Voucher Tickets ở cuối) ───────────── */}
           <VoucherTickets
             vouchers={data.vouchers}
             onClaimVoucher={handleClaimVoucher}
@@ -190,18 +231,35 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   rootContainer: {
     flex: 1,
-    backgroundColor: '#0284C7',
+    backgroundColor: '#0284c7',
+  },
+  headerSafeAreaWrap: {
+    backgroundColor: '#0284c7',
   },
   scrollView: {
     flex: 1,
     backgroundColor: '#F8FAFC',
   },
   scrollContainer: {
-    paddingBottom: 40,
+    paddingBottom: 130, // Khoảng đệm cuộn an toàn rộng rãi tránh Bottom Tab Bar che khuất nội dung cuối
   },
   bodyWrapper: {
     paddingHorizontal: 16,
-    paddingTop: 16,
-    gap: 24,
+    paddingTop: 12,
+    gap: 16,
+  },
+
+  // Micro Trust Line
+  microTrustRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 2,
+  },
+  microTrustText: {
+    fontSize: 11.5,
+    fontWeight: '500',
+    color: '#64748B',
+    letterSpacing: 0.1,
   },
 });

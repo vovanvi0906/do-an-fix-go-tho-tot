@@ -1,6 +1,8 @@
 /**
  * @file PopularServicesCarousel.tsx
- * @description Carousel dịch vụ phổ biến vuốt ngang (Horizontal Snap Scroll) cho React Native FixGo.
+ * @description Carousel dịch vụ phổ biến vuốt ngang (Horizontal Snap Scroll).
+ * Bố cục hiển thị trọn vẹn thông tin (Giá niêm yết, Thời gian có mặt sau 15p, Đánh giá),
+ * Nút Đặt ngay và nút "Xem tất cả 40+ dịch vụ" đạt chuẩn Touch Target 44x44px WCAG AA.
  */
 
 import React from 'react';
@@ -31,25 +33,29 @@ export default function PopularServicesCarousel({
 }: PopularServicesCarouselProps) {
   return (
     <View style={styles.container}>
-      {/* Header */}
+      {/* ── 1. Header Row ─────────────────────────────────────── */}
       <View style={styles.headerRow}>
         <View>
           <Text style={styles.title}>Dịch vụ phổ biến</Text>
-          <Text style={styles.subtitle}>Đặt nhiều nhất tuần qua</Text>
+          <Text style={styles.subtitle}>Giá niêm yết minh bạch • Đặt nhiều nhất tuần</Text>
         </View>
 
         {onViewAll && (
           <Pressable
-            style={({ pressed }) => [styles.viewAllBtn, pressed && styles.pressed]}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel="Xem tất cả hơn 40 dịch vụ sửa chữa"
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            style={({ pressed }) => [styles.viewAllBtn, pressed && styles.pressedEffect]}
             onPress={onViewAll}
           >
-            <Text style={styles.viewAllText}>Tất cả</Text>
-            <Ionicons name="arrow-forward" size={12} color="#0284C7" />
+            <Text style={styles.viewAllText}>Xem tất cả 40+</Text>
+            <Ionicons name="arrow-forward" size={13} color="#0284C7" />
           </Pressable>
         )}
       </View>
 
-      {/* Horizontal Carousel */}
+      {/* ── 2. Horizontal Scroll Cards (Tránh cắt cụt nội dung) ─ */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -57,8 +63,18 @@ export default function PopularServicesCarousel({
         decelerationRate="fast"
       >
         {services.map((service) => (
-          <View key={service.id} style={styles.serviceCard}>
-            {/* Image & Tag */}
+          <Pressable
+            key={service.id}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel={`Dịch vụ ${service.name}, giá ${service.basePrice.toLocaleString('vi-VN')} đồng, đánh giá ${service.rating} sao`}
+            style={({ pressed }) => [
+              styles.serviceCard,
+              pressed && styles.cardPressedEffect,
+            ]}
+            onPress={() => onBookService(service)}
+          >
+            {/* Image Banner, Tag & Arrival Time Chip */}
             <View style={styles.imageContainer}>
               <Image source={{ uri: service.imageUrl }} style={styles.serviceImage} />
               {service.tag && (
@@ -66,14 +82,15 @@ export default function PopularServicesCarousel({
                   <Text style={styles.tagText}>{service.tag}</Text>
                 </View>
               )}
-              <View style={styles.durationChip}>
-                <Ionicons name="time-outline" size={11} color="#0284C7" style={{ marginRight: 3 }} />
-                <Text style={styles.durationText}>{service.durationMin}p</Text>
+              <View style={styles.arrivalChip}>
+                <Ionicons name="flash" size={10} color="#0284C7" style={{ marginRight: 3 }} />
+                <Text style={styles.arrivalText}>Có mặt sau 15p</Text>
               </View>
             </View>
 
             {/* Content Details */}
             <View style={styles.cardContent}>
+              {/* Category & Rating */}
               <View style={styles.ratingRow}>
                 <Ionicons name="star" size={11} color="#F59E0B" />
                 <Text style={styles.ratingText}>{service.rating.toFixed(1)}</Text>
@@ -84,29 +101,36 @@ export default function PopularServicesCarousel({
                 </Text>
               </View>
 
+              {/* Service Full Name */}
               <Text style={styles.serviceName} numberOfLines={2}>
                 {service.name}
               </Text>
 
-              {/* Price & Add Button */}
+              {/* Price & Action Button */}
               <View style={styles.priceRow}>
-                <View>
-                  <Text style={styles.pricePrefix}>Từ</Text>
+                <View style={styles.priceCol}>
+                  <Text style={styles.pricePrefix}>Giá niêm yết:</Text>
                   <Text style={styles.priceValue}>
                     {service.basePrice.toLocaleString('vi-VN')}
-                    <Text style={styles.priceUnit}>đ/{service.unit}</Text>
+                    <Text style={styles.priceUnit}> đ/{service.unit}</Text>
                   </Text>
                 </View>
 
+                {/* Touch Target 44x44px Button Đặt ngay */}
                 <Pressable
-                  style={({ pressed }) => [styles.addBtn, pressed && styles.addBtnPressed]}
+                  accessible={true}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Đặt ngay dịch vụ ${service.name}`}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  style={({ pressed }) => [styles.bookNowBtn, pressed && styles.pressedEffect]}
                   onPress={() => onBookService(service)}
                 >
-                  <Ionicons name="add" size={18} color="#FFFFFF" />
+                  <Text style={styles.bookNowText}>Đặt ngay</Text>
+                  <Ionicons name="chevron-forward" size={12} color="#FFFFFF" />
                 </Pressable>
               </View>
             </View>
-          </View>
+          </Pressable>
         ))}
       </ScrollView>
     </View>
@@ -124,7 +148,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
   },
   title: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '800',
     color: '#0F172A',
   },
@@ -136,34 +160,37 @@ const styles = StyleSheet.create({
   viewAllBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 2,
+    gap: 3,
+    minHeight: 44,
+    justifyContent: 'center',
   },
   viewAllText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#0284C7',
   },
   scrollContent: {
-    paddingRight: 16,
-    gap: 12,
+    paddingRight: 20,
+    gap: 14,
+    paddingVertical: 2,
   },
   serviceCard: {
-    width: 200,
+    width: 220,
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 18,
     borderWidth: 1,
     borderColor: '#E2E8F0',
     padding: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.06,
     shadowRadius: 6,
-    elevation: 2,
+    elevation: 3,
   },
   imageContainer: {
     position: 'relative',
     width: '100%',
-    height: 115,
+    height: 120,
     borderRadius: 14,
     overflow: 'hidden',
     backgroundColor: '#F1F5F9',
@@ -179,29 +206,34 @@ const styles = StyleSheet.create({
     left: 6,
     backgroundColor: 'rgba(15, 23, 42, 0.85)',
     paddingHorizontal: 7,
-    paddingVertical: 2,
+    paddingVertical: 3,
     borderRadius: 8,
   },
   tagText: {
     fontSize: 9,
-    fontWeight: '700',
+    fontWeight: '800',
     color: '#FFFFFF',
   },
-  durationChip: {
+  arrivalChip: {
     position: 'absolute',
     bottom: 6,
     left: 6,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.92)',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    paddingHorizontal: 7,
+    paddingVertical: 3,
     borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
-  durationText: {
-    fontSize: 9,
+  arrivalText: {
+    fontSize: 9.5,
     fontWeight: '700',
-    color: '#334155',
+    color: '#0284C7',
   },
   cardContent: {
     flex: 1,
@@ -220,7 +252,7 @@ const styles = StyleSheet.create({
   },
   reviewsText: {
     fontSize: 10,
-    color: '#94A3B8',
+    color: '#64748B',
     marginLeft: 2,
   },
   dotSeparator: {
@@ -234,24 +266,28 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   serviceName: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
-    color: '#1E293B',
-    lineHeight: 16,
-    marginBottom: 8,
-    minHeight: 32,
+    color: '#0F172A',
+    lineHeight: 18,
+    marginBottom: 10,
+    minHeight: 36,
   },
   priceRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-end',
+    alignItems: 'center',
     borderTopWidth: 1,
-    borderTopColor: '#F8FAFC',
-    paddingTop: 6,
+    borderTopColor: '#F1F5F9',
+    paddingTop: 8,
+  },
+  priceCol: {
+    flex: 1,
   },
   pricePrefix: {
     fontSize: 9,
-    color: '#94A3B8',
+    color: '#64748B',
+    fontWeight: '500',
   },
   priceValue: {
     fontSize: 14,
@@ -263,21 +299,27 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#64748B',
   },
-  addBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#0284C7',
+  bookNowBtn: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 2,
+    backgroundColor: '#0284C7',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 14,
+    minHeight: 36,
+    gap: 2,
   },
-  addBtnPressed: {
-    opacity: 0.8,
-    transform: [{ scale: 0.9 }],
+  bookNowText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
-  pressed: {
-    opacity: 0.8,
-    transform: [{ scale: 0.96 }],
+  pressedEffect: {
+    opacity: 0.85,
+    transform: [{ scale: 0.97 }],
+  },
+  cardPressedEffect: {
+    opacity: 0.94,
+    transform: [{ scale: 0.98 }],
   },
 });

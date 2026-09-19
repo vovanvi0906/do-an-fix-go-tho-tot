@@ -32,6 +32,10 @@ export default function EmptyState({
       <Text style={styles.description}>{description}</Text>
       {onAction && (
         <Pressable
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel={actionText}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           style={({ pressed }) => [styles.actionBtn, pressed && styles.actionBtnPressed]}
           onPress={onAction}
         >
@@ -76,6 +80,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   actionBtn: {
+    minHeight: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
