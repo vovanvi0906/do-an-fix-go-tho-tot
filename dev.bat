@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 title FixGo Pro - Unified Development Environment
 
 echo ================================================================
-echo           FIXGO PRO - UNIFIED DEV STARTER (CLEAN MODE)
+echo           FIXGO PRO - UNIFIED DEV STARTER (QR CODE MODE)
 echo ================================================================
 echo.
 
@@ -41,29 +41,26 @@ call npx prisma generate >nul 2>&1
 call npx prisma db push --skip-generate >nul 2>&1
 cd ..
 
-:: 5. Khoi chay toan bo services tren 1 terminal
-echo [4/4] Khoi dong Backend, AI, Web va Mobile...
-echo.
-echo ================================================================
-echo  HE THONG DANG CHAY (Logs duoc luu tai thu muc logs/):
-echo   - Backend API:    http://localhost:3000/api
-echo   - Swagger Docs:   http://localhost:3000/api/docs
-echo   - AI Service:     http://localhost:8000/docs
-echo   - Frontend Web:   http://localhost:5173
-echo   - Mobile App:     http://localhost:8081
-echo.
-echo  FILE LOG DEBUG:
-echo   - Backend log:    logs\backend.log
-echo   - AI Service log: logs\ai.log
-echo   - Web Admin log:  logs\web.log
-echo   - Mobile log:     logs\mobile.log
-echo ================================================================
-echo.
-echo Nhan [Ctrl + C] de dung toan bo he thong.
+:: 5. Tu dong cap nhat IPv4 Wi-Fi cho Mobile Expo
+echo [4/5] Dong bo dia chi IP Wi-Fi may tinh vao Mobile App...
+node scripts\update-ip.js
 echo.
 
-npx --yes concurrently -k --names "BACKEND,AI,WEB,MOBILE" -c "blue.bold,magenta.bold,cyan.bold,yellow.bold" ^
+:: 6. Khoi chay he thong va xuat truc tiep Ma QR len Terminal
+echo [5/5] Khoi dong cac dich vu va hien thi Ma QR ket noi...
+echo.
+echo ================================================================
+echo  DICH VU CHAY NGAM (Xem log chi tiet tai thu muc logs/):
+echo   - Backend API:  http://localhost:3000/api  (logs\backend.log)
+echo   - AI Service:   http://localhost:8000/docs (logs\ai.log)
+echo   - Web Admin:    http://localhost:5173      (logs\web.log)
+echo ================================================================
+echo.
+echo Dang khoi dong Metro Bundler de tao ma QR...
+echo.
+
+npx --yes concurrently -k --raw ^
   "cd doan-kltn-backend && npm run dev > ..\logs\backend.log 2>&1" ^
   "cd ai-service && .venv\Scripts\activate && uvicorn main:app --host 0.0.0.0 --port 8000 --reload > ..\logs\ai.log 2>&1" ^
   "cd doan-kttn-frontend && npm run dev > ..\logs\web.log 2>&1" ^
-  "cd doan-kltn-mobile && npm start > ..\logs\mobile.log 2>&1"
+  "cd doan-kltn-mobile && npx expo start -c"

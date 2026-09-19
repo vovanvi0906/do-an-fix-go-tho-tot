@@ -10,8 +10,13 @@ async function bootstrap() {
   // 1. Cấu hình Global Prefix
   app.setGlobalPrefix('api');
 
-  // 2. Kích hoạt CORS
-  app.enableCors();
+  // 2. Kích hoạt CORS hỗ trợ mọi kết nối từ Mobile LAN, Web, Emulator
+  app.enableCors({
+    origin: true,
+    credentials: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type,Accept,Authorization,X-Requested-With',
+  });
 
   // 3. Kích hoạt Global ValidationPipe với whitelist & transformation
   app.useGlobalPipes(
@@ -37,8 +42,8 @@ async function bootstrap() {
   SwaggerModule.setup('api/docs', app, document);
 
   const port = process.env.PORT || 3000;
-  await app.listen(port);
-  console.log(`🚀 Backend Server running on: http://localhost:${port}/api`);
+  await app.listen(port, '0.0.0.0');
+  console.log(`🚀 Backend Server running on: http://localhost:${port}/api and http://0.0.0.0:${port}/api`);
   console.log(`📚 Swagger API Docs available at: http://localhost:${port}/api/docs`);
 }
 
