@@ -29,16 +29,16 @@ try:
     import cv2
     import numpy as np
     HAS_OPENCV = True
-except ImportError:
+except Exception as e:
     HAS_OPENCV = False
-    logger.warning("OpenCV not installed in environment, operating in lightweight mock/heuristic mode.")
+    logger.warning(f"OpenCV not available ({e}), operating in lightweight mock/heuristic mode.")
 
 try:
     from ultralytics import YOLO
     HAS_YOLO = True
-except ImportError:
+except Exception as e:
     HAS_YOLO = False
-    logger.warning("Ultralytics YOLO not installed, operating in lightweight fallback mode.")
+    logger.warning(f"Ultralytics YOLO not available ({e}), operating in lightweight fallback mode.")
 
 
 # ==========================================

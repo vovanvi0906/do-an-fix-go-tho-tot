@@ -1,0 +1,15 @@
+
+> doan-kltn-mobile@1.0.0 start
+> expo start
+
+Warning: Ignoring extra certs from `C:\Users\VI\AppData\Roaming\9router\mitm\rootCA.crt`, load failed: error:80000003:system library::No such process
+[90menv: load .env[39m
+[90menv: export EXPO_PUBLIC_API_URL EXPO_PUBLIC_SOCKET_URL EXPO_PUBLIC_ENV[39m
+[90mStarting project at G:\project-school\doan-kltn-mobile[39m
+[2mStarting Metro Bundler[22m
+[33mThe following packages should be updated for best compatibility with the installed [1mexpo[22m version:[39m
+[33m  [1mreact-native-maps[22m[36m@[39m[33m[31m1.29.0[39m[33m - expected version: [32m1.18.0[39m[33m[39m
+[33mYour project may not work correctly until you install the expected versions of the packages.[39m
+Waiting on [4mhttp://localhost:8081[24m
+Logs for your project will appear below.
+Terminate batch job (Y/N)? 
