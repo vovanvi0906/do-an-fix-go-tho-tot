@@ -12,6 +12,7 @@ import AnalyticsPage from '../features/analytics/pages/AnalyticsPage';
 import SystemSettingsPage from '../features/settings/pages/SystemSettingsPage';
 import WorkerDashboardPage from '../features/workers/pages/WorkerDashboardPage';
 import HomePage from '../pages/HomePage';
+import HomeMobileView from '../features/customer/views/HomeMobileView';
 import ProtectedRoute from '../app/router/ProtectedRoute';
 import AdminLayout from '../layouts/AdminLayout';
 import { useAuth } from '../store/authStore';
@@ -78,6 +79,14 @@ export default function AppRoutes() {
           <ProtectedRoute allowedRoles={['CUSTOMER', 'ADMIN', 'WORKER']}>
             <HomeOrDashboardRedirect />
           </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/mobile"
+        element={
+          <div className="min-h-screen bg-slate-900 py-6 sm:py-10 px-2 sm:px-4">
+            <HomeMobileView />
+          </div>
         }
       />
       <Route
