@@ -4,6 +4,9 @@ import Constants from 'expo-constants';
 import { tokenStorage } from '../storage/tokenStorage';
 
 const getSocketUrl = () => {
+  if (process.env.EXPO_PUBLIC_SOCKET_URL) {
+    return process.env.EXPO_PUBLIC_SOCKET_URL;
+  }
   if (process.env.EXPO_PUBLIC_API_URL) {
     return process.env.EXPO_PUBLIC_API_URL.replace('/api', '');
   }

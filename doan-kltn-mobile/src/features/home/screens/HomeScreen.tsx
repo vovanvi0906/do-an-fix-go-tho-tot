@@ -1,18 +1,18 @@
 /**
  * @file HomeScreen.tsx
  * @description Màn hình Trang Chủ chính (Home Screen) cho ứng dụng React Native / Expo Router FixGo.
- * Tuân thủ chuẩn mực 8pt Grid System, Linear/Apple iOS aesthetics, tách biệt hoàn toàn useHomeData hook.
+ * Tuân thủ chuẩn mực 8pt Grid System, Linear/Apple iOS aesthetics, xử lý triệt để Safe Area Insets.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   StyleSheet,
   ScrollView,
-  SafeAreaView,
-  StatusBar,
   Alert,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { useHomeData } from '../hooks/useHomeData';
 import HomeSkeleton from '../components/HomeSkeleton';
 import EmptyState from '../components/EmptyState';
@@ -30,6 +30,7 @@ import { useRouter } from 'expo-router';
  * Component `HomeScreen`
  */
 export default function HomeScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const {
     data,
@@ -49,15 +50,17 @@ export default function HomeScreen() {
 
   const handleBookService = (service: ServiceItem) => {
     Alert.alert(
-      'Đặt dịch vụ',
+      'Đặt dịch vụ FixGo',
       `Bạn có muốn đặt dịch vụ "${service.name}" với giá ${service.basePrice.toLocaleString('vi-VN')} đ?`,
       [
         { text: 'Hủy', style: 'cancel' },
         {
           text: 'Tiếp tục',
           onPress: () => {
-            // Điều hướng sang flow booking
-            console.log('Đặt dịch vụ:', service.id);
+            router.push({
+              pathname: '/(user)/booking',
+              params: { serviceId: service.id, serviceName: service.name, price: service.basePrice },
+            });
           },
         },
       ]
@@ -96,23 +99,19 @@ export default function HomeScreen() {
   // 1. Loading State (Shimmer Skeleton)
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.safeArea}>
-        <StatusBar barStyle="light-content" backgroundColor="#0EA5E9" />
+      <View style={styles.rootContainer}>
+        <StatusBar style="light" translucent />
         <HomeSkeleton />
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor="#0EA5E9" />
+    <View style={styles.rootContainer}>
+      <StatusBar style="light" translucent />
 
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContainer}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* ── 1. Header Gradient & Thanh tìm kiếm ─────────── */}
+      {/* ── 1. Header Gradient & Thanh tìm kiếm với Safe Area Top ─────────── */}
+      <View style={{ backgroundColor: '#0284C7', paddingTop: Math.max(insets.top, 12) }}>
         <HomeHeader
           user={data.user}
           searchQuery={searchQuery}
@@ -120,12 +119,18 @@ export default function HomeScreen() {
           unreadNotificationsCount={data.unreadNotificationsCount}
           onSearchChange={setSearchQuery}
           onDistrictChange={setSelectedDistrict}
-          onOpenNotifications={() => Alert.alert('Thông báo', 'Bạn có 1 thông báo mới')}
+          onOpenNotifications={() => router.push('/(user)/(tabs)/notifications')}
           onOpenRewards={() =>
             Alert.alert('Điểm thưởng FixCoins', `Số dư hiện tại: ${data.user.rewardPoints} điểm`)
           }
         />
+      </View>
 
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+      >
         {/* ── Body Sections (8pt Spacing Grid) ─────────────── */}
         <View style={styles.bodyWrapper}>
           {/* Error State if any */}
@@ -178,14 +183,14 @@ export default function HomeScreen() {
           />
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
+  rootContainer: {
     flex: 1,
-    backgroundColor: '#0EA5E9',
+    backgroundColor: '#0284C7',
   },
   scrollView: {
     flex: 1,

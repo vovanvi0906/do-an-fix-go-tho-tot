@@ -11,6 +11,21 @@ echo.
 :: 1. Tao thu muc logs neu chua co
 if not exist "logs" mkdir "logs"
 
+:: Tu dong sao chep cac file .env mau neu chua ton tai (Self-healing on fresh clone)
+if not exist "doan-kltn-backend\.env" (
+    if exist "doan-kltn-backend\.env.example" (
+        copy "doan-kltn-backend\.env.example" "doan-kltn-backend\.env" >nul
+        echo [INFO] Da tu dong tao doan-kltn-backend/.env tu .env.example
+    )
+)
+
+if not exist "doan-kttn-frontend\.env.local" (
+    if exist "doan-kttn-frontend\.env.example" (
+        copy "doan-kttn-frontend\.env.example" "doan-kttn-frontend\.env.local" >nul
+        echo [INFO] Da tu dong tao doan-kttn-frontend/.env.local tu .env.example
+    )
+)
+
 :: 2. Kiem tra Docker Desktop
 echo [1/5] Kiem tra Docker Desktop...
 docker info >nul 2>&1

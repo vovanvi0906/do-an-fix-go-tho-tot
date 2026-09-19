@@ -17,20 +17,37 @@
 
 ---
 
-## 🚀 Khởi Động Toàn Bộ Hệ Thống (1 Lệnh Duy Nhất)
+## 🚀 Hướng Dẫn Nhanh Cho Người Mới Clone Repo (3 Bước)
 
-Tại thư mục gốc `G:\project-school`, mở CMD hoặc PowerShell và chạy:
+### 📌 Bước 1: Chuẩn bị môi trường trên máy tính
+- **Node.js**: Phiên bản LTS (18.x / 20.x / 22.x).
+- **Python**: Phiên bản 3.10+ (Đảm bảo tick chọn *"Add python.exe to PATH"* khi cài đặt).
+- **Docker Desktop**: Bật Docker Desktop trước khi chạy.
+- **Điện thoại di động**: Cài đặt app **Expo Go** (trên App Store hoặc Google Play Store) và kết nối vào **cùng mạng Wi-Fi** với máy tính.
 
+---
+
+### 📌 Bước 2: Cài đặt thư viện lần đầu (Chỉ chạy 1 lần)
+Mở Terminal tại thư mục gốc dự án và chạy:
+```cmd
+.\setup.bat
+```
+Script sẽ tự động tạo các virtualenv Python, cài đặt toàn bộ `npm packages` cho cả 3 ứng dụng (Backend, Web, Mobile) và tải sẵn Docker image.
+
+---
+
+### 📌 Bước 3: Khởi chạy toàn bộ hệ thống (1 Click duy nhất)
 ```cmd
 .\dev.bat
 ```
-
-Script sẽ tự động:
-1. Kiểm tra trạng thái Docker Desktop.
-2. Khởi chạy PostgreSQL (PostGIS) và Redis bằng `docker-compose.yml` với cấu hình trần RAM thấp nhất.
-3. Kích hoạt Virtualenv và chạy **AI FastAPI Microservice** trên port `8000`.
-4. Tự động chạy Prisma Client Generate, Schema Sync (`db push`) và Seed Catalog/Super Admin.
-5. Chạy **NestJS Backend** ở chế độ Watch Mode trên port `3000`.
+Hệ thống sẽ tự động:
+1. Tự động quét và phát hiện địa chỉ **IPv4 Wi-Fi nội bộ** của máy tính bạn (bất kể bạn đang ở trường, ở nhà hay quán cafe) và đồng bộ vào Mobile `.env`.
+2. Khởi động **PostgreSQL + PostGIS** & **Redis** qua Docker.
+3. Đồng bộ cơ sở dữ liệu Prisma (`prisma db push`).
+4. Khởi chạy **AI Service** (`http://localhost:8000/docs`).
+5. Khởi chạy **Backend API** (`http://localhost:3000/api`).
+6. Khởi chạy **Web Admin** (`http://localhost:5173`).
+7. Mở cửa sổ **Expo Metro Bundler** độc lập hiển thị **Mã QR Code**: Bạn chỉ cần mở app **Expo Go** trên điện thoại và quét mã QR là app chạy ngay lập tức!
 
 ---
 
