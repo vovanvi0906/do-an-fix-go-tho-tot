@@ -44,6 +44,28 @@ export function AuthProvider({ children }) {
     return res;
   };
 
+  const registerCustomer = async (customerData) => {
+    console.log('🚀 [AuthContext] Đăng ký khách hàng:', customerData.email);
+    const res = await authService.registerCustomer(customerData);
+    if (res?.accessToken && res?.user) {
+      setToken(res.accessToken);
+      setUser(res.user);
+      console.log('✨ [AuthContext] State đã cập nhật user & token mới sau khi đăng ký');
+    }
+    return res;
+  };
+
+  const registerWorker = async (workerData) => {
+    console.log('🚀 [AuthContext] Đăng ký thợ:', workerData.email);
+    const res = await authService.registerWorker(workerData);
+    if (res?.accessToken && res?.user) {
+      setToken(res.accessToken);
+      setUser(res.user);
+      console.log('✨ [AuthContext] State đã cập nhật user & token mới sau khi đăng ký thợ');
+    }
+    return res;
+  };
+
   const logout = async () => {
     console.log('👋 [AuthContext] Thực hiện đăng xuất...');
     await authService.logout();
@@ -63,6 +85,8 @@ export function AuthProvider({ children }) {
     isAuthenticated: !!token && !!user,
     isLoading,
     login,
+    registerCustomer,
+    registerWorker,
     logout,
     updateUser,
   };

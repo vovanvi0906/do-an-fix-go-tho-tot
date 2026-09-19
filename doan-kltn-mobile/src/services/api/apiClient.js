@@ -1,12 +1,26 @@
 import axios from 'axios';
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 import { tokenStorage } from '../storage/tokenStorage';
 
-// Tự động nhận diện Base URL API tùy theo môi trường chạy (Android Emulator vs Web/iOS)
+// Tự động nhận diện Base URL API tùy theo môi trường (Điện thoại thật qua Wi-Fi, Android Emulator, Web/iOS)
 const getDefaultBaseUrl = () => {
   if (process.env.EXPO_PUBLIC_API_URL) {
     return process.env.EXPO_PUBLIC_API_URL;
   }
+  // Tự động lấy IP máy tính chủ từ Expo server để điện thoại thật kết nối thẳng vào Backend
+  const hostUri =
+    Constants.expoConfig?.hostUri ||
+    Constants.manifest2?.extra?.expoClient?.hostUri ||
+    Constants.manifest?.debuggerHost;
+
+  if (hostUri) {
+    const hostIp = hostUri.split(':')[0];
+    if (hostIp && hostIp !== 'localhost' && hostIp !== '127.0.0.1') {
+      return `http://${hostIp}:3000/api`;
+    }
+  }
+
   // Android Emulator map localhost qua địa chỉ IP 10.0.2.2
   if (Platform.OS === 'android') {
     return 'http://10.0.2.2:3000/api';

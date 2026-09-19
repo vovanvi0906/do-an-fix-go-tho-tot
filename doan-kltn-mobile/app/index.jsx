@@ -11,48 +11,109 @@ import {
   ScrollView,
   SafeAreaView,
   Modal,
-  ImageBackground,
 } from 'react-native';
 import { useRouter, Link } from 'expo-router';
-import { Ionicons, FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons, FontAwesome } from '@expo/vector-icons';
+import { StatusBar } from 'expo-status-bar';
+import {
+  useFonts,
+  Inter_400Regular,
+  Inter_600SemiBold,
+  Inter_700Bold,
+} from '@expo-google-fonts/inter';
 import { useAuth } from '../src/features/auth';
+
+// ─── Design Tokens (Figma FIXGO – Login Customer Screen) ────────────────────
+const COLORS = {
+  primary: '#3B82F6',        // Nền xanh dương chính
+  primaryDark: '#2563EB',    // Hover / active
+  darkBlue: '#1A365D',       // Nút Đăng nhập (xanh đậm – theo yêu cầu user)
+  white: '#FFFFFF',
+  black: '#000000',
+  gray: '#9CA3AF',           // Placeholder & icon mặc định
+  red: '#EF4444',            // Error border & text
+  lightBlue: '#BFDBFE',      // Link "Quên mật khẩu?"
+  facebookBlue: '#1877F2',
+  googleRed: '#EA4335',
+};
 
 export default function FixGoLoginScreen() {
   const router = useRouter();
-  const { login } = useAuth();
+  const {
+    login,
+    isLoading: isCheckingSession,
+    isAuthenticated,
+    user,
+  } = useAuth();
 
-  // Form State
+  // ─── Font loading (Inter) ───────────────────────────────────────────────────
+  const [fontsLoaded] = useFonts({
+    Inter_400Regular,
+    Inter_600SemiBold,
+    Inter_700Bold,
+  });
+
+  // ─── Form State ─────────────────────────────────────────────────────────────
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Active border highlight state
-  const [isIdentifierFocused, setIsIdentifierFocused] = useState(false);
-  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+  // Per-field error highlight (Figma Screen 2, 4, 5)
+  const [identifierError, setIdentifierError] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
 
   // Modal chọn vai trò đăng ký (Khách hàng / Thợ)
   const [showRegisterModal, setShowRegisterModal] = useState(false);
 
+  // ─── Logging ────────────────────────────────────────────────────────────────
   useEffect(() => {
-    console.log('🚀 [FixGo Mobile] Khởi chạy giao diện Đăng nhập FixGo (Aurora Luxury Dark)');
+    console.log('🚀 [FixGo Mobile] Khởi chạy giao diện Đăng nhập FixGo (Figma Blue)');
   }, []);
 
-  // Xử lý gửi form đăng nhập
+  // ─── Auto-redirect nếu đã đăng nhập ────────────────────────────────────────
+  useEffect(() => {
+    if (!isCheckingSession && isAuthenticated && user) {
+      const role = (user.role || 'CUSTOMER').toUpperCase();
+      console.log('🔄 [FixGo] Phiên đăng nhập còn hiệu lực, role:', role);
+      if (role === 'WORKER') {
+        router.replace('/(worker)/(tabs)');
+      } else {
+        router.replace('/(user)/(tabs)');
+      }
+    }
+  }, [isCheckingSession, isAuthenticated, user]);
+
+  // ─── Validation & Login Handler ─────────────────────────────────────────────
   const handleLogin = async () => {
     console.log('⚡ [FixGo Login] Bấm nút ĐĂNG NHẬP:', { identifier });
-    setErrorMessage('');
 
-    if (!identifier.trim()) {
-      const msg = 'Vui lòng nhập Email, Số điện thoại hoặc Tên đăng nhập';
+    // Reset lỗi cũ
+    setErrorMessage('');
+    setIdentifierError(false);
+    setPasswordError(false);
+
+    // Client-side validation
+    if (!identifier.trim() && !password) {
+      const msg = 'Vui lòng điền thông tin đăng nhập';
       console.warn('⚠️ [FixGo Validation]:', msg);
+      setIdentifierError(true);
+      setPasswordError(true);
+      setErrorMessage(msg);
+      return;
+    }
+    if (!identifier.trim()) {
+      const msg = 'Vui lòng nhập Số điện thoại hoặc email';
+      console.warn('⚠️ [FixGo Validation]:', msg);
+      setIdentifierError(true);
       setErrorMessage(msg);
       return;
     }
     if (!password) {
       const msg = 'Vui lòng nhập Mật khẩu';
       console.warn('⚠️ [FixGo Validation]:', msg);
+      setPasswordError(true);
       setErrorMessage(msg);
       return;
     }
@@ -75,236 +136,261 @@ export default function FixGoLoginScreen() {
       }
     } catch (error) {
       console.error('❌ [FixGo Login Error]:', error);
-      setErrorMessage(error.message || 'Đăng nhập không thành công. Vui lòng kiểm tra lại tài khoản hoặc mật khẩu!');
+      const msg =
+        error.message ||
+        'Đăng nhập không thành công. Vui lòng kiểm tra lại tài khoản hoặc mật khẩu!';
+
+      // Xác định field nào cần highlight đỏ dựa trên nội dung lỗi
+      const lowerMsg = msg.toLowerCase();
+      if (
+        lowerMsg.includes('mật khẩu') &&
+        !lowerMsg.includes('email') &&
+        !lowerMsg.includes('điện thoại')
+      ) {
+        setPasswordError(true);
+      } else if (
+        (lowerMsg.includes('email') || lowerMsg.includes('điện thoại') || lowerMsg.includes('tồn tại')) &&
+        !lowerMsg.includes('mật khẩu')
+      ) {
+        setIdentifierError(true);
+      } else {
+        // Lỗi chung (401, 403, network…) → highlight cả hai
+        setIdentifierError(true);
+        setPasswordError(true);
+      }
+
+      setErrorMessage(msg);
     } finally {
       setIsLoading(false);
     }
   };
 
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // RENDER: Launch Screen (Figma "Launch - 1")
+  // Hiển thị khi đang kiểm tra phiên đăng nhập hoặc chờ font load
+  // ═══════════════════════════════════════════════════════════════════════════════
+  if (isCheckingSession || !fontsLoaded) {
+    return (
+      <View style={styles.launchScreen}>
+        <StatusBar style="light" />
+        <Text style={styles.launchLogo}>FixGo</Text>
+      </View>
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // RENDER: Loading / Success Screen (Figma "Success Login")
+  // Hiển thị khi đang gọi API đăng nhập
+  // ═══════════════════════════════════════════════════════════════════════════════
+  if (isLoading) {
+    return (
+      <View style={styles.loadingScreen}>
+        <StatusBar style="dark" />
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // RENDER: Login Screen (Figma "Login - Customer Screen")
+  // ═══════════════════════════════════════════════════════════════════════════════
   return (
-    <ImageBackground
-      source={require('../assets/images/bgmobi1.png')}
-      style={styles.backgroundImage}
-      resizeMode="cover"
-    >
-      <View style={styles.overlay}>
-        <SafeAreaView style={styles.safeArea}>
-          <KeyboardAvoidingView
-            style={styles.keyboardContainer}
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    <View style={styles.container}>
+      <StatusBar style="light" />
+      <SafeAreaView style={styles.safeArea}>
+        <KeyboardAvoidingView
+          style={styles.flex1}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
           >
-            <ScrollView
-              contentContainerStyle={styles.scrollContent}
-              keyboardShouldPersistTaps="handled"
-              showsVerticalScrollIndicator={false}
-            >
-              <View style={styles.mainWrapper}>
-            {/* 1. Header Thương hiệu FixGo (Logo + Slogan) */}
-            <View style={styles.brandHeader}>
-              {/* Logo FG cách điệu mạ vàng ánh kim */}
-              <View style={styles.logoOuter}>
-                <View style={styles.logoInner}>
-                  <Text style={styles.logoTextFg}>FG</Text>
-                </View>
+            {/* ── Logo FixGo (Figma: centered white bold) ──────────────────── */}
+            <Text style={styles.logo}>FixGo</Text>
+
+            {/* ── Form Container ───────────────────────────────────────────── */}
+            <View style={styles.formContainer}>
+              {/* Input: Số điện thoại hoặc email */}
+              <View
+                style={[
+                  styles.inputWrapper,
+                  identifierError && styles.inputWrapperError,
+                ]}
+              >
+                <Ionicons
+                  name="person-outline"
+                  size={20}
+                  color={COLORS.gray}
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Số điện thoại hoặc email"
+                  placeholderTextColor={COLORS.gray}
+                  value={identifier}
+                  onChangeText={(val) => {
+                    setIdentifier(val);
+                    if (identifierError) setIdentifierError(false);
+                    if (errorMessage) setErrorMessage('');
+                  }}
+                  autoCapitalize="none"
+                  keyboardType="default"
+                  autoCorrect={false}
+                  editable={!isLoading}
+                />
               </View>
 
-              <Text style={styles.brandTitle}>FixGo</Text>
-              <Text style={styles.brandSlogan}>KẾT NỐI DỊCH VỤ – NÂNG TẦM CUỘC SỐNG</Text>
-              <Text style={styles.brandWelcome}>Chào mừng bạn đến với FixGo</Text>
-            </View>
+              {/* Input: Mật khẩu */}
+              <View
+                style={[
+                  styles.inputWrapper,
+                  passwordError && styles.inputWrapperError,
+                ]}
+              >
+                <Ionicons
+                  name="lock-closed-outline"
+                  size={20}
+                  color={COLORS.gray}
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Mật khẩu"
+                  placeholderTextColor={COLORS.gray}
+                  value={password}
+                  onChangeText={(val) => {
+                    setPassword(val);
+                    if (passwordError) setPasswordError(false);
+                    if (errorMessage) setErrorMessage('');
+                  }}
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  editable={!isLoading}
+                />
+                <TouchableOpacity
+                  style={styles.eyeBtn}
+                  onPress={() => setShowPassword(!showPassword)}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons
+                    name={showPassword ? 'eye-outline' : 'eye-off-outline'}
+                    size={20}
+                    color={COLORS.gray}
+                  />
+                </TouchableOpacity>
+              </View>
 
-            {/* 2. Glassmorphism Card Form Đăng Nhập */}
-            <View style={styles.glassCard}>
-              <Text style={styles.cardHeading}>Đăng Nhập</Text>
+              {/* Link: Quên mật khẩu? (Figma: căn phải, màu xanh nhạt) */}
+              <View style={styles.forgotRow}>
+                <Link href="/(auth)/forgot-password" asChild>
+                  <TouchableOpacity activeOpacity={0.7} disabled={isLoading}>
+                    <Text style={styles.forgotText}>Quên mật khẩu?</Text>
+                  </TouchableOpacity>
+                </Link>
+              </View>
 
-              {/* Thông báo lỗi nếu có */}
+              {/* Nút ĐĂNG NHẬP (Figma: dark blue, full-width, rounded) */}
+              <TouchableOpacity
+                style={styles.loginBtn}
+                onPress={handleLogin}
+                disabled={isLoading}
+                activeOpacity={0.85}
+              >
+                <Text style={styles.loginBtnText}>Đăng nhập</Text>
+              </TouchableOpacity>
+
+              {/* Thông báo lỗi (Figma: text đỏ dưới nút Đăng nhập) */}
               {errorMessage ? (
-                <View style={styles.errorBox}>
-                  <Ionicons name="alert-circle" size={18} color="#F87171" style={styles.errorIcon} />
-                  <Text style={styles.errorText}>{errorMessage}</Text>
-                </View>
+                <Text style={styles.errorText}>{errorMessage}</Text>
               ) : null}
 
-              <View style={styles.form}>
-                {/* Field: Email / SĐT / Tên đăng nhập */}
-                <View
-                  style={isIdentifierFocused ? styles.inputWrapperFocused : styles.inputWrapper}
-                >
-                  <Ionicons
-                    name="person-outline"
-                    size={20}
-                    color={isIdentifierFocused ? '#38BDF8' : '#94A3B8'}
-                    style={styles.inputLeftIcon}
-                  />
-                  <TextInput
-                    style={styles.textInput}
-                    placeholder="Email hoặc Tên đăng nhập"
-                    placeholderTextColor="#64748B"
-                    value={identifier}
-                    onChangeText={(val) => {
-                      setIdentifier(val);
-                      if (errorMessage) setErrorMessage('');
-                    }}
-                    onFocus={() => setIsIdentifierFocused(true)}
-                    onBlur={() => setIsIdentifierFocused(false)}
-                    autoCapitalize="none"
-                    keyboardType="default"
-                    autoCorrect={false}
-                    editable={!isLoading}
-                  />
-                </View>
-
-                {/* Field: Mật khẩu */}
-                <View
-                  style={isPasswordFocused ? styles.inputWrapperFocused : styles.inputWrapper}
-                >
-                  <Ionicons
-                    name="lock-closed-outline"
-                    size={20}
-                    color={isPasswordFocused ? '#38BDF8' : '#94A3B8'}
-                    style={styles.inputLeftIcon}
-                  />
-                  <TextInput
-                    style={styles.textInput}
-                    placeholder="Mật khẩu"
-                    placeholderTextColor="#64748B"
-                    value={password}
-                    onChangeText={(val) => {
-                      setPassword(val);
-                      if (errorMessage) setErrorMessage('');
-                    }}
-                    onFocus={() => setIsPasswordFocused(true)}
-                    onBlur={() => setIsPasswordFocused(false)}
-                    secureTextEntry={!showPassword}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    editable={!isLoading}
-                  />
-                  <TouchableOpacity
-                    style={styles.eyeBtn}
-                    onPress={() => setShowPassword(!showPassword)}
-                    activeOpacity={0.7}
-                  >
-                    <Ionicons
-                      name={showPassword ? 'eye-outline' : 'eye-off-outline'}
-                      size={20}
-                      color="#64748B"
-                    />
-                  </TouchableOpacity>
-                </View>
-
-                {/* Quên mật khẩu? (Căn phải theo đúng thiết kế web) */}
-                <View style={styles.forgotRow}>
-                  <Link href="/(auth)/forgot-password" asChild>
-                    <TouchableOpacity activeOpacity={0.7} disabled={isLoading}>
-                      <Text style={styles.forgotText}>Quên mật khẩu?</Text>
-                    </TouchableOpacity>
-                  </Link>
-                </View>
-
-                {/* Nút ĐĂNG NHẬP (Deep Blue với viền tím phát sáng như ảnh) */}
-                <TouchableOpacity
-                  style={isLoading ? styles.loginBtnDisabled : styles.loginBtn}
-                  onPress={handleLogin}
-                  disabled={isLoading}
-                  activeOpacity={0.85}
-                >
-                  {isLoading ? (
-                    <ActivityIndicator color="#FFFFFF" size="small" />
-                  ) : (
-                    <Text style={styles.loginBtnText}>ĐĂNG NHẬP</Text>
-                  )}
-                </TouchableOpacity>
-              </View>
-
-              {/* Phân cách: Hoặc đăng nhập nhanh bằng */}
+              {/* Phân cách: hoặc đăng nhập bằng */}
               <View style={styles.dividerRow}>
                 <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>Hoặc đăng nhập nhanh bằng</Text>
+                <Text style={styles.dividerText}>hoặc đăng nhập bằng</Text>
                 <View style={styles.dividerLine} />
               </View>
 
-              {/* 3 Nút mạng xã hội tròn (Google, Facebook, Apple) */}
+              {/* Social Login: Facebook + Google (Figma: 2 nút tròn trắng) */}
               <View style={styles.socialRow}>
-                {/* Google */}
                 <TouchableOpacity
-                  style={styles.socialCircleBtn}
-                  activeOpacity={0.8}
-                  onPress={() => console.log('Login Google')}
-                >
-                  <FontAwesome name="google" size={20} color="#EA4335" />
-                </TouchableOpacity>
-
-                {/* Facebook */}
-                <TouchableOpacity
-                  style={styles.socialCircleBtn}
+                  style={styles.socialBtn}
                   activeOpacity={0.8}
                   onPress={() => console.log('Login Facebook')}
                 >
-                  <FontAwesome name="facebook" size={20} color="#1877F2" />
+                  <FontAwesome name="facebook" size={24} color={COLORS.facebookBlue} />
                 </TouchableOpacity>
 
-                {/* Apple */}
                 <TouchableOpacity
-                  style={styles.socialCircleBtn}
+                  style={styles.socialBtn}
                   activeOpacity={0.8}
-                  onPress={() => console.log('Login Apple')}
+                  onPress={() => console.log('Login Google')}
                 >
-                  <FontAwesome name="apple" size={22} color="#000000" />
+                  <FontAwesome name="google" size={24} color={COLORS.googleRed} />
                 </TouchableOpacity>
               </View>
 
-              {/* Footer: Chưa có tài khoản? Đăng ký ngay (Màu cam vàng Gold) */}
+              {/* Footer: Đăng ký (Bấm để hiển thị Modal chọn vai trò) */}
               <View style={styles.footerRow}>
-                <Text style={styles.footerNormalText}>Chưa có tài khoản? </Text>
+                <Text style={styles.footerText}>Chưa có tài khoản? </Text>
                 <TouchableOpacity
-                  onPress={() => setShowRegisterModal(true)}
                   activeOpacity={0.7}
+                  onPress={() => setShowRegisterModal(true)}
                 >
-                  <Text style={styles.footerGoldLink}>Đăng ký ngay</Text>
+                  <Text style={styles.footerLink}>Đăng ký ngay</Text>
                 </TouchableOpacity>
               </View>
             </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
 
-            {/* 3. Footer pháp lý bên dưới */}
-            <View style={styles.legalFooterRow}>
-              <Ionicons name="shield-checkmark-outline" size={14} color="#64748B" style={styles.shieldIcon} />
-              <TouchableOpacity activeOpacity={0.7}>
-                <Text style={styles.legalText}>Điều khoản dịch vụ</Text>
-              </TouchableOpacity>
-              <Text style={styles.legalDivider}>|</Text>
-              <TouchableOpacity activeOpacity={0.7}>
-                <Text style={styles.legalText}>Chính sách bảo mật</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-
-      {/* Modal lựa chọn Đăng ký Khách hàng hoặc Thợ */}
+      {/* ── Modal Popup: Chọn vai trò Đăng ký (Khách hàng vs Thợ) ─────────── */}
       <Modal
         visible={showRegisterModal}
-        transparent={true}
+        transparent
         animationType="fade"
         onRequestClose={() => setShowRegisterModal(false)}
       >
-        <View style={styles.modalBackdrop}>
-          <View style={styles.modalCard}>
+        <TouchableOpacity
+          style={styles.modalBackdrop}
+          activeOpacity={1}
+          onPress={() => setShowRegisterModal(false)}
+        >
+          <TouchableOpacity
+            style={styles.modalCard}
+            activeOpacity={1}
+            onPress={(e) => {
+              if (Platform.OS === 'web') {
+                e?.stopPropagation?.();
+              }
+            }}
+          >
+            {/* Header Modal */}
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Lựa Chọn Đăng Ký</Text>
+              <View style={styles.modalHeaderTitleRow}>
+                <Ionicons name="person-add" size={20} color={COLORS.primary} style={{ marginRight: 8 }} />
+                <Text style={styles.modalTitle}>Chọn loại tài khoản</Text>
+              </View>
               <TouchableOpacity
-                onPress={() => setShowRegisterModal(false)}
                 style={styles.modalCloseBtn}
+                onPress={() => setShowRegisterModal(false)}
+                activeOpacity={0.7}
               >
-                <Ionicons name="close" size={22} color="#94A3B8" />
+                <Ionicons name="close" size={22} color={COLORS.gray} />
               </TouchableOpacity>
             </View>
+
             <Text style={styles.modalSubtitle}>
-              Bạn muốn tạo tài khoản với vai trò nào trong FixGo?
+              Vui lòng chọn vai trò bạn muốn tạo tài khoản trong hệ thống FIXGO:
             </Text>
 
+            {/* Các tùy chọn */}
             <View style={styles.modalOptions}>
-              {/* Đăng ký Khách hàng */}
+              {/* Option 1: Khách hàng */}
               <TouchableOpacity
                 style={styles.modalOptionItemCustomer}
                 activeOpacity={0.8}
@@ -314,16 +400,23 @@ export default function FixGoLoginScreen() {
                 }}
               >
                 <View style={styles.modalOptionIconBoxCustomer}>
-                  <Ionicons name="person" size={22} color="#F59E0B" />
+                  <Ionicons name="person" size={22} color={COLORS.primary} />
                 </View>
                 <View style={styles.modalOptionContent}>
-                  <Text style={styles.modalOptionTitleCustomer}>Đăng ký làm Khách hàng</Text>
-                  <Text style={styles.modalOptionSub}>Đặt dịch vụ sửa chữa, bảo trì nhà cửa</Text>
+                  <View style={styles.optionTitleRow}>
+                    <Text style={styles.modalOptionTitleCustomer}>Khách hàng</Text>
+                    <View style={styles.badgeCustomerPill}>
+                      <Text style={styles.badgeCustomerPillText}>Tìm thợ</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.modalOptionSub}>
+                    Dành cho cá nhân cần tìm và đặt thợ sửa chữa gia đình
+                  </Text>
                 </View>
-                <Ionicons name="chevron-forward" size={18} color="#64748B" />
+                <Ionicons name="chevron-forward" size={20} color={COLORS.primary} />
               </TouchableOpacity>
 
-              {/* Đăng ký Thợ */}
+              {/* Option 2: Thợ sửa chữa */}
               <TouchableOpacity
                 style={styles.modalOptionItemWorker}
                 activeOpacity={0.8}
@@ -333,397 +426,303 @@ export default function FixGoLoginScreen() {
                 }}
               >
                 <View style={styles.modalOptionIconBoxWorker}>
-                  <Ionicons name="construct" size={22} color="#60A5FA" />
+                  <Ionicons name="construct" size={22} color="#D97706" />
                 </View>
                 <View style={styles.modalOptionContent}>
-                  <Text style={styles.modalOptionTitleWorker}>Đăng ký làm Thợ / Đối tác FixGo</Text>
-                  <Text style={styles.modalOptionSub}>Nhận việc, quản lý lịch làm & gia tăng thu nhập</Text>
+                  <View style={styles.optionTitleRow}>
+                    <Text style={styles.modalOptionTitleWorker}>Thợ sửa chữa</Text>
+                    <View style={styles.badgeWorkerPill}>
+                      <Text style={styles.badgeWorkerPillText}>Đối tác</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.modalOptionSub}>
+                    Dành cho thợ lành nghề muốn nhận việc và nâng cao thu nhập
+                  </Text>
                 </View>
-                <Ionicons name="chevron-forward" size={18} color="#64748B" />
+                <Ionicons name="chevron-forward" size={20} color="#D97706" />
               </TouchableOpacity>
             </View>
-            </View>
-          </View>
-        </Modal>
-      </SafeAreaView>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     </View>
-  </ImageBackground>
-);
+  );
 }
 
+// ═════════════════════════════════════════════════════════════════════════════════
+// STYLES – khớp Figma "FIXGO – Khoá luận tốt nghiệp"
+// ═════════════════════════════════════════════════════════════════════════════════
 const styles = StyleSheet.create({
-  backgroundImage: {
+  // ─── Launch Screen (Figma "Launch - 1 / 2") ─────────────────────────────────
+  launchScreen: {
     flex: 1,
-    width: '100%',
-    height: '100%',
+    backgroundColor: COLORS.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  overlay: {
+  launchLogo: {
+    fontSize: 48,
+    fontFamily: 'Inter_700Bold',
+    fontWeight: '700',
+    color: COLORS.white,
+    letterSpacing: 1,
+  },
+
+  // ─── Loading / Success Screen (Figma "Success Login") ───────────────────────
+  loadingScreen: {
     flex: 1,
-    backgroundColor: 'rgba(11, 17, 26, 0.72)', // Lớp nền tối mờ giúp tôn ảnh nền nhưng vẫn đảm bảo đọc chữ rõ ràng
+    backgroundColor: COLORS.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  // ─── Login Screen Container ─────────────────────────────────────────────────
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.primary,
   },
   safeArea: {
     flex: 1,
-    backgroundColor: 'transparent',
   },
-  keyboardContainer: {
+  flex1: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 28,
-  },
-  mainWrapper: {
-    width: '100%',
-    maxWidth: 420,
-    alignItems: 'center',
+    paddingHorizontal: 32,
+    paddingVertical: 40,
   },
 
-  // 1. Header FixGo
-  brandHeader: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  logoOuter: {
-    width: 66,
-    height: 66,
-    borderRadius: 22,
-    backgroundColor: 'rgba(217, 119, 6, 0.12)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 10,
-    borderWidth: 1.5,
-    borderColor: 'rgba(245, 158, 11, 0.45)',
-    shadowColor: '#F59E0B',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-  },
-  logoInner: {
-    width: 48,
-    height: 48,
-    borderRadius: 15,
-    backgroundColor: 'rgba(245, 158, 11, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  logoTextFg: {
-    fontSize: 22,
-    fontWeight: '900',
-    color: '#FCD34D',
-    letterSpacing: -0.5,
-  },
-  brandTitle: {
-    fontSize: 26,
-    fontWeight: '900',
-    color: '#F3F4F6',
-    letterSpacing: 0.5,
-    marginBottom: 4,
-  },
-  brandSlogan: {
-    fontSize: 12,
+  // ─── Logo FixGo ─────────────────────────────────────────────────────────────
+  logo: {
+    fontSize: 42,
+    fontFamily: 'Inter_700Bold',
     fontWeight: '700',
-    color: '#D4AF37', // Vàng ánh kim Gold
-    letterSpacing: 1.2,
-    textAlign: 'center',
-    marginBottom: 4,
-  },
-  brandWelcome: {
-    fontSize: 12,
-    color: '#94A3B8',
-    textAlign: 'center',
+    color: COLORS.white,
+    letterSpacing: 1,
+    marginBottom: 56,
   },
 
-  // 2. Glass Card
-  glassCard: {
+  // ─── Form ───────────────────────────────────────────────────────────────────
+  formContainer: {
     width: '100%',
-    backgroundColor: 'rgba(17, 24, 39, 0.85)',
-    borderRadius: 24,
-    paddingHorizontal: 20,
-    paddingVertical: 24,
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 8,
-    marginBottom: 20,
-  },
-  cardHeading: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    textAlign: 'center',
-    marginBottom: 18,
+    maxWidth: 400,
   },
 
-  // Error Box
-  errorBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(239, 68, 68, 0.15)',
-    borderWidth: 1,
-    borderColor: '#EF4444',
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-    marginBottom: 14,
-  },
-  errorIcon: {
-    marginRight: 8,
-  },
-  errorText: {
-    flex: 1,
-    fontSize: 12,
-    color: '#FCA5A5',
-    fontWeight: '500',
-    lineHeight: 16,
-  },
-
-  // Form & Inputs
-  form: {
-    marginBottom: 4,
-  },
+  // ─── Inputs (Figma: rounded white fields) ───────────────────────────────────
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    height: 48,
-    marginBottom: 12,
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    height: 52,
+    marginBottom: 16,
+    borderWidth: 2,
+    borderColor: 'transparent',
   },
-  inputWrapperFocused: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderWidth: 1.5,
-    borderColor: '#38BDF8',
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    height: 48,
-    marginBottom: 12,
-    shadowColor: '#38BDF8',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    elevation: 2,
+  inputWrapperError: {
+    borderColor: COLORS.red,
   },
-  inputLeftIcon: {
-    marginRight: 10,
+  inputIcon: {
+    marginRight: 12,
   },
   textInput: {
     flex: 1,
     height: '100%',
-    fontSize: 13.5,
-    color: '#FFFFFF',
+    fontSize: 15,
+    fontFamily: 'Inter_400Regular',
+    color: COLORS.black,
+    ...(Platform.OS === 'web' ? { outlineStyle: 'none' } : {}),
   },
   eyeBtn: {
     padding: 6,
   },
 
-  // Quên mật khẩu
+  // ─── Quên mật khẩu (Figma: căn phải, xanh nhạt) ───────────────────────────
   forgotRow: {
     alignItems: 'flex-end',
-    marginBottom: 16,
-    marginTop: -2,
+    marginBottom: 20,
+    marginTop: -4,
   },
   forgotText: {
-    fontSize: 12,
-    color: '#94A3B8',
-    fontWeight: '500',
+    fontSize: 13,
+    fontFamily: 'Inter_600SemiBold',
+    fontWeight: '600',
+    color: COLORS.lightBlue,
   },
 
-  // Button ĐĂNG NHẬP
+  // ─── Nút Đăng nhập (Figma: full-width, dark blue, rounded) ─────────────────
   loginBtn: {
-    backgroundColor: '#1E2968',
-    height: 48,
-    borderRadius: 24,
+    backgroundColor: COLORS.darkBlue,
+    height: 52,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: '#6366F1', // Viền tím neon phát sáng như web
-    shadowColor: '#6366F1',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.45,
-    shadowRadius: 10,
-    elevation: 5,
-    marginBottom: 16,
-  },
-  loginBtnDisabled: {
-    backgroundColor: '#172554',
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: '#4338CA',
-    marginBottom: 16,
+    marginBottom: 8,
   },
   loginBtnText: {
-    color: '#FFFFFF',
-    fontSize: 14.5,
-    fontWeight: '800',
-    letterSpacing: 1,
+    color: COLORS.white,
+    fontSize: 16,
+    fontFamily: 'Inter_700Bold',
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
 
-  // Divider
+  // ─── Error text (Figma: đỏ, centered, dưới nút) ────────────────────────────
+  errorText: {
+    color: COLORS.red,
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
+    textAlign: 'center',
+    marginTop: 4,
+    marginBottom: 8,
+  },
+
+  // ─── Divider ────────────────────────────────────────────────────────────────
   dividerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    marginVertical: 24,
   },
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
   },
   dividerText: {
-    paddingHorizontal: 10,
-    fontSize: 11.5,
-    color: '#94A3B8',
-    fontWeight: '500',
+    paddingHorizontal: 12,
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
+    color: COLORS.white,
   },
 
-  // Social Buttons
+  // ─── Social Login (Figma: 2 nút tròn trắng – Facebook + Google) ────────────
   socialRow: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 16,
-    marginBottom: 20,
+    gap: 24,
+    marginBottom: 32,
   },
-  socialCircleBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#FFFFFF',
+  socialBtn: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: COLORS.white,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000000',
+    shadowColor: COLORS.black,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 2,
+    elevation: 3,
   },
 
-  // Footer
+  // ─── Footer (Figma: Chưa có tài khoản? Đăng ký ngay) ──────────────────────
   footerRow: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  footerNormalText: {
-    fontSize: 12.5,
-    color: '#94A3B8',
+  footerText: {
+    fontSize: 14,
+    fontFamily: 'Inter_400Regular',
+    color: COLORS.white,
   },
-  footerGoldLink: {
-    fontSize: 12.5,
+  footerLink: {
+    fontSize: 14,
+    fontFamily: 'Inter_700Bold',
     fontWeight: '700',
-    color: '#F59E0B', // Màu cam vàng Gold ấm áp chuẩn ảnh web
+    color: COLORS.white,
+    textDecorationLine: 'underline',
   },
 
-  // Legal Footer
-  legalFooterRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  shieldIcon: {
-    marginRight: 6,
-  },
-  legalText: {
-    fontSize: 11,
-    color: '#64748B',
-  },
-  legalDivider: {
-    marginHorizontal: 8,
-    color: '#475569',
-    fontSize: 11,
-  },
-
-  // Modal Styles
+  // ─── Modal Popup Styles (Role Selection) ───────────────────────────────────
   modalBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
   },
   modalCard: {
     width: '100%',
-    maxWidth: 400,
-    backgroundColor: '#111827',
+    maxWidth: 420,
+    backgroundColor: COLORS.white,
     borderRadius: 24,
     padding: 24,
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 8,
+    shadowColor: COLORS.black,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.2,
+    shadowRadius: 24,
+    elevation: 10,
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: 8,
+  },
+  modalHeaderTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '800',
-    color: '#FFFFFF',
+    fontFamily: 'Inter_700Bold',
+    fontWeight: '700',
+    color: '#0F172A',
   },
   modalCloseBtn: {
-    padding: 4,
+    padding: 6,
+    borderRadius: 16,
+    backgroundColor: '#F1F5F9',
   },
   modalSubtitle: {
     fontSize: 13,
-    color: '#94A3B8',
+    fontFamily: 'Inter_400Regular',
+    color: '#64748B',
     marginBottom: 20,
     lineHeight: 18,
   },
   modalOptions: {
-    gap: 12,
+    gap: 14,
   },
   modalOptionItemCustomer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+    backgroundColor: '#EFF6FF',
     borderWidth: 1.5,
-    borderColor: 'rgba(245, 158, 11, 0.35)',
-    borderRadius: 16,
+    borderColor: '#BFDBFE',
+    borderRadius: 18,
     padding: 14,
   },
   modalOptionItemWorker: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    backgroundColor: '#FFFBEB',
     borderWidth: 1.5,
-    borderColor: 'rgba(59, 130, 246, 0.35)',
-    borderRadius: 16,
+    borderColor: '#FDE68A',
+    borderRadius: 18,
     padding: 14,
   },
   modalOptionIconBoxCustomer: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
-    backgroundColor: 'rgba(245, 158, 11, 0.2)',
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#DBEAFE',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
   },
   modalOptionIconBoxWorker: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
-    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#FEF3C7',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -731,19 +730,52 @@ const styles = StyleSheet.create({
   modalOptionContent: {
     flex: 1,
   },
+  optionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 2,
+  },
   modalOptionTitleCustomer: {
-    fontSize: 14,
+    fontSize: 15,
+    fontFamily: 'Inter_700Bold',
     fontWeight: '700',
-    color: '#FBBF24',
+    color: '#1D4ED8',
   },
   modalOptionTitleWorker: {
-    fontSize: 14,
+    fontSize: 15,
+    fontFamily: 'Inter_700Bold',
     fontWeight: '700',
-    color: '#60A5FA',
+    color: '#B45309',
+  },
+  badgeCustomerPill: {
+    backgroundColor: '#DBEAFE',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  badgeCustomerPillText: {
+    fontSize: 10,
+    fontFamily: 'Inter_700Bold',
+    fontWeight: '700',
+    color: '#1D4ED8',
+  },
+  badgeWorkerPill: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  badgeWorkerPillText: {
+    fontSize: 10,
+    fontFamily: 'Inter_700Bold',
+    fontWeight: '700',
+    color: '#B45309',
   },
   modalOptionSub: {
-    fontSize: 11,
-    color: '#94A3B8',
-    marginTop: 2,
+    fontSize: 11.5,
+    fontFamily: 'Inter_400Regular',
+    color: '#64748B',
+    lineHeight: 16,
   },
 });
