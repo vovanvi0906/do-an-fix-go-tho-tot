@@ -12,7 +12,8 @@ export default function AuthLayout() {
       }}
     >
       <Stack.Screen name="login" options={{ headerShown: false, title: 'Đăng nhập' }} />
-      <Stack.Screen name="register" options={{ title: 'Đăng ký tài khoản' }} />
+      <Stack.Screen name="login-worker" options={{ headerShown: false, title: 'Đăng nhập Thợ' }} />
+      <Stack.Screen name="register" options={{ headerShown: false, title: 'Đăng ký tài khoản' }} />
       <Stack.Screen name="register-customer" options={{ title: 'Đăng ký Khách hàng' }} />
       <Stack.Screen name="register-worker" options={{ title: 'Đăng ký Thợ' }} />
       <Stack.Screen name="forgot-password" options={{ title: 'Quên mật khẩu' }} />
