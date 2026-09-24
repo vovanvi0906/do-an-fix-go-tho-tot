@@ -1,1 +1,2 @@
-// Export services of booking
+// Feature: booking/services
+export { bookingService } from './bookingService';
