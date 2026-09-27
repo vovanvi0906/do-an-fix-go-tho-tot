@@ -1,1 +1,2 @@
-// Export hooks of booking
+// Feature: booking/hooks
+export { useBooking } from './useBooking';

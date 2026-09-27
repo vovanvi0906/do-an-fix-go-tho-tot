@@ -1,3 +1,18 @@
+/**
+ * @file [id].jsx
+ * @description Màn hình Chi tiết & Theo dõi Đơn hàng của Khách hàng FixGo.
+ * Hỗ trợ hiển thị mượt mà mọi trạng thái:
+ * - AWAITING_CONFIRM: Đơn đang chờ Admin duyệt thợ (Dịch vụ theo yêu cầu, đếm ngược 20 phút)
+ * - SEARCHING_WORKER: Đang quét tìm thợ gần bạn
+ * - MATCHED / ASSIGNED: Thợ đã nhận đơn
+ * - WORKER_ARRIVING / IN_PROGRESS: Thợ đang tới / Đang sửa chữa
+ * - COMPLETED / PAID: Đơn hoàn thành
+ * - CANCELLED / EXPIRED / REJECTED: Đơn đã hủy hoặc hết hạn
+ *
+ * Khởi tạo dữ liệu tức thì từ navigation params kết hợp local storage,
+ * đảm bảo không bao giờ bị lỗi 401, không bị kẹt loading hay màn hình trắng.
+ */
+
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -6,44 +21,85 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { orderService } from '../../../src/services/api/orderService';
 import { socketService } from '../../../src/services/socket/socketService';
+import { orderStorage } from '../../../src/services/storage/orderStorage';
 
 export default function UserOrderDetailScreen() {
-  const { id } = useLocalSearchParams();
+  const params = useLocalSearchParams();
   const router = useRouter();
+  const id = params?.id;
 
-  const [order, setOrder] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [currentStatus, setCurrentStatus] = useState('ASSIGNED');
+  // Khởi tạo ngay từ params để hiển thị tức thì, không bị chặn bởi mạng
+  const [order, setOrder] = useState(() => {
+    if (params?.title || params?.orderCode || params?.serviceName) {
+      return {
+        id: params.id,
+        orderCode: params.orderCode || `#${String(params.id || '').slice(0, 10).toUpperCase()}`,
+        title: params.title || params.serviceName,
+        serviceName: params.serviceName || params.title,
+        addressText: params.addressText || '606/20, Hiệp Bình, Hồ Chí Minh',
+        customerName: params.customerName || 'Khách hàng FixGo',
+        customerPhone: params.customerPhone || '0366192248',
+        scheduledAt: params.scheduledAt || 'Cần thợ gấp',
+        price: params.price ? Number(params.price) : 150000,
+        status: params.status || 'AWAITING_CONFIRM',
+        isCustomService: params.isCustomService === 'true',
+        createdAt: params.createdAt || new Date().toISOString(),
+        note: params.note || '',
+      };
+    }
+    return null;
+  });
+
+  const [loading, setLoading] = useState(!order);
+  const [currentStatus, setCurrentStatus] = useState(() => params?.status || 'AWAITING_CONFIRM');
+
+  const fetchOrderData = async () => {
+    try {
+      // 1. Tìm trong Local Storage (@fixgo_user_orders)
+      const localList = await orderStorage.getLocalOrders();
+      const foundLocal = localList.find(
+        (o) =>
+          String(o.id) === String(id) ||
+          String(o.orderCode) === String(id) ||
+          (params?.orderCode && String(o.orderCode) === String(params.orderCode))
+      );
+
+      if (foundLocal) {
+        setOrder(foundLocal);
+        setCurrentStatus(foundLocal.status || 'AWAITING_CONFIRM');
+        setLoading(false);
+        return;
+      }
+
+      // 2. Nếu không có ở local và ID không phải dạng mock thì fetch Backend
+      if (id && !String(id).startsWith('ord-') && !String(id).startsWith('#')) {
+        const res = await orderService.getOrderById(id);
+        if (res) {
+          setOrder(res);
+          setCurrentStatus(res.status || 'ASSIGNED');
+        }
+      }
+    } catch (e) {
+      console.warn('⚠️ [OrderDetail] Lỗi lấy đơn fallback:', e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
+    fetchOrderData();
+
+    // Kết nối Socket để nhận realtime status nếu có
     socketService.connect();
-
-    // Tải thông tin đơn hàng
-    const fetchOrder = async () => {
-      try {
-        if (id) {
-          const res = await orderService.getOrderById(id);
-          if (res) {
-            setOrder(res);
-            setCurrentStatus(res.status || 'ASSIGNED');
-          }
-        }
-      } catch (e) {
-        console.warn('Load order fallback:', e.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchOrder();
-
-    // Lắng nghe cập nhật trạng thái thời gian thực từ Socket.IO
     const handleStatusUpdate = (data) => {
-      console.log('🔄 [Order Tracking Socket] Cập nhật trạng thái:', data);
+      console.log('🔄 [OrderDetail Socket] Cập nhật trạng thái:', data);
       if (data.orderId === id) {
         setCurrentStatus(data.status);
       }
@@ -60,126 +116,280 @@ export default function UserOrderDetailScreen() {
     };
   }, [id]);
 
-  const getStatusStepIndex = (status) => {
-    const steps = ['SEARCHING', 'ASSIGNED', 'WORKER_ARRIVING', 'ARRIVED', 'IN_PROGRESS', 'COMPLETED'];
-    return Math.max(0, steps.indexOf(status));
+  // Hủy đơn hàng
+  const handleCancelOrder = () => {
+    Alert.alert('Xác nhận hủy đơn', 'Bạn có chắc chắn muốn hủy yêu cầu đặt dịch vụ này?', [
+      { text: 'Không', style: 'cancel' },
+      {
+        text: 'Đồng ý hủy',
+        style: 'destructive',
+        onPress: async () => {
+          if (order?.id) {
+            await orderStorage.updateOrderStatus(order.id, 'CANCELLED', 'Khách hàng chủ động hủy');
+          }
+          setCurrentStatus('CANCELLED');
+          fetchOrderData();
+        },
+      },
+    ]);
   };
 
-  const stepIndex = getStatusStepIndex(currentStatus);
+  // Demo: Admin Duyệt đơn (chuyển sang MATCHED / Đã xác nhận)
+  const handleAdminApproveDemo = async () => {
+    if (order?.id) {
+      await orderStorage.adminConfirmOrder(order.id);
+    }
+    setCurrentStatus('MATCHED');
+    Alert.alert('Thành công', 'Admin đã duyệt yêu cầu! Đơn hàng đã chuyển sang trạng thái ĐÃ XÁC NHẬN.');
+    fetchOrderData();
+  };
 
-  if (loading) {
+  if (loading && !order) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#2563EB" />
-        <Text style={styles.loadingText}>Đang tải thông tin theo dõi đơn hàng...</Text>
+        <ActivityIndicator size="large" color="#0284C7" />
+        <Text style={styles.loadingText}>Đang tải chi tiết đơn hàng...</Text>
       </View>
     );
   }
 
+  const isAwaitingConfirm = currentStatus === 'AWAITING_CONFIRM' || currentStatus === 'PENDING_ADMIN';
+  const isCancelled = currentStatus === 'CANCELLED' || currentStatus === 'EXPIRED' || currentStatus === 'REJECTED';
+  const isMatched = currentStatus === 'MATCHED' || currentStatus === 'ASSIGNED' || currentStatus === 'WORKER_ARRIVING';
+  const isInProgress = currentStatus === 'IN_PROGRESS';
+  const isCompleted = currentStatus === 'COMPLETED' || currentStatus === 'PAID';
+
+  // Tính số phút còn lại của giới hạn 20 phút duyệt
+  const createdTime = new Date(order?.createdAt || order?.submittedAt || Date.now()).getTime();
+  const elapsedMins = Math.floor((Date.now() - createdTime) / 60000);
+  const remainingMins = Math.max(0, 20 - elapsedMins);
+
   return (
-    <View style={styles.container}>
-      {/* Header */}
+    <SafeAreaView style={styles.container} edges={['top']}>
+      {/* ── Header Đơn hàng ────────────────────────────────────────── */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color="#0F172A" />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
+          <Ionicons name="chevron-back" size={22} color="#0F172A" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Theo Dõi Đơn Hàng</Text>
+        <Text style={styles.headerTitle}>Chi Tiết Đơn Hàng</Text>
         <View style={{ width: 40 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Bản đồ định vị giả lập / GPS Tracking Map */}
-        <View style={styles.mapSimulationBox}>
-          <View style={styles.mapGridOverlay}>
-            <View style={styles.customerPin}>
-              <Ionicons name="home" size={20} color="#FFFFFF" />
+        {/* ── 1. BANNER TRẠNG THÁI: CHỜ ADMIN DUYỆT ──────────────────── */}
+        {isAwaitingConfirm && (
+          <View style={styles.awaitingBanner}>
+            <View style={styles.bannerIconCircle}>
+              <Ionicons name="time" size={24} color="#D97706" />
             </View>
-            <View style={styles.routeLine} />
-            <View style={styles.workerPin}>
-              <Ionicons name="car" size={20} color="#FFFFFF" />
+            <View style={{ flex: 1 }}>
+              <View style={styles.awaitingTitleRow}>
+                <Text style={styles.awaitingTitle}>Đơn đang chờ duyệt</Text>
+                <View style={styles.countdownBadge}>
+                  <Text style={styles.countdownText}>Còn {remainingMins} phút</Text>
+                </View>
+              </View>
+              <Text style={styles.awaitingSub}>
+                Admin đang xem xét yêu cầu dịch vụ để phân công thợ có tay nghề phù hợp nhất quanh khu vực của bạn.
+              </Text>
             </View>
           </View>
-          <View style={styles.etaBadge}>
-            <Ionicons name="time" size={16} color="#16A34A" />
-            <Text style={styles.etaText}>
-              {currentStatus === 'WORKER_ARRIVING'
-                ? 'Thợ dự kiến đến sau 8 phút'
-                : currentStatus === 'IN_PROGRESS'
-                ? 'Thợ đang tiến hành sửa chữa'
-                : 'Thợ đã nhận cuốc và chuẩn bị di chuyển'}
+        )}
+
+        {/* ── BANNER NẾU ĐƠN ĐÃ HỦY / HẾT HẠN ───────────────────────── */}
+        {isCancelled && (
+          <View style={styles.cancelledBanner}>
+            <View style={[styles.bannerIconCircle, { backgroundColor: '#FEE2E2' }]}>
+              <Ionicons name="close-circle" size={24} color="#DC2626" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.cancelledTitle}>Đơn hàng đã kết thúc</Text>
+              <Text style={styles.cancelledSub}>
+                {order?.statusReason || 'Đơn hàng đã được hủy hoặc hết thời gian chờ 20 phút không có thợ phù hợp.'}
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {/* ── 2. THẺ THÔNG TIN ĐƠN HÀNG ────────────────────────────── */}
+        <View style={styles.card}>
+          <View style={styles.cardHeaderRow}>
+            <Text style={styles.orderCodeBadge}>
+              {order?.orderCode || `#${String(order?.id || '').slice(0, 10).toUpperCase()}`}
+            </Text>
+            <View
+              style={[
+                styles.statusPill,
+                isAwaitingConfirm && styles.pillAmber,
+                isMatched && styles.pillGreen,
+                isInProgress && styles.pillBlue,
+                isCompleted && styles.pillGreen,
+                isCancelled && styles.pillRed,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.statusPillText,
+                  isAwaitingConfirm && styles.textAmber,
+                  isMatched && styles.textGreen,
+                  isInProgress && styles.textBlue,
+                  isCompleted && styles.textGreen,
+                  isCancelled && styles.textRed,
+                ]}
+              >
+                {isAwaitingConfirm
+                  ? `Chờ duyệt (${remainingMins}p)`
+                  : isMatched
+                  ? 'Đã xác nhận'
+                  : isInProgress
+                  ? 'Đang thực hiện'
+                  : isCompleted
+                  ? 'Hoàn thành'
+                  : 'Đã hủy'}
+              </Text>
+            </View>
+          </View>
+
+          <Text style={styles.serviceMainTitle}>
+            {order?.title || order?.serviceName || 'Dịch vụ sửa chữa'}
+          </Text>
+
+          <View style={styles.divider} />
+
+          <View style={styles.infoRow}>
+            <Ionicons name="calendar-outline" size={17} color="#0284C7" style={styles.infoIcon} />
+            <Text style={styles.infoLabel}>Thời gian:</Text>
+            <Text style={styles.infoValue}>
+              {order?.scheduledAt || 'Cần thợ gấp (Làm ngay)'}
+            </Text>
+          </View>
+
+          <View style={styles.infoRow}>
+            <Ionicons name="location-outline" size={17} color="#0284C7" style={styles.infoIcon} />
+            <Text style={styles.infoLabel}>Địa chỉ:</Text>
+            <Text style={styles.infoValue} numberOfLines={2}>
+              {order?.addressText || '606/20, Hiệp Bình, Hồ Chí Minh'}
+            </Text>
+          </View>
+
+          <View style={styles.infoRow}>
+            <Ionicons name="person-outline" size={17} color="#0284C7" style={styles.infoIcon} />
+            <Text style={styles.infoLabel}>Người đặt:</Text>
+            <Text style={styles.infoValue}>
+              {order?.customerName || 'Khách hàng'} • {order?.customerPhone || '0366192248'}
+            </Text>
+          </View>
+
+          {order?.note ? (
+            <View style={styles.infoRow}>
+              <Ionicons name="document-text-outline" size={17} color="#0284C7" style={styles.infoIcon} />
+              <Text style={styles.infoLabel}>Ghi chú:</Text>
+              <Text style={styles.infoValue}>{order.note}</Text>
+            </View>
+          ) : null}
+
+          <View style={styles.divider} />
+
+          <View style={styles.priceRow}>
+            <Text style={styles.priceLabel}>Dự toán chi phí:</Text>
+            <Text style={styles.priceValue}>
+              {order?.price ? `${Number(order.price).toLocaleString('vi-VN')} đ` : 'Khảo sát báo giá'}
             </Text>
           </View>
         </View>
 
-        {/* Thông tin Thợ nhận đơn */}
-        <View style={styles.workerCard}>
-          <View style={styles.workerAvatarCircle}>
-            <Text style={styles.workerAvatarText}>👨‍🔧</Text>
+        {/* ── 3. THÔNG TIN THỢ PHỤ TRÁCH (Khi đã xác nhận thợ) ─────── */}
+        {!isAwaitingConfirm && !isCancelled && (
+          <View style={styles.workerCard}>
+            <View style={styles.workerAvatarCircle}>
+              <Text style={styles.workerAvatarText}>👨‍🔧</Text>
+            </View>
+            <View style={{ flex: 1, marginLeft: 14 }}>
+              <Text style={styles.workerName}>
+                {order?.worker?.fullName || 'Nguyễn Văn Thợ (FixGo Pro)'}
+              </Text>
+              <Text style={styles.workerPhone}>
+                📞 SĐT: {order?.worker?.user?.phone || '0987.654.321'}
+              </Text>
+              <Text style={styles.workerRating}>⭐ 4.9 (128 đánh giá) • Thợ chuyên nghiệp</Text>
+            </View>
+            <TouchableOpacity style={styles.callBtn} activeOpacity={0.8}>
+              <Ionicons name="call" size={18} color="#FFFFFF" />
+            </TouchableOpacity>
           </View>
-          <View style={{ flex: 1, marginLeft: 14 }}>
-            <Text style={styles.workerName}>
-              {order?.worker?.fullName || 'Nguyễn Văn Thợ (FixGo Pro)'}
-            </Text>
-            <Text style={styles.workerPhone}>
-              📞 SĐT: {order?.worker?.user?.phone || '0987.654.321'}
-            </Text>
-            <Text style={styles.workerRating}>⭐ 4.9 (128 đánh giá) • Thợ Điện Nước</Text>
-          </View>
-          <TouchableOpacity style={styles.callBtn} activeOpacity={0.8}>
-            <Ionicons name="call" size={20} color="#FFFFFF" />
-          </TouchableOpacity>
-        </View>
+        )}
 
-        {/* Tiến trình thực hiện đơn (Workflow Timeline) */}
+        {/* ── 4. TIẾN TRÌNH THỰC HIỆN ĐƠN HÀNG ───────────────────────── */}
         <View style={styles.timelineCard}>
-          <Text style={styles.timelineHeading}>Tiến trình thực hiện đơn hàng #{id || 'ORD-99'}</Text>
+          <Text style={styles.timelineHeading}>Tiến trình đơn hàng</Text>
 
-          {/* Bước 1: Tìm thợ */}
           <View style={styles.timelineItem}>
-            <View style={stepIndex >= 0 ? styles.dotCompleted : styles.dotPending} />
+            <View style={styles.dotCompleted} />
             <View style={styles.timelineContent}>
-              <Text style={stepIndex >= 0 ? styles.stepTitleActive : styles.stepTitle}>
-                1. Khởi tạo & Tìm kiếm thợ
-              </Text>
-              <Text style={styles.stepSub}>Hệ thống quét thợ online trong bán kính 5km</Text>
+              <Text style={styles.stepTitleActive}>1. Đã tiếp nhận yêu cầu</Text>
+              <Text style={styles.stepSub}>Đơn hàng đã được ghi nhận trên hệ thống</Text>
             </View>
           </View>
 
-          {/* Bước 2: Thợ nhận đơn */}
           <View style={styles.timelineItem}>
-            <View style={stepIndex >= 1 ? styles.dotCompleted : styles.dotPending} />
+            <View style={!isAwaitingConfirm ? styles.dotCompleted : styles.dotPendingActive} />
             <View style={styles.timelineContent}>
-              <Text style={stepIndex >= 1 ? styles.stepTitleActive : styles.stepTitle}>
-                2. Thợ đã nhận đơn (ASSIGNED)
+              <Text style={!isAwaitingConfirm ? styles.stepTitleActive : styles.stepTitleAmber}>
+                2. Admin duyệt & Điều phối thợ
               </Text>
-              <Text style={styles.stepSub}>Thợ xác nhận tiếp nhận công việc</Text>
+              <Text style={styles.stepSub}>
+                {isAwaitingConfirm
+                  ? `Đang rà soát thợ phù hợp (Tối đa còn ${remainingMins} phút)...`
+                  : 'Đã hoàn tất duyệt và phân bổ thợ'}
+              </Text>
             </View>
           </View>
 
-          {/* Bước 3: Đang di chuyển */}
           <View style={styles.timelineItem}>
-            <View style={stepIndex >= 2 ? styles.dotCompleted : styles.dotPending} />
+            <View style={isInProgress || isCompleted ? styles.dotCompleted : styles.dotPending} />
             <View style={styles.timelineContent}>
-              <Text style={stepIndex >= 2 ? styles.stepTitleActive : styles.stepTitle}>
-                3. Đang di chuyển đến địa chỉ (ARRIVING)
+              <Text style={isInProgress || isCompleted ? styles.stepTitleActive : styles.stepTitle}>
+                3. Thợ đến làm việc
               </Text>
-              <Text style={styles.stepSub}>Thợ đang trên đường đến điểm hẹn</Text>
+              <Text style={styles.stepSub}>Kiểm tra sự cố, khảo sát và sửa chữa tận nơi</Text>
             </View>
           </View>
 
-          {/* Bước 4: Làm việc & Hoàn thành */}
           <View style={styles.timelineItem}>
-            <View style={stepIndex >= 4 ? styles.dotCompleted : styles.dotPending} />
+            <View style={isCompleted ? styles.dotCompleted : styles.dotPending} />
             <View style={styles.timelineContent}>
-              <Text style={stepIndex >= 4 ? styles.stepTitleActive : styles.stepTitle}>
-                4. Thực hiện dịch vụ & Nghiệm thu
+              <Text style={isCompleted ? styles.stepTitleActive : styles.stepTitle}>
+                4. Nghiệm thu & Hoàn tất
               </Text>
-              <Text style={styles.stepSub}>Khách hàng nghiệm thu và hoàn tất thanh toán</Text>
+              <Text style={styles.stepSub}>Khách hàng nghiệm thu, thanh toán và bảo hành</Text>
             </View>
           </View>
         </View>
+
+        {/* ── 5. CÁC NÚT THAO TÁC ───────────────────────────────────── */}
+        {isAwaitingConfirm && (
+          <View style={styles.actionsContainer}>
+            {/* Nút Demo Duyệt cho tester / admin */}
+            <TouchableOpacity
+              style={styles.demoApproveBtn}
+              onPress={handleAdminApproveDemo}
+              activeOpacity={0.85}
+            >
+              <Ionicons name="checkmark-done-circle" size={20} color="#FFFFFF" style={{ marginRight: 6 }} />
+              <Text style={styles.demoApproveBtnText}>Demo: Admin duyệt đơn</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.cancelOrderBtn}
+              onPress={handleCancelOrder}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.cancelOrderBtnText}>Hủy yêu cầu đặt lịch</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -198,14 +408,14 @@ const styles = StyleSheet.create({
     marginTop: 12,
     fontSize: 14,
     color: '#64748B',
+    fontFamily: 'Inter_500Medium',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingTop: 48,
-    paddingBottom: 14,
+    paddingVertical: 12,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
     borderBottomColor: '#E2E8F0',
@@ -219,168 +429,356 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '800',
+    fontSize: 17.5,
+    fontFamily: 'Inter_700Bold',
+    fontWeight: '700',
     color: '#0F172A',
   },
   scrollContent: {
     padding: 16,
+    paddingBottom: 40,
+    gap: 14,
   },
-  mapSimulationBox: {
-    height: 200,
-    backgroundColor: '#0F172A',
-    borderRadius: 20,
-    overflow: 'hidden',
-    marginBottom: 16,
+
+  // Banner trạng thái
+  awaitingBanner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: '#FFFBEB',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    borderRadius: 16,
+    padding: 14,
+    gap: 12,
+  },
+  bannerIconCircle: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: '#FEF3C7',
     justifyContent: 'center',
     alignItems: 'center',
-    position: 'relative',
+    marginTop: 2,
   },
-  mapGridOverlay: {
-    width: '80%',
+  awaitingTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    marginBottom: 4,
   },
-  customerPin: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#2563EB',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
+  awaitingTitle: {
+    fontSize: 15,
+    fontFamily: 'Inter_700Bold',
+    fontWeight: '700',
+    color: '#B45309',
   },
-  routeLine: {
-    flex: 1,
-    height: 3,
-    backgroundColor: '#38BDF8',
-    borderStyle: 'dashed',
-    marginHorizontal: 8,
+  countdownBadge: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
   },
-  workerPin: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#16A34A',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
+  countdownText: {
+    fontSize: 11.5,
+    fontFamily: 'Inter_600SemiBold',
+    color: '#D97706',
   },
-  etaBadge: {
-    position: 'absolute',
-    bottom: 12,
+  awaitingSub: {
+    fontSize: 12.5,
+    fontFamily: 'Inter_400Regular',
+    color: '#92400E',
+    lineHeight: 18,
+  },
+  cancelledBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    borderRadius: 16,
+    padding: 14,
+    gap: 12,
   },
-  etaText: {
-    marginLeft: 6,
-    fontSize: 12,
+  cancelledTitle: {
+    fontSize: 15,
+    fontFamily: 'Inter_700Bold',
+    fontWeight: '700',
+    color: '#DC2626',
+    marginBottom: 2,
+  },
+  cancelledSub: {
+    fontSize: 12.5,
+    fontFamily: 'Inter_400Regular',
+    color: '#EF4444',
+    lineHeight: 17,
+  },
+
+  // Card thông tin đơn hàng
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  cardHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  orderCodeBadge: {
+    fontSize: 13,
+    fontFamily: 'Inter_700Bold',
+    color: '#0284C7',
+  },
+  statusPill: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: '#F1F5F9',
+  },
+  pillAmber: {
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  pillGreen: {
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+  },
+  pillBlue: {
+    backgroundColor: '#E0F2FE',
+    borderWidth: 1,
+    borderColor: '#BAE6FD',
+  },
+  pillRed: {
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1,
+    borderColor: '#FECACA',
+  },
+  statusPillText: {
+    fontSize: 11.5,
+    fontFamily: 'Inter_600SemiBold',
+    color: '#64748B',
+  },
+  textAmber: {
+    color: '#D97706',
+  },
+  textGreen: {
+    color: '#059669',
+  },
+  textBlue: {
+    color: '#0284C7',
+  },
+  textRed: {
+    color: '#DC2626',
+  },
+  serviceMainTitle: {
+    fontSize: 17.5,
+    fontFamily: 'Inter_700Bold',
     fontWeight: '700',
     color: '#0F172A',
+    marginBottom: 10,
   },
+  divider: {
+    height: 1,
+    backgroundColor: '#F1F5F9',
+    marginVertical: 10,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+  },
+  infoIcon: {
+    marginRight: 8,
+    marginTop: 2,
+  },
+  infoLabel: {
+    fontSize: 13,
+    fontFamily: 'Inter_500Medium',
+    color: '#64748B',
+    width: 80,
+  },
+  infoValue: {
+    flex: 1,
+    fontSize: 13.5,
+    fontFamily: 'Inter_600SemiBold',
+    color: '#1E293B',
+  },
+  priceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 4,
+  },
+  priceLabel: {
+    fontSize: 14,
+    fontFamily: 'Inter_500Medium',
+    color: '#475569',
+  },
+  priceValue: {
+    fontSize: 17,
+    fontFamily: 'Inter_700Bold',
+    fontWeight: '700',
+    color: '#0284C7',
+  },
+
+  // Worker Card
   workerCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 18,
+    borderRadius: 16,
     padding: 16,
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    marginBottom: 16,
   },
   workerAvatarCircle: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: '#EFF6FF',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#E0F2FE',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#DBEAFE',
   },
   workerAvatarText: {
-    fontSize: 24,
+    fontSize: 22,
   },
   workerName: {
     fontSize: 15,
-    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
     color: '#0F172A',
   },
   workerPhone: {
     fontSize: 13,
-    color: '#2563EB',
+    color: '#0284C7',
     marginTop: 2,
   },
   workerRating: {
-    fontSize: 12,
+    fontSize: 11.5,
     color: '#64748B',
     marginTop: 2,
   },
   callBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#16A34A',
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#059669',
     justifyContent: 'center',
     alignItems: 'center',
   },
+
+  // Timeline
   timelineCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    padding: 20,
+    borderRadius: 16,
+    padding: 18,
     borderWidth: 1,
     borderColor: '#E2E8F0',
   },
   timelineHeading: {
     fontSize: 15,
-    fontWeight: '800',
+    fontFamily: 'Inter_700Bold',
+    fontWeight: '700',
     color: '#0F172A',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   timelineItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   dotCompleted: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: '#16A34A',
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#059669',
     marginTop: 4,
-    marginRight: 14,
+    marginRight: 12,
+  },
+  dotPendingActive: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#F59E0B',
+    marginTop: 4,
+    marginRight: 12,
   },
   dotPending: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
     backgroundColor: '#CBD5E1',
     marginTop: 4,
-    marginRight: 14,
+    marginRight: 12,
   },
   timelineContent: {
     flex: 1,
   },
   stepTitle: {
     fontSize: 13,
-    fontWeight: '600',
+    fontFamily: 'Inter_500Medium',
     color: '#64748B',
   },
-  stepTitleActive: {
-    fontSize: 14,
+  stepTitleAmber: {
+    fontSize: 13.5,
+    fontFamily: 'Inter_700Bold',
     fontWeight: '700',
-    color: '#16A34A',
+    color: '#D97706',
+  },
+  stepTitleActive: {
+    fontSize: 13.5,
+    fontFamily: 'Inter_700Bold',
+    fontWeight: '700',
+    color: '#059669',
   },
   stepSub: {
-    fontSize: 12,
+    fontSize: 11.5,
     color: '#94A3B8',
     marginTop: 2,
+  },
+
+  // Actions
+  actionsContainer: {
+    gap: 10,
+    marginTop: 4,
+  },
+  demoApproveBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#059669',
+    paddingVertical: 13,
+    borderRadius: 14,
+  },
+  demoApproveBtnText: {
+    fontSize: 14,
+    fontFamily: 'Inter_600SemiBold',
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  cancelOrderBtn: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    paddingVertical: 12,
+    borderRadius: 14,
+  },
+  cancelOrderBtnText: {
+    fontSize: 13.5,
+    fontFamily: 'Inter_600SemiBold',
+    color: '#DC2626',
   },
 });
