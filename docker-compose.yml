@@ -7,8 +7,8 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgrespassword
-      POSTGRES_DB: ondemand_db
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: fixgodb
     ports:
       - '5432:5432'
     volumes:

@@ -36,7 +36,7 @@ import CategoryGrid from '../components/CategoryGrid';
 import PopularServicesCarousel from '../components/PopularServicesCarousel';
 import VoucherTickets from '../components/VoucherTickets';
 import CategoryDetailModal, { type SubServiceItem } from '../components/CategoryDetailModal';
-import type { ServiceItem, WorkerItem } from '../types/home.types';
+import type { CategoryItem, ServiceItem, WorkerItem } from '../types/home.types';
 import type { AiDiagnosisResponse } from '../../../services/api/aiService';
 
 /**
