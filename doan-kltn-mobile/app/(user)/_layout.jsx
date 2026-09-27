@@ -14,7 +14,8 @@ export default function UserLayout() {
       <Stack.Screen name="booking/address" options={{ headerShown: true, title: 'Địa chỉ nhận việc' }} />
       <Stack.Screen name="booking/confirm" options={{ headerShown: true, title: 'Xác nhận đặt lịch' }} />
       <Stack.Screen name="booking/create-booking" options={{ headerShown: false, title: 'Đặt đơn dịch vụ' }} />
-      <Stack.Screen name="order/[id]" options={{ headerShown: true, title: 'Chi tiết đơn hàng' }} />
+      <Stack.Screen name="price-list" options={{ headerShown: false, title: 'Bảng giá dịch vụ' }} />
+      <Stack.Screen name="order/[id]" options={{ headerShown: false, title: 'Chi tiết đơn hàng' }} />
     </Stack>
   );
 }

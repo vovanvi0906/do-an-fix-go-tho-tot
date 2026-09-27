@@ -179,7 +179,7 @@ export default function HomeHeader({
           style={styles.searchInput}
           value={searchQuery}
           onChangeText={onSearchChange}
-          placeholder="Tìm kiếm dịch vụ (sửa điện, máy lạnh, cống...)"
+          placeholder="Hơn 100 dịch vụ Quý Khách đang cần?"
           placeholderTextColor="#64748B"
           returnKeyType="search"
         />

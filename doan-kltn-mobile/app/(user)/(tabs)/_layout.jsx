@@ -58,7 +58,7 @@ export default function UserTabsLayout() {
       <Tabs.Screen
         name="orders"
         options={{
-          headerShown: true,
+          headerShown: false,
           title: 'Đơn của tôi',
           tabBarLabel: 'Đơn hàng',
           tabBarIcon: ({ color, focused }) => (
