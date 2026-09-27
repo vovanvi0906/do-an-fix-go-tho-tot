@@ -35,6 +35,7 @@ import WorkerMapSection from '../components/WorkerMapSection';
 import CategoryGrid from '../components/CategoryGrid';
 import PopularServicesCarousel from '../components/PopularServicesCarousel';
 import VoucherTickets from '../components/VoucherTickets';
+import CategoryDetailModal, { type SubServiceItem } from '../components/CategoryDetailModal';
 import type { ServiceItem, WorkerItem } from '../types/home.types';
 import type { AiDiagnosisResponse } from '../../../services/api/aiService';
 
@@ -45,6 +46,8 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [isAiScanModalOpen, setIsAiScanModalOpen] = useState(false);
+  const [selectedCategoryForModal, setSelectedCategoryForModal] = useState<CategoryItem | null>(null);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
 
   // =========================================================================
   // HOOK QUẢN LÝ DỮ LIỆU & STATE TRANG CHỦ
@@ -66,22 +69,16 @@ export default function HomeScreen() {
   } = useHomeData();
 
   const handleBookService = (service: ServiceItem) => {
-    Alert.alert(
-      'Đặt dịch vụ FixGo',
-      `Bạn có muốn đặt dịch vụ "${service.name}" với giá niêm yết ${service.basePrice.toLocaleString('vi-VN')} đ?`,
-      [
-        { text: 'Hủy', style: 'cancel' },
-        {
-          text: 'Tiếp tục',
-          onPress: () => {
-            router.push({
-              pathname: '/(user)/booking',
-              params: { serviceId: service.id, serviceName: service.name, price: service.basePrice },
-            });
-          },
-        },
-      ]
-    );
+    router.push({
+      pathname: '/(user)/booking/create-booking',
+      params: {
+        serviceId: service.id,
+        serviceName: service.name,
+        price: String(service.basePrice),
+        categoryName: service.categoryName,
+        address: data.user.currentDistrict || '606/20, Hiệp Bình, Hồ Chí Minh',
+      },
+    });
   };
 
   const handleSelectWorker = (worker: WorkerItem) => {
@@ -93,8 +90,13 @@ export default function HomeScreen() {
           text: 'Đặt lịch thợ này',
           onPress: () => {
             router.push({
-              pathname: '/(user)/booking',
-              params: { workerId: worker.id, workerName: worker.fullName },
+              pathname: '/(user)/booking/create-booking',
+              params: {
+                workerId: worker.id,
+                workerName: worker.fullName,
+                serviceName: `Thợ ${worker.fullName} - ${worker.specialty}`,
+                address: data.user.currentDistrict || '606/20, Hiệp Bình, Hồ Chí Minh',
+              },
             });
           },
         },
@@ -104,11 +106,54 @@ export default function HomeScreen() {
   };
 
   const handleCategorySelect = (catId: string) => {
-    if (selectedCategoryId === catId) {
-      setSelectedCategoryId(null);
-    } else {
-      setSelectedCategoryId(catId);
+    setSelectedCategoryId(catId);
+    const cat = data.categories.find((c) => c.id === catId);
+    if (cat) {
+      // Khi chọn "Dịch vụ khác" -> Chuyển thẳng đến màn đặt dịch vụ, khách tự nhập tiêu đề
+      if (cat.slug === 'dich-vu-khac' || cat.id === 'cat-08') {
+        console.log('⚡ [HomeScreen] Chọn Dịch vụ khác -> Chuyển thẳng tới Đặt dịch vụ theo yêu cầu');
+        router.push({
+          pathname: '/(user)/booking/create-booking',
+          params: {
+            isCustomService: 'true',
+            categoryId: cat.id,
+            categorySlug: cat.slug,
+            categoryName: 'Dịch vụ khác',
+            serviceName: '', // Khách hàng tự nhập tiêu đề dịch vụ muốn đặt (VD: Chơi với mèo)
+            address: data.user.currentDistrict || '606/20, Hiệp Bình, Hồ Chí Minh',
+          },
+        });
+        return;
+      }
+
+      // Khi chọn "Bảng giá" -> Mở màn hình Bảng giá dịch vụ 3 cấp chuẩn FixGo
+      if (cat.slug === 'bang-gia' || cat.id === 'cat-07') {
+        console.log('⚡ [HomeScreen] Chọn Bảng giá -> Mở màn hình Bảng giá dịch vụ');
+        router.push('/(user)/price-list');
+        return;
+      }
+
+      setSelectedCategoryForModal(cat);
+      setIsCategoryModalOpen(true);
     }
+  };
+
+  const handleSelectSubService = (subService: SubServiceItem) => {
+    setIsCategoryModalOpen(false);
+    console.log('⚡ [HomeScreen] Chọn dịch vụ con:', subService);
+    const isCustom = subService.categorySlug === 'dich-vu-khac' || subService.id === 'custom-sub';
+    router.push({
+      pathname: '/(user)/booking/create-booking',
+      params: {
+        isCustomService: isCustom ? 'true' : 'false',
+        serviceId: subService.id,
+        serviceName: subService.name,
+        categorySlug: subService.categorySlug,
+        categoryName: subService.categoryName,
+        basePrice: String(subService.basePrice || 150000),
+        address: data.user.currentDistrict || '606/20, Hiệp Bình, Hồ Chí Minh',
+      },
+    });
   };
 
   const handleScanPress = () => {
@@ -116,27 +161,17 @@ export default function HomeScreen() {
   };
 
   const handleConfirmAiBooking = (diagnosis: AiDiagnosisResponse) => {
-    Alert.alert(
-      'Xác nhận đặt lịch qua AI',
-      `Bạn đang đặt thợ cho dịch vụ "${diagnosis.categoryName}"\n• Khoảng giá ước tính: ${diagnosis.estimatedPrice.min.toLocaleString('vi-VN')} đ - ${diagnosis.estimatedPrice.max.toLocaleString('vi-VN')} đ\n• Thời gian thợ tới: ~15 phút`,
-      [
-        { text: 'Để sau', style: 'cancel' },
-        {
-          text: 'Tiếp tục đặt lịch',
-          onPress: () => {
-            router.push({
-              pathname: '/(user)/booking',
-              params: {
-                categoryId: diagnosis.suggestedCategoryId,
-                categoryName: diagnosis.categoryName,
-                price: diagnosis.estimatedPrice.min,
-                note: diagnosis.notes,
-              },
-            });
-          },
-        },
-      ]
-    );
+    router.push({
+      pathname: '/(user)/booking/create-booking',
+      params: {
+        categoryId: diagnosis.suggestedCategoryId,
+        categoryName: diagnosis.categoryName,
+        serviceName: diagnosis.categoryName,
+        price: String(diagnosis.estimatedPrice.min),
+        note: diagnosis.notes,
+        address: data.user.currentDistrict || '606/20, Hiệp Bình, Hồ Chí Minh',
+      },
+    });
   };
 
   const handleClaimVoucher = (voucherId: string) => {
@@ -242,6 +277,14 @@ export default function HomeScreen() {
         visible={isAiScanModalOpen}
         onClose={() => setIsAiScanModalOpen(false)}
         onConfirmBooking={handleConfirmAiBooking}
+      />
+
+      {/* ── Modal Danh sách Dịch vụ Con (Thợ Việt Style) ─────────────── */}
+      <CategoryDetailModal
+        visible={isCategoryModalOpen}
+        category={selectedCategoryForModal}
+        onClose={() => setIsCategoryModalOpen(false)}
+        onSelectSubService={handleSelectSubService}
       />
     </View>
   );

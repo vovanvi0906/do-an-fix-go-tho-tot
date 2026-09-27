@@ -270,7 +270,7 @@ const styles = StyleSheet.create({
   pulseRing: {
     position: 'absolute',
     borderWidth: 1.5,
-    borderColor: '#0F172A',
+    borderColor: '#0284C7',
     backgroundColor: 'transparent',
   },
   scanLine: {
@@ -282,19 +282,19 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: '#0F172A',
+    backgroundColor: '#0284C7',
     marginTop: -5,
   },
   centerDot: {
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#0F172A',
+    backgroundColor: '#0284C7',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#0F172A',
+    shadowColor: '#0284C7',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.35,
     shadowRadius: 12,
     elevation: 8,
   },
@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
   countdownText: {
     fontSize: 40,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#0284C7',
     letterSpacing: 2,
     fontVariant: ['tabular-nums'],
   },
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: '#0F172A',
+    backgroundColor: '#0284C7',
     borderRadius: 2,
   },
   searchingTitle: {

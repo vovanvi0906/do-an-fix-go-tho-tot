@@ -5,6 +5,7 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { tokenStorage } from '../../../services/storage/tokenStorage';
 import type {
   HomeDataState,
   UserProfile,
@@ -20,13 +21,13 @@ import type {
 
 const MOCK_USER: UserProfile = {
   id: 'cust-001',
-  fullName: 'Nguyễn Văn An',
-  phone: '0901111111',
-  email: 'khach1@fixgo.vn',
+  fullName: 'Lữ Hồng Phúc Đại',
+  phone: '0366192248',
+  email: 'phucdai@fixgo.vn',
   avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
   role: 'CUSTOMER',
   rewardPoints: 0,
-  currentDistrict: 'Q. Bình Thạnh, TP.HCM',
+  currentDistrict: '606/20, Hiệp Bình, Hồ Chí Minh',
 };
 
 const MOCK_CATEGORIES: CategoryItem[] = [
@@ -274,9 +275,21 @@ export function useHomeData(): UseHomeDataReturn {
       // =========================================================================
       // 1. TODO: API Integration - GET /api/v1/users/profile
       // const userRes = await apiClient.get('/api/v1/users/profile');
-      // setUser(userRes.data);
-      // =========================================================================
-      setUser(MOCK_USER);
+      const storedUser = await tokenStorage.getUser().catch(() => null);
+      if (storedUser) {
+        setUser({
+          id: storedUser.id || 'cust-001',
+          fullName: storedUser.name || storedUser.fullName || 'Lữ Hồng Phúc Đại',
+          phone: storedUser.phone || '0366192248',
+          email: storedUser.email || 'phucdai@fixgo.vn',
+          avatarUrl: storedUser.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+          role: storedUser.role || 'CUSTOMER',
+          rewardPoints: 0,
+          currentDistrict: '606/20, Hiệp Bình, Hồ Chí Minh',
+        });
+      } else {
+        setUser(MOCK_USER);
+      }
 
       // =========================================================================
       // 2. TODO: API Integration - GET /api/v1/workers/nearby?lat={lat}&lng={lng}

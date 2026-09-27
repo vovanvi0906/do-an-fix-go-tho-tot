@@ -36,58 +36,62 @@ interface CategoryVisualConfig {
 }
 
 /**
- * Bảng màu Soft-Tint quy hoạch theo 4 họ màu chức năng (Functional Color Grouping)
+ * Bảng màu Soft-Tint tối giản, sang trọng, hiện đại (Minimal Luxury Palette)
  */
 const CATEGORY_CONFIG_MAP: Record<string, CategoryVisualConfig> = {
-  // 1. Nhóm Hạ tầng Năng lượng & Nước (Amber & Brand Blue)
+  // 1. Sửa điện
   'sua-dien': {
     tintBg: '#FEF3C7',
     iconColor: '#D97706',
     borderColor: '#FDE68A',
-    iconName: 'flash',
+    iconName: 'flash-outline',
     isPopular: true,
   },
+  // 2. Sửa nước
   'sua-nuoc': {
     tintBg: '#E0F2FE',
     iconColor: '#0284C7',
     borderColor: '#BAE6FD',
-    iconName: 'water',
+    iconName: 'water-outline',
     isPopular: true,
   },
-  // 2. Nhóm Điện lạnh & Môi trường sống (Cyan & Emerald)
+  // 3. Điện lạnh
   'dien-lanh': {
     tintBg: '#ECFEFF',
     iconColor: '#0891B2',
     borderColor: '#A5F3FC',
-    iconName: 'snow',
+    iconName: 'snow-outline',
     isHot: true,
   },
-  'lam-vuon': {
-    tintBg: '#ECFDF5',
-    iconColor: '#059669',
-    borderColor: '#A7F3D0',
-    iconName: 'leaf',
-  },
-  // 3. Nhóm Đồ gia dụng & Tiện ích trong nhà (Violet & Rose)
+  // 4. Thiết bị gia dụng
   'thiet-bi': {
     tintBg: '#EEF2FF',
     iconColor: '#4F46E5',
     borderColor: '#C7D2FE',
-    iconName: 'tv',
+    iconName: 'tv-outline',
   },
+  // 5. Làm vườn
+  'lam-vuon': {
+    tintBg: '#ECFDF5',
+    iconColor: '#059669',
+    borderColor: '#A7F3D0',
+    iconName: 'leaf-outline',
+  },
+  // 6. Giúp việc
   'giup-viec': {
     tintBg: '#FFF1F2',
     iconColor: '#E11D48',
     borderColor: '#FECDD3',
-    iconName: 'sparkles',
+    iconName: 'sparkles-outline',
   },
-  // 4. Nhóm Thông tin & Hệ thống (Slate Gray trung tính)
+  // 7. Bảng giá
   'bang-gia': {
-    tintBg: '#F1F5F9',
-    iconColor: '#475569',
-    borderColor: '#E2E8F0',
+    tintBg: '#F0FDFA',
+    iconColor: '#0D9488',
+    borderColor: '#CCFBF1',
     iconName: 'receipt-outline',
   },
+  // 8. Dịch vụ khác
   'dich-vu-khac': {
     tintBg: '#F1F5F9',
     iconColor: '#475569',
@@ -102,13 +106,13 @@ const getCategoryVisual = (slugOrIcon: string, index: number): CategoryVisualCon
   }
 
   const fallbackList: CategoryVisualConfig[] = [
-    { tintBg: '#FEF3C7', iconColor: '#D97706', borderColor: '#FDE68A', iconName: 'flash', isPopular: true },
-    { tintBg: '#E0F2FE', iconColor: '#0284C7', borderColor: '#BAE6FD', iconName: 'water', isPopular: true },
-    { tintBg: '#ECFEFF', iconColor: '#0891B2', borderColor: '#A5F3FC', iconName: 'snow', isHot: true },
-    { tintBg: '#ECFDF5', iconColor: '#059669', borderColor: '#A7F3D0', iconName: 'leaf' },
-    { tintBg: '#EEF2FF', iconColor: '#4F46E5', borderColor: '#C7D2FE', iconName: 'tv' },
-    { tintBg: '#FFF1F2', iconColor: '#E11D48', borderColor: '#FECDD3', iconName: 'sparkles' },
-    { tintBg: '#F1F5F9', iconColor: '#475569', borderColor: '#E2E8F0', iconName: 'receipt-outline' },
+    { tintBg: '#FEF3C7', iconColor: '#D97706', borderColor: '#FDE68A', iconName: 'flash-outline', isPopular: true },
+    { tintBg: '#E0F2FE', iconColor: '#0284C7', borderColor: '#BAE6FD', iconName: 'water-outline', isPopular: true },
+    { tintBg: '#ECFEFF', iconColor: '#0891B2', borderColor: '#A5F3FC', iconName: 'snow-outline', isHot: true },
+    { tintBg: '#ECFDF5', iconColor: '#059669', borderColor: '#A7F3D0', iconName: 'leaf-outline' },
+    { tintBg: '#EEF2FF', iconColor: '#4F46E5', borderColor: '#C7D2FE', iconName: 'tv-outline' },
+    { tintBg: '#FFF1F2', iconColor: '#E11D48', borderColor: '#FECDD3', iconName: 'sparkles-outline' },
+    { tintBg: '#F0FDFA', iconColor: '#0D9488', borderColor: '#CCFBF1', iconName: 'receipt-outline' },
     { tintBg: '#F1F5F9', iconColor: '#475569', borderColor: '#E2E8F0', iconName: 'grid-outline' },
   ];
 
@@ -206,19 +210,19 @@ function CategoryGridItem({
         onPress={() => onSelect?.(category.id)}
         style={styles.pressableTouch}
       >
-        {/* Squircle Soft-Tint Box */}
+        {/* Squircle Soft-Tint Box Tối Giản, Hiện Đại, Sang Trọng */}
         <View
           style={[
             styles.squircleBox,
             {
-              backgroundColor: isSelected ? config.iconColor : config.tintBg,
-              borderColor: isSelected ? config.iconColor : config.borderColor,
+              backgroundColor: isSelected ? '#0284C7' : config.tintBg,
+              borderColor: isSelected ? '#0284C7' : config.borderColor,
             },
           ]}
         >
           <Ionicons
             name={config.iconName}
-            size={25}
+            size={24}
             color={isSelected ? '#FFFFFF' : config.iconColor}
           />
 
@@ -363,16 +367,16 @@ const styles = StyleSheet.create({
   },
   squircleBox: {
     position: 'relative',
-    width: 56,
-    height: 56,
-    borderRadius: 18,
+    width: 58,
+    height: 58,
+    borderRadius: 19,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
+    shadowColor: '#0284C7',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
+    shadowOpacity: 0.08,
+    shadowRadius: 5,
     elevation: 2,
   },
   hotBadge: {
