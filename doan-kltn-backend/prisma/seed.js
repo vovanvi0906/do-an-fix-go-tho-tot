@@ -1,196 +1,721 @@
 const { PrismaClient, UserRole, UserStatus, Prisma } = require('@prisma/client');
 const bcrypt = require('bcrypt');
 
+/**
+ * ============================================================================
+ * FIXGO PRO - REAL-WORLD COMMERCIAL & MULTI-TIER WORKER SEEDING SCRIPT
+ * ============================================================================
+ * File: prisma/seed.ts
+ * Ngôn ngữ: TypeScript
+ */
+
 const prisma = new PrismaClient();
 
-const SEED_SERVICE_CATEGORIES = [
-  // 1. NHÓM ĐIỆN - NƯỚC (ELECTRICAL & PLUMBING)
+// Tọa độ mốc Khách hàng (Anchor Location)
+const ANCHOR_CUSTOMER = {
+  lat: 10.8385,
+  lng: 106.6785,
+  address: 'Số 123 Lê Đức Thọ, Phường 16, Quận Gò Vấp, TP.HCM',
+};
+
+function calculateDistanceKm(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Bán kính Trái Đất (km)
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return Math.round(R * c * 10) / 10;
+}
+
+
+
+const REAL_COMMERCIAL_CATEGORIES = [
+  // 1. SỬA ĐIỆN (sua-dien)
   {
-    name: 'Điện - Nước',
-    slug: 'dien-nuoc',
-    description: 'Dịch vụ sửa chữa, xử lý sự cố hệ thống điện dân dụng và cấp thoát nước sinh hoạt gia đình',
+    name: 'Sửa điện',
+    slug: 'sua-dien',
+    description: 'Khắc phục sự cố điện dân dụng, chập cháy, thay thế công tắc ổ cắm an toàn 100%.',
+    icon: 'flash',
     iconUrl: 'https://cdn-icons-png.flaticon.com/512/3100/3100553.png',
+    basePrice: 80000,
+    unit: 'lần',
+    estimatedMinutes: 60,
+    warrantyDays: 30,
     isActive: true,
     services: [
       {
-        name: 'Sửa chữa điện',
-        slug: 'sua-chua-dien',
-        description: 'Xử lý sự cố chập cháy điện cục bộ, thay thế Aptomat, ổ cắm, công tắc, lắp đặt quạt trần và các thiết bị chiếu sáng dân dụng.',
-        basePrice: 150000,
+        name: 'Sửa / Thay ổ cắm, công tắc, Aptomat',
+        slug: 'sua-thay-o-cam-cong-tac-aptomat',
+        description: 'Kiểm tra nguồn, thay mới mặt ổ cắm/công tắc âm hoặc nổi, thay aptomat quá tải.',
+        basePrice: 80000,
+        maxPrice: 180000,
+        unit: 'cái',
+        estimatedDurationMin: 30,
+        isPopular: true,
+        isActive: true,
+      },
+      {
+        name: 'Xử lý sự cố chập điện / Nhảy CB âm tường',
+        slug: 'xu-ly-su-co-chap-dien-nhay-cb',
+        description: 'Dò tìm điểm chập cháy bằng đồng hồ chuyên dụng, cô lập đường dây hỏng, đấu nối an toàn.',
+        basePrice: 350000,
+        maxPrice: 850000,
+        unit: 'lần',
+        estimatedDurationMin: 90,
+        isPopular: true,
+        isActive: true,
+      },
+      {
+        name: 'Lắp đặt / Sửa hệ thống đèn chiếu sáng',
+        slug: 'lap-dat-sua-den-chieu-sang',
+        description: 'Lắp bóng LED búp, tuýp LED, đèn ốp trần, đèn ray rọi trang trí.',
+        basePrice: 70000,
+        maxPrice: 150000,
+        unit: 'bộ',
+        estimatedDurationMin: 45,
+        isPopular: false,
+        isActive: true,
+      },
+      {
+        name: 'Đấu nối, kéo đường dây điện nổi / luồn ghen',
+        slug: 'dau-noi-keo-day-dien-noi-luon-ghen',
+        description: 'Đi nẹp bảo vệ hoặc luồn ống ruột gà cho đường cấp nguồn mới.',
+        basePrice: 120000,
+        maxPrice: 250000,
         unit: 'lần',
         estimatedDurationMin: 60,
-        icon: 'zap',
+        isPopular: false,
         isActive: true,
       },
       {
-        name: 'Sửa chữa nước',
-        slug: 'sua-chua-nuoc',
-        description: 'Khắc phục rò rỉ đường ống nước, thay thế vòi nước, dây cấp, phao bồn cầu, xử lý tình trạng thông tắc lavabo và chậu rửa.',
-        basePrice: 180000,
-        unit: 'lần',
-        estimatedDurationMin: 90,
-        icon: 'droplet',
-        isActive: true,
-      },
-    ],
-  },
-
-  // 2. NHÓM VỆ SINH & DỌN DẸP (CLEANING & HOUSEKEEPING)
-  {
-    name: 'Vệ sinh & Dọn dẹp',
-    slug: 've-sinh-don-dep',
-    description: 'Dịch vụ dọn dẹp vệ sinh nhà ở, căn hộ gia đình và bảo dưỡng, vệ sinh thiết bị điện lạnh định kỳ',
-    iconUrl: 'https://cdn-icons-png.flaticon.com/512/995/995053.png',
-    isActive: true,
-    services: [
-      {
-        name: 'Dọn dẹp nhà cửa',
-        slug: 'don-dep-nha-cua',
-        description: 'Dọn dẹp theo giờ, tổng vệ sinh căn hộ, nhà ở theo yêu cầu.',
-        basePrice: 80000,
-        unit: 'giờ',
-        estimatedDurationMin: 180,
-        icon: 'sparkles',
-        isActive: true,
-      },
-      {
-        name: 'Vệ sinh điện lạnh',
-        slug: 've-sinh-dien-lanh',
-        description: 'Bảo dưỡng và vệ sinh máy lạnh (điều hòa), máy giặt định kỳ.',
-        basePrice: 200000,
-        unit: 'bộ',
-        estimatedDurationMin: 75,
-        icon: 'wind',
+        name: 'Lắp đặt công tắc / Ổ cắm thông minh SmartHome',
+        slug: 'lap-dat-cong-tac-o-cam-smarthome',
+        description: 'Lắp đặt công tắc cảm ứng WiFi/Zigbee, đấu nối dây nguội N và cài đặt app.',
+        basePrice: 150000,
+        maxPrice: 300000,
+        unit: 'cái',
+        estimatedDurationMin: 45,
+        isPopular: false,
         isActive: true,
       },
     ],
   },
 
-  // 3. NHÓM SỬA CHỮA THIẾT BỊ GIA ĐÌNH (HOME APPLIANCE REPAIR)
+  // 2. SỬA NƯỚC (sua-nuoc)
   {
-    name: 'Sửa chữa thiết bị gia đình',
-    slug: 'thiet-bi-gia-dinh',
-    description: 'Kiểm tra, bảo dưỡng và khắc phục các sự cố kỹ thuật của các thiết bị điện máy, điện lạnh dân dụng',
-    iconUrl: 'https://cdn-icons-png.flaticon.com/512/3652/3652191.png',
+    name: 'Sửa nước',
+    slug: 'sua-nuoc',
+    description: 'Xử lý rò rỉ nước, thông tắc cống nghẹt, thay mới vòi sen, lavabo, bồn cầu cấp tốc.',
+    icon: 'water',
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/3100/3100554.png',
+    basePrice: 100000,
+    unit: 'lần',
+    estimatedMinutes: 60,
+    warrantyDays: 30,
     isActive: true,
     services: [
       {
-        name: 'Sửa chữa thiết bị gia đình',
-        slug: 'sua-chua-thiet-bi-gia-dinh',
-        description: 'Kiểm tra và khắc phục các lỗi cơ bản của tủ lạnh, lò vi sóng, máy lọc nước gia đình.',
+        name: 'Sửa vòi nước rò rỉ / Thay vòi sen tắm',
+        slug: 'sua-voi-nuoc-ro-ri-thay-voi-sen',
+        description: 'Thay củ sen nóng lạnh, vòi lavabo, vòi xịt vệ sinh, quấn băng tan chống rỉ.',
+        basePrice: 100000,
+        maxPrice: 220000,
+        unit: 'cái',
+        estimatedDurationMin: 30,
+        isPopular: true,
+        isActive: true,
+      },
+      {
+        name: 'Thông tắc lavabo, cống sàn, chậu rửa bát',
+        slug: 'thong-tac-lavabo-cong-san-chau-rua-bat',
+        description: 'Dùng máy lò xo chuyên dụng đánh sạch cặn mỡ, tóc rác ứ đọng đường ống thoát.',
         basePrice: 250000,
-        unit: 'thiết bị',
-        estimatedDurationMin: 90,
-        icon: 'refrigerator',
+        maxPrice: 450000,
+        unit: 'lần',
+        estimatedDurationMin: 45,
+        isPopular: true,
+        isActive: true,
+      },
+      {
+        name: 'Khắc phục bục vỡ đường ống nước PVC/PPR',
+        slug: 'khac-phuc-buc-vo-ong-nuoc-pvc-ppr',
+        description: 'Cắt bỏ đoạn ống nứt vỡ, hàn nhiệt ống PPR hoặc dán nối cút co chống rò rỉ.',
+        basePrice: 250000,
+        maxPrice: 600000,
+        unit: 'điểm',
+        estimatedDurationMin: 60,
+        isPopular: false,
+        isActive: true,
+      },
+      {
+        name: 'Sửa chữa / Lắp máy bơm nước tăng áp',
+        slug: 'sua-chua-lap-may-bom-nuoc-tang-ap',
+        description: 'Kiểm tra rơ-le áp suất, thay phớt, tụ điện hoặc lắp bơm tăng áp gia đình.',
+        basePrice: 200000,
+        maxPrice: 450000,
+        unit: 'máy',
+        estimatedDurationMin: 60,
+        isPopular: false,
+        isActive: true,
+      },
+      {
+        name: 'Thay phao cơ / Phao điện ngắt nước bồn chứa',
+        slug: 'thay-phao-co-phao-dien-ngat-nuoc',
+        description: 'Chống tràn và chống cạn bồn nước sinh hoạt mái nhà.',
+        basePrice: 150000,
+        maxPrice: 250000,
+        unit: 'bộ',
+        estimatedDurationMin: 45,
+        isPopular: false,
         isActive: true,
       },
     ],
   },
 
-  // 4. NHÓM SÂN VƯỜN & TIỆN ÍCH PHỤ (GARDENING & ODD JOBS)
+  // 3. ĐIỆN LẠNH (dien-lanh)
   {
-    name: 'Sân vườn & Tiện ích phụ',
-    slug: 'san-vuon-tien-ich',
-    description: 'Chăm sóc không gian xanh cảnh quan sân vườn và hỗ trợ lắp đặt nội thất đồ gỗ, giá kệ tại nhà',
-    iconUrl: 'https://cdn-icons-png.flaticon.com/512/1518/1518968.png',
+    name: 'Điện lạnh',
+    slug: 'dien-lanh',
+    description: 'Vệ sinh máy lạnh sạch sâu, nạp ga R32/R410A chuẩn, sửa máy giặt, tủ lạnh.',
+    icon: 'snow',
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/995/995053.png',
+    basePrice: 150000,
+    unit: 'bộ',
+    estimatedMinutes: 60,
+    warrantyDays: 30,
     isActive: true,
     services: [
       {
-        name: 'Sân vườn',
-        slug: 'san-vuon',
-        description: 'Cắt tỉa cây cảnh, dọn dẹp sân vườn quy mô hộ gia đình.',
+        name: 'Vệ sinh máy lạnh treo tường (1.0 HP - 2.5 HP)',
+        slug: 've-sinh-may-lanh-treo-tuong',
+        description: 'Rửa dàn lạnh bằng bạt chuyên dụng, xịt rửa dàn nóng, thông ống thoát nước thải.',
+        basePrice: 150000,
+        maxPrice: 220000,
+        unit: 'bộ',
+        estimatedDurationMin: 45,
+        isPopular: true,
+        isActive: true,
+      },
+      {
+        name: 'Nạp gas bổ sung máy lạnh (R32 / R410A)',
+        slug: 'nap-gas-bo-sung-may-lanh',
+        description: 'Đo áp suất hút, hút chân không và nạp bù lượng gas hao hụt định kỳ.',
         basePrice: 200000,
+        maxPrice: 450000,
+        unit: 'máy',
+        estimatedDurationMin: 30,
+        isPopular: false,
+        isActive: true,
+      },
+      {
+        name: 'Khắc phục máy lạnh chảy nước máng sau',
+        slug: 'khac-phuc-may-lanh-chay-nuoc-mang-sau',
+        description: 'Thông tắc bụi bẩn đường ống thoát, cân chỉnh lại độ nghiêng dàn lạnh.',
+        basePrice: 150000,
+        maxPrice: 250000,
+        unit: 'lần',
+        estimatedDurationMin: 40,
+        isPopular: true,
+        isActive: true,
+      },
+      {
+        name: 'Tháo dỡ, di dời và lắp đặt máy lạnh',
+        slug: 'thao-do-di-doi-lap-dat-may-lanh',
+        description: 'Thu hồi gas an toàn, tháo máy, khoan giá đỡ và lắp đặt tại vị trí mới.',
+        basePrice: 350000,
+        maxPrice: 650000,
+        unit: 'bộ',
+        estimatedDurationMin: 90,
+        isPopular: false,
+        isActive: true,
+      },
+      {
+        name: 'Vệ sinh bảo dưỡng máy giặt lồng đứng / ngang',
+        slug: 've-sinh-bao-duong-may-giat',
+        description: 'Tháo mâm giặt, xịt rửa sạch cặn xà phòng và nấm mốc bám ngoài lồng inox.',
+        basePrice: 250000,
+        maxPrice: 550000,
+        unit: 'cái',
+        estimatedDurationMin: 75,
+        isPopular: false,
+        isActive: true,
+      },
+    ],
+  },
+
+  // 4. THIẾT BỊ GIA DỤNG (thiet-bi)
+  {
+    name: 'Thiết bị gia dụng',
+    slug: 'thiet-bi',
+    description: 'Sửa bếp từ, lò vi sóng, máy nước nóng, lắp máy lọc nước, máy rửa chén âm tủ.',
+    icon: 'tv',
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/3652/3652191.png',
+    basePrice: 150000,
+    unit: 'thiết bị',
+    estimatedMinutes: 60,
+    warrantyDays: 30,
+    isActive: true,
+    services: [
+      {
+        name: 'Sửa bếp từ, bếp hồng ngoại (Báo lỗi E0-E9)',
+        slug: 'sua-bep-tu-bep-hong-ngoai',
+        description: 'Thay sò công suất IGBT, sửa mạch nguồn, cảm biến nhiệt mâm từ.',
+        basePrice: 250000,
+        maxPrice: 550000,
+        unit: 'bếp',
+        estimatedDurationMin: 60,
+        isPopular: true,
+        isActive: true,
+      },
+      {
+        name: 'Bảo dưỡng & Thay lõi lọc nước tinh khiết RO',
+        slug: 'bao-duong-thay-loi-loc-nuoc-ro',
+        description: 'Đo chỉ số TDS nước, thay thế combo lõi số 1-2-3 và màng lọc RO.',
+        basePrice: 150000,
+        maxPrice: 350000,
+        unit: 'bộ',
+        estimatedDurationMin: 30,
+        isPopular: false,
+        isActive: true,
+      },
+      {
+        name: 'Sửa máy nước nóng trực tiếp / gián tiếp',
+        slug: 'sua-may-nuoc-nong-truc-tiep-gian-tiep',
+        description: 'Thay thanh đốt sợi đốt, thay rơ le nhiệt, sửa cầu dao chống giật ELCB.',
+        basePrice: 200000,
+        maxPrice: 450000,
+        unit: 'bình',
+        estimatedDurationMin: 45,
+        isPopular: false,
+        isActive: true,
+      },
+      {
+        name: 'Lắp đặt máy rửa chén / Lò nướng âm tủ',
+        slug: 'lap-dat-may-rua-chen-lo-nuong',
+        description: 'Cắt đá, đấu nguồn cấp nước, thoát nước thải và căn chỉnh vị trí máy.',
+        basePrice: 250000,
+        maxPrice: 450000,
+        unit: 'máy',
+        estimatedDurationMin: 60,
+        isPopular: false,
+        isActive: true,
+      },
+    ],
+  },
+
+  // 5. LÀM VƯỜN (lam-vuon)
+  {
+    name: 'Làm vườn',
+    slug: 'lam-vuon',
+    description: 'Cắt tỉa cây cảnh, dọn cỏ dại, bón phân hữu cơ sinh học, tưới cây tự động.',
+    icon: 'leaf',
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/1518/1518968.png',
+    basePrice: 150000,
+    unit: 'lần',
+    estimatedMinutes: 60,
+    warrantyDays: 14,
+    isActive: true,
+    services: [
+      {
+        name: 'Cắt tỉa cỏ sân vườn, dọn cỏ dại',
+        slug: 'cat-tia-co-san-vuon-don-co-dai',
+        description: 'Dùng máy cắt cỏ cầm tay, gom rác thực vật và dọn sạch mặt bằng.',
+        basePrice: 250000,
+        maxPrice: 500000,
         unit: 'buổi',
         estimatedDurationMin: 120,
-        icon: 'trees',
+        isPopular: false,
         isActive: true,
       },
       {
-        name: 'Lắp đặt nội thất',
-        slug: 'lap-dat-noi-that',
-        description: 'Hỗ trợ lắp đặt nội thất cơ bản (lắp kệ treo tường, ráp bàn ghế lắp ráp sẵn).',
+        name: 'Cắt tỉa, tạo tán cây cảnh / Hàng rào sân vườn',
+        slug: 'cat-tia-tao-tan-cay-canh',
+        description: 'Tỉa cành khô, cắt tạo hình cây cảnh bonsai, tỉa gọn tán lá che khuất.',
         basePrice: 150000,
-        unit: 'sản phẩm',
+        maxPrice: 400000,
+        unit: 'cây',
         estimatedDurationMin: 60,
-        icon: 'hammer',
+        isPopular: true,
+        isActive: true,
+      },
+      {
+        name: 'Cải tạo đất, bón phân vi sinh & Trừ sâu bệnh',
+        slug: 'cai-tao-dat-bon-phan-vi-sinh',
+        description: 'Xới đất chậu, bón phân hữu cơ và phun thuốc thảo mộc trừ rầy rệp.',
+        basePrice: 200000,
+        maxPrice: 350000,
+        unit: 'lần',
+        estimatedDurationMin: 60,
+        isPopular: false,
+        isActive: true,
+      },
+    ],
+  },
+
+  // 6. GIÚP VIỆC (giup-viec)
+  {
+    name: 'Giúp việc',
+    slug: 'giup-viec',
+    description: 'Dọn dẹp nhà theo giờ, tổng vệ sinh sau xây dựng, giặt hấp sofa nệm hơi nước.',
+    icon: 'sparkles',
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/995/995053.png',
+    basePrice: 65000,
+    unit: 'giờ',
+    estimatedMinutes: 180,
+    warrantyDays: 0,
+    isActive: true,
+    services: [
+      {
+        name: 'Dọn dẹp nhà cửa theo giờ',
+        slug: 'don-dep-nha-cua-theo-gio',
+        description: 'Quét dọn, lau nhà, lau chùi bàn ghế nội thất, dọn rửa nhà vệ sinh.',
+        basePrice: 65000,
+        maxPrice: 85000,
+        unit: 'giờ',
+        estimatedDurationMin: 180,
+        isPopular: true,
+        isActive: true,
+      },
+      {
+        name: 'Tổng vệ sinh nhà sau xây dựng / dọn chuyển nhà',
+        slug: 'tong-ve-sinh-nha-sau-xay-dung',
+        description: 'Tẩy sơn vôi sàn nhà, hút bụi công nghiệp, lau kính cao tầng.',
+        basePrice: 15000,
+        maxPrice: 25000,
+        unit: 'm²',
+        estimatedDurationMin: 240,
+        isPopular: false,
+        isActive: true,
+      },
+      {
+        name: 'Giặt hấp sofa nệm, rèm cửa tại nhà',
+        slug: 'giat-hap-sofa-nem-rem-cua',
+        description: 'Hút bụi sâu, phun bọt tẩy ố, giặt hơi nước nóng diệt khuẩn 99%.',
+        basePrice: 300000,
+        maxPrice: 500000,
+        unit: 'bộ',
+        estimatedDurationMin: 90,
+        isPopular: false,
+        isActive: true,
+      },
+    ],
+  },
+
+  // 7. BẢNG GIÁ (bang-gia)
+  {
+    name: 'Bảng giá',
+    slug: 'bang-gia',
+    description: 'Tra cứu bảng giá minh bạch 3 tầng chi phí: Khảo sát 0đ, Nhân công chuẩn hóa, Vật tư niêm yết.',
+    icon: 'receipt',
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/1055/1055644.png',
+    basePrice: 0,
+    unit: 'lần',
+    estimatedMinutes: 30,
+    warrantyDays: 30,
+    isActive: true,
+    services: [
+      {
+        name: 'Khảo sát & Báo giá tại nhà',
+        slug: 'khao-sat-bao-gia-tai-nha',
+        description: 'Thợ đến tận nơi kiểm tra, đo đạc, chẩn đoán sự cố và báo giá miễn phí 100%.',
+        basePrice: 0,
+        maxPrice: 0,
+        unit: 'lần',
+        estimatedDurationMin: 30,
+        isPopular: true,
+        isActive: true,
+      },
+      {
+        name: 'Phí nhân công tối thiểu theo ca',
+        slug: 'phi-nhan-cong-toi-thieu',
+        description: 'Định mức công thợ chuẩn hóa cho các ca sửa chữa đơn giản dưới 30 phút.',
+        basePrice: 100000,
+        maxPrice: 150000,
+        unit: 'ca',
+        estimatedDurationMin: 30,
+        isPopular: true,
+        isActive: true,
+      },
+      {
+        name: 'Chi phí vật tư & linh kiện chính hãng',
+        slug: 'chi-phi-vat-tu-linh-kien',
+        description: 'Minh bạch 100% hóa đơn linh kiện xuất xưởng theo giá niêm yết của hãng.',
+        basePrice: 0,
+        maxPrice: 500000,
+        unit: 'món',
+        estimatedDurationMin: 30,
+        isPopular: false,
+        isActive: true,
+      },
+    ],
+  },
+
+  // 8. DỊCH VỤ KHÁC (dich-vu-khac)
+  {
+    name: 'Dịch vụ khác',
+    slug: 'dich-vu-khac',
+    description: 'Sửa khóa cửa, diệt côn trùng, chuyển nhà trọn gói, khoan tường treo tranh kệ.',
+    icon: 'grid',
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/2942/2942813.png',
+    basePrice: 150000,
+    unit: 'lần',
+    estimatedMinutes: 60,
+    warrantyDays: 30,
+    isActive: true,
+    services: [
+      {
+        name: 'Sửa khóa cửa, thay ổ khóa vân tay',
+        slug: 'sua-khoa-cua-thay-khoa-van-tay',
+        description: 'Mở khóa khẩn cấp, thay ruột khóa tay gạt, lắp đặt khóa cửa điện tử.',
+        basePrice: 150000,
+        maxPrice: 400000,
+        unit: 'bộ',
+        estimatedDurationMin: 45,
+        isPopular: true,
+        isActive: true,
+      },
+      {
+        name: 'Khoan tường treo tranh, giá kệ, rèm cửa',
+        slug: 'khoan-tuong-treo-tranh-gia-ke',
+        description: 'Định vị cân bằng laser, khoan vít nở chịu tải an toàn cho tranh ảnh/kệ TV.',
+        basePrice: 150000,
+        maxPrice: 300000,
+        unit: 'lần',
+        estimatedDurationMin: 45,
+        isPopular: false,
+        isActive: true,
+      },
+      {
+        name: 'Phun thuốc diệt muỗi, kiến, gián sinh học',
+        slug: 'phun-thuoc-diet-muoi-kien-gian',
+        description: 'Phun mù nhiệt / ULV tồn lưu hoá chất an toàn của Bộ Y tế khắp các phòng.',
+        basePrice: 350000,
+        maxPrice: 650000,
+        unit: 'căn hộ',
+        estimatedDurationMin: 60,
+        isPopular: false,
         isActive: true,
       },
     ],
   },
 ];
 
+const MULTI_TIER_WORKERS_DATA = [
+  {
+    name: 'Lê Văn Thợ Điện',
+    phone: '0903111001',
+    email: 'tho1@fixgo.vn',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&q=80',
+    categorySlug: 'sua-dien',
+    specialty: 'Sửa điện',
+    bio: 'Kỹ thuật viên điện chuyên nghiệp 5 năm kinh nghiệm. Nhận xử lý chập điện khẩn cấp, thay thế CB, ổ cắm 24/7.',
+    skills: ['Sửa chữa điện', 'Thay thế Aptomat', 'Xử lý chập điện', 'Đấu nối dây điện'],
+    experienceYears: 5,
+    rating: 5.0,
+    totalReviews: 142,
+    completedJobs: 142,
+    currentLat: 10.8415,
+    currentLng: 106.6795,
+    locationNote: 'Đường Nguyễn Văn Lượng, Gò Vấp (~0.4 km)',
+    walletBalance: 500000,
+  },
+  {
+    name: 'Trần Văn Sửa Nước',
+    phone: '0903111002',
+    email: 'tho2@fixgo.vn',
+    avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&q=80',
+    categorySlug: 'sua-nuoc',
+    specialty: 'Sửa nước',
+    bio: 'Chuyên gia sửa ống nước rò rỉ, thông tắc cống lavabo bằng máy lò xo chuyên dụng, không đục phá.',
+    skills: ['Sửa ống nước rò rỉ', 'Thông tắc cống nghẹt', 'Thay vòi sen lavabo', 'Sửa máy bơm nước'],
+    experienceYears: 6,
+    rating: 4.9,
+    totalReviews: 98,
+    completedJobs: 98,
+    currentLat: 10.8320,
+    currentLng: 106.6850,
+    locationNote: 'Khu Cityland Park Hills, Gò Vấp (~1.2 km)',
+    walletBalance: 500000,
+  },
+  {
+    name: 'Phạm Văn Thợ Lạnh',
+    phone: '0903111003',
+    email: 'tho3@fixgo.vn',
+    avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&q=80',
+    categorySlug: 'dien-lanh',
+    specialty: 'Điện lạnh',
+    bio: 'Kỹ sư nhiệt điện lạnh 7 năm kinh nghiệm. Vệ sinh máy lạnh sạch sâu, nạp gas R32/R410A chuẩn, sửa máy giặt.',
+    skills: ['Vệ sinh máy lạnh', 'Nạp gas điều hòa', 'Sửa máy giặt', 'Sửa tủ lạnh'],
+    experienceYears: 7,
+    rating: 4.9,
+    totalReviews: 115,
+    completedJobs: 115,
+    currentLat: 10.8250,
+    currentLng: 106.6960,
+    locationNote: 'Đường Phan Văn Trị / Bình Thạnh (~2.8 km)',
+    walletBalance: 500000,
+  },
+  {
+    name: 'Hoàng Gia Dụng',
+    phone: '0903111004',
+    email: 'tho4@fixgo.vn',
+    avatarUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&q=80',
+    categorySlug: 'thiet-bi',
+    specialty: 'Thiết bị gia dụng',
+    bio: 'Chuyên sửa bo mạch bếp từ, lò vi sóng, bình nóng lạnh, lắp máy lọc nước RO chính hãng.',
+    skills: ['Sửa bếp từ', 'Bảo dưỡng máy lọc nước', 'Sửa bình nóng lạnh', 'Lắp máy rửa chén'],
+    experienceYears: 4,
+    rating: 4.8,
+    totalReviews: 64,
+    completedJobs: 64,
+    currentLat: 10.8050,
+    currentLng: 106.6920,
+    locationNote: 'Vòng xoay Hàng Xanh, Bình Thạnh (~5.5 km)',
+    walletBalance: 500000,
+  },
+  {
+    name: 'Nguyễn Thị Giúp Việc',
+    phone: '0903111005',
+    email: 'tho5@fixgo.vn',
+    avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&q=80',
+    categorySlug: 'giup-viec',
+    specialty: 'Giúp việc',
+    bio: 'Dọn dẹp nhà cửa theo giờ ngăn nắp, tổng vệ sinh nhà mới, giặt sofa hơi nước nóng diệt khuẩn 99%.',
+    skills: ['Dọn dẹp nhà theo giờ', 'Tổng vệ sinh nhà mới', 'Giặt sofa nệm rèm', 'Nấu ăn gia đình'],
+    experienceYears: 8,
+    rating: 5.0,
+    totalReviews: 210,
+    completedJobs: 210,
+    currentLat: 10.7760,
+    currentLng: 106.7010,
+    locationNote: 'Phường Bến Nghé, Quận 1 (~9.0 km)',
+    walletBalance: 500000,
+  },
+  {
+    name: 'Đỗ Văn Làm Vườn',
+    phone: '0903111006',
+    email: 'tho6@fixgo.vn',
+    avatarUrl: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&q=80',
+    categorySlug: 'lam-vuon',
+    specialty: 'Làm vườn',
+    bio: 'Cắt tỉa tạo thế cây cảnh bonsai, phát cỏ sân vườn, cải tạo đất hữu cơ, lắp hệ thống tưới tự động.',
+    skills: ['Cắt tỉa cây cảnh', 'Dọn cỏ sân vườn', 'Bón phân hữu cơ', 'Tưới nhỏ giọt'],
+    experienceYears: 10,
+    rating: 4.7,
+    totalReviews: 45,
+    completedJobs: 45,
+    currentLat: 10.7350,
+    currentLng: 106.7220,
+    locationNote: 'Khu đô thị Phú Mỹ Hưng, Quận 7 (~13.5 km)',
+    walletBalance: 500000,
+  },
+];
+
 async function main() {
   await prisma.$connect();
   console.log('================================================================');
-  console.log('         FIXGO PRO - SEEDING DỮ LIỆU KIỂM THỬ THỰC TẾ');
+  console.log('       FIXGO PRO - SEEDING COMMERCIAL CATALOG & REAL WORKERS');
   console.log('================================================================\n');
 
-  // Mật khẩu chung 123456 đã hash
   const defaultPasswordHash = await bcrypt.hash('123456', 10);
 
-  // ------------------------------------------------------------------
   // 1. SEED SUPER ADMIN
-  // ------------------------------------------------------------------
   const adminEmail = 'admin@homeservice.com';
-  const admin = await prisma.user.upsert({
-    where: { email: adminEmail },
-    update: {
-      name: 'Super Administrator',
-      passwordHash: defaultPasswordHash,
-      role: UserRole.ADMIN,
-      status: UserStatus.ACTIVE,
-    },
-    create: {
-      email: adminEmail,
-      phone: '0900000000',
-      name: 'Super Administrator',
-      passwordHash: defaultPasswordHash,
-      role: UserRole.ADMIN,
-      status: UserStatus.ACTIVE,
-    },
+  let admin = await prisma.user.findFirst({
+    where: { OR: [{ email: adminEmail }, { phone: '0900000000' }] },
   });
-  console.log(`✓ [Admin] Đã sẵn sàng: ${admin.email} (Pass: 123456)`);
+  if (admin) {
+    admin = await prisma.user.update({
+      where: { id: admin.id },
+      data: {
+        name: 'Super Administrator',
+        email: adminEmail,
+        phone: '0900000000',
+        passwordHash: defaultPasswordHash,
+        role: UserRole.ADMIN,
+        status: UserStatus.ACTIVE,
+      },
+    });
+  } else {
+    admin = await prisma.user.create({
+      data: {
+        name: 'Super Administrator',
+        email: adminEmail,
+        phone: '0900000000',
+        passwordHash: defaultPasswordHash,
+        role: UserRole.ADMIN,
+        status: UserStatus.ACTIVE,
+      },
+    });
+  }
+  console.log(`✓ [Admin] Sẵn sàng: ${admin.email} (Pass: 123456)`);
 
-  // ------------------------------------------------------------------
-  // 2. SEED CATALOG: 4 NHÓM DANH MỤC & DỊCH VỤ
-  // ------------------------------------------------------------------
+  // 2. SEED 8 NHÓM DANH MỤC & CÁC DỊCH VỤ CON
+  console.log('\n--- Seeding 8 Danh Mục & Dịch Vụ Thực Tế FixGo Pro ---');
+  let categoryCount = 0;
+  let serviceCount = 0;
   const createdCategories = {};
   const createdServices = {};
 
-  for (const catData of SEED_SERVICE_CATEGORIES) {
+  for (const catData of REAL_COMMERCIAL_CATEGORIES) {
     const { services, slug, ...catFields } = catData;
 
     let category = await prisma.serviceCategory.findFirst({
-      where: { name: catFields.name },
+      where: { OR: [{ slug }, { name: catFields.name }] },
     });
+
+    const categoryPayload = {
+      name: catFields.name,
+      slug,
+      description: catFields.description,
+      icon: catFields.icon,
+      iconUrl: catFields.iconUrl,
+      basePrice: new Prisma.Decimal(catFields.basePrice),
+      unit: catFields.unit,
+      estimatedMinutes: catFields.estimatedMinutes,
+      warrantyDays: catFields.warrantyDays,
+      isActive: catFields.isActive ?? true,
+    };
 
     if (category) {
       category = await prisma.serviceCategory.update({
         where: { id: category.id },
-        data: catFields,
+        data: categoryPayload,
       });
+      console.log(`📦 [Category CẬP NHẬT]: ${category.name} (slug: ${category.slug})`);
     } else {
       category = await prisma.serviceCategory.create({
-        data: catFields,
+        data: categoryPayload,
       });
+      console.log(`✨ [Category TẠO MỚI]: ${category.name} (slug: ${category.slug})`);
     }
-    createdCategories[catData.name] = category;
-    console.log(`📦 [Category]: ${category.name} (ID: ${category.id})`);
+    createdCategories[category.slug || category.name] = category;
+    categoryCount++;
 
     for (const svc of services) {
-      const existingSvc = await prisma.service.findFirst({
+      let existingSvc = await prisma.service.findFirst({
         where: {
-          name: svc.name,
-          categoryId: category.id,
+          OR: [
+            { slug: svc.slug },
+            { name: svc.name, categoryId: category.id },
+          ],
         },
       });
 
       const svcPayload = {
         name: svc.name,
+        slug: svc.slug,
         description: svc.description,
         basePrice: new Prisma.Decimal(svc.basePrice),
+        maxPrice: new Prisma.Decimal(svc.maxPrice),
         unit: svc.unit,
-        estimatedDurationMin: svc.estimatedDurationMin || 60,
+        estimatedDurationMin: svc.estimatedDurationMin,
+        isPopular: svc.isPopular ?? false,
         isActive: svc.isActive !== false,
         categoryId: category.id,
       };
@@ -206,16 +731,13 @@ async function main() {
           data: svcPayload,
         });
       }
-      createdServices[svc.name] = savedService;
-      console.log(`   └── ➕ [Service]: ${svc.name} - ${svc.basePrice.toLocaleString('vi-VN')} đ/${svc.unit}`);
+      createdServices[svc.slug || svc.name] = savedService;
+      serviceCount++;
     }
   }
 
-  // ------------------------------------------------------------------
-  // 3. SEED 2 TÀI KHOẢN KHÁCH HÀNG (CUSTOMER)
-  // ------------------------------------------------------------------
-  console.log('\n--- Seeding 2 Tài Khoản Khách Hàng (Customer) ---');
-
+  // 3. SEED KHÁCH HÀNG TẠI ANCHOR LOCATION (GÒ VẤP)
+  console.log('\n--- Seeding Khách Hàng Thử Nghiệm (Anchor Location) ---');
   const CUSTOMERS_DATA = [
     {
       name: 'Nguyễn Văn Khách 1',
@@ -223,13 +745,13 @@ async function main() {
       email: 'khach1@fixgo.vn',
       avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
       address: {
-        title: 'Nhà riêng',
-        street: 'Số 123 Lê Lợi, Phường Bến Nghé, Quận 1, TP.HCM',
-        ward: 'Phường Bến Nghé',
-        district: 'Quận 1',
+        title: 'Nhà riêng (Anchor Location)',
+        street: ANCHOR_CUSTOMER.address,
+        ward: 'Phường 16',
+        district: 'Quận Gò Vấp',
         city: 'TP. Hồ Chí Minh',
-        latitude: 10.7769,
-        longitude: 106.7009,
+        latitude: ANCHOR_CUSTOMER.lat,
+        longitude: ANCHOR_CUSTOMER.lng,
       },
     },
     {
@@ -250,29 +772,37 @@ async function main() {
   ];
 
   for (const cData of CUSTOMERS_DATA) {
-    // Upsert User
-    const user = await prisma.user.upsert({
-      where: { phone: cData.phone },
-      update: {
-        name: cData.name,
-        email: cData.email,
-        passwordHash: defaultPasswordHash,
-        role: UserRole.CUSTOMER,
-        status: UserStatus.ACTIVE,
-        avatarUrl: cData.avatarUrl,
-      },
-      create: {
-        name: cData.name,
-        phone: cData.phone,
-        email: cData.email,
-        passwordHash: defaultPasswordHash,
-        role: UserRole.CUSTOMER,
-        status: UserStatus.ACTIVE,
-        avatarUrl: cData.avatarUrl,
-      },
+    let user = await prisma.user.findFirst({
+      where: { OR: [{ phone: cData.phone }, { email: cData.email }] },
     });
 
-    // Upsert Customer Profile
+    if (user) {
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          name: cData.name,
+          phone: cData.phone,
+          email: cData.email,
+          passwordHash: defaultPasswordHash,
+          role: UserRole.CUSTOMER,
+          status: UserStatus.ACTIVE,
+          avatarUrl: cData.avatarUrl,
+        },
+      });
+    } else {
+      user = await prisma.user.create({
+        data: {
+          name: cData.name,
+          phone: cData.phone,
+          email: cData.email,
+          passwordHash: defaultPasswordHash,
+          role: UserRole.CUSTOMER,
+          status: UserStatus.ACTIVE,
+          avatarUrl: cData.avatarUrl,
+        },
+      });
+    }
+
     const customerProfile = await prisma.customerProfile.upsert({
       where: { userId: user.id },
       update: {
@@ -286,7 +816,6 @@ async function main() {
       },
     });
 
-    // Upsert Customer Wallet
     await prisma.wallet.upsert({
       where: { customerId: customerProfile.id },
       update: { balance: new Prisma.Decimal(1000000) },
@@ -297,7 +826,6 @@ async function main() {
       },
     });
 
-    // Create/Update Address
     const existingAddress = await prisma.address.findFirst({
       where: { customerId: customerProfile.id, isDefault: true },
     });
@@ -305,10 +833,7 @@ async function main() {
     if (existingAddress) {
       await prisma.address.update({
         where: { id: existingAddress.id },
-        data: {
-          ...cData.address,
-          isDefault: true,
-        },
+        data: { ...cData.address, isDefault: true },
       });
     } else {
       await prisma.address.create({
@@ -319,78 +844,48 @@ async function main() {
         },
       });
     }
-
     console.log(`👤 [Customer]: ${cData.name} | SĐT: ${cData.phone} | Tọa độ: (${cData.address.latitude}, ${cData.address.longitude})`);
   }
 
-  // ------------------------------------------------------------------
-  // 4. SEED 2 TÀI KHOẢN THỢ (WORKER)
-  // ------------------------------------------------------------------
-  console.log('\n--- Seeding 2 Tài Khoản Thợ (Worker) ---');
+  // 4. SEED 6 THỢ CHUYÊN NGHIỆP PHÂN TẦNG BÁN KÍNH
+  console.log('\n--- Seeding 6 Thợ Chuyên Nghiệp Phân Tầng Bán Kính ---');
+  const summaryList = [];
 
-  const catDienNuoc = createdCategories['Điện - Nước']?.id;
-  const catVeSinh = createdCategories['Vệ sinh & Dọn dẹp']?.id;
-  const catThietBi = createdCategories['Sửa chữa thiết bị gia đình']?.id;
+  for (const wData of MULTI_TIER_WORKERS_DATA) {
+    const category = createdCategories[wData.categorySlug];
+    const categoryId = category ? category.id : null;
 
-  const WORKERS_DATA = [
-    {
-      name: 'Lê Văn Thợ Điện',
-      phone: '0903333333',
-      email: 'tho1@fixgo.vn',
-      avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-      bio: 'Kỹ thuật viên điện nước chuyên nghiệp 5 năm kinh nghiệm, phục vụ nhanh khu vực Quận 1 và lân cận.',
-      skills: ['Sửa chữa điện', 'Sửa chữa nước', 'Thay thế Aptomat', 'Xử lý rò rỉ ống nước'],
-      experienceYears: 5,
-      rating: 5.0,
-      totalReviews: 18,
-      currentLat: 10.7780,
-      currentLng: 106.6990,
-      categoryIds: [catDienNuoc, catThietBi].filter(Boolean),
-      serviceNames: ['Sửa chữa điện', 'Sửa chữa nước', 'Sửa chữa thiết bị gia đình'],
-      walletBalance: 500000,
-    },
-    {
-      name: 'Phạm Văn Thợ Lạnh',
-      phone: '0904444444',
-      email: 'tho2@fixgo.vn',
-      avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
-      bio: 'Chuyên gia bảo dưỡng, nạp gas máy lạnh dân dụng và sửa chữa tủ lạnh, máy giặt gia đình.',
-      skills: ['Vệ sinh máy lạnh', 'Nạp gas R32/R410A', 'Sửa chữa tủ lạnh', 'Bảo dưỡng máy giặt'],
-      experienceYears: 7,
-      rating: 4.9,
-      totalReviews: 32,
-      currentLat: 10.8015,
-      currentLng: 106.7120,
-      categoryIds: [catVeSinh, catThietBi].filter(Boolean),
-      serviceNames: ['Vệ sinh điện lạnh', 'Sửa chữa thiết bị gia đình'],
-      walletBalance: 500000,
-    },
-  ];
-
-  for (const wData of WORKERS_DATA) {
-    // Upsert User
-    const user = await prisma.user.upsert({
-      where: { phone: wData.phone },
-      update: {
-        name: wData.name,
-        email: wData.email,
-        passwordHash: defaultPasswordHash,
-        role: UserRole.WORKER,
-        status: UserStatus.ACTIVE,
-        avatarUrl: wData.avatarUrl,
-      },
-      create: {
-        name: wData.name,
-        phone: wData.phone,
-        email: wData.email,
-        passwordHash: defaultPasswordHash,
-        role: UserRole.WORKER,
-        status: UserStatus.ACTIVE,
-        avatarUrl: wData.avatarUrl,
-      },
+    let user = await prisma.user.findFirst({
+      where: { OR: [{ phone: wData.phone }, { email: wData.email }] },
     });
 
-    // Upsert Worker Profile
+    if (user) {
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          name: wData.name,
+          phone: wData.phone,
+          email: wData.email,
+          passwordHash: defaultPasswordHash,
+          role: UserRole.WORKER,
+          status: UserStatus.ACTIVE,
+          avatarUrl: wData.avatarUrl,
+        },
+      });
+    } else {
+      user = await prisma.user.create({
+        data: {
+          name: wData.name,
+          phone: wData.phone,
+          email: wData.email,
+          passwordHash: defaultPasswordHash,
+          role: UserRole.WORKER,
+          status: UserStatus.ACTIVE,
+          avatarUrl: wData.avatarUrl,
+        },
+      });
+    }
+
     const workerProfile = await prisma.workerProfile.upsert({
       where: { userId: user.id },
       update: {
@@ -403,7 +898,7 @@ async function main() {
         faceVerifiedAt: new Date(),
         currentLat: wData.currentLat,
         currentLng: wData.currentLng,
-        serviceCategoryIds: wData.categoryIds,
+        serviceCategoryIds: categoryId ? [categoryId] : [],
         skills: wData.skills,
         bio: wData.bio,
         experienceYears: wData.experienceYears,
@@ -422,7 +917,7 @@ async function main() {
         faceVerifiedAt: new Date(),
         currentLat: wData.currentLat,
         currentLng: wData.currentLng,
-        serviceCategoryIds: wData.categoryIds,
+        serviceCategoryIds: categoryId ? [categoryId] : [],
         skills: wData.skills,
         bio: wData.bio,
         experienceYears: wData.experienceYears,
@@ -432,24 +927,31 @@ async function main() {
       },
     });
 
-    // Upsert Worker Wallet (bảng worker_wallets)
+    try {
+      await prisma.$executeRawUnsafe(
+        `UPDATE worker_profiles 
+         SET "currentLocation" = ST_SetSRID(ST_MakePoint($1, $2), 4326) 
+         WHERE id = $3`,
+        wData.currentLng,
+        wData.currentLat,
+        workerProfile.id
+      );
+    } catch (gisErr) {
+      // Fallback nếu chưa kích hoạt PostGIS
+    }
+
     await prisma.workerWallet.upsert({
       where: { workerId: workerProfile.id },
-      update: {
-        balance: new Prisma.Decimal(wData.walletBalance),
-      },
+      update: { balance: new Prisma.Decimal(wData.walletBalance) },
       create: {
         workerId: workerProfile.id,
         balance: new Prisma.Decimal(wData.walletBalance),
       },
     });
 
-    // Upsert Wallet (bảng wallets cho compatibility)
     await prisma.wallet.upsert({
       where: { workerId: workerProfile.id },
-      update: {
-        balance: new Prisma.Decimal(wData.walletBalance),
-      },
+      update: { balance: new Prisma.Decimal(wData.walletBalance) },
       create: {
         workerId: workerProfile.id,
         balance: new Prisma.Decimal(wData.walletBalance),
@@ -457,10 +959,12 @@ async function main() {
       },
     });
 
-    // Liên kết WorkerService
-    for (const sName of wData.serviceNames) {
-      const svc = createdServices[sName];
-      if (svc) {
+    if (categoryId) {
+      const categoryServices = await prisma.service.findMany({
+        where: { categoryId },
+      });
+
+      for (const svc of categoryServices) {
         await prisma.workerService.upsert({
           where: {
             workerId_serviceId: {
@@ -468,9 +972,7 @@ async function main() {
               serviceId: svc.id,
             },
           },
-          update: {
-            isAvailable: true,
-          },
+          update: { isAvailable: true },
           create: {
             workerId: workerProfile.id,
             serviceId: svc.id,
@@ -480,17 +982,35 @@ async function main() {
       }
     }
 
-    console.log(`🔧 [Worker]: ${wData.name} | SĐT: ${wData.phone} | Tọa độ GPS: (${wData.currentLat}, ${wData.currentLng}) | Ví: ${wData.walletBalance.toLocaleString('vi-VN')} đ`);
+    const distance = calculateDistanceKm(
+      ANCHOR_CUSTOMER.lat,
+      ANCHOR_CUSTOMER.lng,
+      wData.currentLat,
+      wData.currentLng
+    );
+
+    summaryList.push({
+      'Họ tên': wData.name,
+      'SĐT': wData.phone,
+      'Chuyên môn': wData.specialty,
+      'Đánh giá': `${wData.rating} ⭐ (${wData.totalReviews} đơn)`,
+      'Cự ly Radar': `~${distance} km`,
+      'Vị trí thực tế': wData.locationNote,
+    });
   }
 
-  console.log('\n================================================================');
-  console.log('          HOÀN TẤT NẠP DỮ LIỆU SEED CHO HỆ THỐNG');
-  console.log('================================================================');
+  // 5. IN BẢNG TỔNG KẾT
+  console.log('\n========================================================================================================');
+  console.log('       BẢNG TỔNG KẾT DANH SÁCH THỢ FIXGO PRO PHÂN TẦNG BÁN KÍNH RADAR (Anchor: Gò Vấp)');
+  console.log('========================================================================================================');
+  console.table(summaryList);
+  console.log('========================================================================================================');
+  console.log(`🎉 [HOÀN TẤT]: Đã nạp thành công ${categoryCount} danh mục, ${serviceCount} dịch vụ và 6 Thợ chuyên nghiệp!`);
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Lỗi Seeding:', e);
+    console.error('❌ Lỗi Seeding:', e.message);
     process.exit(1);
   })
   .finally(async () => {

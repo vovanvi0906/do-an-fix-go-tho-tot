@@ -43,6 +43,7 @@ export interface RealLeafletMapProps {
   radiusInMeters?: number;
   scrollEnabled?: boolean;
   showZoomControl?: boolean;
+  pointerEvents?: 'box-none' | 'none' | 'box-only' | 'auto';
 }
 
 export const RealLeafletMap = forwardRef<RealLeafletMapRef, RealLeafletMapProps>(
@@ -59,6 +60,7 @@ export const RealLeafletMap = forwardRef<RealLeafletMapRef, RealLeafletMapProps>
       radiusInMeters = 3000,
       scrollEnabled = true,
       showZoomControl = false,
+      pointerEvents,
     },
     ref
   ) => {
@@ -347,7 +349,7 @@ export const RealLeafletMap = forwardRef<RealLeafletMapRef, RealLeafletMapProps>
     ]);
 
     return (
-      <View style={[styles.container, { height, width }]}>
+      <View style={[styles.container, { height, width }]} pointerEvents={pointerEvents}>
         <WebView
           ref={webViewRef}
           originWhitelist={['*']}

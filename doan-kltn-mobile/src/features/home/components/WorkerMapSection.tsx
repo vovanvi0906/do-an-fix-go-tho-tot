@@ -14,6 +14,7 @@ import {
   Text,
   StyleSheet,
   Pressable,
+  TouchableOpacity,
   Image,
   ScrollView,
   Platform,
@@ -231,17 +232,24 @@ export default function WorkerMapSection({
         </Text>
       </View>
 
-      {/* ── 2. Khối Bản Đồ Thật (Leaflet OpenStreetMap - Height 180px) ─ */}
-      <View style={styles.mapCard}>
+      {/* ── 2. Khối Bản Đồ Thật (Leaflet Satellite Hybrid - Toàn bộ ô bản đồ là vùng bấm mở Modal) ─ */}
+      <TouchableOpacity
+        activeOpacity={0.92}
+        onPress={handleOpenMapModal}
+        accessible={true}
+        accessibilityRole="button"
+        accessibilityLabel="Chạm để xem bản đồ chi tiết mạng lưới thợ toàn màn hình"
+        style={styles.mapCard}
+      >
         {/* Loading Indicator */}
         {(loadingLocation || loadingWorkers) && (
-          <View style={styles.mapLoadingOverlay}>
+          <View style={styles.mapLoadingOverlay} pointerEvents="none">
             <ActivityIndicator size="small" color="#0284C7" />
             <Text style={styles.mapLoadingText}>Đang quét GPS & tìm thợ...</Text>
           </View>
         )}
 
-        {/* Real Leaflet Map qua WebView */}
+        {/* Real Leaflet Map qua WebView với pointerEvents="none" */}
         <RealLeafletMap
           ref={mapRef}
           userLocation={location}
@@ -252,25 +260,20 @@ export default function WorkerMapSection({
           scrollEnabled={false}
           showRadiusCircle={true}
           radiusInMeters={3000}
+          pointerEvents="none"
         />
 
-        {/* Nút nổi Định Vị Lại Bản Đồ (Re-center GPS) */}
-        <Pressable
-          accessible={true}
-          accessibilityRole="button"
-          accessibilityLabel="Định vị lại vị trí của tôi"
-          style={({ pressed }) => [
-            styles.recenterBtn,
-            pressed && styles.pressedEffect,
-          ]}
-          onPress={handleRecenterUser}
-        >
+        {/* Lớp phủ trong suốt bảo đảm 100% bắt trọn mọi cử chỉ chạm vào bản đồ */}
+        <View style={styles.touchCatchOverlay} pointerEvents="none" />
+
+        {/* Nút nổi Định Vị Lại Bản Đồ (Icon visual chỉ báo GPS) */}
+        <View style={styles.recenterBtn} pointerEvents="none">
           <Ionicons name="locate" size={17} color="#0284C7" />
-        </Pressable>
+        </View>
 
         {/* Badge thông báo nếu không có thợ trực tuyến trong bán kính */}
         {workers.length === 0 && !loadingWorkers && (
-          <View style={styles.noWorkersMapBanner}>
+          <View style={styles.noWorkersMapBanner} pointerEvents="none">
             <Ionicons name="radio-outline" size={13} color="#64748B" style={{ marginRight: 5 }} />
             <Text style={styles.noWorkersMapBannerText}>
               Chưa có thợ trực tuyến trong bán kính 15km
@@ -278,25 +281,15 @@ export default function WorkerMapSection({
           </View>
         )}
 
-        {/* Nút CTA "Xem bản đồ chi tiết khu vực" (44px touch height) */}
-        <View style={styles.bottomPillContainer}>
-          <Pressable
-            accessible={true}
-            accessibilityRole="button"
-            accessibilityLabel="Xem bản đồ chi tiết mạng lưới thợ"
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            style={({ pressed }) => [
-              styles.mapDetailsPill,
-              pressed && styles.pressedEffect,
-            ]}
-            onPress={handleOpenMapModal}
-          >
+        {/* Nút CTA "Xem bản đồ chi tiết khu vực" (pointerEvents="none" để touch xuyên thấu) */}
+        <View style={styles.bottomPillContainer} pointerEvents="none">
+          <View style={styles.mapDetailsPill}>
             <Ionicons name="location-sharp" size={14} color="#0284C7" style={{ marginRight: 6 }} />
             <Text style={styles.mapDetailsText}>Xem bản đồ chi tiết khu vực</Text>
             <Ionicons name="chevron-forward" size={13} color="#0284C7" style={{ marginLeft: 3 }} />
-          </Pressable>
+          </View>
         </View>
-      </View>
+      </TouchableOpacity>
 
       {/* ── 3. Danh Sách Thẻ Thợ Thật hoặc Khối Empty State ─────── */}
       {workers.length > 0 ? (
@@ -521,6 +514,11 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     position: 'relative',
     backgroundColor: '#F1F5F9',
+  },
+  touchCatchOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'transparent',
+    zIndex: 10,
   },
   mapLoadingOverlay: {
     position: 'absolute',

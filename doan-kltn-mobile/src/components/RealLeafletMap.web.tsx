@@ -43,6 +43,7 @@ export interface RealLeafletMapProps {
   radiusInMeters?: number;
   scrollEnabled?: boolean;
   showZoomControl?: boolean;
+  pointerEvents?: 'box-none' | 'none' | 'box-only' | 'auto';
 }
 
 export const RealLeafletMap = forwardRef<RealLeafletMapRef, RealLeafletMapProps>(
@@ -58,6 +59,7 @@ export const RealLeafletMap = forwardRef<RealLeafletMapRef, RealLeafletMapProps>
       showRadiusCircle = true,
       radiusInMeters = 3000,
       showZoomControl = true,
+      pointerEvents,
     },
     ref
   ) => {
@@ -364,12 +366,15 @@ export const RealLeafletMap = forwardRef<RealLeafletMapRef, RealLeafletMapProps>
     ]);
 
     return (
-      <View style={[styles.container, { height, width }]}>
+      <View style={[styles.container, { height, width }]} pointerEvents={pointerEvents}>
         {/* @ts-ignore - iframe hợp lệ trên Web */}
         <iframe
           ref={iframeRef as any}
           srcDoc={htmlDoc}
-          style={webIframeStyle}
+          style={{
+            ...webIframeStyle,
+            pointerEvents: pointerEvents === 'none' ? 'none' : 'auto',
+          }}
           title="Leaflet Real Map HD"
         />
       </View>

@@ -35,7 +35,10 @@ import WorkerMapSection from '../components/WorkerMapSection';
 import CategoryGrid from '../components/CategoryGrid';
 import PopularServicesCarousel from '../components/PopularServicesCarousel';
 import VoucherTickets from '../components/VoucherTickets';
+import SubServiceListModal from '../../services/components/SubServiceListModal';
+import PriceEstimateModal from '../../services/components/PriceEstimateModal';
 import type { ServiceItem, WorkerItem } from '../types/home.types';
+import type { SubService, ServiceCategoryDetail } from '../../services/types/service.types';
 import type { AiDiagnosisResponse } from '../../../services/api/aiService';
 
 /**
@@ -45,6 +48,9 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [isAiScanModalOpen, setIsAiScanModalOpen] = useState(false);
+  const [isSubServicesModalOpen, setIsSubServicesModalOpen] = useState(false);
+  const [selectedCategorySlugOrId, setSelectedCategorySlugOrId] = useState<string | null>(null);
+  const [isPriceEstimateModalOpen, setIsPriceEstimateModalOpen] = useState(false);
 
   // =========================================================================
   // HOOK QUẢN LÝ DỮ LIỆU & STATE TRANG CHỦ
@@ -104,11 +110,48 @@ export default function HomeScreen() {
   };
 
   const handleCategorySelect = (catId: string) => {
+    const matchedCategory = data.categories.find(
+      (c) => c.id === catId || c.slug === catId
+    );
+
+    const slug = matchedCategory?.slug || catId;
+
+    if (slug === 'bang-gia') {
+      setIsPriceEstimateModalOpen(true);
+    } else {
+      setSelectedCategorySlugOrId(slug);
+      setIsSubServicesModalOpen(true);
+    }
+
     if (selectedCategoryId === catId) {
       setSelectedCategoryId(null);
     } else {
       setSelectedCategoryId(catId);
     }
+  };
+
+  const handleBookSubService = (service: SubService, category: ServiceCategoryDetail) => {
+    Alert.alert(
+      'Đặt dịch vụ FixGo',
+      `Bạn có muốn đặt dịch vụ "${service.name}" thuộc nhóm "${category.name}" với giá ước tính ${service.estimatedPriceRange}?`,
+      [
+        { text: 'Hủy', style: 'cancel' },
+        {
+          text: 'Tiếp tục đặt lịch',
+          onPress: () => {
+            router.push({
+              pathname: '/(user)/booking',
+              params: {
+                serviceId: service.id,
+                serviceName: service.name,
+                categoryName: category.name,
+                price: service.basePrice || 150000,
+              },
+            });
+          },
+        },
+      ]
+    );
   };
 
   const handleScanPress = () => {
@@ -242,6 +285,23 @@ export default function HomeScreen() {
         visible={isAiScanModalOpen}
         onClose={() => setIsAiScanModalOpen(false)}
         onConfirmBooking={handleConfirmAiBooking}
+      />
+
+      {/* ── Modal Danh sách Dịch vụ Con theo Danh mục ──────────────── */}
+      <SubServiceListModal
+        visible={isSubServicesModalOpen}
+        categorySlugOrId={selectedCategorySlugOrId}
+        onClose={() => setIsSubServicesModalOpen(false)}
+        onBookService={handleBookSubService}
+        onOpenAiScan={handleScanPress}
+        onOpenPriceEstimate={() => setIsPriceEstimateModalOpen(true)}
+      />
+
+      {/* ── Modal Tra Cứu Bảng Giá Minh Bạch 3 Tầng ───────────────── */}
+      <PriceEstimateModal
+        visible={isPriceEstimateModalOpen}
+        onClose={() => setIsPriceEstimateModalOpen(false)}
+        onOpenAiScan={handleScanPress}
       />
     </View>
   );
