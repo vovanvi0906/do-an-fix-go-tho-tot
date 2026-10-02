@@ -111,14 +111,14 @@ export function initRemoteLogger(): void {
     }
   }
 
-  // 2. Bắt lỗi Unhandled Rejection & Runtime Error trên Web
-  if (typeof window !== 'undefined') {
+  // 2. Bắt lỗi Unhandled Rejection & Runtime Error trên Web (chỉ khi có window.addEventListener)
+  if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
     try {
-      window.addEventListener('error', (event) => {
+      window.addEventListener('error', (event: any) => {
         sendErrorToLog(event.error || event.message, 'WEB_RUNTIME_ERROR', 'error');
       });
 
-      window.addEventListener('unhandledrejection', (event) => {
+      window.addEventListener('unhandledrejection', (event: any) => {
         sendErrorToLog(event.reason, 'WEB_UNHANDLED_PROMISE', 'error');
       });
     } catch (e) {

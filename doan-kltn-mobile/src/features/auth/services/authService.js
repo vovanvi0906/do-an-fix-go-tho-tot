@@ -86,4 +86,19 @@ export const authService = {
     });
     return { token, user };
   },
+
+  /**
+   * Đặt lại mật khẩu (sau khi xác thực OTP SĐT thành công)
+   * @param {string} resetToken - Token từ verify-phone-otp (purpose=reset-password)
+   * @param {string} newPassword - Mật khẩu mới
+   */
+  async resetPassword(resetToken, newPassword) {
+    console.log('🔐 [AuthService] Gửi yêu cầu đặt lại mật khẩu');
+    const response = await apiClient.post('/auth/reset-password', {
+      resetToken,
+      newPassword,
+    });
+    console.log('✅ [AuthService] Đặt lại mật khẩu thành công');
+    return response;
+  },
 };
