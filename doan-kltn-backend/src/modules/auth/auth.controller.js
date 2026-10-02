@@ -8,6 +8,7 @@ import {
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { ResetPasswordDto } from './dto/send-otp.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -58,5 +59,15 @@ export class AuthController {
   async login(body) {
     const identifier = body.email || body.emailOrPhone || body.phone || body.username;
     return this.authService.login(identifier, body.password);
+  }
+
+  @Post('reset-password')
+  @ApiOperation({ summary: 'Đặt lại mật khẩu mới (sau khi xác thực OTP SĐT)' })
+  @ApiBody({ type: ResetPasswordDto })
+  @ApiResponse({ status: 200, description: 'Đặt lại mật khẩu thành công' })
+  @ApiResponse({ status: 400, description: 'Token không hợp lệ hoặc đã hết hạn' })
+  @Bind(Body())
+  async resetPassword(body) {
+    return this.authService.resetPassword(body.resetToken, body.newPassword);
   }
 }

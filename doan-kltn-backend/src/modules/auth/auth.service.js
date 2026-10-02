@@ -8,13 +8,15 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
+import { OtpService } from './otp.service';
 
 @Injectable()
-@Dependencies(UsersService, JwtService)
+@Dependencies(UsersService, JwtService, OtpService)
 export class AuthService {
-  constructor(usersService, jwtService) {
+  constructor(usersService, jwtService, otpService) {
     this.usersService = usersService;
     this.jwtService = jwtService;
+    this.otpService = otpService;
   }
 
   async register(data) {
@@ -48,6 +50,7 @@ export class AuthService {
       phone: phone || null,
       role: 'CUSTOMER',
       status: 'ACTIVE',
+      isEmailVerified: true,
       customerProfile: {
         create: {
           fullName: fullName || null,
@@ -89,6 +92,7 @@ export class AuthService {
       phone: phone || null,
       role: 'WORKER',
       status: 'ACTIVE',
+      isEmailVerified: true,
       workerProfile: {
         create: {
           fullName: fullName || null,
@@ -153,6 +157,32 @@ export class AuthService {
       message: 'Đăng nhập thành công',
       user: sanitizedUser,
       accessToken: token,
+    };
+  }
+
+  /**
+   * Đặt lại mật khẩu (dùng resetToken từ OTP verify)
+   */
+  async resetPassword(resetToken, newPassword) {
+    console.log('🔐 [Backend AuthService] Yêu cầu đặt lại mật khẩu');
+
+    // Validate resetToken và lấy phone đã verify
+    const phone = await this.otpService.validateResetToken(resetToken);
+
+    // Kiểm tra user tồn tại
+    const user = await this.usersService.findByPhone(phone);
+    if (!user) {
+      throw new BadRequestException('Không tìm thấy tài khoản với số điện thoại này');
+    }
+
+    // Hash mật khẩu mới
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await this.usersService.updatePassword(phone, passwordHash);
+
+    console.log('✅ [Backend AuthService] Đặt lại mật khẩu thành công cho:', phone);
+
+    return {
+      message: 'Đặt lại mật khẩu thành công. Vui lòng đăng nhập với mật khẩu mới.',
     };
   }
 }
