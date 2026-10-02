@@ -63,7 +63,9 @@ export class AdminService {
     if (status && status !== 'ALL') {
       if (['ACTIVE', 'BLOCKED'].includes(status)) {
         where.status = status;
-      } else if (['PENDING', 'APPROVED', 'REJECTED', 'DRAFT'].includes(status)) {
+      } else if (
+        ['PENDING', 'APPROVED', 'REJECTED', 'DRAFT'].includes(status)
+      ) {
         where.role = 'WORKER';
         where.workerProfile = { approvalStatus: status };
       }
@@ -172,8 +174,8 @@ export class AdminService {
                   skills: Array.isArray(skills)
                     ? skills
                     : skills
-                    ? [skills]
-                    : [],
+                      ? [skills]
+                      : [],
                   approvalStatus: 'APPROVED',
                 },
               },
@@ -248,7 +250,9 @@ export class AdminService {
           data: {
             ...(dto.fullName !== undefined && { fullName: dto.fullName }),
             ...(dto.bio !== undefined && { bio: dto.bio }),
-            ...(dto.cccdNumber !== undefined && { idCardNumber: dto.cccdNumber }),
+            ...(dto.cccdNumber !== undefined && {
+              idCardNumber: dto.cccdNumber,
+            }),
             ...(dto.avatarUrl !== undefined && { avatarUrl: dto.avatarUrl }),
             ...(dto.approvalStatus !== undefined && {
               approvalStatus: dto.approvalStatus,
@@ -317,12 +321,16 @@ export class AdminService {
 
     // Ràng buộc 1: Admin không được xóa tài khoản của chính mình
     if (currentUserId && id === currentUserId) {
-      throw new BadRequestException('Bạn không thể tự xóa tài khoản của chính mình.');
+      throw new BadRequestException(
+        'Bạn không thể tự xóa tài khoản của chính mình.',
+      );
     }
 
     // Ràng buộc 2: Admin không được xóa tài khoản Admin khác
     if (user.role === 'ADMIN') {
-      throw new BadRequestException('Không được phép xóa tài khoản Quản trị viên (Admin).');
+      throw new BadRequestException(
+        'Không được phép xóa tài khoản Quản trị viên (Admin).',
+      );
     }
 
     await this.prisma.$transaction(async (tx) => {
@@ -460,100 +468,29 @@ export class AdminService {
   }
 
   // ==========================================
-  // SERVICES
-  // ==========================================
-
-  async createService(dto) {
-    const {
-      categoryId,
-      name,
-      description,
-      basePrice,
-      unit,
-      estimatedDurationMin,
-      isActive,
-    } = dto;
-
-    const category = await this.prisma.serviceCategory.findUnique({
-      where: { id: categoryId },
-    });
-
-    if (!category) {
-      throw new BadRequestException('Danh mục dịch vụ (categoryId) không tồn tại');
-    }
-
-    return this.prisma.service.create({
-      data: {
-        categoryId,
-        name,
-        description: description || null,
-        basePrice,
-        unit: unit || null,
-        estimatedDurationMin: estimatedDurationMin || null,
-        isActive: isActive !== undefined ? isActive : true,
-      },
-      include: {
-        category: true,
-      },
-    });
-  }
-
-  async updateService(id, dto) {
-    const service = await this.prisma.service.findUnique({
-      where: { id },
-    });
-
-    if (!service) {
-      throw new NotFoundException('Không tìm thấy dịch vụ');
-    }
-
-    const {
-      categoryId,
-      name,
-      description,
-      basePrice,
-      unit,
-      estimatedDurationMin,
-      isActive,
-    } = dto;
-
-    if (categoryId) {
-      const category = await this.prisma.serviceCategory.findUnique({
-        where: { id: categoryId },
-      });
-      if (!category) {
-        throw new BadRequestException('Danh mục dịch vụ (categoryId) không tồn tại');
-      }
-    }
-
-    return this.prisma.service.update({
-      where: { id },
-      data: {
-        ...(categoryId !== undefined && { categoryId }),
-        ...(name !== undefined && { name }),
-        ...(description !== undefined && { description }),
-        ...(basePrice !== undefined && { basePrice }),
-        ...(unit !== undefined && { unit }),
-        ...(estimatedDurationMin !== undefined && { estimatedDurationMin }),
-        ...(isActive !== undefined && { isActive }),
-      },
-      include: {
-        category: true,
-      },
-    });
-  }
-
-  // ==========================================
   // WORKER APPROVAL MANAGEMENT
   // ==========================================
 
   async getWorkers(query = {}) {
     // Xử lý linh hoạt cả tham số dạng string status hoặc query object
-    const statusParam = typeof query === 'string' ? query : query?.status || query?.approvalStatus;
-    const isOnlineParam = typeof query === 'object' ? query?.isOnline : undefined;
-    const search = typeof query === 'object' && query?.search ? query.search.trim() : undefined;
-    const page = typeof query === 'object' && query?.page ? Math.max(1, parseInt(query.page, 10)) : 1;
-    const limit = typeof query === 'object' && query?.limit ? Math.max(1, parseInt(query.limit, 10)) : 10;
+    const statusParam =
+      typeof query === 'string'
+        ? query
+        : query?.status || query?.approvalStatus;
+    const isOnlineParam =
+      typeof query === 'object' ? query?.isOnline : undefined;
+    const search =
+      typeof query === 'object' && query?.search
+        ? query.search.trim()
+        : undefined;
+    const page =
+      typeof query === 'object' && query?.page
+        ? Math.max(1, parseInt(query.page, 10))
+        : 1;
+    const limit =
+      typeof query === 'object' && query?.limit
+        ? Math.max(1, parseInt(query.limit, 10))
+        : 10;
     const skip = (page - 1) * limit;
 
     const where = {};
@@ -564,7 +501,11 @@ export class AdminService {
     }
 
     // 2. Lọc theo trạng thái trực tuyến
-    if (isOnlineParam !== undefined && isOnlineParam !== 'ALL' && isOnlineParam !== '') {
+    if (
+      isOnlineParam !== undefined &&
+      isOnlineParam !== 'ALL' &&
+      isOnlineParam !== ''
+    ) {
       where.isOnline = isOnlineParam === true || isOnlineParam === 'true';
     }
 
@@ -728,7 +669,14 @@ export class AdminService {
     if (statusParam && statusParam !== 'ALL') {
       if (statusParam === 'IN_PROGRESS') {
         where.status = {
-          in: ['ASSIGNED', 'WORKER_ARRIVING', 'ARRIVED', 'IN_PROGRESS', 'AWAITING_CONFIRMATION', 'AWAITING_PAYMENT'],
+          in: [
+            'ASSIGNED',
+            'WORKER_ARRIVING',
+            'ARRIVED',
+            'IN_PROGRESS',
+            'AWAITING_CONFIRMATION',
+            'AWAITING_PAYMENT',
+          ],
         };
       } else {
         where.status = statusParam;
@@ -1070,7 +1018,9 @@ export class AdminService {
         where: { name: data.name.trim() },
       });
       if (duplicate && duplicate.id !== id) {
-        throw new BadRequestException(`Tên danh mục "${data.name}" đã được sử dụng`);
+        throw new BadRequestException(
+          `Tên danh mục "${data.name}" đã được sử dụng`,
+        );
       }
     }
 
@@ -1089,14 +1039,19 @@ export class AdminService {
           .replace(/^-+|-+$/g, '');
       }
     }
-    if (data.slug !== undefined) updateData.slug = data.slug ? data.slug.trim().toLowerCase() : null;
-    if (data.description !== undefined) updateData.description = data.description ? data.description.trim() : null;
+    if (data.slug !== undefined)
+      updateData.slug = data.slug ? data.slug.trim().toLowerCase() : null;
+    if (data.description !== undefined)
+      updateData.description = data.description
+        ? data.description.trim()
+        : null;
     if (data.icon !== undefined || data.iconUrl !== undefined) {
       const chosenIcon = data.icon?.trim() || data.iconUrl?.trim() || null;
       updateData.icon = chosenIcon;
       updateData.iconUrl = chosenIcon;
     }
-    if (data.isActive !== undefined) updateData.isActive = Boolean(data.isActive);
+    if (data.isActive !== undefined)
+      updateData.isActive = Boolean(data.isActive);
 
     const updated = await this.prisma.serviceCategory.update({
       where: { id },
@@ -1213,7 +1168,6 @@ export class AdminService {
     };
   }
 
-
   async getAdminServices(query = {}) {
     const isActiveParam = query?.isActive;
     const categoryId = query?.categoryId;
@@ -1229,10 +1183,13 @@ export class AdminService {
       where.isActive = true;
     } else if (statusParam === 'INACTIVE') {
       where.isActive = false;
-    } else if (isActiveParam !== undefined && isActiveParam !== 'ALL' && isActiveParam !== '') {
+    } else if (
+      isActiveParam !== undefined &&
+      isActiveParam !== 'ALL' &&
+      isActiveParam !== ''
+    ) {
       where.isActive = isActiveParam === 'true' || isActiveParam === true;
     }
-
 
     if (categoryId && categoryId !== 'ALL') {
       where.categoryId = categoryId;
@@ -1299,7 +1256,9 @@ export class AdminService {
         description: data.description || '',
         basePrice: data.basePrice || 100000,
         unit: data.unit || 'lần',
-        estimatedDurationMin: data.estimatedDurationMin ? parseInt(data.estimatedDurationMin, 10) : 60,
+        estimatedDurationMin: data.estimatedDurationMin
+          ? parseInt(data.estimatedDurationMin, 10)
+          : 60,
         isActive: data.isActive !== undefined ? Boolean(data.isActive) : true,
         categoryId,
       },
@@ -1323,13 +1282,15 @@ export class AdminService {
 
     const updateData = {};
     if (data.name !== undefined) updateData.name = data.name;
-    if (data.description !== undefined) updateData.description = data.description;
+    if (data.description !== undefined)
+      updateData.description = data.description;
     if (data.basePrice !== undefined) updateData.basePrice = data.basePrice;
     if (data.unit !== undefined) updateData.unit = data.unit;
     if (data.estimatedDurationMin !== undefined) {
       updateData.estimatedDurationMin = parseInt(data.estimatedDurationMin, 10);
     }
-    if (data.isActive !== undefined) updateData.isActive = Boolean(data.isActive);
+    if (data.isActive !== undefined)
+      updateData.isActive = Boolean(data.isActive);
     if (data.categoryId) updateData.categoryId = data.categoryId;
 
     const updated = await this.prisma.service.update({
@@ -1468,7 +1429,14 @@ export class AdminService {
     const endDate = new Date();
 
     if (timeRange === 'today') {
-      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+      startDate = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        0,
+        0,
+        0,
+      );
     } else if (timeRange === '7days') {
       startDate = new Date();
       startDate.setDate(now.getDate() - 7);
@@ -1508,7 +1476,9 @@ export class AdminService {
       // Tổng số khách hàng
       this.prisma.customerProfile.count(),
       // Tổng số thợ đã duyệt
-      this.prisma.workerProfile.count({ where: { approvalStatus: 'APPROVED' } }),
+      this.prisma.workerProfile.count({
+        where: { approvalStatus: 'APPROVED' },
+      }),
       // Thợ đang online
       this.prisma.workerProfile.count({ where: { isOnline: true } }),
       // Tổng doanh thu thực tế từ đơn COMPLETED
@@ -1524,7 +1494,9 @@ export class AdminService {
 
     const totalRevenue = Number(revenueResult._sum?.totalPrice || 0);
     const completionRate =
-      totalOrders > 0 ? Number(((completedOrders / totalOrders) * 100).toFixed(1)) : 0;
+      totalOrders > 0
+        ? Number(((completedOrders / totalOrders) * 100).toFixed(1))
+        : 0;
 
     return {
       totalRevenue,
@@ -1584,7 +1556,9 @@ export class AdminService {
         const dayStr = d.toISOString().slice(0, 10);
         const label = dayNames[d.getDay()];
 
-        const bucketOrders = orders.filter((o) => o.createdAt.toISOString().slice(0, 10) === dayStr);
+        const bucketOrders = orders.filter(
+          (o) => o.createdAt.toISOString().slice(0, 10) === dayStr,
+        );
         const rev = bucketOrders
           .filter((o) => o.status === 'COMPLETED')
           .reduce((sum, o) => sum + Number(o.totalPrice || 0), 0);
@@ -1667,9 +1641,19 @@ export class AdminService {
       },
     });
 
-    const colors = ['#3b82f6', '#06b6d4', '#6366f1', '#f59e0b', '#10b981', '#ec4899'];
+    const colors = [
+      '#3b82f6',
+      '#06b6d4',
+      '#6366f1',
+      '#f59e0b',
+      '#10b981',
+      '#ec4899',
+    ];
     let items = categories.map((cat, idx) => {
-      const orderCount = cat.services.reduce((acc, s) => acc + (s._count?.orders || 0), 0);
+      const orderCount = cat.services.reduce(
+        (acc, s) => acc + (s._count?.orders || 0),
+        0,
+      );
       return {
         id: cat.id,
         name: cat.name,
@@ -1682,7 +1666,8 @@ export class AdminService {
 
     items = items.map((item) => ({
       ...item,
-      percentage: totalOrders > 0 ? Math.round((item.orders / totalOrders) * 100) : 0,
+      percentage:
+        totalOrders > 0 ? Math.round((item.orders / totalOrders) * 100) : 0,
     }));
 
     return items;
@@ -1705,12 +1690,16 @@ export class AdminService {
 
     return workers.map((w) => {
       const completedJobs = w.orders?.length || 0;
-      const totalEarned = w.orders?.reduce((sum, o) => sum + Number(o.totalPrice || 0), 0) || 0;
+      const totalEarned =
+        w.orders?.reduce((sum, o) => sum + Number(o.totalPrice || 0), 0) || 0;
 
       return {
         id: w.id,
         fullName: w.fullName,
-        specialty: w.workerServices?.[0]?.service?.name || w.skills?.[0] || 'Kỹ thuật viên',
+        specialty:
+          w.workerServices?.[0]?.service?.name ||
+          w.skills?.[0] ||
+          'Kỹ thuật viên',
         ratingAvg: Number(w.ratingAvg || 5.0),
         totalJobs: completedJobs,
         totalEarned,
@@ -1786,22 +1775,31 @@ export class AdminService {
     const current = await this.getSystemSettings();
 
     const updateData = {};
-    if (data.siteName !== undefined) updateData.siteName = String(data.siteName);
-    if (data.supportEmail !== undefined) updateData.supportEmail = String(data.supportEmail);
-    if (data.supportHotline !== undefined) updateData.supportHotline = String(data.supportHotline);
+    if (data.siteName !== undefined)
+      updateData.siteName = String(data.siteName);
+    if (data.supportEmail !== undefined)
+      updateData.supportEmail = String(data.supportEmail);
+    if (data.supportHotline !== undefined)
+      updateData.supportHotline = String(data.supportHotline);
     if (data.maxSearchRadiusKm !== undefined) {
       updateData.maxSearchRadiusKm = parseFloat(data.maxSearchRadiusKm) || 15.0;
     }
     if (data.defaultCommissionRate !== undefined) {
-      updateData.defaultCommissionRate = parseFloat(data.defaultCommissionRate) || 15.0;
+      updateData.defaultCommissionRate =
+        parseFloat(data.defaultCommissionRate) || 15.0;
     }
     if (data.orderTimeoutSeconds !== undefined) {
-      updateData.orderTimeoutSeconds = parseInt(data.orderTimeoutSeconds, 10) || 60;
+      updateData.orderTimeoutSeconds =
+        parseInt(data.orderTimeoutSeconds, 10) || 60;
     }
-    if (data.autoMatching !== undefined) updateData.autoMatching = Boolean(data.autoMatching);
-    if (data.notifyOnArrival !== undefined) updateData.notifyOnArrival = Boolean(data.notifyOnArrival);
-    if (data.smsOtpEnabled !== undefined) updateData.smsOtpEnabled = Boolean(data.smsOtpEnabled);
-    if (data.maintenanceMode !== undefined) updateData.maintenanceMode = Boolean(data.maintenanceMode);
+    if (data.autoMatching !== undefined)
+      updateData.autoMatching = Boolean(data.autoMatching);
+    if (data.notifyOnArrival !== undefined)
+      updateData.notifyOnArrival = Boolean(data.notifyOnArrival);
+    if (data.smsOtpEnabled !== undefined)
+      updateData.smsOtpEnabled = Boolean(data.smsOtpEnabled);
+    if (data.maintenanceMode !== undefined)
+      updateData.maintenanceMode = Boolean(data.maintenanceMode);
     if (data.maintenanceMessage !== undefined) {
       updateData.maintenanceMessage = String(data.maintenanceMessage);
     }
@@ -1824,7 +1822,7 @@ export class AdminService {
 
   async getDashboardOverview(timeframe = 'month') {
     const { startDate, endDate } = this._getTimeBounds(
-      timeframe === 'week' ? '7days' : timeframe
+      timeframe === 'week' ? '7days' : timeframe,
     );
 
     const [
@@ -1938,11 +1936,18 @@ export class AdminService {
     const totalRevenue = Number(revenueResult._sum?.totalPrice || 0);
 
     // Tính toán phân bổ danh mục dịch vụ thực
-    const colors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899'];
+    const colors = [
+      '#3b82f6',
+      '#10b981',
+      '#f59e0b',
+      '#8b5cf6',
+      '#06b6d4',
+      '#ec4899',
+    ];
     let serviceDistribution = categories.map((cat, idx) => {
       const orderCount = cat.services.reduce(
         (acc, s) => acc + (s._count?.orders || 0),
-        0
+        0,
       );
       return {
         id: cat.id,
@@ -1954,7 +1959,7 @@ export class AdminService {
 
     const totalCategoryOrders = serviceDistribution.reduce(
       (sum, item) => sum + item.count,
-      0
+      0,
     );
     serviceDistribution = serviceDistribution.map((item) => ({
       ...item,
@@ -2013,7 +2018,9 @@ export class AdminService {
       });
     });
 
-    recentActivities.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    recentActivities.sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+    );
 
     return {
       totalCustomers,
@@ -2041,7 +2048,7 @@ export class AdminService {
    */
   async getDashboardOverviewV1(timeframe = 'month') {
     const { startDate, endDate } = this._getTimeBounds(
-      timeframe === 'week' ? '7days' : timeframe
+      timeframe === 'week' ? '7days' : timeframe,
     );
 
     const [
@@ -2201,7 +2208,9 @@ export class AdminService {
       activities.push({
         id: `act-wkr-${worker.id}`,
         type: isApproved ? 'WORKER_APPROVED' : 'WORKER_REGISTER',
-        title: isApproved ? 'Hồ sơ thợ được phê duyệt' : 'Đối tác thợ mới đăng ký',
+        title: isApproved
+          ? 'Hồ sơ thợ được phê duyệt'
+          : 'Đối tác thợ mới đăng ký',
         description: `Thợ: ${worker.fullName || 'Đối tác thợ'} • Trạng thái: ${worker.approvalStatus}`,
         createdAt: worker.createdAt,
         status: worker.approvalStatus,
@@ -2241,7 +2250,7 @@ export class AdminService {
     let distribution = categories.map((cat, idx) => {
       const orderCount = cat.services.reduce(
         (acc, s) => acc + (s._count?.orders || 0),
-        0
+        0,
       );
       return {
         id: cat.id,
@@ -2269,9 +2278,3 @@ export class AdminService {
     };
   }
 }
-
-
-
-
-
-

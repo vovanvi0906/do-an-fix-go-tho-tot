@@ -102,7 +102,10 @@ export class CreateOrderDto {
     example: '2026-09-06T09:00:00.000Z',
   })
   @IsOptional()
-  @IsDateString({}, { message: 'scheduledAt phải là định dạng ISO date string' })
+  @IsDateString(
+    {},
+    { message: 'scheduledAt phải là định dạng ISO date string' },
+  )
   scheduledAt;
 
   // Compatibility alias

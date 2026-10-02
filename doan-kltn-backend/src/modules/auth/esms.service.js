@@ -9,7 +9,9 @@ import * as crypto from 'crypto';
 export class EsmsService {
   constructor() {
     this.logger = new Logger(EsmsService.name);
-    this.apiUrl = process.env.ESMS_API_URL || 'http://rest.esms.vn/MainService.svc/json/SendMultipleMessage_V4_post_json';
+    this.apiUrl =
+      process.env.ESMS_API_URL ||
+      'http://rest.esms.vn/MainService.svc/json/SendMultipleMessage_V4_post_json';
   }
 
   /**
@@ -50,7 +52,8 @@ export class EsmsService {
    */
   async sendOtpSms(phone, otpCode) {
     const apiKey = process.env.ESMS_API_KEY || '82571DA6FC34F8BD5A1CFCD5F7951D';
-    const secretKey = process.env.ESMS_SECRET_KEY || '76CB6899A3234645B37696368681D2';
+    const secretKey =
+      process.env.ESMS_SECRET_KEY || '76CB6899A3234645B37696368681D2';
     const brandname = (process.env.ESMS_BRANDNAME || '').trim();
     const smsType = process.env.ESMS_SMS_TYPE || '2';
     const sandbox = process.env.ESMS_SANDBOX || '0';
@@ -65,7 +68,9 @@ export class EsmsService {
 
     // Nội dung tin nhắn khớp 100% từng chữ với template Brandname Baotrixemay đã duyệt (TempId: 458)
     const content = `${otpCode} la ma xac minh dang ky Baotrixemay cua ban`;
-    const requestId = crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(16).toString('hex');
+    const requestId = crypto.randomUUID
+      ? crypto.randomUUID()
+      : crypto.randomBytes(16).toString('hex');
 
     // Cấu hình Payload theo đặc tả eSMS API
     const payload = {
@@ -80,7 +85,9 @@ export class EsmsService {
       RequestId: requestId,
     };
 
-    this.logger.log(`📨 [eSMS] Đang gửi SMS OTP đến số: ${recipientPhone} (Brandname: "${payload.Brandname}", Content: "${content}")`);
+    this.logger.log(
+      `📨 [eSMS] Đang gửi SMS OTP đến số: ${recipientPhone} (Brandname: "${payload.Brandname}", Content: "${content}")`,
+    );
 
     let response;
     try {
@@ -93,8 +100,13 @@ export class EsmsService {
         body: JSON.stringify(payload),
       });
     } catch (networkError) {
-      console.error('❌ [eSMS Network Error] Không thể kết nối tới máy chủ eSMS:', networkError);
-      throw new BadRequestException(`Lỗi kết nối tới máy chủ eSMS: ${networkError.message}`);
+      console.error(
+        '❌ [eSMS Network Error] Không thể kết nối tới máy chủ eSMS:',
+        networkError,
+      );
+      throw new BadRequestException(
+        `Lỗi kết nối tới máy chủ eSMS: ${networkError.message}`,
+      );
     }
 
     if (!response.ok) {
@@ -111,7 +123,9 @@ export class EsmsService {
     const isSuccess = data?.CodeResult === '100' || data?.CodeResult === 100;
 
     if (isSuccess) {
-      this.logger.log(`✅ [eSMS] Gửi SMS OTP thành công tới: ${recipientPhone}, SMSID: ${data.SMSID}`);
+      this.logger.log(
+        `✅ [eSMS] Gửi SMS OTP thành công tới: ${recipientPhone}, SMSID: ${data.SMSID}`,
+      );
       return {
         success: true,
         smsId: data.SMSID,
@@ -122,18 +136,21 @@ export class EsmsService {
 
     // Nếu CodeResult !== "100" -> In console.error chi tiết và throw Exception
     const errorMap = {
-      '101': 'Đăng nhập thất bại (ApiKey hoặc SecretKey không chính xác)',
-      '102': 'Tài khoản eSMS đã bị khóa',
-      '103': 'Tài khoản eSMS không đủ tiền để gửi tin nhắn (Số dư dưới mức tối thiểu)',
-      '104': `Brandname "${brandname || 'Baotrixemay'}" chưa được duyệt hoặc không tồn tại trên tài khoản eSMS`,
-      '105': 'Nội dung tin nhắn chứa từ ngữ bị chặn/spam',
-      '106': 'Loại tin nhắn (SmsType) không hợp lệ',
-      '118': 'Loại tin nhắn (SmsType) không được cấp quyền cho tài khoản này',
-      '146': 'Sai template Brandname CSKH (Nội dung tin nhắn không khớp với mẫu template đã được duyệt)',
-      '99': 'Lỗi không xác định từ hệ thống eSMS',
+      101: 'Đăng nhập thất bại (ApiKey hoặc SecretKey không chính xác)',
+      102: 'Tài khoản eSMS đã bị khóa',
+      103: 'Tài khoản eSMS không đủ tiền để gửi tin nhắn (Số dư dưới mức tối thiểu)',
+      104: `Brandname "${brandname || 'Baotrixemay'}" chưa được duyệt hoặc không tồn tại trên tài khoản eSMS`,
+      105: 'Nội dung tin nhắn chứa từ ngữ bị chặn/spam',
+      106: 'Loại tin nhắn (SmsType) không hợp lệ',
+      118: 'Loại tin nhắn (SmsType) không được cấp quyền cho tài khoản này',
+      146: 'Sai template Brandname CSKH (Nội dung tin nhắn không khớp với mẫu template đã được duyệt)',
+      99: 'Lỗi không xác định từ hệ thống eSMS',
     };
 
-    const errorDesc = data?.ErrorMessage || errorMap[data?.CodeResult] || `Lỗi eSMS mã: ${data?.CodeResult}`;
+    const errorDesc =
+      data?.ErrorMessage ||
+      errorMap[data?.CodeResult] ||
+      `Lỗi eSMS mã: ${data?.CodeResult}`;
     const detailedMessage = `Gửi SMS thất bại qua eSMS: [Mã ${data?.CodeResult}] ${errorDesc}`;
 
     console.error('❌ [eSMS API Error Details]:', {

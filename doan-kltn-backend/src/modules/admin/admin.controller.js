@@ -47,7 +47,11 @@ export class AdminController {
     summary:
       'Lấy danh sách người dùng (Customer, Worker, Admin) kèm phân trang và tìm kiếm',
   })
-  @ApiQuery({ name: 'role', required: false, enum: ['CUSTOMER', 'WORKER', 'ADMIN', 'ALL'] })
+  @ApiQuery({
+    name: 'role',
+    required: false,
+    enum: ['CUSTOMER', 'WORKER', 'ADMIN', 'ALL'],
+  })
   @ApiQuery({ name: 'status', required: false, type: String })
   @ApiQuery({ name: 'search', required: false, type: String })
   @ApiQuery({ name: 'page', required: false, type: Number })
@@ -66,7 +70,9 @@ export class AdminController {
   }
 
   @Post('users')
-  @ApiOperation({ summary: 'Tạo tài khoản người dùng mới (Customer hoặc Worker)' })
+  @ApiOperation({
+    summary: 'Tạo tài khoản người dùng mới (Customer hoặc Worker)',
+  })
   @Bind(Body())
   async createUser(body) {
     return this.adminService.createUser(body);
@@ -107,20 +113,6 @@ export class AdminController {
     return this.adminService.updateCategory(id, body);
   }
 
-  @Post('services')
-  @ApiOperation({ summary: 'Tạo dịch vụ mới thuộc danh mục' })
-  @Bind(Body())
-  async createService(body) {
-    return this.adminService.createService(body);
-  }
-
-  @Patch('services/:id')
-  @ApiOperation({ summary: 'Cập nhật thông tin dịch vụ' })
-  @Bind(Param('id'), Body())
-  async updateService(id, body) {
-    return this.adminService.updateService(id, body);
-  }
-
   // ==========================================
   // WORKER APPROVAL & MANAGEMENT STATE MACHINE
   // ==========================================
@@ -142,28 +134,36 @@ export class AdminController {
   }
 
   @Post('workers/:id/approve')
-  @ApiOperation({ summary: 'Phê duyệt hồ sơ thợ (POST - chuyển trạng thái sang APPROVED)' })
+  @ApiOperation({
+    summary: 'Phê duyệt hồ sơ thợ (POST - chuyển trạng thái sang APPROVED)',
+  })
   @Bind(Param('id'))
   async approveWorkerPost(id) {
     return this.adminService.approveWorker(id);
   }
 
   @Patch('workers/:id/approve')
-  @ApiOperation({ summary: 'Phê duyệt hồ sơ thợ (PATCH - chuyển trạng thái sang APPROVED)' })
+  @ApiOperation({
+    summary: 'Phê duyệt hồ sơ thợ (PATCH - chuyển trạng thái sang APPROVED)',
+  })
   @Bind(Param('id'))
   async approveWorkerPatch(id) {
     return this.adminService.approveWorker(id);
   }
 
   @Post('workers/:id/reject')
-  @ApiOperation({ summary: 'Từ chối hồ sơ thợ (POST - chuyển trạng thái sang REJECTED)' })
+  @ApiOperation({
+    summary: 'Từ chối hồ sơ thợ (POST - chuyển trạng thái sang REJECTED)',
+  })
   @Bind(Param('id'), Body())
   async rejectWorkerPost(id, body) {
     return this.adminService.rejectWorker(id, body?.reason);
   }
 
   @Patch('workers/:id/reject')
-  @ApiOperation({ summary: 'Từ chối hồ sơ thợ (PATCH - chuyển trạng thái sang REJECTED)' })
+  @ApiOperation({
+    summary: 'Từ chối hồ sơ thợ (PATCH - chuyển trạng thái sang REJECTED)',
+  })
   @Bind(Param('id'), Body())
   async rejectWorkerPatch(id, body) {
     return this.adminService.rejectWorker(id, body?.reason);
@@ -182,7 +182,9 @@ export class AdminController {
   // ==========================================
 
   @Get('orders')
-  @ApiOperation({ summary: 'Lấy danh sách đơn hàng toàn hệ thống kèm bộ lọc và phân trang' })
+  @ApiOperation({
+    summary: 'Lấy danh sách đơn hàng toàn hệ thống kèm bộ lọc và phân trang',
+  })
   @ApiQuery({ name: 'status', required: false, type: String })
   @ApiQuery({ name: 'categoryId', required: false, type: String })
   @ApiQuery({ name: 'search', required: false, type: String })
@@ -194,7 +196,9 @@ export class AdminController {
   }
 
   @Get('orders/:id')
-  @ApiOperation({ summary: 'Lấy chi tiết đơn hàng (khách, thợ, dịch vụ, lịch sử trạng thái)' })
+  @ApiOperation({
+    summary: 'Lấy chi tiết đơn hàng (khách, thợ, dịch vụ, lịch sử trạng thái)',
+  })
   @Bind(Param('id'))
   async getOrderById(id) {
     return this.adminService.getOrderById(id);
@@ -205,7 +209,12 @@ export class AdminController {
   @Bind(Param('id'), Body(), Req())
   async updateOrderStatus(id, body, req) {
     const adminId = req?.user?.id || req?.user?.userId;
-    return this.adminService.updateOrderStatus(id, body?.status, body?.note, adminId);
+    return this.adminService.updateOrderStatus(
+      id,
+      body?.status,
+      body?.note,
+      adminId,
+    );
   }
 
   @Patch('orders/:id/cancel')
@@ -234,7 +243,10 @@ export class AdminController {
   }
 
   @Get('services')
-  @ApiOperation({ summary: 'Lấy danh sách dịch vụ (có phân trang, lọc trạng thái isActive, tìm kiếm)' })
+  @ApiOperation({
+    summary:
+      'Lấy danh sách dịch vụ (có phân trang, lọc trạng thái isActive, tìm kiếm)',
+  })
   @ApiQuery({ name: 'isActive', required: false, type: String })
   @ApiQuery({ name: 'categoryId', required: false, type: String })
   @ApiQuery({ name: 'search', required: false, type: String })
@@ -253,14 +265,18 @@ export class AdminController {
   }
 
   @Patch('services/:id')
-  @ApiOperation({ summary: 'Cập nhật thông tin chi tiết hoặc giá khởi điểm của một dịch vụ' })
+  @ApiOperation({
+    summary: 'Cập nhật thông tin chi tiết hoặc giá khởi điểm của một dịch vụ',
+  })
   @Bind(Param('id'), Body())
   async updateService(id, body) {
     return this.adminService.updateService(id, body);
   }
 
   @Patch('services/:id/toggle')
-  @ApiOperation({ summary: 'Chuyển đổi nhanh trạng thái hoạt động của dịch vụ (Bật/Tắt)' })
+  @ApiOperation({
+    summary: 'Chuyển đổi nhanh trạng thái hoạt động của dịch vụ (Bật/Tắt)',
+  })
   @Bind(Param('id'))
   async toggleServiceStatus(id) {
     return this.adminService.toggleServiceStatus(id);
@@ -268,7 +284,13 @@ export class AdminController {
 
   @Delete('services/:id')
   @ApiOperation({ summary: 'Xóa hoặc tạm ngưng cung cấp dịch vụ' })
-  @ApiQuery({ name: 'force', required: false, type: Boolean, description: 'Xóa vĩnh viễn dịch vụ kèm các dữ liệu mẫu/thử nghiệm liên kết' })
+  @ApiQuery({
+    name: 'force',
+    required: false,
+    type: Boolean,
+    description:
+      'Xóa vĩnh viễn dịch vụ kèm các dữ liệu mẫu/thử nghiệm liên kết',
+  })
   @Bind(Param('id'), Query('force'))
   async deleteService(id, force) {
     return this.adminService.deleteService(id, force);
@@ -280,22 +302,34 @@ export class AdminController {
 
   @Get('analytics/overview')
   @ApiOperation({ summary: 'Lấy các chỉ số tổng quan (KPI Cards) hệ thống' })
-  @ApiQuery({ name: 'timeRange', required: false, enum: ['today', '7days', 'month', 'year'] })
+  @ApiQuery({
+    name: 'timeRange',
+    required: false,
+    enum: ['today', '7days', 'month', 'year'],
+  })
   @Bind(Query('timeRange'))
   async getAnalyticsOverview(timeRange) {
     return this.adminService.getAnalyticsOverview(timeRange);
   }
 
   @Get('analytics/revenue')
-  @ApiOperation({ summary: 'Lấy dữ liệu biểu đồ doanh thu theo khoảng thời gian' })
-  @ApiQuery({ name: 'timeRange', required: false, enum: ['today', '7days', 'month', 'year'] })
+  @ApiOperation({
+    summary: 'Lấy dữ liệu biểu đồ doanh thu theo khoảng thời gian',
+  })
+  @ApiQuery({
+    name: 'timeRange',
+    required: false,
+    enum: ['today', '7days', 'month', 'year'],
+  })
   @Bind(Query('timeRange'))
   async getAnalyticsRevenue(timeRange) {
     return this.adminService.getAnalyticsRevenue(timeRange);
   }
 
   @Get('analytics/services-distribution')
-  @ApiOperation({ summary: 'Thống kê tỷ lệ và số lượng đơn theo danh mục dịch vụ' })
+  @ApiOperation({
+    summary: 'Thống kê tỷ lệ và số lượng đơn theo danh mục dịch vụ',
+  })
   async getServicesDistribution() {
     return this.adminService.getServicesDistribution();
   }
@@ -308,7 +342,11 @@ export class AdminController {
 
   @Get('analytics/export')
   @ApiOperation({ summary: 'Xuất báo cáo thống kê dạng tệp CSV/Excel' })
-  @ApiQuery({ name: 'timeRange', required: false, enum: ['today', '7days', 'month', 'year'] })
+  @ApiQuery({
+    name: 'timeRange',
+    required: false,
+    enum: ['today', '7days', 'month', 'year'],
+  })
   @Bind(Query('timeRange'))
   async exportAnalyticsReport(timeRange) {
     return this.adminService.exportAnalyticsReport(timeRange);
@@ -319,7 +357,9 @@ export class AdminController {
   // ==========================================
 
   @Get('settings')
-  @ApiOperation({ summary: 'Lấy toàn bộ thông tin cấu hình hiện tại của hệ thống' })
+  @ApiOperation({
+    summary: 'Lấy toàn bộ thông tin cấu hình hiện tại của hệ thống',
+  })
   async getSystemSettings() {
     return this.adminService.getSystemSettings();
   }
@@ -336,8 +376,14 @@ export class AdminController {
   // ==========================================
 
   @Get('dashboard/overview')
-  @ApiOperation({ summary: 'Lấy các số liệu tổng quan thời gian thực cho trang Dashboard' })
-  @ApiQuery({ name: 'timeframe', required: false, enum: ['today', 'week', 'month'] })
+  @ApiOperation({
+    summary: 'Lấy các số liệu tổng quan thời gian thực cho trang Dashboard',
+  })
+  @ApiQuery({
+    name: 'timeframe',
+    required: false,
+    enum: ['today', 'week', 'month'],
+  })
   @Bind(Query('timeframe'))
   async getDashboardOverview(timeframe) {
     return this.adminService.getDashboardOverview(timeframe);
@@ -345,15 +391,13 @@ export class AdminController {
 
   @Get('stats')
   @ApiOperation({ summary: 'Lấy số liệu thống kê tổng quan (Alias)' })
-  @ApiQuery({ name: 'timeframe', required: false, enum: ['today', 'week', 'month'] })
+  @ApiQuery({
+    name: 'timeframe',
+    required: false,
+    enum: ['today', 'week', 'month'],
+  })
   @Bind(Query('timeframe'))
   async getDashboardStats(timeframe) {
     return this.adminService.getDashboardOverview(timeframe);
   }
 }
-
-
-
-
-
-

@@ -23,10 +23,14 @@ export class EmailService {
           pass: smtpPass,
         },
       });
-      this.logger.log(`📧 [EmailService] Đã khởi tạo SMTP transporter: ${smtpUser} → ${smtpHost}:${smtpPort}`);
+      this.logger.log(
+        `📧 [EmailService] Đã khởi tạo SMTP transporter: ${smtpUser} → ${smtpHost}:${smtpPort}`,
+      );
     } else {
       this.transporter = null;
-      this.logger.warn('⚠️ [EmailService] Chưa cấu hình SMTP_USER/SMTP_PASS. Email OTP sẽ chỉ được log ra terminal.');
+      this.logger.warn(
+        '⚠️ [EmailService] Chưa cấu hình SMTP_USER/SMTP_PASS. Email OTP sẽ chỉ được log ra terminal.',
+      );
     }
   }
 
@@ -37,7 +41,9 @@ export class EmailService {
    * @returns {Promise<boolean>} true nếu gửi thành công hoặc đã log ra terminal
    */
   async sendOtpEmail(toEmail, otpCode) {
-    this.logger.log(`📧 [EmailService] Chuẩn bị gửi OTP ${otpCode} đến ${toEmail}`);
+    this.logger.log(
+      `📧 [EmailService] Chuẩn bị gửi OTP ${otpCode} đến ${toEmail}`,
+    );
 
     // Luôn log mã OTP ra terminal để debug
     console.log('');
@@ -49,7 +55,9 @@ export class EmailService {
     console.log('');
 
     if (!this.transporter) {
-      this.logger.warn('⚠️ [EmailService] Không có SMTP transporter → chỉ log OTP ra terminal.');
+      this.logger.warn(
+        '⚠️ [EmailService] Không có SMTP transporter → chỉ log OTP ra terminal.',
+      );
       return true;
     }
 
@@ -87,10 +95,15 @@ export class EmailService {
       };
 
       await this.transporter.sendMail(mailOptions);
-      this.logger.log(`✅ [EmailService] Đã gửi OTP qua Email thành công đến: ${toEmail}`);
+      this.logger.log(
+        `✅ [EmailService] Đã gửi OTP qua Email thành công đến: ${toEmail}`,
+      );
       return true;
     } catch (error) {
-      this.logger.error(`❌ [EmailService] Gửi Email OTP thất bại: ${error.message}`, error.stack);
+      this.logger.error(
+        `❌ [EmailService] Gửi Email OTP thất bại: ${error.message}`,
+        error.stack,
+      );
       // Vẫn return true vì đã log OTP ra terminal, không block flow khi SMTP lỗi
       return true;
     }

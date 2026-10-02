@@ -51,7 +51,9 @@ export class LogsService {
       }
 
       fs.appendFileSync(this.logFilePath, logEntry, 'utf8');
-      console.log(`📝 [MOBILE-LOG] Logged [${levelTag}] from ${platformTag}: ${dto.message}`);
+      console.log(
+        `📝 [MOBILE-LOG] Logged [${levelTag}] from ${platformTag}: ${dto.message}`,
+      );
       return { success: true };
     } catch (err) {
       console.error('❌ [LogsService] Lỗi khi ghi client log:', err);

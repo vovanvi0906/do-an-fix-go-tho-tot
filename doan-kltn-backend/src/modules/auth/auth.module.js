@@ -22,9 +22,24 @@ import { RolesGuard } from './guards/roles.guard';
     }),
   ],
   controllers: [AuthController, OtpController],
-  providers: [AuthService, OtpService, EmailService, EsmsService, JwtStrategy, JwtAuthGuard, RolesGuard],
-  exports: [AuthService, OtpService, EsmsService, JwtModule, PassportModule, JwtStrategy, JwtAuthGuard, RolesGuard],
+  providers: [
+    AuthService,
+    OtpService,
+    EmailService,
+    EsmsService,
+    JwtStrategy,
+    JwtAuthGuard,
+    RolesGuard,
+  ],
+  exports: [
+    AuthService,
+    OtpService,
+    EsmsService,
+    JwtModule,
+    PassportModule,
+    JwtStrategy,
+    JwtAuthGuard,
+    RolesGuard,
+  ],
 })
 export class AuthModule {}
-
-

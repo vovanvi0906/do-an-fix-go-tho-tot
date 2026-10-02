@@ -56,7 +56,9 @@ export class CustomerHomeService {
             });
             walletBalance = Number(newWallet.balance) || 0;
           } catch (createErr) {
-            this.logger.warn(`Không thể khởi tạo ví mặc định cho customer ${customerProfile.id}: ${createErr.message}`);
+            this.logger.warn(
+              `Không thể khởi tạo ví mặc định cho customer ${customerProfile.id}: ${createErr.message}`,
+            );
           }
         } else {
           // Trường hợp user đăng nhập vai trò khác (như Worker) ghé thăm trang khách hàng
@@ -89,7 +91,10 @@ export class CustomerHomeService {
         availableVouchersCount,
       };
     } catch (error) {
-      this.logger.error(`Lỗi khi tổng hợp số liệu trang chủ khách hàng: ${error.message}`, error.stack);
+      this.logger.error(
+        `Lỗi khi tổng hợp số liệu trang chủ khách hàng: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -243,7 +248,10 @@ export class CustomerHomeService {
         hasActiveOrder: true,
       };
     } catch (error) {
-      this.logger.error(`Lỗi khi lấy đơn hàng đang hoạt động: ${error.message}`, error.stack);
+      this.logger.error(
+        `Lỗi khi lấy đơn hàng đang hoạt động: ${error.message}`,
+        error.stack,
+      );
       return { activeOrder: null, hasActiveOrder: false };
     }
   }

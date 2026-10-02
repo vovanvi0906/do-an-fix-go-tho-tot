@@ -41,7 +41,9 @@ export class UsersRepository {
 
   async findByEmailOrPhone(identifier) {
     if (!identifier) return null;
-    const cleanPhone = identifier.replace(/@(phone|worker)\.alotho\.vn$/, '').trim();
+    const cleanPhone = identifier
+      .replace(/@(phone|worker)\.alotho\.vn$/, '')
+      .trim();
     return this.prisma.user.findFirst({
       where: {
         OR: [

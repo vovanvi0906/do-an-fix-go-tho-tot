@@ -20,7 +20,9 @@ export class LogsController {
 
   @Post('client')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Tiếp nhận log và crash báo cáo từ Mobile/Web client' })
+  @ApiOperation({
+    summary: 'Tiếp nhận log và crash báo cáo từ Mobile/Web client',
+  })
   @ApiResponse({ status: 200, description: 'Ghi log thành công' })
   @Bind(Body())
   async logClientError(body) {

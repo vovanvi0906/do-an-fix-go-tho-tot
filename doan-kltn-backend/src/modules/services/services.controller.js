@@ -18,13 +18,17 @@ export class ServicesController {
   }
 
   @Get('service-categories')
-  @ApiOperation({ summary: 'Lấy danh sách các danh mục dịch vụ đang hoạt động' })
+  @ApiOperation({
+    summary: 'Lấy danh sách các danh mục dịch vụ đang hoạt động',
+  })
   async getCategories() {
     return this.servicesService.getCategories();
   }
 
   @Get('services')
-  @ApiOperation({ summary: 'Lấy danh sách các dịch vụ (có thể lọc theo categoryId)' })
+  @ApiOperation({
+    summary: 'Lấy danh sách các dịch vụ (có thể lọc theo categoryId)',
+  })
   @ApiQuery({ name: 'categoryId', required: false, type: String })
   @Bind(Query('categoryId'))
   async getServices(categoryId) {

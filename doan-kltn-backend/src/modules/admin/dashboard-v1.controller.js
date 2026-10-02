@@ -40,10 +40,16 @@ export class DashboardV1Controller {
    */
   @Get('overview')
   @ApiOperation({
-    summary: 'Lấy số liệu tổng quan hệ thống (Khách hàng, Đối tác thợ, Hồ sơ chờ duyệt, Tổng đơn đặt)',
-    description: 'Trả về các chỉ số KPI vận hành, số lượng tài khoản, đơn hàng và tỷ lệ tăng trưởng trong kỳ.',
+    summary:
+      'Lấy số liệu tổng quan hệ thống (Khách hàng, Đối tác thợ, Hồ sơ chờ duyệt, Tổng đơn đặt)',
+    description:
+      'Trả về các chỉ số KPI vận hành, số lượng tài khoản, đơn hàng và tỷ lệ tăng trưởng trong kỳ.',
   })
-  @ApiQuery({ name: 'timeframe', required: false, enum: ['today', 'week', 'month'] })
+  @ApiQuery({
+    name: 'timeframe',
+    required: false,
+    enum: ['today', 'week', 'month'],
+  })
   @Bind(Query('timeframe'))
   async getOverview(timeframe) {
     return this.adminService.getDashboardOverviewV1(timeframe);
@@ -57,7 +63,8 @@ export class DashboardV1Controller {
   @Get('activities')
   @ApiOperation({
     summary: 'Lấy danh sách hoạt động gần đây theo thời gian thực',
-    description: 'Truy vấn các sự kiện phát sinh từ đơn đặt dịch vụ và đăng ký thợ mới nhất.',
+    description:
+      'Truy vấn các sự kiện phát sinh từ đơn đặt dịch vụ và đăng ký thợ mới nhất.',
   })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @Bind(Query('limit'))
@@ -73,10 +80,16 @@ export class DashboardV1Controller {
    */
   @Get('service-distribution')
   @ApiOperation({
-    summary: 'Lấy dữ liệu thống kê phân bổ theo danh mục dịch vụ phục vụ cho biểu đồ',
-    description: 'Phân tích số lượng và tỷ trọng phần trăm đơn đặt theo từng danh mục dịch vụ gia đình.',
+    summary:
+      'Lấy dữ liệu thống kê phân bổ theo danh mục dịch vụ phục vụ cho biểu đồ',
+    description:
+      'Phân tích số lượng và tỷ trọng phần trăm đơn đặt theo từng danh mục dịch vụ gia đình.',
   })
-  @ApiQuery({ name: 'timeframe', required: false, enum: ['today', 'week', 'month'] })
+  @ApiQuery({
+    name: 'timeframe',
+    required: false,
+    enum: ['today', 'week', 'month'],
+  })
   @Bind(Query('timeframe'))
   async getServiceDistribution(timeframe) {
     return this.adminService.getServiceDistributionV1(timeframe);

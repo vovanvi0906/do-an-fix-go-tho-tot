@@ -15,8 +15,8 @@ export class FastApiAiClient {
 
     this.confidenceThreshold = parseFloat(
       configService.get('AI_CONFIDENCE_THRESHOLD') ||
-      process.env.AI_CONFIDENCE_THRESHOLD ||
-      '0.6'
+        process.env.AI_CONFIDENCE_THRESHOLD ||
+        '0.6',
     );
   }
 
@@ -37,12 +37,18 @@ export class FastApiAiClient {
         return await response.json();
       }
     } catch (err) {
-      console.warn('FastAPI AI Service (/ai/diagnose) không phản hồi, chạy chế độ fallback:', err.message);
+      console.warn(
+        'FastAPI AI Service (/ai/diagnose) không phản hồi, chạy chế độ fallback:',
+        err.message,
+      );
     }
 
     // Heuristic Fallback khi AI Service chưa bật hoặc offline
     const descLower = (description || '').toLowerCase();
-    const isBlurry = descLower.includes('mờ') || descLower.includes('không rõ') || (imageUrl || '').includes('khong_ro');
+    const isBlurry =
+      descLower.includes('mờ') ||
+      descLower.includes('không rõ') ||
+      (imageUrl || '').includes('khong_ro');
 
     if (isBlurry) {
       return {
@@ -54,7 +60,11 @@ export class FastApiAiClient {
       };
     }
 
-    if (descLower.includes('điện') || descLower.includes('chập') || descLower.includes('aptomat')) {
+    if (
+      descLower.includes('điện') ||
+      descLower.includes('chập') ||
+      descLower.includes('aptomat')
+    ) {
       return {
         suggestedCategoryId: 'cat-dien',
         suggestedCategoryName: 'Sửa điện',
@@ -64,7 +74,12 @@ export class FastApiAiClient {
       };
     }
 
-    if (descLower.includes('nước') || descLower.includes('vòi') || descLower.includes('ống') || descLower.includes('bồn')) {
+    if (
+      descLower.includes('nước') ||
+      descLower.includes('vòi') ||
+      descLower.includes('ống') ||
+      descLower.includes('bồn')
+    ) {
       return {
         suggestedCategoryId: 'cat-nuoc',
         suggestedCategoryName: 'Sửa nước',
@@ -100,11 +115,16 @@ export class FastApiAiClient {
         return await response.json();
       }
     } catch (err) {
-      console.warn('FastAPI AI Service (/ai/compare-before-after) không phản hồi, chạy chế độ fallback:', err.message);
+      console.warn(
+        'FastAPI AI Service (/ai/compare-before-after) không phản hồi, chạy chế độ fallback:',
+        err.message,
+      );
     }
 
     // Heuristic Fallback
-    const isDirty = (afterImageUrl || '').includes('chua_xong') || (afterImageUrl || '').includes('dirty');
+    const isDirty =
+      (afterImageUrl || '').includes('chua_xong') ||
+      (afterImageUrl || '').includes('dirty');
     return {
       matchScore: isDirty ? 0.55 : 0.92,
       passed: !isDirty,
@@ -131,11 +151,16 @@ export class FastApiAiClient {
         return await response.json();
       }
     } catch (err) {
-      console.warn('FastAPI AI Service (/ai/face-verify) không phản hồi, chạy chế độ fallback:', err.message);
+      console.warn(
+        'FastAPI AI Service (/ai/face-verify) không phản hồi, chạy chế độ fallback:',
+        err.message,
+      );
     }
 
     // Heuristic Fallback
-    const isLowMatch = (selfieUrl || '').includes('unmatched') || (selfieUrl || '').includes('low_confidence');
+    const isLowMatch =
+      (selfieUrl || '').includes('unmatched') ||
+      (selfieUrl || '').includes('low_confidence');
     return {
       verified: !isLowMatch,
       confidence: isLowMatch ? 0.48 : 0.95,

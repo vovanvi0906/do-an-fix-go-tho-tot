@@ -25,4 +25,3 @@ export class UpdateServiceCategoryDto {
   @IsBoolean({ message: 'isActive phải là kiểu boolean (true/false)' })
   isActive;
 }
-
