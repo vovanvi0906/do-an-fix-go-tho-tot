@@ -78,7 +78,9 @@ apiClient.interceptors.response.use(
     const status = error.response?.status;
     let message = 'Đã có lỗi xảy ra. Vui lòng thử lại sau!';
 
-    if (errorResponse) {
+    if (status === 401) {
+      message = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!';
+    } else if (errorResponse) {
       if (Array.isArray(errorResponse.message)) {
         message = errorResponse.message.join(', ');
       } else if (typeof errorResponse.message === 'string') {

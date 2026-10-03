@@ -18,7 +18,10 @@ alwaysApply: true
 - 🔒 **Secrets & Environment**: Không bao giờ hardcode API keys, JWT Secret hay token vào mã nguồn. Luôn đọc từ biến môi trường qua `@nestjs/config` hoặc `pydantic-settings`.
 - 💰 **Giao dịch tài chính & Đơn hàng**: Mọi logic biến động số dư ví hoặc đổi trạng thái đơn hàng (nhận đơn, hủy đơn) BẮT BUỘC dùng Prisma Transaction (`$transaction`) và cơ chế Atomic Update để tránh race condition (tranh chấp cuốc xe giữa nhiều thợ).
 
-## 3. Định Dạng Báo Cáo Kết Quả
+## 3. Duy Trì Tài Liệu Thiết Lập & Khởi Chạy
+- 📝 **Cập nhật SETUP_AND_RUN.md**: Khi thêm/sửa microservice, cổng (port), biến môi trường (`.env`), database container, script batch (`setup.bat`, `dev.bat`, `stop.bat`), AI **BẮT BUỘC** phải cập nhật lại tài liệu [SETUP_AND_RUN.md](file:///g:/do-an-fix-go-tho-tot/.agents/SETUP_AND_RUN.md) để đảm bảo người clone mới luôn khởi chạy thành công.
+
+## 4. Định Dạng Báo Cáo Kết Quả
 Sau khi hoàn thành tác vụ, AI phải:
 1. Tóm tắt ngắn gọn những gì đã thay đổi.
 2. Liệt kê danh sách file đã tạo / chỉnh sửa dạng clickable link `file:///...`.
