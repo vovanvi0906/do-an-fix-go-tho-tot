@@ -54,6 +54,10 @@ export class FastApiAiClient {
       return {
         suggestedCategoryId: null,
         suggestedCategoryName: null,
+        suggestedServiceId: null,
+        suggestedServiceName: null,
+        suggestedServiceConfidence: null,
+        estimatedPriceRange: null,
         confidence: 0.45,
         detectedLabels: ['unrecognized_object', 'blurry_image'],
         notes: 'Ảnh không rõ nét, độ tin cậy thấp (< 60%)',
@@ -68,6 +72,10 @@ export class FastApiAiClient {
       return {
         suggestedCategoryId: 'cat-dien',
         suggestedCategoryName: 'Sửa điện',
+        suggestedServiceId: 'thay-aptomat-cb',
+        suggestedServiceName: 'Xử lý chập điện / Thay CB Aptomat',
+        suggestedServiceConfidence: 0.90,
+        estimatedPriceRange: { min: 150000, max: 300000, formatted: '150.000đ - 300.000đ' },
         confidence: 0.92,
         detectedLabels: ['circuit_breaker', 'electrical_spark'],
         issueDetected: 'Sự cố chập aptomat điện',
@@ -83,6 +91,10 @@ export class FastApiAiClient {
       return {
         suggestedCategoryId: 'cat-nuoc',
         suggestedCategoryName: 'Sửa nước',
+        suggestedServiceId: 'sua-voi-nuoc-ro-ri',
+        suggestedServiceName: 'Sửa vòi nước rò rỉ / Thay vòi sen tắm',
+        suggestedServiceConfidence: 0.88,
+        estimatedPriceRange: { min: 100000, max: 220000, formatted: '100.000đ - 220.000đ' },
         confidence: 0.89,
         detectedLabels: ['pipe_leak', 'faucet_damage'],
         issueDetected: 'Rò rỉ đường ống nước',
@@ -92,6 +104,10 @@ export class FastApiAiClient {
     return {
       suggestedCategoryId: 'cat-dien-nuoc',
       suggestedCategoryName: 'Sửa điện - nước',
+      suggestedServiceId: 'kiem-tra-tong-quat',
+      suggestedServiceName: 'Kiểm tra & Xử lý sự cố thiết bị',
+      suggestedServiceConfidence: 0.85,
+      estimatedPriceRange: { min: 120000, max: 250000, formatted: '120.000đ - 250.000đ' },
       confidence: 0.85,
       detectedLabels: ['appliance_damage'],
       issueDetected: description || 'Sự cố thiết bị gia đình',

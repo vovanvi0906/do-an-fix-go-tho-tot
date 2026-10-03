@@ -1,9 +1,10 @@
 import { create } from 'zustand';
 
 export const useOrderStore = create((set, get) => ({
-  // 1. Kết quả chẩn đoán AI & Danh mục chọn
+  // 1. Kết quả chẩn đoán AI & Danh mục/Dịch vụ chọn
   diagnoseResult: null,
   selectedCategory: null,
+  selectedService: null,
 
   // 2. Thông tin xác nhận đơn
   selectedAddress: {
@@ -47,9 +48,20 @@ export const useOrderStore = create((set, get) => ({
             basePrice: result.estimatedPriceMin || 150000,
           }
         : null,
+      selectedService: result?.suggestedServiceName
+        ? {
+            id: result.suggestedServiceId || null,
+            name: result.suggestedServiceName,
+            price: result.estimatedPriceMin || 150000,
+            priceRange: result.estimatedPriceRange || null,
+            confidence: result.suggestedServiceConfidence || null,
+          }
+        : null,
     }),
 
-  setSelectedCategory: (category) => set({ selectedCategory: category }),
+  setSelectedCategory: (category) => set({ selectedCategory: category, selectedService: null }),
+
+  setSelectedService: (service) => set({ selectedService: service }),
 
   setSelectedAddress: (address) => set({ selectedAddress: address }),
 
@@ -105,6 +117,7 @@ export const useOrderStore = create((set, get) => ({
     set({
       diagnoseResult: null,
       selectedCategory: null,
+      selectedService: null,
       orderNote: '',
       appliedVoucher: null,
       currentOrder: null,
