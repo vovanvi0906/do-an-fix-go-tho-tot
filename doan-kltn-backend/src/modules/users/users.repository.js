@@ -41,7 +41,9 @@ export class UsersRepository {
 
   async findByEmailOrPhone(identifier) {
     if (!identifier) return null;
-    const cleanPhone = identifier.replace(/@(phone|worker)\.alotho\.vn$/, '').trim();
+    const cleanPhone = identifier
+      .replace(/@(phone|worker)\.alotho\.vn$/, '')
+      .trim();
     return this.prisma.user.findFirst({
       where: {
         OR: [
@@ -76,6 +78,33 @@ export class UsersRepository {
         customerProfile: true,
         workerProfile: true,
       },
+    });
+  }
+
+  async updatePassword(phone, passwordHash) {
+    return this.prisma.user.updateMany({
+      where: { phone },
+      data: { passwordHash },
+    });
+  }
+
+  async markEmailVerified(userId, email) {
+    const data = { isEmailVerified: true };
+    if (email) data.email = email;
+    return this.prisma.user.update({
+      where: { id: userId },
+      data,
+      include: {
+        customerProfile: true,
+        workerProfile: true,
+      },
+    });
+  }
+
+  async markEmailVerifiedByEmail(email) {
+    return this.prisma.user.updateMany({
+      where: { email },
+      data: { isEmailVerified: true },
     });
   }
 }

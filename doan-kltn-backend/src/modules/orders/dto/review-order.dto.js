@@ -1,4 +1,11 @@
-import { IsNotEmpty, IsInt, IsString, IsOptional, Min, Max } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsInt,
+  IsString,
+  IsOptional,
+  Min,
+  Max,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class ReviewOrderDto {
@@ -18,7 +25,8 @@ export class ReviewOrderDto {
   @ApiPropertyOptional({
     type: String,
     description: 'Nội dung nhận xét về thái độ và tay nghề của kỹ thuật viên',
-    example: 'Thợ đến đúng giờ, tay nghề xuất sắc, tư vấn nhiệt tình và sạch sẽ.',
+    example:
+      'Thợ đến đúng giờ, tay nghề xuất sắc, tư vấn nhiệt tình và sạch sẽ.',
   })
   @IsOptional()
   @IsString()

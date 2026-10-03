@@ -16,12 +16,12 @@ export class RedisService {
       await this.client.set('thesis:test', 'hello');
       const testVal = await this.client.get('thesis:test');
       this.logger.log(
-        `Redis connected successfully. Test write/read verification: thesis:test = "${testVal}"`
+        `Redis connected successfully. Test write/read verification: thesis:test = "${testVal}"`,
       );
     } catch (error) {
       this.logger.error(
         `Failed to connect or perform test operations on Redis: ${error.message}`,
-        error.stack
+        error.stack,
       );
     }
   }

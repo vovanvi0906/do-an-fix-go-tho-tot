@@ -52,10 +52,21 @@ export class AdminCategoriesV1Controller {
   @Get()
   @ApiOperation({
     summary: 'Lấy danh sách danh mục ngành nghề kèm thống kê số lượng dịch vụ',
-    description: 'Truy vấn toàn bộ các nhóm ngành nghề và số lượng gói dịch vụ trực thuộc. Hỗ trợ query search và status.',
+    description:
+      'Truy vấn toàn bộ các nhóm ngành nghề và số lượng gói dịch vụ trực thuộc. Hỗ trợ query search và status.',
   })
-  @ApiQuery({ name: 'search', required: false, type: String, description: 'Từ khóa tìm kiếm theo tên hoặc mô tả' })
-  @ApiQuery({ name: 'status', required: false, type: String, description: 'Lọc trạng thái: all | active | inactive' })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    type: String,
+    description: 'Từ khóa tìm kiếm theo tên hoặc mô tả',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    type: String,
+    description: 'Lọc trạng thái: all | active | inactive',
+  })
   @Bind(Query('search'), Query('status'))
   async getCategories(search, status) {
     return this.adminService.getServiceCategories({ search, status });
@@ -103,7 +114,12 @@ export class AdminCategoriesV1Controller {
   @Delete(':id')
   @ApiOperation({ summary: 'Vô hiệu hóa hoặc xóa danh mục' })
   @ApiParam({ name: 'id', description: 'ID danh mục' })
-  @ApiQuery({ name: 'force', required: false, type: Boolean, description: 'Xóa vĩnh viễn' })
+  @ApiQuery({
+    name: 'force',
+    required: false,
+    type: Boolean,
+    description: 'Xóa vĩnh viễn',
+  })
   @Bind(Param('id'), Query('force'))
   async deleteCategory(id, force) {
     return this.adminService.deleteServiceCategory(id, force);

@@ -59,7 +59,10 @@ export class OrdersService {
     this.orderQueueService = orderQueueService;
 
     // Kết nối gateway vào queue service để broadcast khi mở rộng bán kính
-    if (this.orderQueueService && typeof this.orderQueueService.setGateway === 'function') {
+    if (
+      this.orderQueueService &&
+      typeof this.orderQueueService.setGateway === 'function'
+    ) {
       this.orderQueueService.setGateway(this.ordersGateway);
     }
   }
@@ -73,7 +76,10 @@ export class OrdersService {
     const threshold = this.fastApiAiClient.confidenceThreshold || 0.6;
 
     // Gọi AI service để phân tích hình ảnh và mô tả
-    const aiResult = await this.fastApiAiClient.diagnoseIncident(imageUrl, description || '');
+    const aiResult = await this.fastApiAiClient.diagnoseIncident(
+      imageUrl,
+      description || '',
+    );
     const confidence = parseFloat(aiResult.confidence ?? 0.85);
 
     // Lấy toàn bộ Category đang hoạt động
@@ -91,7 +97,10 @@ export class OrdersService {
         suggestedCategoryName: null,
         estimatedPriceMin: null,
         estimatedPriceMax: null,
-        issueDescription: aiResult.notes || description || 'Ảnh chưa đủ rõ để AI phân loại chính xác',
+        issueDescription:
+          aiResult.notes ||
+          description ||
+          'Ảnh chưa đủ rõ để AI phân loại chính xác',
         message: `Độ tin cậy nhận diện (${(confidence * 100).toFixed(0)}%) dưới ngưỡng ${threshold * 100}%. Vui lòng chọn danh mục dịch vụ phù hợp bên dưới.`,
         availableCategories: categories.map((c) => ({
           id: c.id,
@@ -105,21 +114,30 @@ export class OrdersService {
     // Khi confidence >= threshold: Tự động đề xuất Category phù hợp nhất
     let matchedCategory = null;
     if (aiResult.suggestedCategoryId) {
-      matchedCategory = categories.find((c) =>
-        c.id === aiResult.suggestedCategoryId ||
-        (aiResult.suggestedCategoryName && c.name.toLowerCase().includes(aiResult.suggestedCategoryName.toLowerCase()))
+      matchedCategory = categories.find(
+        (c) =>
+          c.id === aiResult.suggestedCategoryId ||
+          (aiResult.suggestedCategoryName &&
+            c.name
+              .toLowerCase()
+              .includes(aiResult.suggestedCategoryName.toLowerCase())),
       );
     }
 
     if (!matchedCategory && aiResult.issueDetected) {
       const issueLower = String(aiResult.issueDetected).toLowerCase();
-      matchedCategory = categories.find((c) => issueLower.includes(c.name.toLowerCase()));
+      matchedCategory = categories.find((c) =>
+        issueLower.includes(c.name.toLowerCase()),
+      );
     }
 
     if (!matchedCategory) {
-      matchedCategory = categories.find((c) =>
-        c.name.toLowerCase().includes('điện') || c.name.toLowerCase().includes('nước')
-      ) || categories[0];
+      matchedCategory =
+        categories.find(
+          (c) =>
+            c.name.toLowerCase().includes('điện') ||
+            c.name.toLowerCase().includes('nước'),
+        ) || categories[0];
     }
 
     const basePrice = Number(matchedCategory?.basePrice || 150000);
@@ -134,7 +152,10 @@ export class OrdersService {
       detectedLabels: aiResult.detectedLabels || [],
       estimatedPriceMin,
       estimatedPriceMax,
-      issueDescription: aiResult.issueDetected || description || 'Sự cố thiết bị gia đình cần kiểm tra',
+      issueDescription:
+        aiResult.issueDetected ||
+        description ||
+        'Sự cố thiết bị gia đình cần kiểm tra',
       message: `AI đã chẩn đoán thành công với độ tin cậy ${(confidence * 100).toFixed(0)}%`,
       imageUrl,
     };
@@ -172,7 +193,9 @@ export class OrdersService {
     // 1. Xác định Category & lấy % hoa hồng từ cấu hình (không hardcode)
     let category = null;
     if (categoryId) {
-      category = await this.prisma.serviceCategory.findUnique({ where: { id: categoryId } });
+      category = await this.prisma.serviceCategory.findUnique({
+        where: { id: categoryId },
+      });
     } else if (serviceId) {
       const srv = await this.prisma.service.findUnique({
         where: { id: serviceId },
@@ -182,7 +205,9 @@ export class OrdersService {
     }
 
     if (!category) {
-      category = await this.prisma.serviceCategory.findFirst({ where: { isActive: true } });
+      category = await this.prisma.serviceCategory.findFirst({
+        where: { isActive: true },
+      });
     }
 
     if (!category) {
@@ -191,7 +216,9 @@ export class OrdersService {
 
     // Lấy commissionPercent từ config category (mặc định 15%)
     const commissionPercent = Number(category.commissionPercent || 15.0);
-    const finalEstimatedPrice = Number(estimatedPrice || category.basePrice || 150000);
+    const finalEstimatedPrice = Number(
+      estimatedPrice || category.basePrice || 150000,
+    );
 
     // 2. Dùng Prisma $transaction tạo đơn và ghi log trạng thái ban đầu SEARCHING_WORKER
     const order = await this.prisma.$transaction(async (tx) => {
@@ -233,7 +260,12 @@ export class OrdersService {
     });
 
     // 3. Lên lịch BullMQ delayed job 3 phút: Nếu chưa có thợ nhận -> tự động mở rộng +2km
-    await this.orderQueueService.scheduleRadiusExpansion(order.id, 1, 5, 180000);
+    await this.orderQueueService.scheduleRadiusExpansion(
+      order.id,
+      1,
+      5,
+      180000,
+    );
 
     // 4. Quét thợ lân cận trong bán kính 5km
     const nearbyWorkers = await this.matchNearbyWorkers(order.id, 5);
@@ -307,7 +339,9 @@ export class OrdersService {
       }
     }
 
-    throw new ForbiddenException('Bạn không có quyền truy cập vào thông tin đơn hàng này');
+    throw new ForbiddenException(
+      'Bạn không có quyền truy cập vào thông tin đơn hàng này',
+    );
   }
 
   /**
@@ -333,7 +367,10 @@ export class OrdersService {
       if (workerProfile) {
         where.workerId = workerProfile.id;
       } else {
-        return { data: [], pagination: { total: 0, page, limit, totalPages: 0 } };
+        return {
+          data: [],
+          pagination: { total: 0, page, limit, totalPages: 0 },
+        };
       }
     }
 
@@ -351,7 +388,12 @@ export class OrdersService {
             select: { id: true, name: true, phone: true, avatarUrl: true },
           },
           worker: {
-            select: { id: true, fullName: true, ratingAvg: true, isOnline: true },
+            select: {
+              id: true,
+              fullName: true,
+              ratingAvg: true,
+              isOnline: true,
+            },
           },
           payment: true,
         },
@@ -383,23 +425,39 @@ export class OrdersService {
 
     // Kiểm tra quyền hủy đơn
     if (userRole !== 'ADMIN' && order.customerId !== userId) {
-      const workerProfile = await this.prisma.workerProfile.findUnique({ where: { userId } });
+      const workerProfile = await this.prisma.workerProfile.findUnique({
+        where: { userId },
+      });
       if (!workerProfile || order.workerId !== workerProfile.id) {
         throw new ForbiddenException('Bạn không có quyền hủy đơn hàng này');
       }
     }
 
-    if (order.status === 'COMPLETED' || order.status === 'PAID' || order.status === 'CANCELLED') {
-      throw new BadRequestException(`Không thể hủy đơn hàng đang ở trạng thái ${order.status}`);
+    if (
+      order.status === 'COMPLETED' ||
+      order.status === 'PAID' ||
+      order.status === 'CANCELLED'
+    ) {
+      throw new BadRequestException(
+        `Không thể hủy đơn hàng đang ở trạng thái ${order.status}`,
+      );
     }
 
     // Business Rule: Hủy trước MATCHED -> Miễn phí (0đ). Hủy từ MATCHED trở đi -> Áp phí hủy 20%
-    const freeCancelStatuses = ['PENDING_AI', 'AWAITING_CONFIRM', 'SEARCHING_WORKER', 'SEARCHING', 'CREATED'];
+    const freeCancelStatuses = [
+      'PENDING_AI',
+      'AWAITING_CONFIRM',
+      'SEARCHING_WORKER',
+      'SEARCHING',
+      'CREATED',
+    ];
     let cancellationFee = 0;
 
     if (!freeCancelStatuses.includes(order.status)) {
       const penaltyRate = 0.2; // 20% phí hủy
-      cancellationFee = Math.round(Number(order.estimatedPrice || 150000) * penaltyRate);
+      cancellationFee = Math.round(
+        Number(order.estimatedPrice || 150000) * penaltyRate,
+      );
     }
 
     // Cập nhật trạng thái CANCELLED trong 1 Transaction
@@ -502,7 +560,10 @@ export class OrdersService {
         avatarUrl: w.avatarUrl,
         rating: Number(w.ratingAvg || 5.0).toFixed(1),
         distanceKm: parseFloat(w.distance_km || 0).toFixed(2),
-        etaMinutes: Math.max(10, Math.round(parseFloat(w.distance_km || 1) * 4)),
+        etaMinutes: Math.max(
+          10,
+          Math.round(parseFloat(w.distance_km || 1) * 4),
+        ),
       }));
     } catch (err) {
       console.warn('Lỗi query thợ lân cận:', err.message);
@@ -526,12 +587,18 @@ export class OrdersService {
     }
 
     if (!worker.faceVerifiedAt) {
-      throw new BadRequestException('Yêu cầu xác thực khuôn mặt trước khi nhận đơn hàng');
+      throw new BadRequestException(
+        'Yêu cầu xác thực khuôn mặt trước khi nhận đơn hàng',
+      );
     }
 
-    const hoursSinceFaceVerify = (Date.now() - new Date(worker.faceVerifiedAt).getTime()) / (1000 * 60 * 60);
+    const hoursSinceFaceVerify =
+      (Date.now() - new Date(worker.faceVerifiedAt).getTime()) /
+      (1000 * 60 * 60);
     if (hoursSinceFaceVerify > 24) {
-      throw new BadRequestException('Xác thực khuôn mặt đã hết hạn (> 24 giờ). Vui lòng xác thực lại khuôn mặt');
+      throw new BadRequestException(
+        'Xác thực khuôn mặt đã hết hạn (> 24 giờ). Vui lòng xác thực lại khuôn mặt',
+      );
     }
 
     // 2. Chống Race condition bằng Transaction với SELECT ... FOR UPDATE
@@ -548,12 +615,19 @@ export class OrdersService {
 
       const currentOrder = lockedOrders[0];
 
-      if (currentOrder.status !== 'SEARCHING_WORKER' && currentOrder.status !== 'SEARCHING') {
-        throw new ConflictException('Đơn hàng không còn ở trạng thái mở hoặc đã được xử lý');
+      if (
+        currentOrder.status !== 'SEARCHING_WORKER' &&
+        currentOrder.status !== 'SEARCHING'
+      ) {
+        throw new ConflictException(
+          'Đơn hàng không còn ở trạng thái mở hoặc đã được xử lý',
+        );
       }
 
       if (currentOrder.workerId) {
-        throw new ConflictException('Đơn hàng đã được kỹ thuật viên khác nhận trước');
+        throw new ConflictException(
+          'Đơn hàng đã được kỹ thuật viên khác nhận trước',
+        );
       }
 
       // Cập nhật gán thợ và chuyển trạng thái sang MATCHED
@@ -620,7 +694,7 @@ export class OrdersService {
     // FALLBACK RULE: Nếu confidence < ngưỡng cấu hình (0.6) -> Chuyển sang hàng đợi xác minh thủ công bởi admin, KHÔNG CHẶN CỨNG
     if (confidence < threshold || !aiResult.verified) {
       console.warn(
-        `⚠️ [ADMIN AUDIT QUEUE] Thợ ${worker.fullName || worker.id} xác thực khuôn mặt độ khớp thấp (${(confidence * 100).toFixed(0)}% < ${threshold * 100}%). Chuyển vào hàng đợi kiểm duyệt thủ công.`
+        `⚠️ [ADMIN AUDIT QUEUE] Thợ ${worker.fullName || worker.id} xác thực khuôn mặt độ khớp thấp (${(confidence * 100).toFixed(0)}% < ${threshold * 100}%). Chuyển vào hàng đợi kiểm duyệt thủ công.`,
       );
 
       // Cập nhật trạng thái chờ duyệt thủ công và cấp mốc faceVerifiedAt để thợ không bị đứng luồng
@@ -657,7 +731,8 @@ export class OrdersService {
       needsManualReview: false,
       confidence,
       verifiedAt,
-      message: 'Xác thực sinh trắc học khuôn mặt thành công! Bạn có thể nhận đơn trong vòng 24 giờ tới.',
+      message:
+        'Xác thực sinh trắc học khuôn mặt thành công! Bạn có thể nhận đơn trong vòng 24 giờ tới.',
     };
   }
 
@@ -680,20 +755,25 @@ export class OrdersService {
     });
 
     if (!order || order.workerId !== worker.id) {
-      throw new ForbiddenException('Bạn không phải là kỹ thuật viên phụ trách đơn hàng này');
+      throw new ForbiddenException(
+        'Bạn không phải là kỹ thuật viên phụ trách đơn hàng này',
+      );
     }
 
     // Mapping tương thích trạng thái
     let normalizedStatus = status;
     if (status === 'WORKER_ARRIVING') normalizedStatus = 'WORKER_EN_ROUTE';
-    if (status === 'AWAITING_CONFIRMATION') normalizedStatus = 'AWAITING_ACCEPTANCE';
+    if (status === 'AWAITING_CONFIRMATION')
+      normalizedStatus = 'AWAITING_ACCEPTANCE';
 
     const updatedOrder = await this.prisma.$transaction(async (tx) => {
       const updated = await tx.order.update({
         where: { id: orderId },
         data: {
           status: normalizedStatus,
-          ...(normalizedStatus === 'IN_PROGRESS' && !order.startedAt ? { startedAt: new Date() } : {}),
+          ...(normalizedStatus === 'IN_PROGRESS' && !order.startedAt
+            ? { startedAt: new Date() }
+            : {}),
         },
       });
 
@@ -701,7 +781,8 @@ export class OrdersService {
         data: {
           orderId,
           status: normalizedStatus,
-          note: note || `Kỹ thuật viên cập nhật tiến độ sang ${normalizedStatus}`,
+          note:
+            note || `Kỹ thuật viên cập nhật tiến độ sang ${normalizedStatus}`,
           changedBy: workerUserId,
         },
       });
@@ -764,17 +845,26 @@ export class OrdersService {
       orderBy: { uploadedAt: 'desc' },
     });
 
-    const beforeImage = images.find((img) => img.type === 'BEFORE' || img.imageType === 'BEFORE');
-    const afterImage = images.find((img) => img.type === 'AFTER' || img.imageType === 'AFTER');
+    const beforeImage = images.find(
+      (img) => img.type === 'BEFORE' || img.imageType === 'BEFORE',
+    );
+    const afterImage = images.find(
+      (img) => img.type === 'AFTER' || img.imageType === 'AFTER',
+    );
 
     if (!beforeImage || !afterImage) {
-      throw new BadRequestException('Cần upload đầy đủ cả ảnh BEFORE và ảnh AFTER để AI thực hiện so khớp');
+      throw new BadRequestException(
+        'Cần upload đầy đủ cả ảnh BEFORE và ảnh AFTER để AI thực hiện so khớp',
+      );
     }
 
     // Gọi AI service so sánh ảnh trước và sau khi sửa
-    const aiResult = await this.fastApiAiClient.compareBeforeAfter(beforeImage.url, afterImage.url);
+    const aiResult = await this.fastApiAiClient.compareBeforeAfter(
+      beforeImage.url,
+      afterImage.url,
+    );
     const matchScore = parseFloat(aiResult.matchScore ?? 0.9);
-    const passed = Boolean(aiResult.passed ?? (matchScore >= 0.8));
+    const passed = Boolean(aiResult.passed ?? matchScore >= 0.8);
 
     // Cập nhật điểm AI vào OrderImage
     await this.prisma.orderImage.update({
@@ -787,8 +877,14 @@ export class OrdersService {
       matchScore,
       passed,
       isClean: passed,
-      notes: aiResult.notes || (passed ? 'Nghiệm thu đạt chuẩn chất lượng AI' : 'Chất lượng công việc cần thợ kiểm tra lại'),
-      message: passed ? 'Nghiệm thu đạt chuẩn chất lượng AI' : 'Chất lượng công việc cần thợ kiểm tra lại',
+      notes:
+        aiResult.notes ||
+        (passed
+          ? 'Nghiệm thu đạt chuẩn chất lượng AI'
+          : 'Chất lượng công việc cần thợ kiểm tra lại'),
+      message: passed
+        ? 'Nghiệm thu đạt chuẩn chất lượng AI'
+        : 'Chất lượng công việc cần thợ kiểm tra lại',
       beforeImageUrl: beforeImage.url,
       afterImageUrl: afterImage.url,
     };
@@ -807,7 +903,9 @@ export class OrdersService {
     }
 
     if (order.customerId !== customerUserId) {
-      throw new ForbiddenException('Chỉ khách hàng tạo đơn mới có quyền xác nhận nghiệm thu');
+      throw new ForbiddenException(
+        'Chỉ khách hàng tạo đơn mới có quyền xác nhận nghiệm thu',
+      );
     }
 
     const updatedOrder = await this.prisma.$transaction(async (tx) => {
@@ -839,7 +937,8 @@ export class OrdersService {
 
     return {
       success: true,
-      message: 'Xác nhận nghiệm thu dịch vụ thành công! Vui lòng tiến hành thanh toán cho kỹ thuật viên.',
+      message:
+        'Xác nhận nghiệm thu dịch vụ thành công! Vui lòng tiến hành thanh toán cho kỹ thuật viên.',
       order: updatedOrder,
     };
   }
@@ -890,7 +989,9 @@ export class OrdersService {
       return updated;
     });
 
-    console.log(`🚨 [DISPUTE TICKET CREATED] Đơn ${orderId} có khiếu nại từ khách hàng: ${reason}`);
+    console.log(
+      `🚨 [DISPUTE TICKET CREATED] Đơn ${orderId} có khiếu nại từ khách hàng: ${reason}`,
+    );
 
     try {
       this.ordersGateway.emitStatusChanged(orderId, 'DISPUTED');
@@ -900,7 +1001,8 @@ export class OrdersService {
 
     return {
       success: true,
-      message: 'Khiếu nại đã được ghi nhận. Đội ngũ Chăm sóc khách hàng FixGo sẽ liên hệ hỗ trợ trong 30 phút.',
+      message:
+        'Khiếu nại đã được ghi nhận. Đội ngũ Chăm sóc khách hàng FixGo sẽ liên hệ hỗ trợ trong 30 phút.',
       order: updatedOrder,
     };
   }
@@ -919,13 +1021,21 @@ export class OrdersService {
     }
 
     if (!order.workerId) {
-      throw new BadRequestException('Đơn hàng chưa có kỹ thuật viên phụ trách, không thể thanh toán');
+      throw new BadRequestException(
+        'Đơn hàng chưa có kỹ thuật viên phụ trách, không thể thanh toán',
+      );
     }
 
     // Tính toán số tiền theo cấu hình hoa hồng category (không hardcode)
-    const grossAmount = Number(order.finalPrice || order.estimatedPrice || 150000);
-    const commissionPercent = Number(order.commissionPercent || order.category?.commissionPercent || 15.0);
-    const commissionAmount = Math.round((grossAmount * commissionPercent) / 100);
+    const grossAmount = Number(
+      order.finalPrice || order.estimatedPrice || 150000,
+    );
+    const commissionPercent = Number(
+      order.commissionPercent || order.category?.commissionPercent || 15.0,
+    );
+    const commissionAmount = Math.round(
+      (grossAmount * commissionPercent) / 100,
+    );
     const workerPayoutAmount = grossAmount - commissionAmount;
 
     // Thực thi trong 1 Prisma Transaction duy nhất bảo đảm tính toàn vẹn tài chính
@@ -1027,11 +1137,15 @@ export class OrdersService {
     }
 
     if (!order.workerId) {
-      throw new BadRequestException('Đơn hàng không có kỹ thuật viên để đánh giá');
+      throw new BadRequestException(
+        'Đơn hàng không có kỹ thuật viên để đánh giá',
+      );
     }
 
     if (order.status !== 'PAID' && order.status !== 'COMPLETED') {
-      throw new BadRequestException('Chỉ có thể đánh giá sau khi đơn hàng đã nghiệm thu hoặc thanh toán');
+      throw new BadRequestException(
+        'Chỉ có thể đánh giá sau khi đơn hàng đã nghiệm thu hoặc thanh toán',
+      );
     }
 
     // Lấy customerProfile ID tương ứng nếu có
@@ -1077,7 +1191,8 @@ export class OrdersService {
 
     return {
       success: true,
-      message: 'Gửi đánh giá dịch vụ thành công! Cảm ơn ý kiến đóng góp của bạn.',
+      message:
+        'Gửi đánh giá dịch vụ thành công! Cảm ơn ý kiến đóng góp của bạn.',
       review: result,
     };
   }
@@ -1098,17 +1213,22 @@ export class OrdersService {
       throw new NotFoundException('Không tìm thấy đơn hàng');
     }
 
-    const action = adjustPriceDto.action || (userRole === 'CUSTOMER' ? 'ACCEPT' : 'PROPOSE');
+    const action =
+      adjustPriceDto.action || (userRole === 'CUSTOMER' ? 'ACCEPT' : 'PROPOSE');
 
     // 1. Trường hợp Khách hàng phê duyệt (ACCEPT) hoặc từ chối (REJECT)
     if (action === 'ACCEPT' || action === 'REJECT') {
       if (userRole !== 'ADMIN' && order.customerId !== userId) {
-        throw new ForbiddenException('Chỉ khách hàng tạo đơn mới có quyền phê duyệt/từ chối điều chỉnh giá');
+        throw new ForbiddenException(
+          'Chỉ khách hàng tạo đơn mới có quyền phê duyệt/từ chối điều chỉnh giá',
+        );
       }
 
       if (action === 'ACCEPT') {
         const additionalPrice = Number(adjustPriceDto.additionalPrice || 0);
-        const currentPrice = Number(order.finalPrice || order.estimatedPrice || 150000);
+        const currentPrice = Number(
+          order.finalPrice || order.estimatedPrice || 150000,
+        );
         const newFinalPrice = currentPrice + additionalPrice;
 
         const updatedOrder = await this.prisma.$transaction(async (tx) => {
@@ -1153,7 +1273,9 @@ export class OrdersService {
         };
       } else {
         // REJECT
-        const currentPrice = Number(order.finalPrice || order.estimatedPrice || 150000);
+        const currentPrice = Number(
+          order.finalPrice || order.estimatedPrice || 150000,
+        );
         await this.prisma.orderStatusHistory.create({
           data: {
             orderId,
@@ -1177,16 +1299,21 @@ export class OrdersService {
           success: true,
           status: 'REJECTED',
           finalPrice: currentPrice,
-          message: 'Khách hàng đã từ chối điều chỉnh giá phát sinh. Thợ tiếp tục thực hiện theo mức giá ban đầu hoặc trao đổi lại.',
+          message:
+            'Khách hàng đã từ chối điều chỉnh giá phát sinh. Thợ tiếp tục thực hiện theo mức giá ban đầu hoặc trao đổi lại.',
         };
       }
     }
 
     // 2. Trường hợp Thợ đề xuất chi phí phát sinh (PROPOSE)
-    const workerProfile = await this.prisma.workerProfile.findUnique({ where: { userId } });
+    const workerProfile = await this.prisma.workerProfile.findUnique({
+      where: { userId },
+    });
     if (!workerProfile || order.workerId !== workerProfile.id) {
       if (userRole !== 'ADMIN') {
-        throw new ForbiddenException('Chỉ kỹ thuật viên phụ trách đơn mới có thể đề xuất chi phí phát sinh');
+        throw new ForbiddenException(
+          'Chỉ kỹ thuật viên phụ trách đơn mới có thể đề xuất chi phí phát sinh',
+        );
       }
     }
 
@@ -1196,10 +1323,14 @@ export class OrdersService {
     }
 
     if (!adjustPriceDto.reason) {
-      throw new BadRequestException('Vui lòng nêu rõ lý do phát sinh chi phí linh kiện/công việc');
+      throw new BadRequestException(
+        'Vui lòng nêu rõ lý do phát sinh chi phí linh kiện/công việc',
+      );
     }
 
-    const currentPrice = Number(order.finalPrice || order.estimatedPrice || 150000);
+    const currentPrice = Number(
+      order.finalPrice || order.estimatedPrice || 150000,
+    );
     const proposedTotal = currentPrice + additionalPrice;
 
     await this.prisma.orderStatusHistory.create({
@@ -1231,7 +1362,8 @@ export class OrdersService {
       additionalPrice,
       proposedTotal,
       reason: adjustPriceDto.reason,
-      message: 'Đã gửi yêu cầu điều chỉnh giá tới khách hàng thành công. Vui lòng chờ khách hàng phê duyệt trước khi tiếp tục thực hiện.',
+      message:
+        'Đã gửi yêu cầu điều chỉnh giá tới khách hàng thành công. Vui lòng chờ khách hàng phê duyệt trước khi tiếp tục thực hiện.',
     };
   }
 
@@ -1239,10 +1371,14 @@ export class OrdersService {
    * 17. PATCH /orders/:id/schedule: Đặt lịch hẹn sau khi không tìm được thợ ngay
    */
   async scheduleOrder(orderId, userId, scheduledAt) {
-    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+    });
     if (!order) throw new NotFoundException('Không tìm thấy đơn hàng');
 
-    const scheduledDate = new Date(scheduledAt || Date.now() + 24 * 60 * 60 * 1000);
+    const scheduledDate = new Date(
+      scheduledAt || Date.now() + 24 * 60 * 60 * 1000,
+    );
 
     const updated = await this.prisma.order.update({
       where: { id: orderId },
@@ -1271,7 +1407,9 @@ export class OrdersService {
 
   // Compatibility aliases
   async getCurrentWorkerOrder(userId) {
-    const workerProfile = await this.prisma.workerProfile.findUnique({ where: { userId } });
+    const workerProfile = await this.prisma.workerProfile.findUnique({
+      where: { userId },
+    });
     if (!workerProfile) return null;
     return this.ordersRepository.findCurrentOrderForWorker(workerProfile.id);
   }
@@ -1289,7 +1427,9 @@ export class OrdersService {
   }
 
   async finishWork(orderId, userId) {
-    return this.updateStatus(orderId, userId, { status: 'AWAITING_ACCEPTANCE' });
+    return this.updateStatus(orderId, userId, {
+      status: 'AWAITING_ACCEPTANCE',
+    });
   }
 
   async confirmCompletion(orderId, userId) {

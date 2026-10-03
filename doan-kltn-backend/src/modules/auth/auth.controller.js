@@ -1,13 +1,9 @@
 import { Controller, Post, Bind, Body, Dependencies } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiBody,
-  ApiResponse,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBody, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { ResetPasswordDto } from './dto/send-otp.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -18,10 +14,18 @@ export class AuthController {
   }
 
   @Post('register')
-  @ApiOperation({ summary: 'Đăng ký tài khoản người dùng (Khách hàng hoặc Thợ)' })
+  @ApiOperation({
+    summary: 'Đăng ký tài khoản người dùng (Khách hàng hoặc Thợ)',
+  })
   @ApiBody({ type: RegisterDto })
-  @ApiResponse({ status: 201, description: 'Đăng ký tài khoản thành công, trả về JWT Token và User' })
-  @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ hoặc Email/SĐT đã tồn tại' })
+  @ApiResponse({
+    status: 201,
+    description: 'Đăng ký tài khoản thành công, trả về JWT Token và User',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Dữ liệu không hợp lệ hoặc Email/SĐT đã tồn tại',
+  })
   @Bind(Body())
   async register(body) {
     return this.authService.register(body);
@@ -50,13 +54,33 @@ export class AuthController {
   @Post('login')
   @ApiOperation({ summary: 'Đăng nhập hệ thống (Hỗ trợ Email, SĐT, Username)' })
   @ApiBody({ type: LoginDto })
-  @ApiResponse({ status: 200, description: 'Đăng nhập thành công, trả về accessToken và User info' })
+  @ApiResponse({
+    status: 200,
+    description: 'Đăng nhập thành công, trả về accessToken và User info',
+  })
   @ApiResponse({ status: 400, description: 'Thiếu email hoặc mật khẩu' })
-  @ApiResponse({ status: 401, description: 'Tài khoản hoặc mật khẩu không chính xác' })
+  @ApiResponse({
+    status: 401,
+    description: 'Tài khoản hoặc mật khẩu không chính xác',
+  })
   @ApiResponse({ status: 403, description: 'Tài khoản bị khóa' })
   @Bind(Body())
   async login(body) {
-    const identifier = body.email || body.emailOrPhone || body.phone || body.username;
+    const identifier =
+      body.email || body.emailOrPhone || body.phone || body.username;
     return this.authService.login(identifier, body.password);
+  }
+
+  @Post('reset-password')
+  @ApiOperation({ summary: 'Đặt lại mật khẩu mới (sau khi xác thực OTP SĐT)' })
+  @ApiBody({ type: ResetPasswordDto })
+  @ApiResponse({ status: 200, description: 'Đặt lại mật khẩu thành công' })
+  @ApiResponse({
+    status: 400,
+    description: 'Token không hợp lệ hoặc đã hết hạn',
+  })
+  @Bind(Body())
+  async resetPassword(body) {
+    return this.authService.resetPassword(body.resetToken, body.newPassword);
   }
 }

@@ -55,7 +55,8 @@ export class CustomerHomeController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Lấy dữ liệu tổng quan thành công (activeServicesCount, walletBalance, availableVouchersCount)',
+    description:
+      'Lấy dữ liệu tổng quan thành công (activeServicesCount, walletBalance, availableVouchersCount)',
   })
   @Bind(Req())
   async getSummary(req) {

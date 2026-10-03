@@ -1,10 +1,18 @@
-import { IsNotEmpty, IsString, IsOptional, IsNumber, Min, IsIn } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsOptional,
+  IsNumber,
+  Min,
+  IsIn,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class AdjustPriceDto {
   @ApiPropertyOptional({
     type: Number,
-    description: 'Số tiền chi phí phát sinh thêm (VNĐ) khi thợ kiểm tra hiện trường',
+    description:
+      'Số tiền chi phí phát sinh thêm (VNĐ) khi thợ kiểm tra hiện trường',
     example: 120000,
   })
   @IsOptional()
@@ -14,7 +22,8 @@ export class AdjustPriceDto {
 
   @ApiPropertyOptional({
     type: String,
-    description: 'Lý do phát sinh chi phí ngoài báo giá ban đầu (vd: thay linh kiện tụ block quạt)',
+    description:
+      'Lý do phát sinh chi phí ngoài báo giá ban đầu (vd: thay linh kiện tụ block quạt)',
     example: 'Thay tụ kích block điều hòa bị cháy rò điện',
   })
   @IsOptional()
@@ -32,7 +41,8 @@ export class AdjustPriceDto {
 
   @ApiPropertyOptional({
     type: String,
-    description: 'Hành động duyệt chi phí: PROPOSE (Thợ đề xuất), ACCEPT (Khách duyệt), REJECT (Khách từ chối)',
+    description:
+      'Hành động duyệt chi phí: PROPOSE (Thợ đề xuất), ACCEPT (Khách duyệt), REJECT (Khách từ chối)',
     enum: ['PROPOSE', 'ACCEPT', 'REJECT'],
     example: 'PROPOSE',
   })

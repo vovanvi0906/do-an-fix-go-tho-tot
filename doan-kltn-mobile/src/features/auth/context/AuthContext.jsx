@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authService } from '../services/authService';
+import { tokenStorage } from '../../../services/storage/tokenStorage';
 
 const AuthContext = createContext(null);
 
@@ -51,9 +52,14 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
-  const updateUser = (updatedUser) => {
+  const updateUser = async (updatedUser) => {
     console.log('📝 [AuthContext] Cập nhật thông tin User:', updatedUser);
     setUser(updatedUser);
+    try {
+      await tokenStorage.saveUser(updatedUser);
+    } catch (e) {
+      console.warn('⚠️ [AuthContext] Không thể lưu user vào storage:', e);
+    }
   };
 
   const value = {

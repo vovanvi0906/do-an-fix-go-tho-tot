@@ -8,13 +8,15 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
+import { OtpService } from './otp.service';
 
 @Injectable()
-@Dependencies(UsersService, JwtService)
+@Dependencies(UsersService, JwtService, OtpService)
 export class AuthService {
-  constructor(usersService, jwtService) {
+  constructor(usersService, jwtService, otpService) {
     this.usersService = usersService;
     this.jwtService = jwtService;
+    this.otpService = otpService;
   }
 
   async register(data) {
@@ -36,7 +38,9 @@ export class AuthService {
     if (phone) {
       const existingPhone = await this.usersService.findByPhone(phone);
       if (existingPhone) {
-        throw new BadRequestException('Số điện thoại đã tồn tại trong hệ thống');
+        throw new BadRequestException(
+          'Số điện thoại đã tồn tại trong hệ thống',
+        );
       }
     }
 
@@ -48,6 +52,7 @@ export class AuthService {
       phone: phone || null,
       role: 'CUSTOMER',
       status: 'ACTIVE',
+      isEmailVerified: true,
       customerProfile: {
         create: {
           fullName: fullName || null,
@@ -67,7 +72,16 @@ export class AuthService {
   }
 
   async registerWorker(data) {
-    const { email, password, phone, fullName, avatarUrl, skills, bio, cccdNumber } = data;
+    const {
+      email,
+      password,
+      phone,
+      fullName,
+      avatarUrl,
+      skills,
+      bio,
+      cccdNumber,
+    } = data;
 
     const existingEmail = await this.usersService.findByEmail(email);
     if (existingEmail) {
@@ -77,7 +91,9 @@ export class AuthService {
     if (phone) {
       const existingPhone = await this.usersService.findByPhone(phone);
       if (existingPhone) {
-        throw new BadRequestException('Số điện thoại đã tồn tại trong hệ thống');
+        throw new BadRequestException(
+          'Số điện thoại đã tồn tại trong hệ thống',
+        );
       }
     }
 
@@ -89,6 +105,7 @@ export class AuthService {
       phone: phone || null,
       role: 'WORKER',
       status: 'ACTIVE',
+      isEmailVerified: true,
       workerProfile: {
         create: {
           fullName: fullName || null,
@@ -112,7 +129,9 @@ export class AuthService {
   }
 
   async login(emailOrPhone, password) {
-    console.log('🔑 [Backend AuthService] Nhận yêu cầu đăng nhập:', { identifier: emailOrPhone });
+    console.log('🔑 [Backend AuthService] Nhận yêu cầu đăng nhập:', {
+      identifier: emailOrPhone,
+    });
 
     if (!emailOrPhone || !password) {
       console.warn('⚠️ [Backend AuthService] Thiếu emailOrPhone hoặc password');
@@ -121,13 +140,20 @@ export class AuthService {
 
     const user = await this.usersService.findByEmailOrPhone(emailOrPhone);
     if (!user) {
-      console.warn('⚠️ [Backend AuthService] Không tìm thấy user với định danh:', emailOrPhone);
-      throw new UnauthorizedException('Email / Số điện thoại hoặc mật khẩu không chính xác');
+      console.warn(
+        '⚠️ [Backend AuthService] Không tìm thấy user với định danh:',
+        emailOrPhone,
+      );
+      throw new UnauthorizedException(
+        'Email / Số điện thoại hoặc mật khẩu không chính xác',
+      );
     }
 
     if (user.status === 'BLOCKED') {
       console.warn('⚠️ [Backend AuthService] User bị khóa:', user.email);
-      throw new ForbiddenException('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin');
+      throw new ForbiddenException(
+        'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin',
+      );
     }
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
@@ -136,7 +162,9 @@ export class AuthService {
         email: user.email,
         phone: user.phone,
       });
-      throw new UnauthorizedException('Email / Số điện thoại hoặc mật khẩu không chính xác');
+      throw new UnauthorizedException(
+        'Email / Số điện thoại hoặc mật khẩu không chính xác',
+      );
     }
 
     const token = this.jwtService.sign({ sub: user.id, role: user.role });
@@ -153,6 +181,38 @@ export class AuthService {
       message: 'Đăng nhập thành công',
       user: sanitizedUser,
       accessToken: token,
+    };
+  }
+
+  /**
+   * Đặt lại mật khẩu (dùng resetToken từ OTP verify)
+   */
+  async resetPassword(resetToken, newPassword) {
+    console.log('🔐 [Backend AuthService] Yêu cầu đặt lại mật khẩu');
+
+    // Validate resetToken và lấy phone đã verify
+    const phone = await this.otpService.validateResetToken(resetToken);
+
+    // Kiểm tra user tồn tại
+    const user = await this.usersService.findByPhone(phone);
+    if (!user) {
+      throw new BadRequestException(
+        'Không tìm thấy tài khoản với số điện thoại này',
+      );
+    }
+
+    // Hash mật khẩu mới
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await this.usersService.updatePassword(phone, passwordHash);
+
+    console.log(
+      '✅ [Backend AuthService] Đặt lại mật khẩu thành công cho:',
+      phone,
+    );
+
+    return {
+      message:
+        'Đặt lại mật khẩu thành công. Vui lòng đăng nhập với mật khẩu mới.',
     };
   }
 }
