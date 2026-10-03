@@ -7,6 +7,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "sync-ip": "node ../scripts/update-ip.js",
     "test": "jest"
   },
   "dependencies": {

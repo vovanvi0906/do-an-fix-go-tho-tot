@@ -112,6 +112,7 @@ export function initRemoteLogger(): void {
   }
 
   // 2. Bắt lỗi Unhandled Rejection & Runtime Error trên Web (chỉ khi có window.addEventListener)
+
   if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
     try {
       window.addEventListener('error', (event: any) => {

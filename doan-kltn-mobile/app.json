@@ -28,7 +28,14 @@
       "expo-router",
       "expo-asset",
       "expo-font",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "FixGo cần truy cập thư viện ảnh để phân tích sự cố.",
+          "cameraPermission": "FixGo cần truy cập máy ảnh để chụp và chẩn đoán sự cố."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
