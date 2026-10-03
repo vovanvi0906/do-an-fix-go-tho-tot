@@ -35,7 +35,7 @@ if %ERRORLEVEL% equ 0 (
     docker info >nul 2>&1
     if %ERRORLEVEL% equ 0 (
         echo [1/4] Khoi dong Postgres va Redis qua Docker...
-        docker compose up -d >nul 2>&1
+        docker compose up -d postgres redis >nul 2>&1
     )
 )
 

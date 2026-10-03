@@ -140,18 +140,44 @@ export class OrdersService {
         ) || categories[0];
     }
 
-    const basePrice = Number(matchedCategory?.basePrice || 150000);
-    const estimatedPriceMin = Math.round(basePrice * 0.9);
-    const estimatedPriceMax = Math.round(basePrice * 1.3);
+    let matchedService = null;
+    if (matchedCategory && (aiResult.suggestedServiceId || aiResult.suggestedServiceName)) {
+      try {
+        matchedService = await this.prisma.service.findFirst({
+          where: {
+            categoryId: matchedCategory.id,
+            isActive: true,
+            OR: [
+              { slug: aiResult.suggestedServiceId },
+              { name: { contains: aiResult.suggestedServiceName ? aiResult.suggestedServiceName.slice(0, 15) : '', mode: 'insensitive' } },
+            ],
+          },
+        });
+      } catch (svcErr) {
+        console.warn('Không thể tìm kiếm service item trong DB:', svcErr.message);
+      }
+    }
+
+    const basePrice = Number(matchedService?.basePrice || matchedCategory?.basePrice || 150000);
+    const estimatedPriceMin = aiResult.estimatedPriceRange?.min ?? Math.round(basePrice * 0.9);
+    const estimatedPriceMax = aiResult.estimatedPriceRange?.max ?? Math.round(basePrice * 1.3);
 
     return {
       requiresManualSelection: false,
       suggestedCategoryId: matchedCategory?.id,
       suggestedCategoryName: matchedCategory?.name,
+      suggestedServiceId: matchedService?.id || aiResult.suggestedServiceId || null,
+      suggestedServiceName: matchedService?.name || aiResult.suggestedServiceName || null,
+      suggestedServiceConfidence: aiResult.suggestedServiceConfidence || null,
       confidence,
       detectedLabels: aiResult.detectedLabels || [],
       estimatedPriceMin,
       estimatedPriceMax,
+      estimatedPriceRange: aiResult.estimatedPriceRange || {
+        min: estimatedPriceMin,
+        max: estimatedPriceMax,
+        formatted: `${estimatedPriceMin.toLocaleString('vi-VN')} đ ~ ${estimatedPriceMax.toLocaleString('vi-VN')} đ`,
+      },
       issueDescription:
         aiResult.issueDetected ||
         description ||

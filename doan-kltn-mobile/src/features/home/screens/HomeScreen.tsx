@@ -166,9 +166,12 @@ export default function HomeScreen() {
       params: {
         categoryId: diagnosis.suggestedCategoryId,
         categoryName: diagnosis.categoryName,
-        serviceName: diagnosis.categoryName,
+        serviceId: diagnosis.suggestedServiceId || '',
+        serviceName: diagnosis.suggestedServiceName || diagnosis.categoryName,
         price: String(diagnosis.estimatedPrice.min),
-        note: diagnosis.notes,
+        note: diagnosis.suggestedServiceName
+          ? `[Dịch vụ đề xuất: ${diagnosis.suggestedServiceName}] ${diagnosis.notes}`
+          : diagnosis.notes,
         address: data.user.currentDistrict || '606/20, Hiệp Bình, Hồ Chí Minh',
       },
     });

@@ -1,62 +1,17 @@
-"""
-FixGo Pro - Zero-Shot Incident Classifier using OpenAI CLIP (ViT-B/32)
-Phân loại 5 nhóm sự cố FixGo bằng kỹ thuật Prompt Ensembling không cần gán nhãn lại.
-"""
+"""FixGo Pro - Zero-Shot Incident & Sub-Service Classifier using CLIP ViT-B/32."""
 
-import os
 import logging
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union, Any
 import numpy as np
 from PIL import Image
 import torch
+from service_catalog import CLASS_PROMPTS, CLASSES, SUB_SERVICES_CATALOG, format_vnd
 
 logger = logging.getLogger("ai-service.clip")
-
 MODEL_NAME = "openai/clip-vit-base-patch32"
 
-CLASS_PROMPTS: Dict[str, List[str]] = {
-    "sua_dien": [
-        "a photo of an electric circuit breaker or breaker box",
-        "a photo of burnt electrical wires or short circuit",
-        "a photo of a broken electrical wall outlet",
-        "a photo of home power wiring hazard",
-        "a photo of an electrical distribution panel",
-    ],
-    "sua_nuoc": [
-        "a photo of a leaking water pipe under a sink",
-        "a photo of a broken water pipe with water leaking",
-        "a photo of a dripping faucet or shower head",
-        "a photo of water leak damage on wall or floor",
-        "a photo of a clogged drainage pipe or toilet",
-    ],
-    "dien_lanh": [
-        "a photo of a leaking wall mounted air conditioner",
-        "a photo of an indoor air conditioning unit",
-        "a photo of a refrigerator appliance interior or exterior",
-        "a photo of a washing machine appliance issue",
-        "a photo of cooling frost buildup on HVAC equipment",
-    ],
-    "thiet_bi": [
-        "a photo of a broken kitchen induction cooker stove",
-        "a photo of a damaged microwave oven appliance",
-        "a photo of an electric water heater cylinder",
-        "a photo of a malfunctioning household kitchen appliance",
-        "a photo of an appliance digital error code",
-    ],
-    "other_unclear": [
-        "a photo of an unclear blurry image",
-        "a photo of a person portrait or selfie",
-        "a photo of an outdoor landscape nature view",
-        "a photo of a document text on paper",
-        "a photo of a random object unrelated to home repair",
-    ],
-}
-
-CLASSES = list(CLASS_PROMPTS.keys())
-
-_model = None
-_processor = None
-_text_features = None  # Normalized (5, 512) tensor
+_model, _processor, _text_features = None, None, None
+_sub_service_embeddings: Dict[str, Tuple[List[Dict[str, Any]], torch.Tensor]] = {}
 
 
 def _to_tensor(feat) -> torch.Tensor:
@@ -67,35 +22,40 @@ def _to_tensor(feat) -> torch.Tensor:
     return feat[0] if isinstance(feat, (tuple, list)) else feat
 
 
+def _embed_prompts(prompts: List[str]) -> torch.Tensor:
+    inputs = _processor(text=prompts, return_tensors="pt", padding=True)
+    txt_feat = _to_tensor(_model.get_text_features(**inputs))
+    txt_feat = txt_feat / txt_feat.norm(dim=-1, keepdim=True)
+    mean_feat = txt_feat.mean(dim=0, keepdim=True)
+    return mean_feat / mean_feat.norm(dim=-1, keepdim=True)
+
+
 def load_clip() -> bool:
-    """Nạp CLIP ViT-B/32 trên CPU và tiền tính toán Text Embeddings cho 5 nhóm lớp."""
-    global _model, _processor, _text_features
+    """Nạp CLIP ViT-B/32 và tính sẵn Text Embeddings cho danh mục lớn & dịch vụ con."""
+    global _model, _processor, _text_features, _sub_service_embeddings
     try:
-        # pyrefly: ignore [missing-import]
         from transformers import CLIPModel, CLIPProcessor
 
-        logger.info(f"📦 [CLIP] Đang nạp mô hình {MODEL_NAME} trên CPU...")
+        logger.info(f"📦 [CLIP] Đang nạp {MODEL_NAME} trên CPU...")
         _model = CLIPModel.from_pretrained(MODEL_NAME).to("cpu")
         _processor = CLIPProcessor.from_pretrained(MODEL_NAME)
         _model.eval()
 
-        class_embeddings = []
         with torch.no_grad():
-            for cls_name in CLASSES:
-                prompts = CLASS_PROMPTS[cls_name]
-                inputs = _processor(text=prompts, return_tensors="pt", padding=True)
-                txt_feat = _to_tensor(_model.get_text_features(**inputs))
-                txt_feat = txt_feat / txt_feat.norm(dim=-1, keepdim=True)
-                mean_feat = txt_feat.mean(dim=0, keepdim=True)
-                mean_feat = mean_feat / mean_feat.norm(dim=-1, keepdim=True)
-                class_embeddings.append(mean_feat)
+            class_embeds = [_embed_prompts(CLASS_PROMPTS[c]) for c in CLASSES]
+            _text_features = torch.cat(class_embeds, dim=0)
 
-        _text_features = torch.cat(class_embeddings, dim=0)  # Shape: (5, dim)
-        logger.info("✅ [CLIP] Đã nạp thành công và tính sẵn 5-class Prompt Embeddings.")
+            _sub_service_embeddings.clear()
+            for cat_slug, services in SUB_SERVICES_CATALOG.items():
+                svc_embeds = [_embed_prompts(s["prompts"]) for s in services]
+                _sub_service_embeddings[cat_slug] = (services, torch.cat(svc_embeds, dim=0))
+
+        logger.info("✅ [CLIP] Đã nạp thành công và tính sẵn Embeddings danh mục & dịch vụ con.")
         return True
     except Exception as e:
         logger.error(f"❌ [CLIP] Không thể nạp mô hình: {e}")
         _model, _processor, _text_features = None, None, None
+        _sub_service_embeddings.clear()
         return False
 
 
@@ -103,35 +63,84 @@ def is_ready() -> bool:
     return _model is not None and _processor is not None and _text_features is not None
 
 
-def predict_clip(image_input: Union[np.ndarray, Image.Image]) -> Optional[Dict[str, float]]:
-    """Dự đoán xác suất 5 nhóm sự cố bằng CLIP Zero-Shot (trả về dict class -> float)."""
-    if not is_ready():
+def _encode_image(image_input: Union[np.ndarray, Image.Image]) -> Optional[torch.Tensor]:
+    if isinstance(image_input, np.ndarray):
+        rgb = image_input[:, :, ::-1] if len(image_input.shape) == 3 and image_input.shape[2] == 3 else image_input
+        pil_img = Image.fromarray(rgb)
+    elif isinstance(image_input, Image.Image):
+        pil_img = image_input.convert("RGB")
+    else:
         return None
 
+    inputs = _processor(images=pil_img, return_tensors="pt")
+    with torch.no_grad():
+        img_feat = _to_tensor(_model.get_image_features(**inputs))
+        return img_feat / img_feat.norm(dim=-1, keepdim=True)
+
+
+def predict_sub_service_from_feat(
+    img_feat: torch.Tensor, category_key: str
+) -> Optional[Dict[str, Any]]:
+    """Dự đoán dịch vụ con thuộc danh mục cụ thể từ vector ảnh đã trích xuất."""
+    if not is_ready():
+        return None
+    norm_cat = category_key.replace("_", "-")
+    if norm_cat not in _sub_service_embeddings:
+        return None
+
+    services, svc_feats = _sub_service_embeddings[norm_cat]
+    with torch.no_grad():
+        logits = _model.logit_scale.exp() * (img_feat @ svc_feats.T)
+        probs = torch.softmax(logits, dim=-1).squeeze(0)
+
+    best_idx = int(torch.argmax(probs).item())
+    best_svc = services[best_idx]
+    best_conf = float(probs[best_idx].item())
+    unit_str = best_svc.get("unit", "lần")
+    formatted_price = f"{format_vnd(best_svc['min_price'])} - {format_vnd(best_svc['max_price'])} / {unit_str}"
+
+    return {
+        "serviceId": best_svc["slug"],
+        "serviceName": best_svc["name"],
+        "confidence": round(best_conf, 4),
+        "priceRange": {
+            "min": best_svc["min_price"],
+            "max": best_svc["max_price"],
+            "unit": unit_str,
+            "formatted": formatted_price,
+        },
+        "allServiceProbs": {s["slug"]: round(float(probs[i].item()), 4) for i, s in enumerate(services)},
+    }
+
+
+def predict_clip_full(
+    image_input: Union[np.ndarray, Image.Image], category_hint: Optional[str] = None
+) -> Optional[Dict[str, Any]]:
+    """Phân loại 2 bước: 1. Dự đoán danh mục lớn -> 2. Dự đoán dịch vụ con chi tiết."""
+    if not is_ready():
+        return None
     try:
-        if isinstance(image_input, np.ndarray):
-            # Chuyển OpenCV BGR sang PIL RGB
-            if len(image_input.shape) == 3 and image_input.shape[2] == 3:
-                rgb = image_input[:, :, ::-1]
-            else:
-                rgb = image_input
-            pil_img = Image.fromarray(rgb)
-        elif isinstance(image_input, Image.Image):
-            pil_img = image_input.convert("RGB")
-        else:
+        img_feat = _encode_image(image_input)
+        if img_feat is None:
             return None
 
-        inputs = _processor(images=pil_img, return_tensors="pt")
         with torch.no_grad():
-            img_feat = _to_tensor(_model.get_image_features(**inputs))
-            img_feat = img_feat / img_feat.norm(dim=-1, keepdim=True)
-
-            logit_scale = _model.logit_scale.exp()
-            logits = logit_scale * (img_feat @ _text_features.T)
+            logits = _model.logit_scale.exp() * (img_feat @ _text_features.T)
             probs = torch.softmax(logits, dim=-1).squeeze(0)
 
         probs_dict = {cls_name: round(float(probs[i].item()), 4) for i, cls_name in enumerate(CLASSES)}
-        return probs_dict
+        sorted_cls = sorted(probs_dict.items(), key=lambda x: x[1], reverse=True)
+        top_cat, top_conf = sorted_cls[0]
+
+        target_cat = category_hint or top_cat
+        sub_svc = predict_sub_service_from_feat(img_feat, target_cat) if target_cat != "other_unclear" else None
+        return {"category_probs": probs_dict, "top_category": top_cat, "top_category_conf": top_conf, "sub_service": sub_svc}
     except Exception as e:
-        logger.warning(f"⚠️ [CLIP] Lỗi dự đoán hình ảnh: {e}")
+        logger.warning(f"⚠️ [CLIP] Lỗi dự đoán: {e}")
         return None
+
+
+def predict_clip(image_input: Union[np.ndarray, Image.Image]) -> Optional[Dict[str, float]]:
+    """Hàm tương thích ngược trả về xác suất 5 nhóm lớp."""
+    res = predict_clip_full(image_input)
+    return res["category_probs"] if res else None

@@ -52,7 +52,7 @@ except Exception as e:
 
 # Kiểm tra module CLIP Zero-Shot
 try:
-    from clip_classifier import load_clip, predict_clip, is_ready as is_clip_ready
+    from clip_classifier import load_clip, predict_clip, predict_clip_full, is_ready as is_clip_ready
     HAS_CLIP = True
 except Exception as e:
     HAS_CLIP = False
@@ -299,6 +299,13 @@ class BoundingBox(BaseModel):
     box: List[float] = Field(description="[x1, y1, x2, y2]")
 
 
+class PriceRange(BaseModel):
+    min: int = Field(description="Giá tối thiểu (VNĐ)")
+    max: int = Field(description="Giá tối đa (VNĐ)")
+    unit: str = Field(description="Đơn vị tính (lần, cái, bộ, mét...)")
+    formatted: str = Field(description="Chuỗi định dạng hiển thị giá (VD: 100.000đ - 220.000đ / cái)")
+
+
 class DiagnoseResponse(BaseModel):
     suggestedCategoryId: Optional[str] = None
     suggestedCategoryName: Optional[str] = None
@@ -312,6 +319,12 @@ class DiagnoseResponse(BaseModel):
     clip_label: Optional[str] = Field(default=None, description="Nhãn dự đoán cao nhất từ CLIP")
     clip_confidence: Optional[float] = Field(default=None, description="Độ tin cậy của nhãn CLIP cao nhất")
     decision_source: Optional[str] = Field(default=None, description="'clip' | 'yolo' | 'ensemble' | 'heuristic'")
+    # Gợi ý dịch vụ cụ thể (Sub-service)
+    suggestedServiceId: Optional[str] = Field(default=None, description="Slug dịch vụ chi tiết được đề xuất")
+    suggestedServiceName: Optional[str] = Field(default=None, description="Tên dịch vụ chi tiết được đề xuất")
+    suggestedServiceConfidence: Optional[float] = Field(default=None, description="Độ tin cậy của dịch vụ chi tiết")
+    estimatedPriceRange: Optional[PriceRange] = Field(default=None, description="Khoảng giá ước tính")
+    allServiceProbs: Optional[Dict[str, float]] = Field(default=None, description="Xác suất các dịch vụ con thuộc danh mục")
 
 
 class CompareBeforeAfterResponse(BaseModel):
@@ -413,13 +426,27 @@ async def diagnose(
 
     if cv_img is not None:
         # A. Trích xuất xác suất từ CLIP Zero-Shot (nếu đã nạp)
-        clip_probs = predict_clip(cv_img) if HAS_CLIP and is_clip_ready() else None
+        clip_full_res = predict_clip_full(cv_img) if HAS_CLIP and is_clip_ready() else None
+        clip_probs = clip_full_res["category_probs"] if clip_full_res else None
+        sub_svc_info = clip_full_res.get("sub_service") if clip_full_res else None
         clip_top1_label, clip_top1_conf, clip_margin = None, 0.0, 0.0
         if clip_probs:
             sorted_clip = sorted(clip_probs.items(), key=lambda x: x[1], reverse=True)
             clip_top1_label, clip_top1_conf = sorted_clip[0]
             clip_top2_conf = sorted_clip[1][1] if len(sorted_clip) > 1 else 0.0
             clip_margin = round(clip_top1_conf - clip_top2_conf, 4)
+
+        # Helper chuẩn bị thông tin dịch vụ con
+        def get_sub_service_args() -> Dict[str, Any]:
+            if not sub_svc_info:
+                return {}
+            return {
+                "suggestedServiceId": sub_svc_info.get("serviceId"),
+                "suggestedServiceName": sub_svc_info.get("serviceName"),
+                "suggestedServiceConfidence": sub_svc_info.get("confidence"),
+                "estimatedPriceRange": sub_svc_info.get("priceRange"),
+                "allServiceProbs": sub_svc_info.get("allServiceProbs"),
+            }
 
         # B. Trích xuất xác suất từ YOLOv8n-cls (nếu đã nạp)
         yolo_top1_name, yolo_top1_conf, all_probs_dict = None, 0.0, None
@@ -455,6 +482,7 @@ async def diagnose(
                     clip_label=clip_top1_label,
                     clip_confidence=clip_top1_conf,
                     decision_source="ensemble",
+                    **get_sub_service_args(),
                 )
             else:
                 return DiagnoseResponse(
@@ -506,6 +534,7 @@ async def diagnose(
                     clip_label=clip_top1_label,
                     clip_confidence=clip_top1_conf,
                     decision_source="clip",
+                    **get_sub_service_args(),
                 )
 
         # 3. Chế độ YOLO (hoặc khi CLIP không khả dụng)
@@ -538,6 +567,7 @@ async def diagnose(
                     clip_label=clip_top1_label,
                     clip_confidence=clip_top1_conf,
                     decision_source="yolo",
+                    **get_sub_service_args(),
                 )
 
     # 3. HEURISTIC FALLBACK (Khi không có model, không nhận diện được qua ảnh hoặc ảnh trống)

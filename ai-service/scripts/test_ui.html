@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FixGo AI - Test Chẩn Đoán Sự Cố (/ai/diagnose)</title>
+  <title>FixGo AI - Kiểm thử Chẩn đoán sự cố & Đề xuất Dịch vụ (/ai/diagnose)</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: #f8fafc; color: #1e293b; padding: 24px; }
-    .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 24px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    h1 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    body { background: #f8fafc; color: #1e293b; padding: 20px; }
+    .container { max-width: 1280px; margin: 0 auto; background: #fff; padding: 24px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    h1 { font-size: 21px; font-weight: 700; margin-bottom: 6px; color: #0f172a; }
     p.desc { font-size: 13px; color: #64748b; margin-bottom: 20px; }
-    .controls { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0; }
+    .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0; }
     input[type="file"] { font-size: 14px; }
     button { background: #2563eb; color: #fff; border: none; padding: 8px 18px; font-size: 14px; font-weight: 600; border-radius: 6px; cursor: pointer; }
     button:disabled { background: #94a3b8; cursor: not-allowed; }
@@ -18,18 +18,38 @@
     .btn-secondary:hover { background: #115e59; }
     #msg { font-size: 13px; color: #ef4444; margin-bottom: 12px; }
     .list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
-    .list-header { display: grid; grid-template-columns: 80px 150px 70px 1fr 1fr 85px; gap: 12px; font-size: 12px; font-weight: 700; color: #475569; padding: 6px 10px; background: #f1f5f9; border-radius: 4px; }
-    .row { display: grid; grid-template-columns: 80px 150px 70px 1fr 1fr 85px; gap: 12px; align-items: center; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff; }
+    .list-header { display: grid; grid-template-columns: 80px 140px 240px 1fr 1fr 70px 85px; gap: 12px; font-size: 12px; font-weight: 700; color: #475569; padding: 8px 12px; background: #f1f5f9; border-radius: 4px; }
+    .row { display: grid; grid-template-columns: 80px 140px 240px 1fr 1fr 70px 85px; gap: 12px; align-items: center; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff; }
     .row.processing { background: #eff6ff; border-color: #93c5fd; }
     .row.error { background: #fef2f2; border-color: #fca5a5; }
-    .row img { width: 80px; height: 80px; object-fit: cover; border-radius: 4px; border: 1px solid #cbd5e1; }
-    .pred-class { font-weight: 600; font-size: 13px; }
+    .row img { width: 80px; height: 80px; object-fit: cover; border-radius: 4px; border: 1px solid #cbd5e1; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+    .row img:hover { transform: scale(1.06); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18); border-color: #2563eb; }
+
+    /* Modal phóng to ảnh */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 9999; cursor: zoom-out; opacity: 0; transition: opacity 0.2s ease-in-out; }
+    .modal-overlay.open { opacity: 1; }
+    .modal-content { position: relative; max-width: 90vw; max-height: 90vh; display: flex; flex-direction: column; align-items: center; cursor: default; }
+    .modal-content img { max-width: 90vw; max-height: 82vh; object-fit: contain; border-radius: 6px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6); }
+    .modal-caption { margin-top: 10px; color: #f8fafc; font-size: 14px; text-align: center; background: rgba(0, 0, 0, 0.6); padding: 6px 14px; border-radius: 20px; }
+    .modal-close { position: absolute; top: -38px; right: 0px; background: rgba(255, 255, 255, 0.2); border: none; color: #fff; font-size: 28px; line-height: 1; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s ease; }
+    .modal-close:hover { background: rgba(255, 255, 255, 0.4); }
+
+    .pred-class { font-weight: 700; font-size: 13px; color: #0f172a; }
     .source-tag { display: inline-block; font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 3px; margin-top: 3px; text-transform: uppercase; }
     .source-clip { background: #dbeafe; color: #1e40af; }
     .source-yolo { background: #fef3c7; color: #92400e; }
     .source-ensemble { background: #dcfce7; color: #166534; }
     .source-heuristic { background: #f1f5f9; color: #475569; }
     .pred-sub { font-size: 11px; color: #64748b; margin-top: 2px; }
+
+    /* Dịch vụ đề xuất & Báo giá */
+    .service-col { display: flex; flex-direction: column; gap: 4px; }
+    .service-empty { font-size: 11px; color: #94a3b8; font-style: italic; }
+    .service-card { background: #f0fdf4; border: 1px solid #bbf7d0; padding: 6px 8px; border-radius: 6px; }
+    .service-name { font-size: 12px; font-weight: 700; color: #166534; line-height: 1.35; display: flex; align-items: flex-start; gap: 4px; }
+    .service-price { font-size: 11px; font-weight: 700; color: #047857; margin-top: 3px; display: inline-block; background: #d1fae5; padding: 2px 6px; border-radius: 3px; }
+    .service-conf { font-size: 10px; color: #15803d; font-weight: 500; margin-top: 2px; }
+
     .conf-badge { font-weight: 700; font-size: 13px; color: #0284c7; }
     .status-badge { font-size: 11px; font-weight: 600; padding: 4px 6px; border-radius: 4px; text-align: center; }
     .status-pending { background: #f1f5f9; color: #64748b; }
@@ -42,43 +62,101 @@
     .prob-item { font-size: 10px; background: #f1f5f9; padding: 2px 5px; border-radius: 3px; }
     .prob-item.high { background: #e0e7ff; color: #3730a3; font-weight: 600; }
     .prob-item.clip-high { background: #dbeafe; color: #1e40af; font-weight: 600; }
-    .stats { padding: 16px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0; }
+
+    .stats { padding: 16px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 16px; }
     .stats-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .stats h2 { font-size: 15px; font-weight: 700; margin: 0; }
+    .stats-hint { font-size: 12px; color: #64748b; margin-top: 3px; }
     .stats-actions { display: flex; gap: 8px; }
-    .stats-items { display: flex; flex-wrap: wrap; gap: 12px; font-size: 13px; }
-    .stats-badge { background: #fff; border: 1px solid #cbd5e1; padding: 4px 10px; border-radius: 4px; }
+    .stats-items { display: flex; flex-wrap: wrap; gap: 10px; font-size: 13px; }
+    .stats-badge { background: #fff; border: 1px solid #cbd5e1; padding: 5px 12px; border-radius: 4px; cursor: pointer; user-select: none; transition: all 0.15s ease; }
+    .stats-badge:hover { background: #e2e8f0; border-color: #94a3b8; }
+    .stats-badge.active { background: #2563eb; color: #fff; border-color: #1d4ed8; box-shadow: 0 1px 3px rgba(37, 99, 235, 0.3); }
+    .stats-badge.active strong { color: #fff; }
     .stats-badge strong { color: #0f172a; }
+
+    .filter-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 10px 14px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 16px; }
+    .filter-group { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #334155; }
+    .filter-group label { font-weight: 600; }
+    .filter-group input, .filter-group select { padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; background: #fff; color: #0f172a; }
+    .filter-group input:focus, .filter-group select:focus { outline: none; border-color: #2563eb; }
   </style>
 </head>
 <body>
-  <div class="container" style="max-width: 1050px;">
-    <h1>FixGo AI - Kiểm thử Chẩn đoán sự cố (So sánh CLIP vs YOLO)</h1>
-    <p class="desc">Endpoint: <code>POST http://localhost:8000/ai/diagnose</code> (Hỗ trợ CLIP Zero-Shot ViT-B/32 & YOLOv8n-cls)</p>
+  <div class="container">
+    <h1>FixGo AI - Kiểm thử Chẩn đoán sự cố & Đề xuất Dịch vụ kỹ thuật</h1>
+    <p class="desc">Endpoint: <code>POST http://localhost:8000/ai/diagnose</code> (Phân loại 2 bước qua CLIP Zero-Shot: Nhận diện Danh mục ➔ Đề xuất Dịch vụ con chi tiết & Khoảng giá)</p>
 
     <div class="controls">
       <input type="file" id="fileInput" accept="image/*" multiple />
       <button id="btnRun" disabled>Chẩn đoán</button>
+      <span id="fileCountBadge" style="font-size: 13px; color: #0284c7; font-weight: 600;"></span>
       <button id="btnExportJson" class="btn-secondary" style="display: none;">Tải báo cáo JSON</button>
       <button id="btnExportCsv" class="btn-secondary" style="display: none;">Tải báo cáo CSV (Excel)</button>
     </div>
     <div id="msg"></div>
 
+    <div id="statsBox" class="stats" style="display: none;">
+      <div class="stats-header">
+        <div>
+          <h2>Thống kê kết quả phân loại</h2>
+          <div class="stats-hint">Nhấp vào từng thẻ bên dưới để lọc nhanh danh sách kết quả</div>
+        </div>
+      </div>
+      <div style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 6px; text-transform: uppercase;">📂 Theo Danh mục sự cố:</div>
+      <div id="statsItems" class="stats-items" style="margin-bottom: 14px;"></div>
+      <div id="serviceStatsTitle" style="font-size: 11px; font-weight: 700; color: #1e40af; margin-bottom: 6px; text-transform: uppercase; display: none;">🔧 Theo Dịch vụ đề xuất:</div>
+      <div id="serviceStatsItems" class="stats-items"></div>
+    </div>
+
+    <div class="filter-bar" id="filterBar" style="display: none;">
+      <div class="filter-group">
+        <label for="filterSearch">🔍 Tìm kiếm:</label>
+        <input type="text" id="filterSearch" placeholder="Tên file ảnh..." />
+      </div>
+      <div class="filter-group">
+        <label for="filterCategory">🏷️ Danh mục:</label>
+        <select id="filterCategory">
+          <option value="ALL">-- Tất cả danh mục --</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="filterService">🔧 Dịch vụ đề xuất:</label>
+        <select id="filterService">
+          <option value="ALL">-- Tất cả dịch vụ --</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="filterSource">⚙️ Nguồn quyết định:</label>
+        <select id="filterSource">
+          <option value="ALL">-- Tất cả nguồn --</option>
+          <option value="clip">CLIP Zero-Shot</option>
+          <option value="yolo">YOLOv8</option>
+          <option value="ensemble">Kết hợp (Ensemble)</option>
+        </select>
+      </div>
+      <button id="btnResetFilter" class="btn-secondary" style="padding: 6px 12px; font-size: 13px;">Đặt lại lọc</button>
+      <span id="filterCountBadge" style="font-size: 13px; font-weight: 600; color: #475569; margin-left: auto;"></span>
+    </div>
+
     <div class="list-header">
       <span>Ảnh</span>
-      <span>Kết quả chính</span>
+      <span>Danh mục sự cố</span>
+      <span>Đề xuất dịch vụ & Báo giá</span>
+      <span>CLIP Zero-Shot</span>
+      <span>YOLOv8n-cls</span>
       <span>Độ khớp</span>
-      <span>CLIP Zero-Shot (Mới)</span>
-      <span>YOLOv8n-cls (Cũ)</span>
       <span>Trạng thái</span>
     </div>
     <div id="resultsList" class="list"></div>
+  </div>
 
-    <div id="statsBox" class="stats" style="display: none;">
-      <div class="stats-header">
-        <h2>Thống kê kết quả phân loại</h2>
-      </div>
-      <div id="statsItems" class="stats-items"></div>
+  <!-- Modal xem ảnh toàn màn hình -->
+  <div id="imageModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <button id="modalClose" class="modal-close" title="Đóng (Esc)">&times;</button>
+      <img id="modalImg" src="" alt="Xem ảnh phóng to" />
+      <div id="modalCaption" class="modal-caption"></div>
     </div>
   </div>
 
@@ -88,29 +166,85 @@
     const btnRun = document.getElementById("btnRun");
     const btnExportJson = document.getElementById("btnExportJson");
     const btnExportCsv = document.getElementById("btnExportCsv");
+    const fileCountBadge = document.getElementById("fileCountBadge");
     const msg = document.getElementById("msg");
     const resultsList = document.getElementById("resultsList");
     const statsBox = document.getElementById("statsBox");
     const statsItems = document.getElementById("statsItems");
+    const serviceStatsTitle = document.getElementById("serviceStatsTitle");
+    const serviceStatsItems = document.getElementById("serviceStatsItems");
+    const filterBar = document.getElementById("filterBar");
+    const filterSearch = document.getElementById("filterSearch");
+    const filterCategory = document.getElementById("filterCategory");
+    const filterService = document.getElementById("filterService");
+    const filterSource = document.getElementById("filterSource");
+    const btnResetFilter = document.getElementById("btnResetFilter");
+    const filterCountBadge = document.getElementById("filterCountBadge");
+
+    const imageModal = document.getElementById("imageModal");
+    const modalImg = document.getElementById("modalImg");
+    const modalCaption = document.getElementById("modalCaption");
+    const modalClose = document.getElementById("modalClose");
+
+    function openImageModal(src, caption) {
+      modalImg.src = src;
+      modalCaption.textContent = caption || "";
+      imageModal.style.display = "flex";
+      requestAnimationFrame(() => {
+        imageModal.classList.add("open");
+      });
+    }
+
+    function closeImageModal() {
+      imageModal.classList.remove("open");
+      setTimeout(() => {
+        imageModal.style.display = "none";
+        modalImg.src = "";
+      }, 150);
+    }
+
+    imageModal.addEventListener("click", (e) => {
+      if (e.target === imageModal || e.target === modalClose) {
+        closeImageModal();
+      }
+    });
+
+    modalClose.addEventListener("click", closeImageModal);
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && imageModal.style.display === "flex") {
+        closeImageModal();
+      }
+    });
 
     let selectedFiles = [];
     let executionHistory = [];
     let currentStats = {};
+    let currentServiceStats = {};
 
     fileInput.addEventListener("change", (e) => {
       msg.textContent = "";
       btnExportJson.style.display = "none";
       btnExportCsv.style.display = "none";
+      filterBar.style.display = "none";
+      filterSearch.value = "";
+      filterCategory.value = "ALL";
+      filterCategory.innerHTML = '<option value="ALL">-- Tất cả danh mục --</option>';
+      filterService.value = "ALL";
+      filterService.innerHTML = '<option value="ALL">-- Tất cả dịch vụ --</option>';
+      filterSource.value = "ALL";
+      filterCountBadge.textContent = "";
       executionHistory = [];
       currentStats = {};
+      currentServiceStats = {};
 
-      const files = Array.from(e.target.files);
-      if (files.length > 20) {
-        msg.textContent = "Cảnh báo: Chỉ được chọn tối đa 20 ảnh. Hệ thống sẽ lấy 20 ảnh đầu tiên.";
-        selectedFiles = files.slice(0, 20);
+      selectedFiles = Array.from(e.target.files);
+      if (selectedFiles.length > 0) {
+        fileCountBadge.textContent = `Đã chọn: ${selectedFiles.length} ảnh`;
       } else {
-        selectedFiles = files;
+        fileCountBadge.textContent = "";
       }
+
       btnRun.disabled = selectedFiles.length === 0;
       renderInitialList(selectedFiles);
     });
@@ -118,15 +252,34 @@
     function renderInitialList(files) {
       resultsList.innerHTML = "";
       statsBox.style.display = "none";
+      filterBar.style.display = "none";
 
       files.forEach((file, idx) => {
         const row = document.createElement("div");
         row.className = "row";
         row.id = `row-${idx}`;
+        row.dataset.filename = file.name.toLowerCase();
+        row.dataset.category = "";
+        row.dataset.service = "";
+        row.dataset.source = "";
+        row.dataset.status = "pending";
 
         const thumb = document.createElement("img");
         thumb.src = URL.createObjectURL(file);
         thumb.alt = file.name;
+        thumb.title = "Nhấp để xem ảnh toàn màn hình";
+        thumb.addEventListener("click", () => {
+          const currentClass = document.getElementById(`class-${idx}`)?.textContent || "";
+          const currentSvc = document.getElementById(`service-${idx}`)?.querySelector(".service-name")?.textContent || "";
+          let caption = file.name;
+          if (currentClass && currentClass !== "Chờ chẩn đoán") {
+            caption += ` — [${currentClass}]`;
+          }
+          if (currentSvc) {
+            caption += ` — [${currentSvc}]`;
+          }
+          openImageModal(thumb.src, caption);
+        });
 
         row.innerHTML = `
           <div id="thumb-${idx}"></div>
@@ -135,7 +288,9 @@
             <div id="source-${idx}"></div>
             <div class="pred-sub">${escapeHtml(file.name)}</div>
           </div>
-          <div class="conf-badge" id="conf-${idx}">--</div>
+          <div id="service-${idx}" class="service-col">
+            <span class="service-empty">Chờ xử lý...</span>
+          </div>
           <div class="probs-box" id="clip-box-${idx}">
             <div class="probs-top" id="clip-top-${idx}">CLIP: --</div>
             <div class="probs-grid" id="clip-probs-${idx}">--</div>
@@ -144,6 +299,7 @@
             <div class="probs-top" id="yolo-top-${idx}">YOLO: --</div>
             <div class="probs-grid" id="yolo-probs-${idx}">--</div>
           </div>
+          <div class="conf-badge" id="conf-${idx}">--</div>
           <div class="status-badge status-pending" id="status-${idx}">Chờ xử lý</div>
         `;
         row.querySelector(`#thumb-${idx}`).appendChild(thumb);
@@ -160,14 +316,17 @@
       msg.textContent = "";
 
       currentStats = {};
+      currentServiceStats = {};
       executionHistory = [];
 
       for (let i = 0; i < selectedFiles.length; i++) {
+        fileCountBadge.textContent = `Đang xử lý ${i + 1}/${selectedFiles.length} ảnh...`;
         const file = selectedFiles[i];
         const row = document.getElementById(`row-${i}`);
         const statusEl = document.getElementById(`status-${i}`);
         const classEl = document.getElementById(`class-${i}`);
         const sourceEl = document.getElementById(`source-${i}`);
+        const serviceEl = document.getElementById(`service-${i}`);
         const confEl = document.getElementById(`conf-${i}`);
         const clipTopEl = document.getElementById(`clip-top-${i}`);
         const clipProbsEl = document.getElementById(`clip-probs-${i}`);
@@ -193,7 +352,7 @@
 
           const data = await res.json();
 
-          // Kết quả chính
+          // Kết quả danh mục chính
           let predictedLabel = data.suggestedCategoryName || (data.detectedLabels && data.detectedLabels[0]) || "Không rõ";
           classEl.textContent = predictedLabel;
           confEl.textContent = data.confidence !== undefined && data.confidence !== null ? `${(data.confidence * 100).toFixed(1)}%` : "--";
@@ -201,6 +360,25 @@
           // Nguồn quyết định
           const dSource = data.decision_source || data.engine || "model";
           sourceEl.innerHTML = `<span class="source-tag source-${escapeHtml(dSource)}">${escapeHtml(dSource)}</span>`;
+
+          // Gợi ý dịch vụ cụ thể & khoảng giá dự kiến
+          if (data.suggestedServiceName) {
+            const priceHtml = data.estimatedPriceRange && data.estimatedPriceRange.formatted
+              ? `<div class="service-price">💰 ${escapeHtml(data.estimatedPriceRange.formatted)}</div>`
+              : "";
+            const confHtml = data.suggestedServiceConfidence
+              ? `<div class="service-conf">Độ khớp: ${(data.suggestedServiceConfidence * 100).toFixed(1)}%</div>`
+              : "";
+            serviceEl.innerHTML = `
+              <div class="service-card">
+                <div class="service-name"><span>🔧</span> <span>${escapeHtml(data.suggestedServiceName)}</span></div>
+                ${priceHtml}
+                ${confHtml}
+              </div>
+            `;
+          } else {
+            serviceEl.innerHTML = `<span class="service-empty">Chưa có đề xuất</span>`;
+          }
 
           // Cột CLIP Zero-Shot
           if (data.clip_probs && typeof data.clip_probs === "object") {
@@ -238,9 +416,21 @@
           statusEl.className = "status-badge status-done";
           statusEl.textContent = "Hoàn tất";
 
-          // Thống kê
-          const statKey = data.suggestedCategoryId || data.clip_label || (data.detectedLabels && data.detectedLabels[0] ? data.detectedLabels[0].split(" ")[0] : "other_unclear");
+          // Thống kê danh mục
+          const rawKey = data.suggestedCategoryId || data.clip_label || (data.detectedLabels && data.detectedLabels[0] ? data.detectedLabels[0].split(" ")[0] : "other_unclear");
+          const statKey = rawKey.replace(/_/g, "-");
           currentStats[statKey] = (currentStats[statKey] || 0) + 1;
+
+          // Thống kê dịch vụ đề xuất
+          const svcName = data.suggestedServiceName || "Chưa xác định";
+          currentServiceStats[svcName] = (currentServiceStats[svcName] || 0) + 1;
+
+          row.dataset.category = statKey;
+          row.dataset.service = svcName;
+          row.dataset.source = (data.decision_source || data.engine || "").toLowerCase();
+          row.dataset.status = "done";
+
+          renderStats(currentStats, currentServiceStats);
 
           // Lưu lịch sử
           executionHistory.push({
@@ -250,6 +440,10 @@
             status: "SUCCESS",
             predictedLabel: predictedLabel,
             categoryId: data.suggestedCategoryId || null,
+            suggestedServiceId: data.suggestedServiceId || null,
+            suggestedServiceName: data.suggestedServiceName || null,
+            suggestedServiceConfidence: data.suggestedServiceConfidence || null,
+            estimatedPriceRange: data.estimatedPriceRange ? data.estimatedPriceRange.formatted : null,
             confidence: data.confidence,
             decisionSource: data.decision_source || data.engine,
             clipLabel: data.clip_label || null,
@@ -265,6 +459,7 @@
           statusEl.textContent = "Lỗi";
           classEl.textContent = "Thất bại";
           sourceEl.innerHTML = "";
+          if (serviceEl) serviceEl.innerHTML = `<span class="service-empty" style="color: #ef4444;">Lỗi phân tích</span>`;
           confEl.textContent = "--";
           clipTopEl.textContent = "Lỗi";
           clipProbsEl.textContent = err.message || "Lỗi kết nối";
@@ -272,6 +467,14 @@
           yoloProbsEl.textContent = "--";
 
           currentStats["error"] = (currentStats["error"] || 0) + 1;
+          currentServiceStats["error"] = (currentServiceStats["error"] || 0) + 1;
+
+          row.dataset.category = "error";
+          row.dataset.service = "error";
+          row.dataset.source = "none";
+          row.dataset.status = "error";
+
+          renderStats(currentStats, currentServiceStats);
 
           executionHistory.push({
             index: i + 1,
@@ -280,6 +483,10 @@
             status: "ERROR",
             predictedLabel: "Lỗi kết nối",
             categoryId: "error",
+            suggestedServiceId: null,
+            suggestedServiceName: null,
+            suggestedServiceConfidence: null,
+            estimatedPriceRange: null,
             confidence: 0,
             decisionSource: "none",
             clipLabel: null,
@@ -292,7 +499,8 @@
       }
 
       // Render thống kê
-      renderStats(currentStats);
+      renderStats(currentStats, currentServiceStats);
+      fileCountBadge.textContent = `Đã hoàn tất ${selectedFiles.length} ảnh.`;
       btnRun.disabled = false;
       fileInput.disabled = false;
 
@@ -302,16 +510,152 @@
       }
     });
 
-    function renderStats(stats) {
+    function renderStats(stats, serviceStats = {}) {
       statsItems.innerHTML = "";
+      serviceStatsItems.innerHTML = "";
+      const totalCount = Object.values(stats).reduce((a, b) => a + b, 0);
+
+      // Thẻ lọc Tất cả danh mục
+      const allItem = document.createElement("div");
+      const isAllActive = filterCategory.value === "ALL";
+      allItem.className = `stats-badge ${isAllActive ? "active" : ""}`;
+      allItem.dataset.cat = "ALL";
+      allItem.innerHTML = `<span>Tất cả:</span> <strong>${totalCount}</strong> ảnh`;
+      allItem.title = "Nhấp để xem tất cả danh mục";
+      allItem.addEventListener("click", () => {
+        filterCategory.value = "ALL";
+        applyFilter();
+      });
+      statsItems.appendChild(allItem);
+
+      // Cập nhật dropdown filterCategory
+      const prevCatVal = filterCategory.value;
+      filterCategory.innerHTML = `<option value="ALL">-- Tất cả danh mục (${totalCount}) --</option>`;
+
       for (const [key, count] of Object.entries(stats)) {
         const item = document.createElement("div");
-        item.className = "stats-badge";
+        const isActive = filterCategory.value === key;
+        item.className = `stats-badge ${isActive ? "active" : ""}`;
+        item.dataset.cat = key;
         item.innerHTML = `<span>${escapeHtml(key)}:</span> <strong>${count}</strong> ảnh`;
+        item.title = `Nhấp để lọc danh mục ${key}`;
+        item.addEventListener("click", () => {
+          filterCategory.value = filterCategory.value === key ? "ALL" : key;
+          applyFilter();
+        });
         statsItems.appendChild(item);
+
+        const opt = document.createElement("option");
+        opt.value = key;
+        opt.textContent = `${key} (${count} ảnh)`;
+        filterCategory.appendChild(opt);
       }
+      filterCategory.value = prevCatVal;
+      if (!filterCategory.value) filterCategory.value = "ALL";
+
+      // Render thống kê Dịch vụ đề xuất
+      const svcEntries = Object.entries(serviceStats);
+      if (svcEntries.length > 0) {
+        serviceStatsTitle.style.display = "block";
+
+        const prevSvcVal = filterService.value;
+        filterService.innerHTML = `<option value="ALL">-- Tất cả dịch vụ (${totalCount}) --</option>`;
+
+        // Thẻ Tất cả dịch vụ
+        const allSvcItem = document.createElement("div");
+        const isAllSvcActive = filterService.value === "ALL";
+        allSvcItem.className = `stats-badge ${isAllSvcActive ? "active" : ""}`;
+        allSvcItem.dataset.svc = "ALL";
+        allSvcItem.innerHTML = `<span>Tất cả dịch vụ:</span> <strong>${totalCount}</strong> ảnh`;
+        allSvcItem.title = "Nhấp để xem tất cả dịch vụ";
+        allSvcItem.addEventListener("click", () => {
+          filterService.value = "ALL";
+          applyFilter();
+        });
+        serviceStatsItems.appendChild(allSvcItem);
+
+        for (const [svc, count] of svcEntries) {
+          const item = document.createElement("div");
+          const isActive = filterService.value === svc;
+          item.className = `stats-badge ${isActive ? "active" : ""}`;
+          item.dataset.svc = svc;
+          item.innerHTML = `<span>🔧 ${escapeHtml(svc)}:</span> <strong>${count}</strong> ảnh`;
+          item.title = `Nhấp để lọc dịch vụ "${svc}"`;
+          item.addEventListener("click", () => {
+            filterService.value = filterService.value === svc ? "ALL" : svc;
+            applyFilter();
+          });
+          serviceStatsItems.appendChild(item);
+
+          const opt = document.createElement("option");
+          opt.value = svc;
+          opt.textContent = `${svc} (${count} ảnh)`;
+          filterService.appendChild(opt);
+        }
+        filterService.value = prevSvcVal;
+        if (!filterService.value) filterService.value = "ALL";
+      } else {
+        serviceStatsTitle.style.display = "none";
+      }
+
       statsBox.style.display = "block";
+      filterBar.style.display = "flex";
+      applyFilter();
     }
+
+    function applyFilter() {
+      const searchTerm = filterSearch.value.trim().toLowerCase();
+      const catVal = filterCategory.value;
+      const svcVal = filterService.value;
+      const sourceVal = filterSource.value;
+
+      const rows = resultsList.querySelectorAll(".row");
+      let visibleCount = 0;
+
+      rows.forEach(row => {
+        const rCat = row.dataset.category || "";
+        const rSvc = row.dataset.service || "";
+        const rSource = row.dataset.source || "";
+        const rName = row.dataset.filename || "";
+
+        const matchSearch = !searchTerm || rName.includes(searchTerm);
+        const matchCat = catVal === "ALL" || rCat === catVal;
+        const matchSvc = svcVal === "ALL" || rSvc === svcVal;
+        const matchSource = sourceVal === "ALL" || rSource.includes(sourceVal);
+
+        if (matchSearch && matchCat && matchSvc && matchSource) {
+          row.style.display = "grid";
+          visibleCount++;
+        } else {
+          row.style.display = "none";
+        }
+      });
+
+      filterCountBadge.textContent = `Hiển thị: ${visibleCount}/${rows.length} ảnh`;
+
+      // Cập nhật trạng thái active trên các badge danh mục
+      statsItems.querySelectorAll(".stats-badge").forEach(b => {
+        b.classList.toggle("active", b.dataset.cat === catVal);
+      });
+
+      // Cập nhật trạng thái active trên các badge dịch vụ
+      serviceStatsItems.querySelectorAll(".stats-badge").forEach(b => {
+        b.classList.toggle("active", b.dataset.svc === svcVal);
+      });
+    }
+
+    filterSearch.addEventListener("input", applyFilter);
+    filterCategory.addEventListener("change", applyFilter);
+    filterService.addEventListener("change", applyFilter);
+    filterSource.addEventListener("change", applyFilter);
+
+    btnResetFilter.addEventListener("click", () => {
+      filterSearch.value = "";
+      filterCategory.value = "ALL";
+      filterService.value = "ALL";
+      filterSource.value = "ALL";
+      applyFilter();
+    });
 
     // Xuất báo cáo dạng JSON
     btnExportJson.addEventListener("click", () => {
@@ -321,6 +665,7 @@
         timestamp: new Date().toISOString(),
         totalImages: executionHistory.length,
         statistics: currentStats,
+        serviceStatistics: currentServiceStats,
         details: executionHistory
       };
 
@@ -335,8 +680,10 @@
         "STT",
         "Tên tệp",
         "Trạng thái",
-        "Kết quả chính",
+        "Danh mục chính",
         "Mã danh mục",
+        "Dịch vụ chi tiết đề xuất",
+        "Khoảng giá dự kiến",
         "Độ tin cậy (%)",
         "Nguồn quyết định",
         "CLIP Top",
@@ -354,6 +701,8 @@
           item.status,
           escapeCsv(item.predictedLabel),
           escapeCsv(item.categoryId || ""),
+          escapeCsv(item.suggestedServiceName || "Chưa xác định"),
+          escapeCsv(item.estimatedPriceRange || ""),
           item.confidence !== null && item.confidence !== undefined ? (item.confidence * 100).toFixed(1) : "",
           item.decisionSource || "",
           item.clipLabel ? `${escapeCsv(item.clipLabel)} (${(item.clipConfidence * 100).toFixed(1)}%)` : "",
@@ -366,8 +715,14 @@
 
       // Thêm thống kê ở cuối CSV
       csvRows.push("");
-      csvRows.push("--- THỐNG KÊ KẾT QUẢ ---");
+      csvRows.push("--- THỐNG KÊ THEO DANH MỤC ---");
       for (const [k, v] of Object.entries(currentStats)) {
+        csvRows.push(`${escapeCsv(k)},${v} ảnh`);
+      }
+
+      csvRows.push("");
+      csvRows.push("--- THỐNG KÊ THEO DỊCH VỤ ĐỀ XUẤT ---");
+      for (const [k, v] of Object.entries(currentServiceStats)) {
         csvRows.push(`${escapeCsv(k)},${v} ảnh`);
       }
 
