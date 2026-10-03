@@ -18,6 +18,3 @@ import { AdminService } from './admin.service';
   exports: [AdminService],
 })
 export class AdminModule {}
-
-
-

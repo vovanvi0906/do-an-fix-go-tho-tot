@@ -31,4 +31,16 @@ export class UsersService {
   async updateStatus(id, status) {
     return this.usersRepository.updateStatus(id, status);
   }
+
+  async updatePassword(phone, passwordHash) {
+    return this.usersRepository.updatePassword(phone, passwordHash);
+  }
+
+  async markEmailVerified(userId, email) {
+    return this.usersRepository.markEmailVerified(userId, email);
+  }
+
+  async markEmailVerifiedByEmail(email) {
+    return this.usersRepository.markEmailVerifiedByEmail(email);
+  }
 }

@@ -9,6 +9,8 @@ import {
   Platform,
   Image,
   Alert,
+  Modal,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -21,6 +23,7 @@ import {
   Inter_700Bold,
 } from '@expo-google-fonts/inter';
 import { useAuth } from '../../../src/features/auth';
+import { otpService } from '../../../src/features/auth/services/otpService';
 
 const COLORS = {
   primary: '#0084FF',
@@ -40,6 +43,8 @@ const COLORS = {
 export default function EditCustomerProfileScreen() {
   const router = useRouter();
   const { user, updateUser } = useAuth();
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [actionModal, setActionModal] = useState({ visible: false, type: 'email' });
 
   // ─── Font Loading ──────────────────────────────────────────────────────────
   const [fontsLoaded] = useFonts({
@@ -57,9 +62,14 @@ export default function EditCustomerProfileScreen() {
 
   const phone = user?.phone || '0366192248';
   const email = user?.email || 'luhongphucdai@gmail.com';
-  const isPhoneVerified = true;
-  const isEmailVerified = !!user?.email;
+  const isPhoneVerified = !!(user?.isPhoneVerified ?? user?.phoneVerified ?? true);
+  // Trạng thái xác thực email đọc trực tiếp từ dữ liệu User trong Context/PostgreSQL
+  const isEmailVerified = !!(user?.isEmailVerified ?? user?.emailVerified);
   const avatarUrl = user?.avatarUrl || user?.customerProfile?.avatarUrl;
+
+  const openActionModal = (type) => {
+    setActionModal({ visible: true, type });
+  };
 
   const handleUploadAvatar = () => {
     Alert.alert(
@@ -183,12 +193,7 @@ export default function EditCustomerProfileScreen() {
           <TouchableOpacity
             style={styles.fieldRow}
             activeOpacity={0.7}
-            onPress={() =>
-              router.push({
-                pathname: '/(user)/profile/edit-field',
-                params: { field: 'phone', value: phone },
-              })
-            }
+            onPress={() => openActionModal('phone')}
           >
             <View style={styles.fieldLeft}>
               <Text style={styles.fieldLabel}>Số điện thoại</Text>
@@ -220,12 +225,7 @@ export default function EditCustomerProfileScreen() {
           <TouchableOpacity
             style={styles.fieldRow}
             activeOpacity={0.7}
-            onPress={() =>
-              router.push({
-                pathname: '/(user)/profile/edit-field',
-                params: { field: 'email', value: email },
-              })
-            }
+            onPress={() => openActionModal('email')}
           >
             <View style={styles.fieldLeft}>
               <Text style={styles.fieldLabel}>Email</Text>
@@ -252,6 +252,184 @@ export default function EditCustomerProfileScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* ═════════════════════════════════════════════════════════════════════
+          MODAL QUẢN LÝ EMAIL & SỐ ĐIỆN THOẠI (THAY THẾ ALERT MẶC ĐỊNH)
+         ═════════════════════════════════════════════════════════════════════ */}
+      <Modal
+        visible={actionModal.visible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setActionModal({ ...actionModal, visible: false })}
+      >
+        <TouchableWithoutFeedback onPress={() => setActionModal({ ...actionModal, visible: false })}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={styles.modalCard}>
+                {/* Header Icon Circle */}
+                <View
+                  style={[
+                    styles.modalIconCircle,
+                    {
+                      backgroundColor:
+                        (actionModal.type === 'email' ? isEmailVerified : isPhoneVerified)
+                          ? '#ECFDF5'
+                          : '#EFF6FF',
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name={
+                      actionModal.type === 'email'
+                        ? 'mail-outline'
+                        : 'call-outline'
+                    }
+                    size={32}
+                    color={
+                      (actionModal.type === 'email' ? isEmailVerified : isPhoneVerified)
+                        ? COLORS.green
+                        : COLORS.primary
+                    }
+                  />
+                </View>
+
+                {/* Modal Title */}
+                <Text style={styles.modalTitle}>
+                  {actionModal.type === 'email' ? 'Quản lý Email' : 'Quản lý Số điện thoại'}
+                </Text>
+
+                {/* Subtitle Description */}
+                <Text style={styles.modalDesc}>
+                  {(actionModal.type === 'email' ? isEmailVerified : isPhoneVerified)
+                    ? 'Thông tin này đã được xác thực an toàn để bảo vệ tài khoản FixGo của bạn.'
+                    : 'Thông tin này chưa được xác thực. Bạn có thể nhận mã OTP để xác thực ngay.'}
+                </Text>
+
+                {/* Info Card Box */}
+                <View style={styles.modalInfoBox}>
+                  <View style={styles.modalInfoHeader}>
+                    <Text style={styles.modalInfoLabel}>
+                      {actionModal.type === 'email' ? 'Địa chỉ Email' : 'Số điện thoại'}
+                    </Text>
+                    <View
+                      style={[
+                        styles.modalBadge,
+                        (actionModal.type === 'email' ? isEmailVerified : isPhoneVerified)
+                          ? styles.modalBadgeVerified
+                          : styles.modalBadgeUnverified,
+                      ]}
+                    >
+                      <Ionicons
+                        name={
+                          (actionModal.type === 'email' ? isEmailVerified : isPhoneVerified)
+                            ? 'checkmark-circle'
+                            : 'alert-circle'
+                        }
+                        size={14}
+                        color={
+                          (actionModal.type === 'email' ? isEmailVerified : isPhoneVerified)
+                            ? COLORS.green
+                            : '#F59E0B'
+                        }
+                      />
+                      <Text
+                        style={[
+                          styles.modalBadgeText,
+                          (actionModal.type === 'email' ? isEmailVerified : isPhoneVerified)
+                            ? styles.modalBadgeTextVerified
+                            : styles.modalBadgeTextUnverified,
+                        ]}
+                      >
+                        {(actionModal.type === 'email' ? isEmailVerified : isPhoneVerified)
+                          ? 'Đã xác thực'
+                          : 'Chưa xác thực'}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <Text
+                    style={styles.modalInfoValue}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.8}
+                  >
+                    {actionModal.type === 'email' ? email : phone}
+                  </Text>
+                </View>
+
+                {/* Action Buttons */}
+                <View style={styles.modalActionGroup}>
+                  {!(actionModal.type === 'email' ? isEmailVerified : isPhoneVerified) ? (
+                    <>
+                      <TouchableOpacity
+                        style={styles.modalPrimaryBtn}
+                        activeOpacity={0.8}
+                        onPress={() => {
+                          const targetType = actionModal.type;
+                          const targetVal = targetType === 'email' ? email : phone;
+                          setActionModal({ ...actionModal, visible: false });
+                          router.push({
+                            pathname: '/(user)/profile/edit-field',
+                            params: { field: targetType, value: targetVal, autoSend: 'true' },
+                          });
+                        }}
+                      >
+                        <Ionicons name="shield-checkmark-outline" size={18} color={COLORS.white} />
+                        <Text style={styles.modalPrimaryBtnText}>Gửi mã OTP xác thực</Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        style={styles.modalSecondaryBtn}
+                        activeOpacity={0.8}
+                        onPress={() => {
+                          const targetType = actionModal.type;
+                          setActionModal({ ...actionModal, visible: false });
+                          router.push({
+                            pathname: '/(user)/profile/edit-field',
+                            params: { field: targetType, value: '' },
+                          });
+                        }}
+                      >
+                        <Ionicons name="create-outline" size={18} color={COLORS.primary} />
+                        <Text style={styles.modalSecondaryBtnText}>
+                          {actionModal.type === 'email' ? 'Đổi Email khác' : 'Đổi Số điện thoại khác'}
+                        </Text>
+                      </TouchableOpacity>
+                    </>
+                  ) : (
+                    <TouchableOpacity
+                      style={styles.modalPrimaryBtn}
+                      activeOpacity={0.8}
+                      onPress={() => {
+                        const targetType = actionModal.type;
+                        const targetVal = targetType === 'email' ? email : phone;
+                        setActionModal({ ...actionModal, visible: false });
+                        router.push({
+                          pathname: '/(user)/profile/edit-field',
+                          params: { field: targetType, value: targetVal },
+                        });
+                      }}
+                    >
+                      <Ionicons name="create-outline" size={18} color={COLORS.white} />
+                      <Text style={styles.modalPrimaryBtnText}>
+                        {actionModal.type === 'email' ? 'Đổi địa chỉ Email mới' : 'Đổi Số điện thoại mới'}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+
+                  <TouchableOpacity
+                    style={styles.modalCloseBtn}
+                    activeOpacity={0.7}
+                    onPress={() => setActionModal({ ...actionModal, visible: false })}
+                  >
+                    <Text style={styles.modalCloseBtnText}>Đóng</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -415,5 +593,159 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     backgroundColor: '#F1F5F9',
+  },
+
+  // ─── Action Modal Styles (Quản lý Email & SĐT) ─────────────────────────────
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.65)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 380,
+    backgroundColor: COLORS.white,
+    borderRadius: 24,
+    paddingHorizontal: 22,
+    paddingTop: 28,
+    paddingBottom: 18,
+    alignItems: 'center',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.2,
+    shadowRadius: 24,
+    elevation: 8,
+  },
+  modalIconCircle: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontFamily: 'Inter_700Bold',
+    fontWeight: '700',
+    color: COLORS.textDark,
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  modalDesc: {
+    fontSize: 13.5,
+    fontFamily: 'Inter_400Regular',
+    color: COLORS.textSub,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 20,
+    paddingHorizontal: 6,
+  },
+  modalInfoBox: {
+    width: '100%',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 22,
+  },
+  modalInfoHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  modalInfoLabel: {
+    fontSize: 12.5,
+    fontFamily: 'Inter_500Medium',
+    color: COLORS.textSub,
+  },
+  modalInfoValue: {
+    fontSize: 15.5,
+    fontFamily: 'Inter_600SemiBold',
+    fontWeight: '600',
+    color: COLORS.textDark,
+    letterSpacing: 0.2,
+  },
+  modalBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 9,
+    paddingVertical: 4.5,
+    borderRadius: 20,
+    gap: 4,
+  },
+  modalBadgeVerified: {
+    backgroundColor: COLORS.greenLight,
+  },
+  modalBadgeUnverified: {
+    backgroundColor: '#FEF3C7',
+  },
+  modalBadgeText: {
+    fontSize: 11.5,
+    fontFamily: 'Inter_600SemiBold',
+    fontWeight: '600',
+  },
+  modalBadgeTextVerified: {
+    color: COLORS.green,
+  },
+  modalBadgeTextUnverified: {
+    color: '#D97706',
+  },
+  modalActionGroup: {
+    width: '100%',
+    gap: 10,
+  },
+  modalPrimaryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.primary,
+    height: 50,
+    borderRadius: 12,
+    gap: 8,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  modalPrimaryBtnText: {
+    color: COLORS.white,
+    fontSize: 15.5,
+    fontFamily: 'Inter_600SemiBold',
+    fontWeight: '600',
+  },
+  modalSecondaryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.primaryLight,
+    height: 48,
+    borderRadius: 12,
+    gap: 8,
+  },
+  modalSecondaryBtnText: {
+    color: COLORS.primary,
+    fontSize: 15,
+    fontFamily: 'Inter_600SemiBold',
+    fontWeight: '600',
+  },
+  modalCloseBtn: {
+    height: 42,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  modalCloseBtnText: {
+    color: COLORS.textSub,
+    fontSize: 14.5,
+    fontFamily: 'Inter_500Medium',
+    fontWeight: '500',
   },
 });

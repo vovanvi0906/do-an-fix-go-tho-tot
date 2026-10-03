@@ -1,4 +1,9 @@
-import { Injectable, OnModuleInit, OnModuleDestroy, Dependencies } from '@nestjs/common';
+import {
+  Injectable,
+  OnModuleInit,
+  OnModuleDestroy,
+  Dependencies,
+} from '@nestjs/common';
 import { Queue, Worker } from 'bullmq';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../infrastructure/database/prisma.service';
@@ -15,9 +20,17 @@ export class OrderQueueService {
     this.configService = configService;
     this.prisma = prisma;
 
-    const redisHost = this.configService.get('redis.host') || process.env.REDIS_HOST || 'localhost';
-    const redisPort = Number(this.configService.get('redis.port') || process.env.REDIS_PORT || 6379);
-    const redisPassword = this.configService.get('redis.password') || process.env.REDIS_PASSWORD || undefined;
+    const redisHost =
+      this.configService.get('redis.host') ||
+      process.env.REDIS_HOST ||
+      'localhost';
+    const redisPort = Number(
+      this.configService.get('redis.port') || process.env.REDIS_PORT || 6379,
+    );
+    const redisPassword =
+      this.configService.get('redis.password') ||
+      process.env.REDIS_PASSWORD ||
+      undefined;
 
     this.connection = {
       host: redisHost,
@@ -52,9 +65,14 @@ export class OrderQueueService {
         console.warn(`[BullMQ] Job ${job?.id} thất bại:`, err.message);
       });
 
-      console.log('🚀 [BullMQ] Order Matching Queue & Worker đã sẵn sàng hoạt động.');
+      console.log(
+        '🚀 [BullMQ] Order Matching Queue & Worker đã sẵn sàng hoạt động.',
+      );
     } catch (err) {
-      console.warn('⚠️ [BullMQ] Không thể khởi tạo BullMQ (kiểm tra Redis):', err.message);
+      console.warn(
+        '⚠️ [BullMQ] Không thể khởi tạo BullMQ (kiểm tra Redis):',
+        err.message,
+      );
     }
   }
 
@@ -70,7 +88,12 @@ export class OrderQueueService {
    * @param {number} [currentRadius=5] - Bán kính hiện tại (km)
    * @param {number} [delayMs=180000] - Thời gian chờ (3 phút = 180.000 ms)
    */
-  async scheduleRadiusExpansion(orderId, attempt = 1, currentRadius = 5, delayMs = 180000) {
+  async scheduleRadiusExpansion(
+    orderId,
+    attempt = 1,
+    currentRadius = 5,
+    delayMs = 180000,
+  ) {
     if (!this.queue) return;
 
     try {
@@ -97,7 +120,9 @@ export class OrderQueueService {
    */
   async processJob(job) {
     const { orderId, attempt, currentRadius } = job.data;
-    console.log(`🔍 [BullMQ Worker] Đang kiểm tra đơn ${orderId} (attempt: ${attempt})...`);
+    console.log(
+      `🔍 [BullMQ Worker] Đang kiểm tra đơn ${orderId} (attempt: ${attempt})...`,
+    );
 
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
@@ -126,13 +151,21 @@ export class OrderQueueService {
       });
 
       // Bắn tín hiệu WebSocket cho các thợ trong bán kính mới
-      if (this.ordersGateway && typeof this.ordersGateway.broadcastToNearbyWorkers === 'function') {
+      if (
+        this.ordersGateway &&
+        typeof this.ordersGateway.broadcastToNearbyWorkers === 'function'
+      ) {
         this.ordersGateway.broadcastToNearbyWorkers(order, expandedRadius);
       }
 
       // Nếu chưa vượt quá bán kính tối đa 15km, tiếp tục lên lịch cho lần tiếp theo
       if (expandedRadius < 15 && attempt < 3) {
-        await this.scheduleRadiusExpansion(orderId, attempt + 1, expandedRadius, 180000);
+        await this.scheduleRadiusExpansion(
+          orderId,
+          attempt + 1,
+          expandedRadius,
+          180000,
+        );
       } else {
         console.log(
           `⚠️ [BullMQ Timeout] Đơn ${orderId} đã quét đến ${expandedRadius}km (lần ${attempt}) mà chưa có thợ nhận. Thông báo cho khách hàng đặt lịch sau hoặc hủy miễn phí.`,
@@ -145,12 +178,17 @@ export class OrderQueueService {
           },
         });
 
-        if (this.ordersGateway && typeof this.ordersGateway.emitNoWorkerFound === 'function') {
+        if (
+          this.ordersGateway &&
+          typeof this.ordersGateway.emitNoWorkerFound === 'function'
+        ) {
           this.ordersGateway.emitNoWorkerFound(orderId);
         }
       }
     } else {
-      console.log(`✅ [BullMQ] Đơn ${orderId} đã có thợ hoặc trạng thái ${order.status}, bỏ qua.`);
+      console.log(
+        `✅ [BullMQ] Đơn ${orderId} đã có thợ hoặc trạng thái ${order.status}, bỏ qua.`,
+      );
     }
   }
 }

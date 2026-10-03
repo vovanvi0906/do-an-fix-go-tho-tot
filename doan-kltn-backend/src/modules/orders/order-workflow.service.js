@@ -53,11 +53,13 @@ export class OrderWorkflowService {
         });
 
         if (!existingOrder) {
-          throw new NotFoundException(`Không tìm thấy đơn hàng với ID: ${orderId}`);
+          throw new NotFoundException(
+            `Không tìm thấy đơn hàng với ID: ${orderId}`,
+          );
         }
 
         throw new ConflictException(
-          'Đơn hàng đã có thợ khác nhận hoặc không còn ở trạng thái chờ nhận!'
+          'Đơn hàng đã có thợ khác nhận hoặc không còn ở trạng thái chờ nhận!',
         );
       }
 
@@ -113,7 +115,9 @@ export class OrderWorkflowService {
     const order = await this.getOrderOrThrow(orderId);
 
     if (order.workerId !== workerProfileId) {
-      throw new ForbiddenException('Bạn không phải thợ được gán cho đơn hàng này');
+      throw new ForbiddenException(
+        'Bạn không phải thợ được gán cho đơn hàng này',
+      );
     }
 
     OrderTransitionValidator.validateTransition(
@@ -138,7 +142,9 @@ export class OrderWorkflowService {
     const order = await this.getOrderOrThrow(orderId);
 
     if (order.workerId !== workerProfileId) {
-      throw new ForbiddenException('Bạn không phải thợ được gán cho đơn hàng này');
+      throw new ForbiddenException(
+        'Bạn không phải thợ được gán cho đơn hàng này',
+      );
     }
 
     OrderTransitionValidator.validateTransition(
@@ -159,15 +165,24 @@ export class OrderWorkflowService {
   /**
    * ARRIVED -> IN_PROGRESS (Thợ bắt đầu làm việc)
    */
-  async startWork(orderId, workerProfileId, changedByUserId, faceVerified = true) {
+  async startWork(
+    orderId,
+    workerProfileId,
+    changedByUserId,
+    faceVerified = true,
+  ) {
     const order = await this.getOrderOrThrow(orderId);
 
     if (order.workerId !== workerProfileId) {
-      throw new ForbiddenException('Bạn không phải thợ được gán cho đơn hàng này');
+      throw new ForbiddenException(
+        'Bạn không phải thợ được gán cho đơn hàng này',
+      );
     }
 
     if (!faceVerified) {
-      throw new BadRequestException('Cần hoàn thành xác thực khuôn mặt trước khi bắt đầu công việc');
+      throw new BadRequestException(
+        'Cần hoàn thành xác thực khuôn mặt trước khi bắt đầu công việc',
+      );
     }
 
     OrderTransitionValidator.validateTransition(
@@ -193,7 +208,9 @@ export class OrderWorkflowService {
     const order = await this.getOrderOrThrow(orderId);
 
     if (order.workerId !== workerProfileId) {
-      throw new ForbiddenException('Bạn không phải thợ được gán cho đơn hàng này');
+      throw new ForbiddenException(
+        'Bạn không phải thợ được gán cho đơn hàng này',
+      );
     }
 
     OrderTransitionValidator.validateTransition(
@@ -218,7 +235,9 @@ export class OrderWorkflowService {
     const order = await this.getOrderOrThrow(orderId);
 
     if (order.customerId !== customerProfileId) {
-      throw new ForbiddenException('Bạn không có quyền nghiệm thu đơn hàng này');
+      throw new ForbiddenException(
+        'Bạn không có quyền nghiệm thu đơn hàng này',
+      );
     }
 
     OrderTransitionValidator.validateTransition(
@@ -240,7 +259,11 @@ export class OrderWorkflowService {
   /**
    * AWAITING_PAYMENT -> COMPLETED (Thanh toán hoàn tất)
    */
-  async markPaidAndComplete(orderId, changedByUserId, note = 'Đã xác nhận thanh toán và hoàn tất đơn hàng') {
+  async markPaidAndComplete(
+    orderId,
+    changedByUserId,
+    note = 'Đã xác nhận thanh toán và hoàn tất đơn hàng',
+  ) {
     const order = await this.getOrderOrThrow(orderId);
 
     OrderTransitionValidator.validateTransition(
@@ -264,12 +287,18 @@ export class OrderWorkflowService {
   async cancel(orderId, reason, changedByUserId, userRole, profileId = null) {
     const order = await this.getOrderOrThrow(orderId);
 
-    if (userRole === 'CUSTOMER' && profileId && order.customerId !== profileId) {
+    if (
+      userRole === 'CUSTOMER' &&
+      profileId &&
+      order.customerId !== profileId
+    ) {
       throw new ForbiddenException('Bạn không thể hủy đơn hàng của người khác');
     }
 
     if (userRole === 'WORKER' && profileId && order.workerId !== profileId) {
-      throw new ForbiddenException('Bạn không thể hủy đơn hàng không được gán cho bạn');
+      throw new ForbiddenException(
+        'Bạn không thể hủy đơn hàng không được gán cho bạn',
+      );
     }
 
     OrderTransitionValidator.validateTransition(

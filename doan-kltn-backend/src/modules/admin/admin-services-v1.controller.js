@@ -48,12 +48,18 @@ export class AdminServicesV1Controller {
    */
   @Get()
   @ApiOperation({
-    summary: 'Lấy danh sách dịch vụ (hỗ trợ search, categoryId, status, page, limit)',
-    description: 'Truy vấn danh sách gói dịch vụ kèm thông tin danh mục và số lượng đơn hàng liên kết.',
+    summary:
+      'Lấy danh sách dịch vụ (hỗ trợ search, categoryId, status, page, limit)',
+    description:
+      'Truy vấn danh sách gói dịch vụ kèm thông tin danh mục và số lượng đơn hàng liên kết.',
   })
   @ApiQuery({ name: 'search', required: false, type: String })
   @ApiQuery({ name: 'categoryId', required: false, type: String })
-  @ApiQuery({ name: 'status', required: false, enum: ['ACTIVE', 'INACTIVE', 'ALL'] })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: ['ACTIVE', 'INACTIVE', 'ALL'],
+  })
   @ApiQuery({ name: 'isActive', required: false, type: String })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
@@ -112,7 +118,9 @@ export class AdminServicesV1Controller {
    * Bật/Tắt nhanh trạng thái hoạt động của dịch vụ
    */
   @Patch(':id/toggle')
-  @ApiOperation({ summary: 'Bật/Tắt nhanh trạng thái hoạt động của dịch vụ (Toggle)' })
+  @ApiOperation({
+    summary: 'Bật/Tắt nhanh trạng thái hoạt động của dịch vụ (Toggle)',
+  })
   @ApiParam({ name: 'id', description: 'ID gói dịch vụ' })
   @Bind(Param('id'))
   async toggleServiceStatus(id) {
@@ -126,7 +134,12 @@ export class AdminServicesV1Controller {
   @Delete(':id')
   @ApiOperation({ summary: 'Xóa hoặc vô hiệu hóa dịch vụ' })
   @ApiParam({ name: 'id', description: 'ID gói dịch vụ' })
-  @ApiQuery({ name: 'force', required: false, type: Boolean, description: 'Xóa vĩnh viễn' })
+  @ApiQuery({
+    name: 'force',
+    required: false,
+    type: Boolean,
+    description: 'Xóa vĩnh viễn',
+  })
   @Bind(Param('id'), Query('force'))
   async deleteService(id, force) {
     return this.adminService.deleteService(id, force);

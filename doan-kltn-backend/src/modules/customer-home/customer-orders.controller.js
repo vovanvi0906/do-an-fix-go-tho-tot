@@ -49,7 +49,8 @@ export class CustomerOrdersController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Lấy thông tin đơn hàng thành công (hoặc null nếu không có đơn nào đang chạy)',
+    description:
+      'Lấy thông tin đơn hàng thành công (hoặc null nếu không có đơn nào đang chạy)',
   })
   @Bind(Req())
   async getActiveOrder(req) {

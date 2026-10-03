@@ -22,24 +22,25 @@ import {
   Inter_700Bold,
 } from '@expo-google-fonts/inter';
 import { useAuth } from '../../src/features/auth';
+import { otpService } from '../../src/features/auth/services/otpService';
 
 // ─── Design Tokens (Figma FIXGO – Customer Signup) ──────────────────────────
 const COLORS = {
-  primary: '#0084FF',        // Màu xanh dương nút hành động & viền focus Figma
+  primary: '#0084FF',
   primaryDark: '#0066CC',
   darkBlue: '#1A365D',
   white: '#FFFFFF',
-  bgGray: '#F3F4F6',         // Màu nền ô input mặc định
-  borderGray: '#E5E7EB',     // Viền xám mặc định
+  bgGray: '#F3F4F6',
+  borderGray: '#E5E7EB',
   textDark: '#111827',
   textSub: '#6B7280',
-  red: '#EF4444',            // Error state
-  green: '#10B981',          // Success state
+  red: '#EF4444',
+  green: '#10B981',
   facebookBlue: '#1877F2',
   googleRed: '#EA4335',
 };
 
-// ─── Component: Lá Cờ Việt Nam (Vẽ vector chuẩn xác, không bị lỗi text "VN") ───
+// ─── Component: Lá Cờ Việt Nam Vector ───────────────────────────────────────
 const VietnamFlag = () => (
   <View style={styles.flagBox}>
     <View style={styles.vnFlag}>
@@ -60,16 +61,28 @@ export default function RegisterCustomerScreen() {
     Inter_700Bold,
   });
 
-  // ─── Step Management (1: Phone, 2: OTP, 3: Password, 4: Name/Email, 5: Success)
+  /**
+   * Step Flow:
+   * Step 1: Nhập Số điện thoại (Gửi Phone OTP)
+   * Step 2: Nhập & Xác thực OTP Số điện thoại
+   * Step 3: Tạo Mật khẩu
+   * Step 4: Nhập Họ, Tên & Email (Gửi Email OTP)
+   * Step 5: Nhập & Xác thực OTP Email
+   * Step 6: Thành công / Đang chuyển hướng
+   */
   const [step, setStep] = useState(1);
 
   // Form State
   const [phone, setPhone] = useState('');
   const [isPhoneFocused, setIsPhoneFocused] = useState(false);
 
+  // Phone OTP State
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [focusedOtpIndex, setFocusedOtpIndex] = useState(null);
+  const [countdown, setCountdown] = useState(60);
+  const otpInputs = useRef([]);
 
+  // Password State
   const [password, setPassword] = useState('');
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -77,22 +90,26 @@ export default function RegisterCustomerScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const [firstName, setFirstName] = useState(''); // Họ
+  // Info & Email State
+  const [firstName, setFirstName] = useState('');
   const [isFirstNameFocused, setIsFirstNameFocused] = useState(false);
-  const [lastName, setLastName] = useState('');   // Tên
+  const [lastName, setLastName] = useState('');
   const [isLastNameFocused, setIsLastNameFocused] = useState(false);
   const [email, setEmail] = useState('');
   const [isEmailFocused, setIsEmailFocused] = useState(false);
+
+  // Email OTP State
+  const [emailOtp, setEmailOtp] = useState(['', '', '', '', '', '']);
+  const [focusedEmailOtpIndex, setFocusedEmailOtpIndex] = useState(null);
+  const [emailCountdown, setEmailCountdown] = useState(60);
+  const emailOtpInputs = useRef([]);
 
   // UI / Error State
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [hasError, setHasError] = useState(false);
-  const [countdown, setCountdown] = useState(60);
 
-  const otpInputs = useRef([]);
-
-  // Timer countdown cho OTP
+  // Timer countdown cho Phone OTP (Step 2)
   useEffect(() => {
     let timer;
     if (step === 2 && countdown > 0) {
@@ -101,6 +118,15 @@ export default function RegisterCustomerScreen() {
     return () => clearInterval(timer);
   }, [step, countdown]);
 
+  // Timer countdown cho Email OTP (Step 5)
+  useEffect(() => {
+    let timer;
+    if (step === 5 && emailCountdown > 0) {
+      timer = setInterval(() => setEmailCountdown((prev) => prev - 1), 1000);
+    }
+    return () => clearInterval(timer);
+  }, [step, emailCountdown]);
+
   // ─── Password Validation Rules ──────────────────────────────────────────────
   const hasMinLength = password.length >= 8;
   const hasLetter = /[a-zA-Z]/.test(password);
@@ -108,8 +134,8 @@ export default function RegisterCustomerScreen() {
   const isPasswordValid = hasMinLength && hasLetter && hasDigit;
   const isPasswordMatch = confirmPassword.length > 0 && password === confirmPassword;
 
-  // ─── Step 1: Handle Phone Submit ────────────────────────────────────────────
-  const handlePhoneSubmit = () => {
+  // ─── Step 1: Gửi OTP Số điện thoại ─────────────────────────────────────────
+  const handlePhoneSubmit = async () => {
     setErrorMessage('');
     setHasError(false);
 
@@ -125,22 +151,34 @@ export default function RegisterCustomerScreen() {
       return;
     }
 
-    setCountdown(60);
-    setStep(2);
+    try {
+      setIsLoading(true);
+      console.log('📱 [RegisterCustomer] Gửi SMS OTP đến số:', cleanPhone);
+      await otpService.sendPhoneOtp(cleanPhone);
+      setCountdown(60);
+      setOtp(['', '', '', '', '', '']);
+      setStep(2);
+    } catch (err) {
+      console.error('❌ [RegisterCustomer] Gửi Phone OTP lỗi:', err);
+      setHasError(true);
+      setErrorMessage(err.message || 'Không thể gửi mã OTP. Vui lòng thử lại!');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // ─── Step 2: Handle OTP Change & Submit ─────────────────────────────────────
+  // ─── Step 2: Xử lý và Xác thực Phone OTP ────────────────────────────────────
   const handleOtpChange = (val, idx) => {
+    const digit = val.replace(/[^0-9]/g, '');
     const newOtp = [...otp];
-    newOtp[idx] = val;
+    newOtp[idx] = digit;
     setOtp(newOtp);
     if (errorMessage) {
       setErrorMessage('');
       setHasError(false);
     }
 
-    // Auto-focus ô tiếp theo
-    if (val && idx < 5) {
+    if (digit && idx < 5) {
       otpInputs.current[idx + 1]?.focus();
     }
   };
@@ -151,19 +189,50 @@ export default function RegisterCustomerScreen() {
     }
   };
 
-  const handleOtpSubmit = () => {
+  const handleOtpSubmit = async () => {
     const fullOtp = otp.join('');
     if (fullOtp.length < 6) {
       setHasError(true);
-      setErrorMessage('Mã không hợp lệ');
+      setErrorMessage('Vui lòng nhập đủ 6 chữ số mã OTP');
       return;
     }
-    setErrorMessage('');
-    setHasError(false);
-    setStep(3);
+
+    try {
+      setIsLoading(true);
+      setErrorMessage('');
+      setHasError(false);
+      const cleanPhone = phone.trim().replace(/\s/g, '');
+      console.log('📱 [RegisterCustomer] Xác thực Phone OTP:', { phone: cleanPhone, code: fullOtp });
+      await otpService.verifyPhoneOtp(cleanPhone, fullOtp, 'register');
+      setStep(3);
+    } catch (err) {
+      console.error('❌ [RegisterCustomer] Verify Phone OTP lỗi:', err);
+      setHasError(true);
+      setErrorMessage(err.message || 'Mã OTP không chính xác hoặc đã hết hạn');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // ─── Step 3: Handle Password Submit ─────────────────────────────────────────
+  const handleResendPhoneOtp = async () => {
+    if (countdown > 0 || isLoading) return;
+    try {
+      setIsLoading(true);
+      setErrorMessage('');
+      setHasError(false);
+      const cleanPhone = phone.trim().replace(/\s/g, '');
+      await otpService.sendPhoneOtp(cleanPhone);
+      setOtp(['', '', '', '', '', '']);
+      setCountdown(60);
+    } catch (err) {
+      setHasError(true);
+      setErrorMessage(err.message || 'Gửi lại mã thất bại');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ─── Step 3: Tạo Mật Khẩu ──────────────────────────────────────────────────
   const handlePasswordSubmit = () => {
     setErrorMessage('');
     setHasError(false);
@@ -192,8 +261,8 @@ export default function RegisterCustomerScreen() {
     setStep(4);
   };
 
-  // ─── Step 4: Handle Name/Email & Complete Registration ───────────────────────
-  const handleFinalSubmit = async () => {
+  // ─── Step 4: Nhập Họ Tên & Email -> Bắn Email OTP ──────────────────────────
+  const handleSendEmailOtp = async () => {
     setErrorMessage('');
     setHasError(false);
 
@@ -207,48 +276,133 @@ export default function RegisterCustomerScreen() {
       setErrorMessage('Vui lòng nhập Tên');
       return;
     }
+    const cleanEmail = email.trim();
+    if (!cleanEmail) {
+      setHasError(true);
+      setErrorMessage('Vui lòng nhập địa chỉ Email');
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail)) {
+      setHasError(true);
+      setErrorMessage('Địa chỉ Email không đúng định dạng');
+      return;
+    }
 
-    // Nếu chưa có email, tạo email tạm từ số điện thoại hoặc yêu cầu nhập
-    const userEmail = email.trim() || `${phone.trim()}@fixgo.customer.vn`;
+    try {
+      setIsLoading(true);
+      console.log('📧 [RegisterCustomer] Gửi Email OTP tới:', cleanEmail);
+      await otpService.sendEmailOtp(cleanEmail);
+      setEmailCountdown(60);
+      setEmailOtp(['', '', '', '', '', '']);
+      setStep(5);
+    } catch (err) {
+      console.error('❌ [RegisterCustomer] Gửi Email OTP lỗi:', err);
+      setHasError(true);
+      setErrorMessage(err.message || 'Không thể gửi mã xác nhận qua Email. Vui lòng thử lại!');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ─── Step 5: Nhập & Xác thực OTP Email -> Hoàn tất tạo tài khoản ────────────
+  const handleEmailOtpChange = (val, idx) => {
+    const digit = val.replace(/[^0-9]/g, '');
+    const newOtp = [...emailOtp];
+    newOtp[idx] = digit;
+    setEmailOtp(newOtp);
+    if (errorMessage) {
+      setErrorMessage('');
+      setHasError(false);
+    }
+
+    if (digit && idx < 5) {
+      emailOtpInputs.current[idx + 1]?.focus();
+    }
+  };
+
+  const handleEmailOtpKeyPress = (e, idx) => {
+    if (e.nativeEvent.key === 'Backspace' && !emailOtp[idx] && idx > 0) {
+      emailOtpInputs.current[idx - 1]?.focus();
+    }
+  };
+
+  const handleResendEmailOtp = async () => {
+    if (emailCountdown > 0 || isLoading) return;
+    try {
+      setIsLoading(true);
+      setErrorMessage('');
+      setHasError(false);
+      const cleanEmail = email.trim();
+      await otpService.sendEmailOtp(cleanEmail);
+      setEmailOtp(['', '', '', '', '', '']);
+      setEmailCountdown(60);
+    } catch (err) {
+      setHasError(true);
+      setErrorMessage(err.message || 'Gửi lại mã thất bại');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyEmailAndComplete = async () => {
+    const fullOtp = emailOtp.join('');
+    if (fullOtp.length < 6) {
+      setHasError(true);
+      setErrorMessage('Vui lòng nhập đủ 6 chữ số mã OTP Email');
+      return;
+    }
+
+    const cleanEmail = email.trim();
+    const cleanPhone = phone.trim().replace(/\s/g, '');
     const fullName = `${firstName.trim()} ${lastName.trim()}`;
 
     try {
       setIsLoading(true);
-      setStep(5); // Show loading spinner (Figma Success Signup)
+      setErrorMessage('');
+      setHasError(false);
 
-      console.log('🚀 [FixGo Register Customer] Gửi đăng ký:', {
+      // 1. Xác thực OTP Email
+      console.log('📧 [RegisterCustomer] Xác thực Email OTP:', { email: cleanEmail, code: fullOtp });
+      await otpService.verifyEmailOtp(cleanEmail, fullOtp);
+
+      // 2. Chuyển sang Step 6 (Đang tạo tài khoản)
+      setStep(6);
+
+      // 3. Đăng ký tài khoản vào cơ sở dữ liệu
+      console.log('🚀 [FixGo Register Customer] Tạo tài khoản:', {
         fullName,
-        email: userEmail,
-        phone: phone.trim(),
+        email: cleanEmail,
+        phone: cleanPhone,
       });
 
-      // Gọi API đăng ký khách hàng
       await registerCustomer({
         fullName,
-        email: userEmail,
-        phone: phone.trim(),
+        email: cleanEmail,
+        phone: cleanPhone,
         password,
       });
 
-      console.log('🎉 [FixGo Register Customer] Hoàn tất đăng ký & điều hướng');
+      console.log('🎉 [FixGo Register Customer] Đăng ký thành công!');
       router.replace('/(user)/(tabs)');
-    } catch (error) {
-      console.error('❌ [FixGo Register Customer Error]:', error);
+    } catch (err) {
+      console.error('❌ [FixGo Register Customer Error]:', err);
       setIsLoading(false);
-      setStep(4); // Quay lại bước 4 để sửa
+      setStep(5);
       setHasError(true);
-      setErrorMessage(error.message || 'Đăng ký thất bại. Vui lòng thử lại!');
+      setErrorMessage(err.message || 'Xác thực hoặc tạo tài khoản thất bại. Vui lòng thử lại!');
     }
   };
 
   // ═════════════════════════════════════════════════════════════════════════════
   // RENDER: Loading / Success Signup Screen (Figma "Success Signup")
   // ═════════════════════════════════════════════════════════════════════════════
-  if (step === 5 || isLoading) {
+  if (step === 6) {
     return (
       <View style={styles.loadingScreen}>
         <StatusBar style="dark" />
         <ActivityIndicator size="large" color={COLORS.primary} />
+        <Text style={styles.loadingText}>Đang thiết lập tài khoản của bạn...</Text>
       </View>
     );
   }
@@ -272,13 +426,12 @@ export default function RegisterCustomerScreen() {
             {step === 1 && (
               <View style={styles.stepContainer}>
                 <Text style={styles.headerTitle}>Nhập số điện thoại</Text>
+                <Text style={styles.headerSubtitle}>
+                  Mã OTP 6 số sẽ được gửi qua SMS để xác thực số điện thoại của bạn.
+                </Text>
 
-                {/* Input Row: Cờ VN + Khung nhập số điện thoại bao bọc toàn bộ */}
                 <View style={styles.phoneInputRow}>
-                  {/* Khung cờ Việt Nam (vẽ chuẩn cờ đỏ sao vàng) */}
                   <VietnamFlag />
-
-                  {/* Khung nhập số điện thoại: Đường viền xanh dương bao bọc toàn bộ khi focus */}
                   <View
                     style={[
                       styles.phoneInputWrapper,
@@ -305,28 +458,29 @@ export default function RegisterCustomerScreen() {
                   </View>
                 </View>
 
-                {/* Nút Tiếp tục (Figma: solid blue) */}
-                <TouchableOpacity
-                  style={styles.primaryBtn}
-                  onPress={handlePhoneSubmit}
-                  activeOpacity={0.85}
-                >
-                  <Text style={styles.primaryBtnText}>Tiếp tục</Text>
-                </TouchableOpacity>
-
-                {/* Thông báo lỗi (Figma: text đỏ dưới nút) */}
                 {errorMessage ? (
                   <Text style={styles.errorText}>{errorMessage}</Text>
                 ) : null}
 
-                {/* Divider: hoặc */}
+                <TouchableOpacity
+                  style={[styles.primaryBtn, isLoading && styles.btnDisabled]}
+                  onPress={handlePhoneSubmit}
+                  disabled={isLoading}
+                  activeOpacity={0.85}
+                >
+                  {isLoading ? (
+                    <ActivityIndicator color={COLORS.white} />
+                  ) : (
+                    <Text style={styles.primaryBtnText}>Tiếp tục</Text>
+                  )}
+                </TouchableOpacity>
+
                 <View style={styles.dividerRow}>
                   <View style={styles.dividerLine} />
                   <Text style={styles.dividerText}>hoặc</Text>
                   <View style={styles.dividerLine} />
                 </View>
 
-                {/* Nút Social: Facebook & Google (Figma: Rounded full width) */}
                 <TouchableOpacity
                   style={styles.socialFullBtn}
                   activeOpacity={0.8}
@@ -338,11 +492,7 @@ export default function RegisterCustomerScreen() {
                     color={COLORS.facebookBlue}
                     style={styles.socialIcon}
                   />
-                  <Text
-                    style={styles.socialFullText}
-                    numberOfLines={1}
-                    allowFontScaling={false}
-                  >
+                  <Text style={styles.socialFullText}>
                     Đăng nhập bằng Facebook
                   </Text>
                 </TouchableOpacity>
@@ -358,16 +508,11 @@ export default function RegisterCustomerScreen() {
                     color={COLORS.googleRed}
                     style={styles.socialIcon}
                   />
-                  <Text
-                    style={styles.socialFullText}
-                    numberOfLines={1}
-                    allowFontScaling={false}
-                  >
+                  <Text style={styles.socialFullText}>
                     Đăng nhập bằng Google
                   </Text>
                 </TouchableOpacity>
 
-                {/* Footer: Đã có tài khoản? Đăng nhập ngay */}
                 <View style={styles.footerRow}>
                   <Text style={styles.footerText}>Đã có tài khoản? </Text>
                   <Link href="/(auth)/login" asChild>
@@ -380,7 +525,7 @@ export default function RegisterCustomerScreen() {
             )}
 
             {/* ══════════════════════════════════════════════════════════════════
-                BƯỚC 2: NHẬP MÃ OTP 6 CHỮ SỐ (Figma Screen 72 / 45)
+                BƯỚC 2: NHẬP MÃ OTP SĐT 6 CHỮ SỐ (Figma Screen 72 / 45)
                ══════════════════════════════════════════════════════════════════ */}
             {step === 2 && (
               <View style={styles.stepContainer}>
@@ -389,7 +534,6 @@ export default function RegisterCustomerScreen() {
                   {phone ? `+84 ${phone.trim().slice(0, 2)}*****${phone.trim().slice(-4)}` : '+84'}
                 </Text>
 
-                {/* 6 Ô nhập OTP */}
                 <View style={styles.otpContainer}>
                   {otp.map((digit, idx) => (
                     <TextInput
@@ -414,7 +558,6 @@ export default function RegisterCustomerScreen() {
                   ))}
                 </View>
 
-                {/* Thông báo lỗi OTP */}
                 {hasError && errorMessage ? (
                   <View style={styles.errorOtpRow}>
                     <Ionicons name="close-circle" size={16} color={COLORS.red} />
@@ -422,15 +565,14 @@ export default function RegisterCustomerScreen() {
                   </View>
                 ) : null}
 
-                {/* Nút Gửi lại mã: mờ xám khi có thời gian đếm ngược, sáng xanh khi hết giờ */}
                 <TouchableOpacity
                   style={[
                     styles.resendBtn,
                     countdown > 0 ? styles.resendBtnDisabled : styles.resendBtnActive,
                   ]}
-                  disabled={countdown > 0}
+                  disabled={countdown > 0 || isLoading}
                   activeOpacity={0.8}
-                  onPress={() => setCountdown(60)}
+                  onPress={handleResendPhoneOtp}
                 >
                   <Text
                     style={[
@@ -442,7 +584,6 @@ export default function RegisterCustomerScreen() {
                   </Text>
                 </TouchableOpacity>
 
-                {/* Navigation Row: Back (<-) & Next (Tiếp ->) */}
                 <View style={styles.navRow}>
                   <TouchableOpacity
                     style={styles.backCircleBtn}
@@ -454,13 +595,21 @@ export default function RegisterCustomerScreen() {
                   <TouchableOpacity
                     style={[
                       styles.nextBtn,
-                      otp.join('').length === 6 ? styles.nextBtnActive : styles.nextBtnDisabled,
+                      otp.join('').length === 6 && !isLoading
+                        ? styles.nextBtnActive
+                        : styles.nextBtnDisabled,
                     ]}
                     onPress={handleOtpSubmit}
-                    disabled={otp.join('').length !== 6}
+                    disabled={otp.join('').length !== 6 || isLoading}
                   >
-                    <Text style={styles.nextBtnText}>Tiếp</Text>
-                    <Ionicons name="arrow-forward" size={18} color={COLORS.white} />
+                    {isLoading ? (
+                      <ActivityIndicator color={COLORS.white} size="small" />
+                    ) : (
+                      <>
+                        <Text style={styles.nextBtnText}>Tiếp</Text>
+                        <Ionicons name="arrow-forward" size={18} color={COLORS.white} />
+                      </>
+                    )}
                   </TouchableOpacity>
                 </View>
               </View>
@@ -476,7 +625,6 @@ export default function RegisterCustomerScreen() {
                   Mật khẩu phải có ít nhất 8 ký tự, bao gồm ít nhất một chữ cái và một chữ số
                 </Text>
 
-                {/* Input: Nhập mật khẩu */}
                 <View
                   style={[
                     styles.inputWrapperWhite,
@@ -506,7 +654,7 @@ export default function RegisterCustomerScreen() {
                   </TouchableOpacity>
                 </View>
 
-                {/* Checklist điều kiện mật khẩu (Figma) */}
+                {/* Checklist */}
                 <View style={styles.checklistContainer}>
                   <View style={styles.checklistItem}>
                     <Ionicons
@@ -557,7 +705,6 @@ export default function RegisterCustomerScreen() {
                   </View>
                 </View>
 
-                {/* Input: Xác nhận lại mật khẩu */}
                 <View
                   style={[
                     styles.inputWrapperWhite,
@@ -586,7 +733,6 @@ export default function RegisterCustomerScreen() {
                   </TouchableOpacity>
                 </View>
 
-                {/* Trạng thái xác nhận mật khẩu (Figma: Mật khẩu chính xác / không khớp) */}
                 {confirmPassword.length > 0 && (
                   <View style={styles.matchStatusRow}>
                     <Ionicons
@@ -609,7 +755,6 @@ export default function RegisterCustomerScreen() {
                   <Text style={styles.errorText}>{errorMessage}</Text>
                 ) : null}
 
-                {/* Navigation Row: Back (<-) & Next (Tiếp ->) */}
                 <View style={styles.navRow}>
                   <TouchableOpacity
                     style={styles.backCircleBtn}
@@ -636,14 +781,15 @@ export default function RegisterCustomerScreen() {
             )}
 
             {/* ══════════════════════════════════════════════════════════════════
-                BƯỚC 4: NHẬP HỌ VÀ TÊN (Figma Screen 79 - 81)
+                BƯỚC 4: NHẬP HỌ TÊN VÀ EMAIL (Xác thực Email OTP)
                ══════════════════════════════════════════════════════════════════ */}
             {step === 4 && (
               <View style={styles.stepContainer}>
-                <Text style={styles.headerTitle}>Nhập họ tên và gmail</Text>
-                <Text style={styles.headerSubtitle}>Cho chúng tôi biết cách gọi bạn và gửi thông tin xác nhận đơn hàng nhé</Text>
+                <Text style={styles.headerTitle}>Nhập họ tên và email</Text>
+                <Text style={styles.headerSubtitle}>
+                  Mã OTP sẽ được gửi tới Email để xác thực quyền sở hữu trước khi hoàn tất đăng ký.
+                </Text>
 
-                {/* 2 Ô nhập Họ và Tên nằm ngang (Figma) */}
                 <View style={styles.nameRow}>
                   <View
                     style={[
@@ -688,7 +834,7 @@ export default function RegisterCustomerScreen() {
                   </View>
                 </View>
 
-                {/* Ô nhập Email tùy chọn / cần thiết cho API Backend */}
+                {/* Input Email */}
                 <View
                   style={[
                     styles.inputWrapperWhite,
@@ -701,7 +847,10 @@ export default function RegisterCustomerScreen() {
                     placeholder="Email (vd: example@gmail.com)"
                     placeholderTextColor={COLORS.textSub}
                     value={email}
-                    onChangeText={setEmail}
+                    onChangeText={(val) => {
+                      setEmail(val);
+                      if (errorMessage) setErrorMessage('');
+                    }}
                     onFocus={() => setIsEmailFocused(true)}
                     onBlur={() => setIsEmailFocused(false)}
                     keyboardType="email-address"
@@ -713,7 +862,6 @@ export default function RegisterCustomerScreen() {
                   <Text style={styles.errorText}>{errorMessage}</Text>
                 ) : null}
 
-                {/* Navigation Row: Back (<-) & Hoàn tất (Tiếp ->) */}
                 <View style={styles.navRow}>
                   <TouchableOpacity
                     style={styles.backCircleBtn}
@@ -725,15 +873,117 @@ export default function RegisterCustomerScreen() {
                   <TouchableOpacity
                     style={[
                       styles.nextBtn,
-                      firstName.trim() && lastName.trim()
+                      firstName.trim() && lastName.trim() && email.trim() && !isLoading
                         ? styles.nextBtnActive
                         : styles.nextBtnDisabled,
                     ]}
-                    onPress={handleFinalSubmit}
-                    disabled={!firstName.trim() || !lastName.trim()}
+                    onPress={handleSendEmailOtp}
+                    disabled={!firstName.trim() || !lastName.trim() || !email.trim() || isLoading}
                   >
-                    <Text style={styles.nextBtnText}>Hoàn tất</Text>
-                    <Ionicons name="arrow-forward" size={18} color={COLORS.white} />
+                    {isLoading ? (
+                      <ActivityIndicator color={COLORS.white} size="small" />
+                    ) : (
+                      <>
+                        <Text style={styles.nextBtnText}>Gửi mã Email</Text>
+                        <Ionicons name="arrow-forward" size={18} color={COLORS.white} />
+                      </>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+
+            {/* ══════════════════════════════════════════════════════════════════
+                BƯỚC 5: NHẬP MÃ OTP EMAIL & HOÀN TẤT ĐĂNG KÝ
+               ══════════════════════════════════════════════════════════════════ */}
+            {step === 5 && (
+              <View style={styles.stepContainer}>
+                <View style={styles.emailIconBox}>
+                  <Ionicons name="mail-outline" size={32} color={COLORS.primary} />
+                </View>
+
+                <Text style={styles.headerTitle}>Xác thực Email của bạn</Text>
+                <Text style={styles.headerSubtitle}>
+                  Vui lòng nhập mã OTP 6 số đã được gửi đến email{'\n'}
+                  <Text style={styles.emailHighlight}>{email.trim()}</Text>
+                </Text>
+
+                <View style={styles.otpContainer}>
+                  {emailOtp.map((digit, idx) => (
+                    <TextInput
+                      key={idx}
+                      ref={(ref) => (emailOtpInputs.current[idx] = ref)}
+                      style={[
+                        styles.otpBox,
+                        focusedEmailOtpIndex === idx && styles.otpBoxFocused,
+                        digit ? styles.otpBoxFilled : null,
+                        hasError && styles.otpBoxError,
+                      ]}
+                      value={digit}
+                      onChangeText={(val) => handleEmailOtpChange(val, idx)}
+                      onKeyPress={(e) => handleEmailOtpKeyPress(e, idx)}
+                      onFocus={() => setFocusedEmailOtpIndex(idx)}
+                      onBlur={() => setFocusedEmailOtpIndex(null)}
+                      keyboardType="number-pad"
+                      maxLength={1}
+                      textAlign="center"
+                      autoFocus={idx === 0}
+                    />
+                  ))}
+                </View>
+
+                {hasError && errorMessage ? (
+                  <View style={styles.errorOtpRow}>
+                    <Ionicons name="close-circle" size={16} color={COLORS.red} />
+                    <Text style={styles.errorOtpText}>{errorMessage}</Text>
+                  </View>
+                ) : null}
+
+                <TouchableOpacity
+                  style={[
+                    styles.resendBtn,
+                    emailCountdown > 0 ? styles.resendBtnDisabled : styles.resendBtnActive,
+                  ]}
+                  disabled={emailCountdown > 0 || isLoading}
+                  activeOpacity={0.8}
+                  onPress={handleResendEmailOtp}
+                >
+                  <Text
+                    style={[
+                      styles.resendBtnText,
+                      emailCountdown > 0 ? styles.resendBtnTextDisabled : styles.resendBtnTextActive,
+                    ]}
+                  >
+                    {emailCountdown > 0 ? `Gửi lại mã: ${emailCountdown}s` : 'Gửi lại mã'}
+                  </Text>
+                </TouchableOpacity>
+
+                <View style={styles.navRow}>
+                  <TouchableOpacity
+                    style={styles.backCircleBtn}
+                    onPress={() => setStep(4)}
+                  >
+                    <Ionicons name="arrow-back" size={20} color={COLORS.textDark} />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.nextBtn,
+                      emailOtp.join('').length === 6 && !isLoading
+                        ? styles.nextBtnActive
+                        : styles.nextBtnDisabled,
+                    ]}
+                    onPress={handleVerifyEmailAndComplete}
+                    disabled={emailOtp.join('').length !== 6 || isLoading}
+                  >
+                    {isLoading ? (
+                      <ActivityIndicator color={COLORS.white} size="small" />
+                    ) : (
+                      <>
+                        <Text style={styles.nextBtnText}>Hoàn tất</Text>
+                        <Ionicons name="checkmark-circle-outline" size={18} color={COLORS.white} />
+                      </>
+                    )}
                   </TouchableOpacity>
                 </View>
               </View>
@@ -754,6 +1004,14 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 15,
+    fontFamily: 'Inter_500Medium',
+    color: COLORS.textSub,
+    textAlign: 'center',
   },
   container: {
     flex: 1,
@@ -776,6 +1034,16 @@ const styles = StyleSheet.create({
     maxWidth: 440,
     alignSelf: 'center',
   },
+  emailIconBox: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#EBF5FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'center',
+    marginBottom: 16,
+  },
   headerTitle: {
     fontSize: 22,
     fontFamily: 'Inter_700Bold',
@@ -787,8 +1055,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
     color: COLORS.textSub,
-    marginBottom: 28,
+    marginBottom: 24,
     lineHeight: 20,
+  },
+  emailHighlight: {
+    fontFamily: 'Inter_600SemiBold',
+    color: COLORS.textDark,
   },
 
   // ─── Phone Input Row (Step 1) ───────────────────────────────────────────────
@@ -857,7 +1129,7 @@ const styles = StyleSheet.create({
     ...(Platform.OS === 'web' ? { outlineStyle: 'none' } : {}),
   },
 
-  // ─── Primary Button (Tiếp tục) ──────────────────────────────────────────────
+  // ─── Primary Button ────────────────────────────────────────────────────────
   primaryBtn: {
     backgroundColor: COLORS.primary,
     height: 50,
@@ -865,6 +1137,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
+  },
+  btnDisabled: {
+    backgroundColor: '#9CA3AF',
   },
   primaryBtnText: {
     color: COLORS.white,
@@ -899,7 +1174,7 @@ const styles = StyleSheet.create({
     color: COLORS.textSub,
   },
 
-  // ─── Social Full Width Buttons (Figma) ──────────────────────────────────────
+  // ─── Social Full Width Buttons ──────────────────────────────────────────────
   socialFullBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -920,7 +1195,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_500Medium',
     color: COLORS.textDark,
     textAlign: 'center',
-    includeFontPadding: false,
   },
   footerRow: {
     flexDirection: 'row',
@@ -940,7 +1214,7 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
   },
 
-  // ─── OTP Styles (Step 2) ────────────────────────────────────────────────────
+  // ─── OTP Styles ─────────────────────────────────────────────────────────────
   otpContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -998,13 +1272,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
     borderRadius: 8,
     alignSelf: 'center',
-    marginBottom: 40,
+    marginBottom: 32,
   },
   resendBtnDisabled: {
-    backgroundColor: '#D1D5DB', // Mờ xám giống Figma
+    backgroundColor: '#D1D5DB',
   },
   resendBtnActive: {
-    backgroundColor: COLORS.primary, // Xanh sáng có thể bấm
+    backgroundColor: COLORS.primary,
   },
   resendBtnText: {
     fontSize: 14,
@@ -1012,10 +1286,10 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   resendBtnTextDisabled: {
-    color: '#6B7280', // Text xám khi đếm ngược
+    color: '#6B7280',
   },
   resendBtnTextActive: {
-    color: COLORS.white, // Text trắng khi kích hoạt
+    color: COLORS.white,
   },
 
   // ─── Input Wrapper Standard ─────────────────────────────────────────────────
@@ -1097,7 +1371,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 32,
+    marginTop: 24,
   },
   backCircleBtn: {
     width: 46,

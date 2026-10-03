@@ -235,7 +235,11 @@ export class OrdersRepository {
   }
 
   async create(orderData, changedByUserId = null) {
-    const { initialStatus = 'SEARCHING', historyNote = 'Khởi tạo đơn hàng mới', ...restData } = orderData;
+    const {
+      initialStatus = 'SEARCHING',
+      historyNote = 'Khởi tạo đơn hàng mới',
+      ...restData
+    } = orderData;
 
     return this.prisma.$transaction(async (tx) => {
       const order = await tx.order.create({
@@ -262,7 +266,11 @@ export class OrdersRepository {
     });
   }
 
-  async updateStatusWithHistory(orderId, newStatus, { updateData = {}, note = null, changedByUserId = null } = {}) {
+  async updateStatusWithHistory(
+    orderId,
+    newStatus,
+    { updateData = {}, note = null, changedByUserId = null } = {},
+  ) {
     return this.prisma.$transaction(async (tx) => {
       const order = await tx.order.update({
         where: { id: orderId },

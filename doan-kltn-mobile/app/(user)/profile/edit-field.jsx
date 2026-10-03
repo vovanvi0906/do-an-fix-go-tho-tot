@@ -10,6 +10,7 @@ import {
   Platform,
   Alert,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons, FontAwesome } from '@expo/vector-icons';
@@ -21,7 +22,7 @@ import {
   Inter_600SemiBold,
   Inter_700Bold,
 } from '@expo-google-fonts/inter';
-import { useAuth } from '../../../src/features/auth';
+import { useAuth, otpService } from '../../../src/features/auth';
 
 const COLORS = {
   primary: '#0084FF',
@@ -55,14 +56,19 @@ export default function EditFieldScreen() {
   const initialValue = typeof params.value === 'string' ? params.value : '';
 
   // ─── Flow Steps: 'input' -> 'otp' -> 'password' ───────────────────────────
-  // Đối với phone và email: Cần luồng 3 bước (Nhập thông tin -> Nhập OTP 6 số -> Nhập mật khẩu hiện tại)
   const isVerificationRequired = fieldType === 'phone' || fieldType === 'email';
   const [currentStep, setCurrentStep] = useState(
     fieldType === 'password' ? 'password' : 'input'
   );
 
   const [inputValue, setInputValue] = useState(initialValue);
-  const [otpValue, setOtpValue] = useState('');
+  // 6 ô OTP đồng bộ 100% với giao diện SignUp
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [focusedOtpIndex, setFocusedOtpIndex] = useState(null);
+  const otpInputs = useRef([]);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [hasError, setHasError] = useState(false);
+
   const [passwordValue, setPasswordValue] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -71,6 +77,34 @@ export default function EditFieldScreen() {
   // Bộ đếm ngược gửi lại OTP (60s)
   const [countdown, setCountdown] = useState(60);
   const [timerActive, setTimerActive] = useState(false);
+
+  // Tự động gửi OTP và chuyển thẳng sang step OTP khi được yêu cầu từ màn hình Profile
+  useEffect(() => {
+    if (params.autoSend === 'true' && params.value) {
+      (async () => {
+        try {
+          setIsSubmitting(true);
+          setErrorMessage('');
+          setHasError(false);
+          if (fieldType === 'phone') {
+            const cleanPhone = params.value.trim().replace(/\s+/g, '');
+            await otpService.sendPhoneOtp(cleanPhone);
+          } else if (fieldType === 'email') {
+            await otpService.sendEmailOtp(params.value.trim());
+          }
+          setOtp(['', '', '', '', '', '']);
+          setCountdown(60);
+          setTimerActive(true);
+          setCurrentStep('otp');
+        } catch (err) {
+          setHasError(true);
+          setErrorMessage(err.message || 'Không thể gửi mã xác nhận.');
+        } finally {
+          setIsSubmitting(false);
+        }
+      })();
+    }
+  }, [params.autoSend]);
 
   useEffect(() => {
     let interval = null;
@@ -160,10 +194,17 @@ export default function EditFieldScreen() {
         Alert.alert('Số điện thoại không hợp lệ', 'Vui lòng nhập số điện thoại hợp lệ tại Việt Nam (10 chữ số).');
         return;
       }
-      // Bắt đầu đếm ngược và chuyển sang bước OTP
-      setCountdown(60);
-      setTimerActive(true);
-      setCurrentStep('otp');
+      try {
+        setIsSubmitting(true);
+        await otpService.sendPhoneOtp(cleanPhone);
+        setCountdown(60);
+        setTimerActive(true);
+        setCurrentStep('otp');
+      } catch (err) {
+        Alert.alert('Lỗi gửi OTP', err.message || 'Không thể gửi mã xác minh.');
+      } finally {
+        setIsSubmitting(false);
+      }
       return;
     }
 
@@ -173,10 +214,20 @@ export default function EditFieldScreen() {
         Alert.alert('Email không hợp lệ', 'Vui lòng nhập đúng định dạng email (vd: name@gmail.com).');
         return;
       }
-      // Bắt đầu đếm ngược và chuyển sang bước OTP
-      setCountdown(60);
-      setTimerActive(true);
-      setCurrentStep('otp');
+      try {
+        setIsSubmitting(true);
+        setErrorMessage('');
+        setHasError(false);
+        await otpService.sendEmailOtp(val);
+        setOtp(['', '', '', '', '', '']);
+        setCountdown(60);
+        setTimerActive(true);
+        setCurrentStep('otp');
+      } catch (err) {
+        Alert.alert('Lỗi gửi OTP', err.message || 'Không thể gửi mã xác minh.');
+      } finally {
+        setIsSubmitting(false);
+      }
       return;
     }
 
@@ -184,22 +235,79 @@ export default function EditFieldScreen() {
     await executeSaveProfile(val);
   };
 
-  // ─── BƯỚC 2: XỬ LÝ XÁC THỰC MÃ OTP ─────────────────────────────────────────
-  const handleOtpSubmit = () => {
-    if (otpValue.trim().length < 6) {
-      Alert.alert('Mã OTP chưa đủ', 'Vui lòng nhập đủ 6 chữ số mã xác minh.');
+  // ─── BƯỚC 2: XỬ LÝ 6 Ô MÃ OTP (ĐỒNG BỘ 100% LUỒNG SIGNUP) ────────────────────
+  const handleOtpChange = (val, idx) => {
+    const digit = val.replace(/[^0-9]/g, '');
+    const newOtp = [...otp];
+    newOtp[idx] = digit;
+    setOtp(newOtp);
+    if (errorMessage) {
+      setErrorMessage('');
+      setHasError(false);
+    }
+    if (digit && idx < 5) {
+      otpInputs.current[idx + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyPress = (e, idx) => {
+    if (e.nativeEvent.key === 'Backspace' && !otp[idx] && idx > 0) {
+      otpInputs.current[idx - 1]?.focus();
+    }
+  };
+
+  const handleOtpSubmit = async () => {
+    const fullOtp = otp.join('');
+    if (fullOtp.length < 6) {
+      setHasError(true);
+      setErrorMessage('Vui lòng nhập đủ 6 chữ số mã xác nhận');
       return;
     }
 
-    // Chuyển sang Bước 3: Xác minh mật khẩu hiện tại (Khớp 100% giao diện Image 2)
-    setCurrentStep('password');
+    try {
+      setIsSubmitting(true);
+      setErrorMessage('');
+      setHasError(false);
+
+      if (fieldType === 'phone') {
+        const cleanPhone = inputValue.trim().replace(/\s+/g, '');
+        await otpService.verifyPhoneOtp(cleanPhone, fullOtp, 'register');
+        setCurrentStep('password');
+      } else if (fieldType === 'email') {
+        const cleanEmail = inputValue.trim();
+        await otpService.verifyEmailOtp(cleanEmail, fullOtp);
+        // Với xác thực email, hoàn tất và cập nhật profile ngay lập tức
+        await executeSaveProfile(cleanEmail);
+      }
+    } catch (err) {
+      setHasError(true);
+      setErrorMessage(err.message || 'Mã OTP không chính xác hoặc đã hết hạn.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleResendOtp = () => {
-    if (countdown > 0) return;
-    setCountdown(60);
-    setTimerActive(true);
-    Alert.alert('Đã gửi lại mã', `Mã xác minh mới đã được gửi đến ${inputValue.trim()}.`);
+  const handleResendOtp = async () => {
+    if (countdown > 0 || isSubmitting) return;
+    try {
+      setIsSubmitting(true);
+      setErrorMessage('');
+      setHasError(false);
+      if (fieldType === 'phone') {
+        const cleanPhone = inputValue.trim().replace(/\s+/g, '');
+        await otpService.sendPhoneOtp(cleanPhone);
+      } else if (fieldType === 'email') {
+        await otpService.sendEmailOtp(inputValue.trim());
+      }
+      setOtp(['', '', '', '', '', '']);
+      setCountdown(60);
+      setTimerActive(true);
+    } catch (err) {
+      setHasError(true);
+      setErrorMessage(err.message || 'Không thể gửi lại mã xác minh lúc này.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // ─── BƯỚC 3: XỬ LÝ XÁC MINH MẬT KHẨU HIỆN TẠI & LƯU THÔNG TIN ──────────────
@@ -240,6 +348,7 @@ export default function EditFieldScreen() {
         fullName: newFullName,
         phone: newPhone,
         email: newEmail,
+        ...(fieldType === 'email' ? { isEmailVerified: true, emailVerified: true } : {}),
       });
 
       const fieldNameSuccess =
@@ -358,51 +467,78 @@ export default function EditFieldScreen() {
           )}
 
           {/* ═══════════════════════════════════════════════════════════════════
-              BƯỚC 2: FORM NHẬP MÃ OTP 6 SỐ
+              BƯỚC 2: FORM NHẬP MÃ OTP 6 SỐ (ĐỒNG BỘ 100% GIAO DIỆN SIGNUP)
              ═══════════════════════════════════════════════════════════════════ */}
           {currentStep === 'otp' && (
-            <View>
-              <Text style={styles.stepTitle}>Nhập mã xác nhận</Text>
-              <Text style={styles.stepSubDesc}>
-                Mã xác minh gồm 6 chữ số đã được gửi tới{' '}
-                <Text style={styles.boldTargetText}>{inputValue.trim()}</Text>
-              </Text>
-
-              <View
-                style={[
-                  styles.inputWrapper,
-                  styles.otpInputWrapper,
-                  isFocused && styles.inputWrapperFocused,
-                ]}
-              >
-                <TextInput
-                  style={[styles.textInput, styles.otpTextInput]}
-                  value={otpValue}
-                  onChangeText={(val) => {
-                    const cleaned = val.replace(/\D/g, '').slice(0, 6);
-                    setOtpValue(cleaned);
-                  }}
-                  placeholder="• • • • • •"
-                  placeholderTextColor="#94A3B8"
-                  keyboardType="number-pad"
-                  maxLength={6}
-                  autoFocus
-                  onFocus={() => setIsFocused(true)}
-                  onBlur={() => setIsFocused(false)}
+            <View style={styles.otpStepContainer}>
+              <View style={styles.iconCircleBox}>
+                <Ionicons
+                  name={fieldType === 'email' ? 'mail-outline' : 'phone-portrait-outline'}
+                  size={32}
+                  color={COLORS.primary}
                 />
               </View>
 
-              <View style={styles.resendOtpRow}>
-                {countdown > 0 ? (
-                  <Text style={styles.countdownText}>
-                    Gửi lại mã sau <Text style={styles.countdownHighlight}>{countdown}s</Text>
-                  </Text>
-                ) : (
-                  <TouchableOpacity onPress={handleResendOtp} activeOpacity={0.7}>
-                    <Text style={styles.resendBtnText}>Gửi lại mã xác minh</Text>
-                  </TouchableOpacity>
-                )}
+              <Text style={styles.headerTitle}>
+                {fieldType === 'email' ? 'Xác thực Email của bạn' : 'Xác thực Số điện thoại'}
+              </Text>
+              <Text style={styles.headerSubtitle}>
+                Vui lòng nhập mã OTP 6 số đã được gửi đến {fieldType === 'email' ? 'email' : 'số điện thoại'}{'\n'}
+                <Text style={styles.targetHighlight}>{inputValue.trim()}</Text>
+              </Text>
+
+              {/* 6 Ô NHẬP MÃ OTP CHUẨN ĐỒNG BỘ FIGMA */}
+              <View style={styles.otpContainer}>
+                {otp.map((digit, idx) => (
+                  <TextInput
+                    key={idx}
+                    ref={(ref) => (otpInputs.current[idx] = ref)}
+                    style={[
+                      styles.otpBox,
+                      focusedOtpIndex === idx && styles.otpBoxFocused,
+                      digit ? styles.otpBoxFilled : null,
+                      hasError && styles.otpBoxError,
+                    ]}
+                    value={digit}
+                    onChangeText={(val) => handleOtpChange(val, idx)}
+                    onKeyPress={(e) => handleOtpKeyPress(e, idx)}
+                    onFocus={() => setFocusedOtpIndex(idx)}
+                    onBlur={() => setFocusedOtpIndex(null)}
+                    keyboardType="number-pad"
+                    maxLength={1}
+                    textAlign="center"
+                    autoFocus={idx === 0}
+                  />
+                ))}
               </View>
+
+              {/* THÔNG BÁO LỖI VỚI ICON */}
+              {hasError && errorMessage ? (
+                <View style={styles.errorOtpRow}>
+                  <Ionicons name="close-circle" size={16} color={COLORS.red} />
+                  <Text style={styles.errorOtpText}>{errorMessage}</Text>
+                </View>
+              ) : null}
+
+              {/* NÚT ĐẾM NGƯỢC GỬI LẠI MÃ */}
+              <TouchableOpacity
+                style={[
+                  styles.resendBtn,
+                  countdown > 0 ? styles.resendBtnDisabled : styles.resendBtnActive,
+                ]}
+                disabled={countdown > 0 || isSubmitting}
+                activeOpacity={0.8}
+                onPress={handleResendOtp}
+              >
+                <Text
+                  style={[
+                    styles.resendBtnText,
+                    countdown > 0 ? styles.resendBtnTextDisabled : styles.resendBtnTextActive,
+                  ]}
+                >
+                  {countdown > 0 ? `Gửi lại mã: ${countdown}s` : 'Gửi lại mã'}
+                </Text>
+              </TouchableOpacity>
             </View>
           )}
 
@@ -451,48 +587,69 @@ export default function EditFieldScreen() {
         </ScrollView>
 
         {/* ═════════════════════════════════════════════════════════════════════
-            BOTTOM ACTION BUTTON: Nút đen chuẩn Figma (Screen 100 - 104 & Image 2)
+            BOTTOM ACTION BUTTON: Nút chuẩn đồng bộ FixGo
            ═════════════════════════════════════════════════════════════════════ */}
         <View style={styles.bottomBar}>
           {currentStep === 'input' && (
             <TouchableOpacity
               style={[
-                styles.blackActionBtn,
-                !inputValue.trim() && styles.blackActionBtnDisabled,
+                styles.primaryActionBtn,
+                !inputValue.trim() && styles.primaryActionBtnDisabled,
               ]}
               onPress={handleInputSubmit}
               disabled={!inputValue.trim() || isSubmitting}
               activeOpacity={0.8}
             >
-              <Text style={styles.blackActionBtnText}>{config.btnText}</Text>
+              {isSubmitting ? (
+                <ActivityIndicator color={COLORS.white} size="small" />
+              ) : (
+                <View style={styles.btnContentRow}>
+                  <Text style={styles.primaryActionBtnText}>{config.btnText}</Text>
+                  <Ionicons name="arrow-forward" size={18} color={COLORS.white} />
+                </View>
+              )}
             </TouchableOpacity>
           )}
 
           {currentStep === 'otp' && (
             <TouchableOpacity
               style={[
-                styles.blackActionBtn,
-                otpValue.length < 6 && styles.blackActionBtnDisabled,
+                styles.primaryActionBtn,
+                otp.join('').length < 6 && styles.primaryActionBtnDisabled,
               ]}
               onPress={handleOtpSubmit}
-              disabled={otpValue.length < 6 || isSubmitting}
+              disabled={otp.join('').length < 6 || isSubmitting}
               activeOpacity={0.8}
             >
-              <Text style={styles.blackActionBtnText}>Xác nhận mã</Text>
+              {isSubmitting ? (
+                <ActivityIndicator color={COLORS.white} size="small" />
+              ) : (
+                <View style={styles.btnContentRow}>
+                  <Text style={styles.primaryActionBtnText}>Tiếp tục</Text>
+                  <Ionicons name="arrow-forward" size={18} color={COLORS.white} />
+                </View>
+              )}
             </TouchableOpacity>
           )}
 
           {currentStep === 'password' && (
             <TouchableOpacity
               style={[
-                styles.blackActionBtn,
-                !passwordValue.trim() && styles.blackActionBtnDisabled,
+                styles.primaryActionBtn,
+                !passwordValue.trim() && styles.primaryActionBtnDisabled,
               ]}
               onPress={handlePasswordVerifyAndSave}
               disabled={!passwordValue.trim() || isSubmitting}
               activeOpacity={0.8}
             >
-              <Text style={styles.blackActionBtnText}>Verify</Text>
+              {isSubmitting ? (
+                <ActivityIndicator color={COLORS.white} size="small" />
+              ) : (
+                <View style={styles.btnContentRow}>
+                  <Text style={styles.primaryActionBtnText}>Xác nhận & Lưu</Text>
+                  <Ionicons name="checkmark-circle" size={18} color={COLORS.white} />
+                </View>
+              )}
             </TouchableOpacity>
           )}
         </View>
@@ -598,56 +755,119 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
 
-  // ─── Step 2 Styles (OTP) ───────────────────────────────────────────────────
-  stepTitle: {
-    fontSize: 20,
+  // ─── Step 2 Styles (OTP) – Đồng bộ 100% Figma SignUp ─────────────────────
+  otpStepContainer: {
+    alignItems: 'center',
+    paddingTop: 8,
+  },
+  iconCircleBox: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#EFF6FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+    alignSelf: 'center',
+  },
+  headerTitle: {
+    fontSize: 22,
     fontFamily: 'Inter_700Bold',
     fontWeight: '700',
     color: COLORS.textDark,
-    marginBottom: 6,
+    marginBottom: 8,
+    textAlign: 'center',
   },
-  stepSubDesc: {
+  headerSubtitle: {
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
     color: COLORS.textSub,
-    lineHeight: 20,
-    marginBottom: 20,
+    lineHeight: 22,
+    marginBottom: 24,
+    textAlign: 'center',
   },
-  boldTargetText: {
+  targetHighlight: {
     fontFamily: 'Inter_600SemiBold',
     fontWeight: '600',
     color: COLORS.textDark,
   },
-  otpInputWrapper: {
-    height: 56,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
+  otpContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginVertical: 16,
+    paddingHorizontal: 4,
   },
-  otpTextInput: {
+  otpBox: {
+    width: 48,
+    height: 54,
+    borderRadius: 12,
+    backgroundColor: '#E5E7EB',
     fontSize: 22,
     fontFamily: 'Inter_700Bold',
     fontWeight: '700',
+    color: COLORS.textDark,
+    borderWidth: 1.5,
+    borderColor: 'transparent',
     textAlign: 'center',
-    letterSpacing: 10,
+    textAlignVertical: 'center',
+    paddingHorizontal: 0,
+    paddingVertical: 0,
+    ...(Platform.OS === 'web'
+      ? {
+          outlineStyle: 'none',
+          textAlign: 'center',
+          lineHeight: '50px',
+        }
+      : {}),
   },
-  resendOtpRow: {
+  otpBoxFocused: {
+    borderColor: COLORS.primary,
+    backgroundColor: COLORS.white,
+  },
+  otpBoxFilled: {
+    borderColor: COLORS.primary,
+    backgroundColor: '#EFF6FF',
+  },
+  otpBoxError: {
+    borderColor: COLORS.red,
+    backgroundColor: '#FEF2F2',
+  },
+  errorOtpRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
+    justifyContent: 'center',
+    gap: 6,
+    marginBottom: 16,
   },
-  countdownText: {
-    fontSize: 13.5,
-    fontFamily: 'Inter_400Regular',
-    color: COLORS.textSub,
+  errorOtpText: {
+    color: COLORS.red,
+    fontSize: 13,
+    fontFamily: 'Inter_500Medium',
   },
-  countdownHighlight: {
-    fontFamily: 'Inter_600SemiBold',
-    color: COLORS.primary,
+  resendBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 22,
+    borderRadius: 8,
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
+  resendBtnDisabled: {
+    backgroundColor: '#D1D5DB',
+  },
+  resendBtnActive: {
+    backgroundColor: COLORS.primary,
   },
   resendBtnText: {
     fontSize: 14,
-    fontFamily: 'Inter_600SemiBold',
-    color: COLORS.primary,
+    fontFamily: 'Inter_500Medium',
+    fontWeight: '500',
+  },
+  resendBtnTextDisabled: {
+    color: '#6B7280',
+  },
+  resendBtnTextActive: {
+    color: COLORS.white,
   },
 
   // ─── Step 3 Styles (Verify Password - Image 2 Match) ───────────────────────
@@ -661,15 +881,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#F3F4F6',
-    borderRadius: 8,
-    borderWidth: 1,
+    borderRadius: 12,
+    borderWidth: 1.5,
     borderColor: '#E5E7EB',
-    height: 48,
-    paddingHorizontal: 12,
+    height: 52,
+    paddingHorizontal: 14,
     marginBottom: 12,
   },
   passwordInputBoxFocused: {
-    borderColor: '#000000',
+    borderColor: COLORS.primary,
     backgroundColor: COLORS.white,
   },
   passwordTextInput: {
@@ -691,7 +911,7 @@ const styles = StyleSheet.create({
     lineHeight: 19,
   },
 
-  // ─── Bottom Bar ────────────────────────────────────────────────────────────
+  // ─── Bottom Bar & Modern Primary Action Buttons ────────────────────────────
   bottomBar: {
     paddingHorizontal: 24,
     paddingVertical: 18,
@@ -699,20 +919,33 @@ const styles = StyleSheet.create({
     borderTopColor: '#F1F5F9',
     backgroundColor: COLORS.white,
   },
-  blackActionBtn: {
-    backgroundColor: COLORS.blackBtn,
-    height: 50,
-    borderRadius: 10,
+  primaryActionBtn: {
+    backgroundColor: COLORS.primary,
+    height: 52,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  blackActionBtnDisabled: {
-    backgroundColor: '#94A3B8',
+  primaryActionBtnDisabled: {
+    backgroundColor: '#93C5FD',
+    shadowOpacity: 0,
+    elevation: 0,
   },
-  blackActionBtnText: {
+  primaryActionBtnText: {
     color: COLORS.white,
-    fontSize: 15.5,
+    fontSize: 16,
     fontFamily: 'Inter_600SemiBold',
     fontWeight: '600',
+  },
+  btnContentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
   },
 });

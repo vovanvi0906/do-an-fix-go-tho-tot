@@ -12,12 +12,12 @@ import { PrismaService } from '../../infrastructure/database/prisma.service';
 /**
  * OrderGateway (Namespace: /orders)
  * Quản lý kết nối Socket.IO thời gian thực cho luồng đặt đơn:
- * 
+ *
  * Server -> Client:
  * - order:status_changed   { orderId, status, timestamp }
  * - worker:location_update { orderId, lat, lng }
  * - order:matched          { orderId, worker: {...} }
- * 
+ *
  * Client -> Server:
  * - worker:update_location { orderId, lat, lng }  (throttle tối đa 1 lần / 3 giây)
  * - order:join             { orderId }            (join room khi mở màn hình theo dõi đơn)
@@ -46,14 +46,20 @@ export class OrderGateway {
   }
 
   afterInit(server) {
-    this.logger.log('📡 [WebSocket Gateway] OrderGateway initialized on namespace /orders');
+    this.logger.log(
+      '📡 [WebSocket Gateway] OrderGateway initialized on namespace /orders',
+    );
 
     // Thiết lập Redis Subscriber nếu có cụm phân tán
     try {
       const redisClient = this.redisService?.getClient();
       if (redisClient) {
         const subClient = redisClient.duplicate();
-        subClient.subscribe('order:broadcast:new', 'order:broadcast:status', 'order:broadcast:location');
+        subClient.subscribe(
+          'order:broadcast:new',
+          'order:broadcast:status',
+          'order:broadcast:location',
+        );
         subClient.on('message', (channel, message) => {
           try {
             const payload = JSON.parse(message);
@@ -62,13 +68,19 @@ export class OrderGateway {
             } else if (channel === 'order:broadcast:status') {
               this.emitStatusChanged(payload.orderId, payload.status);
             } else if (channel === 'order:broadcast:location') {
-              this.emitWorkerLocationUpdate(payload.orderId, payload.lat, payload.lng);
+              this.emitWorkerLocationUpdate(
+                payload.orderId,
+                payload.lat,
+                payload.lng,
+              );
             }
           } catch (e) {
             this.logger.error('Lỗi parse message từ Redis PubSub:', e);
           }
         });
-        this.logger.log('⚡ [Redis PubSub] Subscribed to order channels on namespace /orders');
+        this.logger.log(
+          '⚡ [Redis PubSub] Subscribed to order channels on namespace /orders',
+        );
       }
     } catch (err) {
       this.logger.warn('⚠️ [Redis PubSub Warning]:', err.message);
@@ -158,7 +170,10 @@ export class OrderGateway {
     const { orderId, lat, lng, workerId } = data || {};
 
     if (!orderId || lat === undefined || lng === undefined) {
-      return { status: 'error', message: 'Thiếu thông tin orderId, lat hoặc lng' };
+      return {
+        status: 'error',
+        message: 'Thiếu thông tin orderId, lat hoặc lng',
+      };
     }
 
     const parsedLat = parseFloat(lat);
@@ -191,13 +206,15 @@ export class OrderGateway {
     // Cập nhật tọa độ thợ vào database nền tảng (nếu có thông tin thợ)
     try {
       if (workerId) {
-        await this.prisma.workerProfile.update({
-          where: { id: workerId },
-          data: {
-            currentLat: parsedLat,
-            currentLng: parsedLng,
-          },
-        }).catch(() => {});
+        await this.prisma.workerProfile
+          .update({
+            where: { id: workerId },
+            data: {
+              currentLat: parsedLat,
+              currentLng: parsedLng,
+            },
+          })
+          .catch(() => {});
       }
     } catch (e) {
       // Bỏ qua lỗi DB phụ để không làm chậm luồng realtime
@@ -229,7 +246,9 @@ export class OrderGateway {
     };
 
     const roomName = `order:${orderId}`;
-    this.logger.log(`📢 [Emit order:status_changed] Đơn ${orderId} -> ${status}`);
+    this.logger.log(
+      `📢 [Emit order:status_changed] Đơn ${orderId} -> ${status}`,
+    );
 
     if (this.server) {
       this.server.to(roomName).emit('order:status_changed', payload);
@@ -241,7 +260,9 @@ export class OrderGateway {
         try {
           if (typeof this.server.in === 'function') {
             this.server.in(roomName).socketsLeave(roomName);
-            this.logger.log(`🧹 [Room Cleanup] Đã giải phóng room ${roomName} sau khi hoàn tất trạng thái ${status}`);
+            this.logger.log(
+              `🧹 [Room Cleanup] Đã giải phóng room ${roomName} sau khi hoàn tất trạng thái ${status}`,
+            );
           }
         } catch (e) {
           // Socket.IO cleanup fallback
@@ -288,7 +309,9 @@ export class OrderGateway {
     };
 
     const roomName = `order:${orderId}`;
-    this.logger.log(`🎉 [Emit order:matched] Đơn ${orderId} khớp với thợ: ${payload.worker.fullName}`);
+    this.logger.log(
+      `🎉 [Emit order:matched] Đơn ${orderId} khớp với thợ: ${payload.worker.fullName}`,
+    );
 
     if (this.server) {
       this.server.to(roomName).emit('order:matched', payload);
@@ -303,7 +326,10 @@ export class OrderGateway {
   emitPriceAdjusted(orderId, payload) {
     if (!orderId) return;
     const roomName = `order:${orderId}`;
-    this.logger.log(`💰 [Emit order:price_adjusted] Đơn ${orderId} điều chỉnh giá:`, payload);
+    this.logger.log(
+      `💰 [Emit order:price_adjusted] Đơn ${orderId} điều chỉnh giá:`,
+      payload,
+    );
     if (this.server) {
       this.server.to(roomName).emit('order:price_adjusted', {
         orderId,
@@ -319,11 +345,14 @@ export class OrderGateway {
   emitNoWorkerFound(orderId) {
     if (!orderId) return;
     const roomName = `order:${orderId}`;
-    this.logger.log(`⚠️ [Emit order:no_worker_found] Đơn ${orderId} không tìm thấy thợ sau bán kính mở rộng`);
+    this.logger.log(
+      `⚠️ [Emit order:no_worker_found] Đơn ${orderId} không tìm thấy thợ sau bán kính mở rộng`,
+    );
     if (this.server) {
       this.server.to(roomName).emit('order:no_worker_found', {
         orderId,
-        message: 'Hệ thống chưa tìm thấy thợ khả dụng gần bạn trong khu vực này.',
+        message:
+          'Hệ thống chưa tìm thấy thợ khả dụng gần bạn trong khu vực này.',
         canScheduleLater: true,
         canCancelFree: true,
         timestamp: new Date().toISOString(),
@@ -333,7 +362,9 @@ export class OrderGateway {
 
   broadcastNewOrderToWorkers(workers, orderData) {
     if (!workers || workers.length === 0) return;
-    this.logger.log(`📡 [Emit order.new] Bắn tín hiệu đơn ${orderData?.id} tới ${workers.length} thợ`);
+    this.logger.log(
+      `📡 [Emit order.new] Bắn tín hiệu đơn ${orderData?.id} tới ${workers.length} thợ`,
+    );
 
     if (this.server) {
       this.server.emit('order.new', {
