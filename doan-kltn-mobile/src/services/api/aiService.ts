@@ -9,6 +9,10 @@ import { apiClient, API_BASE_URL } from './apiClient';
 export interface AiDiagnosisResponse {
   suggestedCategoryId: string;
   categoryName: string;
+  suggestedServiceId?: string | null;
+  suggestedServiceName?: string | null;
+  suggestedServiceConfidence?: number | null;
+  estimatedPriceRange?: { min: number; max: number; formatted?: string } | null;
   confidence: number;
   detectedLabels: string[];
   estimatedPrice: { min: number; max: number };
@@ -35,12 +39,20 @@ export async function diagnoseIssueImage(
     });
 
     if (response) {
-      const minPrice = response.estimatedPriceMin || 150000;
-      const maxPrice = response.estimatedPriceMax || 250000;
+      const minPrice = response.estimatedPriceMin || response.estimatedPriceRange?.min || 150000;
+      const maxPrice = response.estimatedPriceMax || response.estimatedPriceRange?.max || 250000;
 
       return {
         suggestedCategoryId: response.suggestedCategoryId || 'cat-dien-nuoc',
         categoryName: response.suggestedCategoryName || 'Sửa điện - nước gia đình',
+        suggestedServiceId: response.suggestedServiceId || null,
+        suggestedServiceName: response.suggestedServiceName || null,
+        suggestedServiceConfidence: response.suggestedServiceConfidence || null,
+        estimatedPriceRange: response.estimatedPriceRange || {
+          min: minPrice,
+          max: maxPrice,
+          formatted: `${minPrice.toLocaleString('vi-VN')} đ ~ ${maxPrice.toLocaleString('vi-VN')} đ`,
+        },
         confidence: response.confidence || 0.90,
         detectedLabels: response.detectedLabels || ['thiết_bị_gia_đình'],
         estimatedPrice: { min: minPrice, max: maxPrice },
@@ -60,6 +72,8 @@ export async function diagnoseIssueImage(
 
   let categoryId = 'sua-dien';
   let categoryName = 'Sửa điện gia đình';
+  let serviceId = 'thay-aptomat-cb';
+  let serviceName = 'Xử lý chập điện / Thay CB Aptomat';
   let labels = ['chập_aptomat', 'tia_lửa_điện', 'cầu_dao_quá_tải'];
   let minP = 150000;
   let maxP = 220000;
@@ -68,13 +82,17 @@ export async function diagnoseIssueImage(
   if (descLower.includes('nước') || descLower.includes('ống') || descLower.includes('vòi') || uriLower.includes('water') || uriLower.includes('leak')) {
     categoryId = 'sua-nuoc';
     categoryName = 'Sửa ống nước & Rò rỉ';
+    serviceId = 'sua-voi-nuoc-ro-ri';
+    serviceName = 'Sửa vòi nước rò rỉ / Thay vòi sen tắm';
     labels = ['rò_rỉ_ống_nước', 'hỏng_vòi_van', 'áp_lực_yếu'];
-    minP = 120000;
-    maxP = 180000;
+    minP = 100000;
+    maxP = 220000;
     noteText = 'Phát hiện rò rỉ đường ống nước sinh hoạt và nứt mối nối. Cần thợ thay thế gioăng cao su & hàn ống.';
   } else if (descLower.includes('lạnh') || descLower.includes('điều hòa') || descLower.includes('máy lạnh') || uriLower.includes('ac') || uriLower.includes('air')) {
     categoryId = 'dien-lanh';
     categoryName = 'Bảo dưỡng & Sửa Điện lạnh';
+    serviceId = 've-sinh-may-lanh';
+    serviceName = 'Vệ sinh bảo dưỡng máy lạnh / Bơm gas R32';
     labels = ['bụi_dàn_lạnh', 'chảy_nước_máng', 'thiếu_gas_r32'];
     minP = 200000;
     maxP = 350000;
@@ -82,6 +100,8 @@ export async function diagnoseIssueImage(
   } else if (descLower.includes('thiết bị') || descLower.includes('máy giặt') || descLower.includes('tủ lạnh')) {
     categoryId = 'thiet-bi';
     categoryName = 'Sửa chữa Đồ gia dụng';
+    serviceId = 'sua-may-giat';
+    serviceName = 'Sửa bo mạch & động cơ máy giặt';
     labels = ['hỏng_bo_mạch', 'động_cơ_kêu', 'không_vắt'];
     minP = 180000;
     maxP = 280000;
@@ -91,6 +111,14 @@ export async function diagnoseIssueImage(
   return {
     suggestedCategoryId: categoryId,
     categoryName,
+    suggestedServiceId: serviceId,
+    suggestedServiceName: serviceName,
+    suggestedServiceConfidence: 0.90,
+    estimatedPriceRange: {
+      min: minP,
+      max: maxP,
+      formatted: `${minP.toLocaleString('vi-VN')} đ ~ ${maxP.toLocaleString('vi-VN')} đ`,
+    },
     confidence: 0.93,
     detectedLabels: labels,
     estimatedPrice: { min: minP, max: maxP },

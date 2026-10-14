@@ -382,6 +382,26 @@ export default function AiScanModal({
                       ))}
                     </View>
                   )}
+
+                  {/* Thẻ Dịch vụ kỹ thuật đề xuất */}
+                  {diagnosisResult.suggestedServiceName && (
+                    <View style={styles.serviceDetailBox}>
+                      <View style={styles.serviceDetailHeader}>
+                        <View style={styles.serviceTag}>
+                          <Ionicons name="construct" size={12} color="#047857" style={{ marginRight: 4 }} />
+                          <Text style={styles.serviceTagText}>Dịch vụ đề xuất</Text>
+                        </View>
+                        {diagnosisResult.suggestedServiceConfidence && (
+                          <Text style={styles.serviceConfidenceText}>
+                            Độ khớp: {Math.round(diagnosisResult.suggestedServiceConfidence * 100)}%
+                          </Text>
+                        )}
+                      </View>
+                      <Text style={styles.serviceDetailNameText}>
+                        {diagnosisResult.suggestedServiceName}
+                      </Text>
+                    </View>
+                  )}
                 </View>
 
                 {/* Khung Báo giá Dự toán */}
@@ -395,8 +415,8 @@ export default function AiScanModal({
                   </View>
 
                   <Text style={styles.priceRangeText}>
-                    {diagnosisResult.estimatedPrice.min.toLocaleString('vi-VN')} đ -{' '}
-                    {diagnosisResult.estimatedPrice.max.toLocaleString('vi-VN')} đ
+                    {diagnosisResult.estimatedPriceRange?.formatted ||
+                      `${diagnosisResult.estimatedPrice.min.toLocaleString('vi-VN')} đ - ${diagnosisResult.estimatedPrice.max.toLocaleString('vi-VN')} đ`}
                   </Text>
                   <Text style={styles.priceNoteText}>
                     *Đã bao gồm công kiểm tra & sửa chữa cơ bản. Bảo hành 30 ngày.
@@ -827,5 +847,43 @@ const styles = StyleSheet.create({
   pressedEffect: {
     opacity: 0.85,
     transform: [{ scale: 0.97 }],
+  },
+  serviceDetailBox: {
+    marginTop: 10,
+    backgroundColor: '#F0FDF4',
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+    borderRadius: 10,
+    padding: 10,
+  },
+  serviceDetailHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  serviceTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  serviceTagText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#15803D',
+  },
+  serviceConfidenceText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#166534',
+  },
+  serviceDetailNameText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#14532D',
+    lineHeight: 18,
   },
 });

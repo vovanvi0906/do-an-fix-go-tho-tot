@@ -37,7 +37,13 @@ const SAMPLE_ISSUES = [
 ];
 
 export default function DiagnoseScreen({ navigation, onNext }) {
-  const { setDiagnoseResult, setSelectedCategory, selectedCategory } = useOrderStore();
+  const {
+    setDiagnoseResult,
+    setSelectedCategory,
+    selectedCategory,
+    selectedService,
+    setSelectedService,
+  } = useOrderStore();
 
   const [imageUrl, setImageUrl] = useState(SAMPLE_ISSUES[0].url);
   const [description, setDescription] = useState(SAMPLE_ISSUES[0].desc);
@@ -64,6 +70,15 @@ export default function DiagnoseScreen({ navigation, onNext }) {
       if (data.suggestedCategoryId && !data.requiresManualSelection) {
         const found = categories.find((c) => c.id === data.suggestedCategoryId);
         if (found) setSelectedCategory(found);
+      }
+
+      if (data.suggestedServiceName) {
+        setSelectedService({
+          id: data.suggestedServiceId || null,
+          name: data.suggestedServiceName,
+          price: data.estimatedPriceMin || 150000,
+          priceRange: data.estimatedPriceRange || null,
+        });
       }
     },
   });
@@ -219,6 +234,35 @@ export default function DiagnoseScreen({ navigation, onNext }) {
               </View>
             )}
 
+            {/* Thẻ Dịch vụ kỹ thuật đề xuất */}
+            {diagnoseData.suggestedServiceName && (
+              <View style={styles.suggestedServiceCard}>
+                <View style={styles.suggestedServiceHeader}>
+                  <View style={styles.serviceIconPill}>
+                    <Ionicons name="construct" size={13} color="#15803D" />
+                    <Text style={styles.serviceIconPillText}>Dịch vụ đề xuất</Text>
+                  </View>
+                  {diagnoseData.suggestedServiceConfidence && (
+                    <Text style={styles.serviceConfidenceText}>
+                      Độ khớp: {Math.round(diagnoseData.suggestedServiceConfidence * 100)}%
+                    </Text>
+                  )}
+                </View>
+                <Text style={styles.suggestedServiceNameText}>
+                  {diagnoseData.suggestedServiceName}
+                </Text>
+                {diagnoseData.estimatedPriceRange && (
+                  <View style={styles.servicePriceBadge}>
+                    <Ionicons name="pricetag" size={12} color="#047857" />
+                    <Text style={styles.servicePriceBadgeText}>
+                      {diagnoseData.estimatedPriceRange.formatted ||
+                        `${diagnoseData.estimatedPriceMin?.toLocaleString('vi-VN')} đ ~ ${diagnoseData.estimatedPriceMax?.toLocaleString('vi-VN')} đ`}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            )}
+
             {/* Khoảng giá ước tính */}
             {diagnoseData.estimatedPriceMin && (
               <View style={styles.priceEstimateRow}>
@@ -277,7 +321,7 @@ export default function DiagnoseScreen({ navigation, onNext }) {
           disabled={!selectedCategory}
         >
           <Text style={styles.proceedBtnText}>
-            Tiếp Tục Đặt Đơn ({selectedCategory?.name || 'Chưa chọn ngành'})
+            Tiếp Tục Đặt Đơn ({selectedService?.name ? (selectedService.name.length > 25 ? selectedService.name.slice(0, 25) + '...' : selectedService.name) : selectedCategory?.name || 'Chưa chọn ngành'})
           </Text>
           <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
         </TouchableOpacity>
@@ -589,5 +633,60 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '700',
+  },
+  suggestedServiceCard: {
+    backgroundColor: '#F0FDF4',
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+  },
+  suggestedServiceHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  serviceIconPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  serviceIconPillText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#15803D',
+  },
+  serviceConfidenceText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#166534',
+  },
+  suggestedServiceNameText: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#14532D',
+    lineHeight: 20,
+    marginBottom: 8,
+  },
+  servicePriceBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: '#D1FAE5',
+    alignSelf: 'flex-start',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  servicePriceBadgeText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#047857',
   },
 });

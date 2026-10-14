@@ -1,0 +1,44 @@
+{
+  "dataset_name": "FixGo Incident Classification Dataset (FixGo-Cls-v1)",
+  "version": "1.0.0",
+  "num_classes": 5,
+  "classes": {
+    "sua_dien": {
+      "id": "sua-dien",
+      "name": "Sửa điện",
+      "description": "Sự cố chập điện, aptomat cháy, ổ cắm lỏng, đứt dây nguồn, bảng điện quá tải",
+      "sources": "Roboflow Universe (Electrical Faults) + FixGo Survey"
+    },
+    "sua_nuoc": {
+      "id": "sua-nuoc",
+      "name": "Sửa nước",
+      "description": "Rò rỉ ống nước, vỡ ống PPR/PVC, hỏng vòi sen, tắc cống, máy bơm rỉ nước",
+      "sources": "Kaggle Plumbing Incident Dataset + FixGo Survey"
+    },
+    "dien_lanh": {
+      "id": "dien-lanh",
+      "name": "Điện lạnh",
+      "description": "Máy lạnh chảy nước, điều hòa bám bụi/đóng tuyết, máy giặt rung lắc/hỏng lồng",
+      "sources": "HVAC Appliance Failure Dataset + FixGo Survey"
+    },
+    "thiet_bi": {
+      "id": "thiet-bi",
+      "name": "Thiết bị gia dụng",
+      "description": "Bếp từ báo lỗi E0-E9, lò vi sóng hỏng biến áp, bình nóng lạnh nhảy ELCB",
+      "sources": "Home Appliance Repair Knowledge Base + FixGo Survey"
+    },
+    "other_unclear": {
+      "id": "other-unclear",
+      "name": "Khác / Không rõ",
+      "description": "Ảnh mờ, ảnh phong cảnh, vật nuôi, chân dung hoặc đồ vật ngoài phạm vi sửa chữa",
+      "sources": "COCO Miscellaneous + Synthetic Blurry / Low Quality Images"
+    }
+  },
+  "splits": {
+    "train": 700,
+    "val": 200,
+    "test": 100,
+    "total_images": 1000
+  },
+  "citation": "FixGo Academic Project - Home Repair Incident Computer Vision"
+}

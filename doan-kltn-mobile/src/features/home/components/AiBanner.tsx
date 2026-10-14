@@ -55,20 +55,20 @@ export default function AiBanner({ onScanPress }: AiBannerProps) {
     let isMounted = true;
     let shimmerTimerId: ReturnType<typeof setTimeout>;
 
-    // Tầng 3: Vòng lặp nhịp thở viền sáng êm ái (chu kỳ 1800ms, useNativeDriver: false)
+    // Tầng 3: Vòng lặp nhịp thở viền sáng êm ái (chu kỳ 1800ms, useNativeDriver: isNative)
     const breathing = Animated.loop(
       Animated.sequence([
         Animated.timing(glowAnim, {
           toValue: 1,
           duration: 1800,
           easing: Easing.inOut(Easing.ease),
-          useNativeDriver: false,
+          useNativeDriver: isNative,
         }),
         Animated.timing(glowAnim, {
-          toValue: 0,
+          toValue: 0.2,
           duration: 1800,
           easing: Easing.inOut(Easing.ease),
-          useNativeDriver: false,
+          useNativeDriver: isNative,
         }),
       ])
     );
@@ -152,12 +152,6 @@ export default function AiBanner({ onScanPress }: AiBannerProps) {
   };
 
   // ── 5. Interpolations ───────────────────────────────────────────────────
-  // Tầng 3: Biến thiên màu viền thở phát sáng
-  const animatedBorderColor = glowAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['rgba(56, 189, 248, 0.15)', 'rgba(56, 189, 248, 0.50)'],
-  });
-
   // Vệt sáng phản chiếu quét qua nút
   const shimmerTranslateX = shimmerAnim.interpolate({
     inputRange: [0, 1],
@@ -210,10 +204,18 @@ export default function AiBanner({ onScanPress }: AiBannerProps) {
             styles.primaryCtaButton,
             {
               transform: [{ scale: scaleAnim }],
-              borderColor: animatedBorderColor,
             },
           ]}
         >
+          {/* Tầng 3: Viền thở phát sáng (Glow Border) hoàn toàn chạy Native Driver */}
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              styles.glowBorder,
+              { opacity: glowAnim },
+            ]}
+          />
+
           {/* Vệt sáng phản chiếu quét qua nút (Shimmer Beam) */}
           <Animated.View
             pointerEvents="none"
@@ -359,6 +361,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 22,
     borderWidth: 1.5,
+    borderColor: 'rgba(56, 189, 248, 0.20)',
     minHeight: 44,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -369,6 +372,13 @@ const styles = StyleSheet.create({
       web: { cursor: 'pointer' },
       default: {},
     }),
+  },
+  glowBorder: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 22,
+    borderWidth: 1.5,
+    borderColor: '#38BDF8',
+    zIndex: 1,
   },
   shimmerBeam: {
     position: 'absolute',

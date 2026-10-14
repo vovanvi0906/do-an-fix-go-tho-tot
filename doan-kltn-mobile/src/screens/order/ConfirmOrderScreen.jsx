@@ -40,6 +40,7 @@ const TIME_OPTIONS = [
 export default function ConfirmOrderScreen({ navigation, onBack, onNext }) {
   const {
     selectedCategory,
+    selectedService,
     diagnoseResult,
     selectedAddress,
     setSelectedAddress,
@@ -56,9 +57,14 @@ export default function ConfirmOrderScreen({ navigation, onBack, onNext }) {
   const [voucherError, setVoucherError] = useState('');
   const [activeAddressTab, setActiveAddressTab] = useState('addr_1');
 
-  // Tính toán bảng giá
+  // Tính toán bảng giá theo dịch vụ chi tiết (nếu có) hoặc danh mục
   const baseServicePrice = Number(
-    selectedCategory?.basePrice || diagnoseResult?.estimatedPriceMin || 150000
+    selectedService?.price ||
+    selectedService?.priceRange?.min ||
+    diagnoseResult?.estimatedPriceRange?.min ||
+    selectedCategory?.basePrice ||
+    diagnoseResult?.estimatedPriceMin ||
+    150000
   );
   const discountAmount = appliedVoucher?.discountAmount || 0;
   const finalPrice = Math.max(0, baseServicePrice - discountAmount);
@@ -106,10 +112,11 @@ export default function ConfirmOrderScreen({ navigation, onBack, onNext }) {
   const handleConfirmBooking = () => {
     const payload = {
       categoryId: selectedCategory?.id,
+      serviceId: selectedService?.id || null,
       addressText: selectedAddress.addressText,
       lat: selectedAddress.lat,
       lng: selectedAddress.lng,
-      note: orderNote || diagnoseResult?.issueDescription || 'Cần thợ kiểm tra xử lý',
+      note: orderNote || (selectedService ? `[${selectedService.name}] ${diagnoseResult?.issueDescription || ''}` : diagnoseResult?.issueDescription) || 'Cần thợ kiểm tra xử lý',
       estimatedPrice: finalPrice,
       scheduledAt: selectedTime === 'now' ? null : new Date().toISOString(),
       aiSuggestedCategoryId: diagnoseResult?.suggestedCategoryId,
@@ -143,9 +150,18 @@ export default function ConfirmOrderScreen({ navigation, onBack, onNext }) {
             <Ionicons name="construct" size={24} color="#2563EB" />
           </View>
           <View style={styles.serviceInfo}>
-            <Text style={styles.serviceName}>{selectedCategory?.name || 'Sửa chữa điện - nước'}</Text>
+            <Text style={styles.serviceName}>
+              {selectedService?.name || selectedCategory?.name || 'Sửa chữa điện - nước'}
+            </Text>
+            {selectedService?.name && selectedCategory?.name && (
+              <Text style={{ fontSize: 11, fontWeight: '600', color: '#2563EB', marginTop: 2 }}>
+                🏷️ {selectedCategory.name}
+              </Text>
+            )}
             <Text style={styles.servicePriceNote}>
-              Giá khởi điểm từ: {baseServicePrice.toLocaleString('vi-VN')} đ
+              {selectedService?.priceRange?.formatted
+                ? `Khoảng giá dự kiến: ${selectedService.priceRange.formatted}`
+                : `Giá khởi điểm từ: ${baseServicePrice.toLocaleString('vi-VN')} đ`}
             </Text>
           </View>
         </View>

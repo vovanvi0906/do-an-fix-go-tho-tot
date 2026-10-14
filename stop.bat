@@ -14,4 +14,4 @@ docker compose down >nul 2>&1
 
 echo.
 echo [OK] Toan bo he thong da duoc tat va giai phong tai nguyen sach se!
-timeout /t 2 >nul
+ping 127.0.0.1 -n 2 >nul

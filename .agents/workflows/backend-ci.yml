@@ -1,0 +1,39 @@
+name: Backend CI
+
+on:
+  push:
+    paths:
+      - 'doan-kltn-backend/**'
+      - '.github/workflows/backend-ci.yml'
+  pull_request:
+    paths:
+      - 'doan-kltn-backend/**'
+      - '.github/workflows/backend-ci.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: doan-kltn-backend
+    env:
+      NODE_ENV: test
+      JWT_SECRET: ci-test-jwt-secret
+      DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/fixgo_test?schema=public"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: doan-kltn-backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Run Linter
+        run: npm run lint --if-present

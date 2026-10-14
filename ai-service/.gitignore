@@ -1,0 +1,15 @@
+# Virtual Environment
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Model Weights
+weights/
+*.pt
+*.onnx
+*.weights
+
+# Evaluation outputs
+eval/results/
+eval/__pycache__/
