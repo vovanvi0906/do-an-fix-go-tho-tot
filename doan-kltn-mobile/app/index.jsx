@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
   ScrollView,
   SafeAreaView,
   Modal,
+  Alert,
 } from 'react-native';
 import { useRouter, Link } from 'expo-router';
 import { Ionicons, FontAwesome } from '@expo/vector-icons';
@@ -18,16 +19,86 @@ import { StatusBar } from 'expo-status-bar';
 import {
   useFonts,
   Inter_400Regular,
+  Inter_500Medium,
   Inter_600SemiBold,
   Inter_700Bold,
 } from '@expo-google-fonts/inter';
+import * as WebBrowser from 'expo-web-browser';
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import { useAuth } from '../src/features/auth';
+import { apiClient } from '../src/services/api/apiClient';
+import { tokenStorage } from '../src/services/storage/tokenStorage';
+import {
+  auth as firebaseAuth,
+  GoogleAuthProvider,
+  signInWithCredential,
+  signInWithPopup,
+} from '../src/services/firebaseConfig';
+
+// ─── Cấu hình Native Google Sign-In (Chạy ngoài Web) ────────────────────────
+if (Platform.OS !== 'web') {
+  GoogleSignin.configure({
+    webClientId:
+      process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ||
+      process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ||
+      '255047379055-cu8ifeqgfak7nj3sq8bcve9hqh9v85m4.apps.googleusercontent.com',
+    offlineAccess: true,
+    forceCodeForRefreshToken: true,
+  });
+}
+
+// Hoàn tất phiên WebBrowser nếu có
+WebBrowser.maybeCompleteAuthSession();
+
+// ─── Helper giải mã JWT an toàn cho React Native (không phụ thuộc lib native) ──
+function parseJwt(token) {
+  if (!token || typeof token !== 'string') return null;
+  try {
+    const parts = token.split('.');
+    if (parts.length < 2) return null;
+    const base64Url = parts[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+
+    let binary = '';
+    if (typeof atob === 'function') {
+      binary = atob(padded);
+    } else {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+      let bc = 0, bs, buffer, idx = 0;
+      for (
+        ;
+        (buffer = padded.charAt(idx++));
+        ~buffer && ((bs = bc % 4 ? bs * 64 + buffer : buffer), bc++ % 4)
+          ? (binary += String.fromCharCode(255 & (bs >> ((-2 * bc) & 6))))
+          : 0
+      ) {
+        buffer = chars.indexOf(buffer);
+      }
+    }
+
+    const jsonPayload = decodeURIComponent(
+      binary
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    try {
+      const parts = token.split('.');
+      return JSON.parse(atob(parts[1]));
+    } catch {
+      return null;
+    }
+  }
+}
 
 // ─── Design Tokens (Figma FIXGO – Login Customer Screen) ────────────────────
 const COLORS = {
   primary: '#3B82F6',        // Nền xanh dương chính
   primaryDark: '#2563EB',    // Hover / active
-  darkBlue: '#1A365D',       // Nút Đăng nhập (xanh đậm – theo yêu cầu user)
+  darkBlue: '#1A365D',       // Nút Đăng nhập (xanh đậm – Figma)
   white: '#FFFFFF',
   black: '#000000',
   gray: '#9CA3AF',           // Placeholder & icon mặc định
@@ -41,14 +112,18 @@ export default function FixGoLoginScreen() {
   const router = useRouter();
   const {
     login,
+    googleLogin,
+    firebaseGoogleLogin,
     isLoading: isCheckingSession,
     isAuthenticated,
     user,
+    updatePhone,
   } = useAuth();
 
   // ─── Font loading (Inter) ───────────────────────────────────────────────────
   const [fontsLoaded] = useFonts({
     Inter_400Regular,
+    Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
   });
@@ -58,6 +133,7 @@ export default function FixGoLoginScreen() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
   // Per-field error highlight (Figma Screen 2, 4, 5)
@@ -67,16 +143,198 @@ export default function FixGoLoginScreen() {
   // Modal chọn vai trò đăng ký (Khách hàng / Thợ)
   const [showRegisterModal, setShowRegisterModal] = useState(false);
 
-  // ─── Logging ────────────────────────────────────────────────────────────────
+
+
+
+
+  // ─── 4. XÁC THỰC VỚI FIREBASE BẰNG signInWithCredential (KHÔNG DÙNG signInWithRedirect)
+  const handleFirebaseGoogleSignIn = async (googleIdToken) => {
+    try {
+      setIsGoogleLoading(true);
+
+      // Giải mã profile người dùng để log chẩn đoán
+      const userProfile = parseJwt(googleIdToken);
+      if (userProfile) {
+        console.log('👤 [FixGo Mobile] Profile Google:', {
+          email: userProfile.email,
+          name: userProfile.name,
+          sub: userProfile.sub,
+        });
+      }
+
+      let res;
+      try {
+        // Chuẩn Native/Expo: Đổi Google id_token sang Firebase Auth Credential
+        console.log('🔥 [FixGo Mobile] Gọi signInWithCredential của Firebase Auth...');
+        const credential = GoogleAuthProvider.credential(googleIdToken);
+        const userCredential = await signInWithCredential(firebaseAuth, credential);
+        const firebaseIdToken = await userCredential.user.getIdToken();
+        console.log('🔥 [FixGo Mobile] Đăng nhập Firebase Auth thành công:', userCredential.user.email);
+
+        // Gửi Firebase idToken lên Backend NestJS để verify & nhận session JWT
+        console.log('🌐 [FixGo Mobile] Gửi Firebase ID Token lên Backend NestJS...');
+        res = await firebaseGoogleLogin(firebaseIdToken);
+        console.log('🎉 [FixGo Mobile] Xác thực Backend hoàn tất!');
+      } catch (fbErr) {
+        console.warn(
+          '⚠️ [FixGo Mobile] signInWithCredential gặp lỗi, kích hoạt fallback gọi Google Backend:',
+          fbErr.message
+        );
+        // Fallback tự động gọi endpoint Google OAuth backend
+        res = await googleLogin(googleIdToken);
+        console.log('🎉 [FixGo Mobile] Fallback Google Backend thành công!');
+      }
+
+      // 1. Bóc tách thông tin user và accessToken từ response backend
+      const loggedUser = res?.data?.user || res?.user;
+      const jwtToken = res?.data?.accessToken || res?.accessToken || res?.data?.token || res?.token;
+      const isSuccess = !!(res?.data?.success ?? res?.success ?? loggedUser);
+      const requirePhone = !!(res?.data?.requirePhoneUpdate ?? res?.requirePhoneUpdate ?? !loggedUser?.phone);
+      const userRole = (loggedUser?.role || 'CUSTOMER').toUpperCase();
+      setPendingRole(userRole);
+
+      // 2. Set trực tiếp Authorization Header cho Axios và lưu token vào Storage
+      if (jwtToken) {
+        tempTokenRef.current = jwtToken;
+        apiClient.defaults.headers.common['Authorization'] = `Bearer ${jwtToken}`;
+        await tokenStorage.saveToken(jwtToken);
+      }
+      if (loggedUser) {
+        await tokenStorage.saveUser(loggedUser);
+      }
+
+      // 3. Nếu tài khoản chưa có số điện thoại: Điều hướng sang màn hình luồng OTP có sẵn của hệ thống
+      if (isSuccess && requirePhone) {
+        console.log('📱 [FixGo Mobile] Google Sign-In thành công, điều hướng sang luồng OTP để bổ sung SĐT...');
+        router.push({
+          pathname: '/(auth)/register-customer',
+          params: {
+            isSocialOnboarding: 'true',
+            role: userRole,
+          },
+        });
+        return;
+      }
+
+      // 4. Nếu tài khoản đã có đầy đủ SĐT, điều hướng thẳng vào Trang chủ
+      if (userRole === 'WORKER') {
+        router.replace('/(worker)/(tabs)');
+      } else {
+        router.replace('/(user)/(tabs)');
+      }
+    } catch (err) {
+      console.error('❌ [FixGo Mobile] Lỗi xác thực tài khoản:', err);
+      Alert.alert(
+        'Đăng nhập thất bại',
+        err.message || 'Không thể xác thực tài khoản Google với hệ thống. Vui lòng thử lại.'
+      );
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
+
+  // ─── 5. KÍCH HOẠT ĐĂNG NHẬP GOOGLE BẰNG GOOGLE SIGNIN NATIVE SDK ──────────
+  const handlePressGoogleSignIn = async () => {
+    try {
+      setIsGoogleLoading(true);
+      setErrorMessage('');
+
+      // Nền tảng Web (Desktop Browser): Dùng Firebase signInWithPopup
+      if (Platform.OS === 'web') {
+        console.log('🌐 [FixGo Web] Đăng nhập Google qua Firebase signInWithPopup...');
+        const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+        const userCredential = await signInWithPopup(firebaseAuth, provider);
+        const firebaseIdToken = await userCredential.user.getIdToken();
+        console.log('🔥 [FixGo Web] Lấy thành công Firebase ID Token cho:', userCredential.user.email);
+
+        console.log('🌐 [FixGo Web] Gửi Firebase ID Token lên Backend NestJS...');
+        const res = await firebaseGoogleLogin(firebaseIdToken);
+        console.log('🎉 [FixGo Web] Đăng nhập Web hoàn tất!');
+
+        const loggedUser = res?.data?.user || res?.user;
+        const jwtToken = res?.data?.accessToken || res?.accessToken || res?.data?.token || res?.token;
+        const isSuccess = !!(res?.data?.success ?? res?.success ?? loggedUser);
+        const requirePhone = !!(res?.data?.requirePhoneUpdate ?? res?.requirePhoneUpdate ?? !loggedUser?.phone);
+        const userRole = (loggedUser?.role || 'CUSTOMER').toUpperCase();
+        setPendingRole(userRole);
+
+        if (jwtToken) {
+          tempTokenRef.current = jwtToken;
+          apiClient.defaults.headers.common['Authorization'] = `Bearer ${jwtToken}`;
+          await tokenStorage.saveToken(jwtToken);
+        }
+        if (loggedUser) {
+          await tokenStorage.saveUser(loggedUser);
+        }
+
+        if (isSuccess && requirePhone) {
+          console.log('📱 [FixGo Web] Google Sign-In thành công, mở Modal cập nhật số điện thoại');
+          setPhoneInput('');
+          setPhoneError('');
+          setShowPhoneModal(true);
+          return;
+        }
+
+        if (userRole === 'WORKER') {
+          router.replace('/(worker)/(tabs)');
+        } else {
+          router.replace('/(user)/(tabs)');
+        }
+        return;
+      }
+
+      // Nền tảng Mobile (Android / iOS): Dùng GoogleSignin Native Play Services
+      console.log('📱 [FixGo Mobile] Kiểm tra Google Play Services...');
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+
+      console.log('📱 [FixGo Mobile] Gọi GoogleSignin.signIn()...');
+      const signInResponse = await GoogleSignin.signIn();
+
+      // Bóc tách idToken hỗ trợ cả phiên bản mới (@react-native-google-signin v13+) lẫn cũ
+      let idToken = signInResponse?.data?.idToken || signInResponse?.idToken;
+      if (!idToken) {
+        console.log('🔄 [FixGo Mobile] Gọi GoogleSignin.getTokens() để lấy idToken...');
+        const tokens = await GoogleSignin.getTokens();
+        idToken = tokens?.idToken;
+      }
+
+      if (idToken) {
+        console.log('✅ [FixGo Mobile] Lấy idToken thành công từ Google Play Services');
+        await handleFirebaseGoogleSignIn(idToken);
+      } else {
+        throw new Error('Không nhận được mã xác thực idToken từ Google Play Services.');
+      }
+    } catch (err) {
+      setIsGoogleLoading(false);
+      if (err.code === statusCodes.SIGN_IN_CANCELLED) {
+        console.log('ℹ️ [FixGo GoogleSignin] Người dùng hủy thao tác đăng nhập Google');
+      } else if (err.code === statusCodes.IN_PROGRESS) {
+        console.warn('⚠️ [FixGo GoogleSignin] Đăng nhập Google đang được tiến hành');
+      } else if (err.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        console.error('❌ [FixGo GoogleSignin] Google Play Services không khả dụng hoặc quá cũ');
+        Alert.alert('Lỗi Google Play', 'Google Play Services trên thiết bị không khả dụng hoặc phiên bản quá cũ.');
+      } else {
+        console.error('❌ [FixGo Auth Error]:', err);
+        Alert.alert(
+          'Đăng nhập thất bại',
+          err.message || 'Không thể đăng nhập bằng Google lúc này.'
+        );
+      }
+    }
+  };
+
+  // ─── Logging khởi chạy ──────────────────────────────────────────────────────
   useEffect(() => {
     console.log('🚀 [FixGo Mobile] Khởi chạy giao diện Đăng nhập FixGo (Figma Blue)');
   }, []);
 
-  // ─── Auto-redirect nếu đã đăng nhập ────────────────────────────────────────
+  // ─── Auto-redirect nếu phiên đăng nhập còn hiệu lực ────────────────────────
+  // Lưu ý: TUYỆT ĐỐI KHÔNG mở Modal tại đây để tránh tự động bật khi chưa thao tác
   useEffect(() => {
     if (!isCheckingSession && isAuthenticated && user) {
       const role = (user.role || 'CUSTOMER').toUpperCase();
-      console.log('🔄 [FixGo] Phiên đăng nhập còn hiệu lực, role:', role);
+      console.log('🔄 [FixGo] Phiên đăng nhập còn hiệu lực, điều hướng role:', role);
       if (role === 'WORKER') {
         router.replace('/(worker)/(tabs)');
       } else {
@@ -85,16 +343,14 @@ export default function FixGoLoginScreen() {
     }
   }, [isCheckingSession, isAuthenticated, user]);
 
-  // ─── Validation & Login Handler ─────────────────────────────────────────────
+  // ─── Validation & Login Form Handler ────────────────────────────────────────
   const handleLogin = async () => {
     console.log('⚡ [FixGo Login] Bấm nút ĐĂNG NHẬP:', { identifier });
 
-    // Reset lỗi cũ
     setErrorMessage('');
     setIdentifierError(false);
     setPasswordError(false);
 
-    // Client-side validation
     if (!identifier.trim() && !password) {
       const msg = 'Vui lòng điền thông tin đăng nhập';
       console.warn('⚠️ [FixGo Validation]:', msg);
@@ -121,11 +377,9 @@ export default function FixGoLoginScreen() {
     try {
       setIsLoading(true);
 
-      // Gọi API đăng nhập tới Backend NestJS (/api/auth/login)
       const res = await login(identifier.trim(), password);
       console.log('🎉 [FixGo Login] Đăng nhập thành công:', res?.user);
 
-      // Phân quyền điều hướng theo role trả về
       const userRole = (res?.user?.role || 'CUSTOMER').toUpperCase();
       if (userRole === 'WORKER') {
         console.log('🛠️ [FixGo Login] Điều hướng Thợ: /(worker)/(tabs)');
@@ -140,7 +394,6 @@ export default function FixGoLoginScreen() {
         error.message ||
         'Đăng nhập không thành công. Vui lòng kiểm tra lại tài khoản hoặc mật khẩu!';
 
-      // Xác định field nào cần highlight đỏ dựa trên nội dung lỗi
       const lowerMsg = msg.toLowerCase();
       if (
         lowerMsg.includes('mật khẩu') &&
@@ -154,7 +407,6 @@ export default function FixGoLoginScreen() {
       ) {
         setIdentifierError(true);
       } else {
-        // Lỗi chung (401, 403, network…) → highlight cả hai
         setIdentifierError(true);
         setPasswordError(true);
       }
@@ -167,7 +419,6 @@ export default function FixGoLoginScreen() {
 
   // ═══════════════════════════════════════════════════════════════════════════════
   // RENDER: Launch Screen (Figma "Launch - 1")
-  // Hiển thị khi đang kiểm tra phiên đăng nhập hoặc chờ font load
   // ═══════════════════════════════════════════════════════════════════════════════
   if (isCheckingSession || !fontsLoaded) {
     return (
@@ -179,8 +430,7 @@ export default function FixGoLoginScreen() {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════════
-  // RENDER: Loading / Success Screen (Figma "Success Login")
-  // Hiển thị khi đang gọi API đăng nhập
+  // RENDER: Loading Screen
   // ═══════════════════════════════════════════════════════════════════════════════
   if (isLoading) {
     return (
@@ -302,7 +552,7 @@ export default function FixGoLoginScreen() {
                 <Text style={styles.loginBtnText}>Đăng nhập</Text>
               </TouchableOpacity>
 
-              {/* Thông báo lỗi (Figma: text đỏ dưới nút Đăng nhập) */}
+              {/* Thông báo lỗi */}
               {errorMessage ? (
                 <Text style={styles.errorText}>{errorMessage}</Text>
               ) : null}
@@ -314,7 +564,7 @@ export default function FixGoLoginScreen() {
                 <View style={styles.dividerLine} />
               </View>
 
-              {/* Social Login: Facebook + Google (Figma: 2 nút tròn trắng) */}
+              {/* Social Login: Facebook + Google */}
               <View style={styles.socialRow}>
                 <TouchableOpacity
                   style={styles.socialBtn}
@@ -327,9 +577,14 @@ export default function FixGoLoginScreen() {
                 <TouchableOpacity
                   style={styles.socialBtn}
                   activeOpacity={0.8}
-                  onPress={() => console.log('Login Google')}
+                  onPress={handlePressGoogleSignIn}
+                  disabled={isLoading || isGoogleLoading}
                 >
-                  <FontAwesome name="google" size={24} color={COLORS.googleRed} />
+                  {isGoogleLoading ? (
+                    <ActivityIndicator size="small" color={COLORS.googleRed} />
+                  ) : (
+                    <FontAwesome name="google" size={24} color={COLORS.googleRed} />
+                  )}
                 </TouchableOpacity>
               </View>
 
@@ -445,15 +700,15 @@ export default function FixGoLoginScreen() {
           </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
+
     </View>
   );
 }
 
 // ═════════════════════════════════════════════════════════════════════════════════
-// STYLES – khớp Figma "FIXGO – Khoá luận tốt nghiệp"
+// STYLES – Figma "FIXGO – Khoá luận tốt nghiệp"
 // ═════════════════════════════════════════════════════════════════════════════════
 const styles = StyleSheet.create({
-  // ─── Launch Screen (Figma "Launch - 1 / 2") ─────────────────────────────────
   launchScreen: {
     flex: 1,
     backgroundColor: COLORS.primary,
@@ -462,21 +717,16 @@ const styles = StyleSheet.create({
   },
   launchLogo: {
     fontSize: 48,
-    fontFamily: 'Inter_700Bold',
     fontWeight: '700',
     color: COLORS.white,
     letterSpacing: 1,
   },
-
-  // ─── Loading / Success Screen (Figma "Success Login") ───────────────────────
   loadingScreen: {
     flex: 1,
     backgroundColor: COLORS.white,
     justifyContent: 'center',
     alignItems: 'center',
   },
-
-  // ─── Login Screen Container ─────────────────────────────────────────────────
   container: {
     flex: 1,
     backgroundColor: COLORS.primary,
@@ -494,8 +744,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     paddingVertical: 40,
   },
-
-  // ─── Logo FixGo ─────────────────────────────────────────────────────────────
   logo: {
     fontSize: 42,
     fontFamily: 'Inter_700Bold',
@@ -504,14 +752,10 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     marginBottom: 56,
   },
-
-  // ─── Form ───────────────────────────────────────────────────────────────────
   formContainer: {
     width: '100%',
     maxWidth: 400,
   },
-
-  // ─── Inputs (Figma: rounded white fields) ───────────────────────────────────
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -540,8 +784,6 @@ const styles = StyleSheet.create({
   eyeBtn: {
     padding: 6,
   },
-
-  // ─── Quên mật khẩu (Figma: căn phải, xanh nhạt) ───────────────────────────
   forgotRow: {
     alignItems: 'flex-end',
     marginBottom: 20,
@@ -553,8 +795,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.lightBlue,
   },
-
-  // ─── Nút Đăng nhập (Figma: full-width, dark blue, rounded) ─────────────────
   loginBtn: {
     backgroundColor: COLORS.darkBlue,
     height: 52,
@@ -570,8 +810,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.5,
   },
-
-  // ─── Error text (Figma: đỏ, centered, dưới nút) ────────────────────────────
   errorText: {
     color: COLORS.red,
     fontSize: 13,
@@ -580,8 +818,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
     marginBottom: 8,
   },
-
-  // ─── Divider ────────────────────────────────────────────────────────────────
   dividerRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -598,8 +834,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_400Regular',
     color: COLORS.white,
   },
-
-  // ─── Social Login (Figma: 2 nút tròn trắng – Facebook + Google) ────────────
   socialRow: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -620,8 +854,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-
-  // ─── Footer (Figma: Chưa có tài khoản? Đăng ký ngay) ──────────────────────
   footerRow: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -639,8 +871,6 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     textDecorationLine: 'underline',
   },
-
-  // ─── Modal Popup Styles (Role Selection) ───────────────────────────────────
   modalBackdrop: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
@@ -777,5 +1007,98 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_400Regular',
     color: '#64748B',
     lineHeight: 16,
+  },
+  phoneModalCard: {
+    width: '90%',
+    maxWidth: 380,
+    backgroundColor: COLORS.white,
+    borderRadius: 20,
+    paddingHorizontal: 22,
+    paddingVertical: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+  phoneModalTitle: {
+    fontSize: 20,
+    fontFamily: 'Inter_700Bold',
+    fontWeight: '700',
+    color: '#0F172A',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  phoneModalSubtitle: {
+    fontSize: 13.5,
+    fontFamily: 'Inter_400Regular',
+    color: '#64748B',
+    lineHeight: 19,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  phoneInputContainer: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F1F3F5',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 10,
+    height: 48,
+    marginBottom: 10,
+    overflow: 'hidden',
+  },
+  phoneInputContainerError: {
+    borderColor: '#EF4444',
+    backgroundColor: '#FEF2F2',
+  },
+  countryCodeBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    height: '100%',
+    borderRightWidth: 1,
+    borderRightColor: '#D1D5DB',
+  },
+  countryFlag: {
+    fontSize: 18,
+    marginRight: 6,
+  },
+  countryCodeText: {
+    fontSize: 15,
+    fontFamily: 'Inter_700Bold',
+    fontWeight: '700',
+    color: '#0F172A',
+  },
+  phoneTextInput: {
+    flex: 1,
+    height: '100%',
+    paddingHorizontal: 12,
+    fontSize: 15,
+    fontFamily: 'Inter_500Medium',
+    color: '#0F172A',
+  },
+  phoneErrorText: {
+    width: '100%',
+    fontSize: 12.5,
+    color: '#EF4444',
+    marginBottom: 10,
+    textAlign: 'left',
+  },
+  phoneContinueBtn: {
+    width: '100%',
+    height: 48,
+    backgroundColor: '#0088FF',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 6,
+  },
+  phoneContinueBtnText: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontFamily: 'Inter_700Bold',
+    fontWeight: '700',
   },
 });

@@ -2,6 +2,7 @@
   "expo": {
     "name": "doan-kltn-mobile",
     "slug": "doan-kltn-mobile",
+    "owner": "fuxdaj1501",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icons/icon.png",
@@ -28,10 +29,19 @@
       "expo-router",
       "expo-asset",
       "expo-font",
-      "expo-secure-store"
+      "expo-secure-store",
+      "@react-native-google-signin/google-signin"
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "1ef87ddd-b13c-4302-8a51-fe70c9b1cbdb"
+      }
     }
   }
 }

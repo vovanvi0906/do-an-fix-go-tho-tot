@@ -1,1 +1,6 @@
-export { default } from '../index';
+import React from 'react';
+import FixGoLoginScreen from '../index';
+
+export default function LoginRoute() {
+  return <FixGoLoginScreen />;
+}
