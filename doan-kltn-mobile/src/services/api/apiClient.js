@@ -41,6 +41,7 @@ export const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
+    'ngrok-skip-browser-warning': 'true',
   },
 });
 
@@ -48,11 +49,14 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use(
   async (config) => {
     try {
+      // Đảm bảo request ngrok không bao giờ bị chặn bởi landing page cảnh báo
+      config.headers['ngrok-skip-browser-warning'] = 'true';
+
       const token = await tokenStorage.getToken();
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
-      console.log(`📡 [API Request] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`, {
+      console.log(`📡 [API Request] ${config.method?.toUpperCase()} ${config.baseURL || ''}${config.url}`, {
         hasToken: !!token,
         data: config.data,
       });
