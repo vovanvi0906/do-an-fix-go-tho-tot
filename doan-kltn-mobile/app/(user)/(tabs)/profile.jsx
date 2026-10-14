@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
   Platform,
   Image,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import {
@@ -40,8 +40,18 @@ const COLORS = {
 
 export default function CustomerProfileScreen() {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, refreshProfile } = useAuth();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  // ─── Tự động làm mới dữ liệu người dùng từ Database mỗi khi vào màn hình ───
+  useFocusEffect(
+    useCallback(() => {
+      console.log('🔄 [ProfileScreen] Focus màn hình Cá nhân, đang làm mới dữ liệu từ server...');
+      if (typeof refreshProfile === 'function') {
+        refreshProfile();
+      }
+    }, [refreshProfile])
+  );
 
   // ─── Font Loading ──────────────────────────────────────────────────────────
   const [fontsLoaded] = useFonts({
@@ -51,14 +61,13 @@ export default function CustomerProfileScreen() {
     Inter_700Bold,
   });
 
-  // Tên hiển thị người dùng
+  // Tên hiển thị người dùng (chuẩn hóa tiếng Việt)
   const displayName =
     user?.fullName ||
     user?.customerProfile?.fullName ||
-    'Lu Dai';
+    user?.email?.split('@')[0] ||
+    'Người dùng FixGo';
 
-  const displayPhone = user?.phone || '0366192248';
-  const displayEmail = user?.email || 'luhongphucdai@gmail.com';
   const avatarUrl = user?.avatarUrl || user?.customerProfile?.avatarUrl;
 
   const handleLogout = async () => {
@@ -80,7 +89,7 @@ export default function CustomerProfileScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* ═════════════════════════════════════════════════════════════════════
-            PHẦN 1: HEADER AVATAR & THÔNG TIN NGƯỜI DÙNG (Figma FixGo_Home)
+            PHẦN 1: HEADER AVATAR & TÊN NGƯỜI DÙNG (Figma FixGo_Home)
            ═════════════════════════════════════════════════════════════════════ */}
         <View style={styles.headerProfileSection}>
           <View style={styles.avatarOuterWrapper}>
@@ -94,7 +103,6 @@ export default function CustomerProfileScreen() {
           </View>
 
           <Text style={styles.userNameText}>{displayName}</Text>
-          <Text style={styles.userSubText}>{displayPhone || displayEmail}</Text>
         </View>
 
         {/* ═════════════════════════════════════════════════════════════════════
@@ -278,10 +286,39 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   userSubText: {
-    fontSize: 14,
+    fontSize: 14.5,
+    fontFamily: 'Inter_500Medium',
+    fontWeight: '500',
+    color: COLORS.textDark,
+    textAlign: 'center',
+    marginTop: 2,
+  },
+  userEmailSubText: {
+    fontSize: 13,
     fontFamily: 'Inter_400Regular',
     color: COLORS.textSub,
     textAlign: 'center',
+    marginTop: 3,
+  },
+  unlinkedPhoneRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 3,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+  },
+  unlinkedPhoneText: {
+    fontSize: 13.5,
+    fontFamily: 'Inter_400Regular',
+    fontStyle: 'italic',
+    color: '#8E8E93',
+  },
+  unlinkedPhoneAction: {
+    fontSize: 13,
+    fontFamily: 'Inter_600SemiBold',
+    fontWeight: '600',
+    color: COLORS.primary,
   },
 
   // ─── Menu Container ────────────────────────────────────────────────────────

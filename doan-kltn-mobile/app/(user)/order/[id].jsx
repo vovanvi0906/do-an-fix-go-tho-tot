@@ -45,7 +45,7 @@ export default function UserOrderDetailScreen() {
         serviceName: params.serviceName || params.title,
         addressText: params.addressText || '606/20, Hiệp Bình, Hồ Chí Minh',
         customerName: params.customerName || 'Khách hàng FixGo',
-        customerPhone: params.customerPhone || '0366192248',
+        customerPhone: params.customerPhone || '',
         scheduledAt: params.scheduledAt || 'Cần thợ gấp',
         price: params.price ? Number(params.price) : 150000,
         status: params.status || 'AWAITING_CONFIRM',
@@ -276,7 +276,7 @@ export default function UserOrderDetailScreen() {
             <Ionicons name="person-outline" size={17} color="#0284C7" style={styles.infoIcon} />
             <Text style={styles.infoLabel}>Người đặt:</Text>
             <Text style={styles.infoValue}>
-              {order?.customerName || 'Khách hàng'} • {order?.customerPhone || '0366192248'}
+              {order?.customerName || 'Khách hàng'}{order?.customerPhone ? ` • ${order.customerPhone}` : ''}
             </Text>
           </View>
 
