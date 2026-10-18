@@ -151,11 +151,12 @@ export default function WorkerFullMapModal({
       transparent={false}
       onRequestClose={onClose}
     >
-      <View style={styles.modalRoot}>
+      <View nativeID="modal-worker-full-map-container" style={styles.modalRoot}>
         {/* ── 1. Top Control Bar & Bộ Lọc Nhanh ────────────────────── */}
-        <View style={[styles.topControlContainer, { paddingTop: Math.max(insets.top, 12) }]}>
-          <View style={styles.headerBar}>
+        <View nativeID="worker-full-map-top-bar" style={[styles.topControlContainer, { paddingTop: Math.max(insets.top, 12) }]}>
+          <View nativeID="worker-full-map-header-bar" style={styles.headerBar}>
             <Pressable
+              nativeID="btn-close-worker-full-map"
               accessible={true}
               accessibilityRole="button"
               accessibilityLabel="Đóng bản đồ"
@@ -179,6 +180,7 @@ export default function WorkerFullMapModal({
             </View>
 
             <Pressable
+              nativeID="btn-recenter-worker-map"
               accessible={true}
               accessibilityRole="button"
               accessibilityLabel="Tái định vị GPS"
@@ -191,6 +193,7 @@ export default function WorkerFullMapModal({
 
           {/* Quick Category Filter Bar */}
           <ScrollView
+            nativeID="worker-map-category-filters-scroll"
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.filterScrollContent}
@@ -200,6 +203,7 @@ export default function WorkerFullMapModal({
               return (
                 <Pressable
                   key={cat.id}
+                  nativeID={`filter-chip-${cat.id}`}
                   accessible={true}
                   accessibilityRole="button"
                   accessibilityLabel={`Lọc theo danh mục ${cat.label}`}
@@ -234,7 +238,7 @@ export default function WorkerFullMapModal({
         </View>
 
         {/* ── 2. Real Map Canvas Area (RealLeafletMap HD) ─────────── */}
-        <View style={styles.mapContainer}>
+        <View nativeID="worker-full-map-canvas-wrapper" style={styles.mapContainer}>
           <RealLeafletMap
             ref={mapRef}
             userLocation={{ lat: currentLat, lng: currentLng }}
@@ -249,7 +253,7 @@ export default function WorkerFullMapModal({
           />
 
           {/* Badge: Số lượng thợ tìm thấy */}
-          <View style={styles.onlineStatusBadge}>
+          <View nativeID="worker-full-map-status-badge" style={styles.onlineStatusBadge}>
             <View
               style={[
                 styles.statusDot,
@@ -266,6 +270,7 @@ export default function WorkerFullMapModal({
 
         {/* ── 3. Bottom Drawer Sheet: Chi Tiết Thợ & Đặt/Gọi Ngay ─── */}
         <Animated.View
+          nativeID="worker-full-map-bottom-sheet"
           style={[
             styles.bottomSheet,
             {
@@ -275,7 +280,7 @@ export default function WorkerFullMapModal({
           ]}
         >
           {activeWorker ? (
-            <View style={styles.drawerContent}>
+            <View nativeID="worker-full-map-worker-detail-card" style={styles.drawerContent}>
               <View style={styles.dragHandle} />
 
               <View style={styles.workerSummaryRow}>
@@ -348,8 +353,9 @@ export default function WorkerFullMapModal({
               </View>
 
               {/* Action Buttons: Gọi điện & Đặt thợ ngay */}
-              <View style={styles.actionButtonsRow}>
+              <View nativeID="worker-full-map-actions-row" style={styles.actionButtonsRow}>
                 <Pressable
+                  nativeID="btn-call-worker"
                   accessible={true}
                   accessibilityRole="button"
                   accessibilityLabel="Gọi điện trực tiếp cho thợ"
@@ -364,6 +370,7 @@ export default function WorkerFullMapModal({
                 </Pressable>
 
                 <Pressable
+                  nativeID="btn-book-worker-now"
                   accessible={true}
                   accessibilityRole="button"
                   accessibilityLabel="Đặt lịch thợ này ngay"

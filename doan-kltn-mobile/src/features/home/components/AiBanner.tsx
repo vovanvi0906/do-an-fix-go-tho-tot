@@ -171,13 +171,14 @@ export default function AiBanner({ onScanPress }: AiBannerProps) {
 
   return (
     <LinearGradient
+      nativeID="home-ai-scan-banner"
       colors={['#082F49', '#0C4A6E']}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={styles.cardContainer}
     >
       {/* ── 1. Header Section ─────────────────────────────────── */}
-      <View style={styles.headerSection}>
+      <View nativeID="home-ai-banner-header" style={styles.headerSection}>
         <View style={styles.titleRow}>
           <View style={styles.sparkleCircle}>
             <Ionicons name="sparkles" size={14} color="#38BDF8" />
@@ -193,6 +194,7 @@ export default function AiBanner({ onScanPress }: AiBannerProps) {
       {/* ── 2. Primary CTA: Nút Chụp ảnh ngay 4 tầng hiệu ứng ─── */}
       <View style={styles.actionRow}>
         <AnimatedPressable
+          nativeID="btn-capture-ai-diagnose"
           accessible={true}
           accessibilityRole="button"
           accessibilityLabel="Chụp ảnh ngay để chẩn đoán sự cố"

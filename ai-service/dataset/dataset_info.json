@@ -1,7 +1,7 @@
 {
   "dataset_name": "FixGo Incident Classification Dataset (FixGo-Cls-v1)",
   "version": "1.0.0",
-  "num_classes": 5,
+  "num_classes": 6,
   "classes": {
     "sua_dien": {
       "id": "sua-dien",
@@ -27,6 +27,12 @@
       "description": "Bếp từ báo lỗi E0-E9, lò vi sóng hỏng biến áp, bình nóng lạnh nhảy ELCB",
       "sources": "Home Appliance Repair Knowledge Base + FixGo Survey"
     },
+    "lam_vuon": {
+      "id": "lam-vuon",
+      "name": "Làm vườn",
+      "description": "Cắt tỉa cỏ sân vườn, dọn cỏ dại, tạo tán cây cảnh, hàng rào, dọn dẹp cảnh quan",
+      "sources": "PlantVillage / Garden Landscape Dataset + FixGo Field Survey"
+    },
     "other_unclear": {
       "id": "other-unclear",
       "name": "Khác / Không rõ",
@@ -35,10 +41,10 @@
     }
   },
   "splits": {
-    "train": 700,
-    "val": 200,
-    "test": 100,
-    "total_images": 1000
+    "train": 840,
+    "val": 240,
+    "test": 120,
+    "total_images": 1200
   },
   "citation": "FixGo Academic Project - Home Repair Incident Computer Vision"
 }

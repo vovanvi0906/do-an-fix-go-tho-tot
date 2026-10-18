@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { adminServicesService } from '../services/adminServices.service';
+import { socketService } from '../../../services/socket/socketService';
 import type {
   ServiceItem,
   ServiceFormData,
@@ -158,6 +159,49 @@ export function useServices(showToast?: ShowToastFn) {
   useEffect(() => {
     fetchServices();
   }, [fetchServices]);
+
+  // 9. Tự động làm mới khi người dùng quay lại tab trình duyệt (Window Focus & Visibility Change)
+  useEffect(() => {
+    const handleFocusOrVisible = () => {
+      if (document.visibilityState === 'visible') {
+        fetchServices();
+        fetchCategories();
+      }
+    };
+
+    window.addEventListener('focus', handleFocusOrVisible);
+    document.addEventListener('visibilitychange', handleFocusOrVisible);
+
+    return () => {
+      window.removeEventListener('focus', handleFocusOrVisible);
+      document.removeEventListener('visibilitychange', handleFocusOrVisible);
+    };
+  }, [fetchServices, fetchCategories]);
+
+  // Real-time WebSocket Subscription for Services & Categories
+  useEffect(() => {
+    socketService.connect();
+    socketService.joinAdminRoom();
+
+    const handleServiceUpdated = (data: any) => {
+      console.log('⚡ [Realtime Services] Cập nhật dịch vụ:', data);
+      fetchServices();
+    };
+
+    const handleCategoryUpdated = (data: any) => {
+      console.log('⚡ [Realtime Services] Danh mục cập nhật:', data);
+      fetchCategories();
+      fetchServices();
+    };
+
+    socketService.on('service.updated', handleServiceUpdated);
+    socketService.on('category.updated', handleCategoryUpdated);
+
+    return () => {
+      socketService.off('service.updated', handleServiceUpdated);
+      socketService.off('category.updated', handleCategoryUpdated);
+    };
+  }, [fetchServices, fetchCategories]);
 
   /**
    * Làm mới dữ liệu toàn trang

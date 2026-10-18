@@ -189,6 +189,7 @@ function CategoryGridItem({
 
   return (
     <Animated.View
+      nativeID={`category-item-container-${category.slug || category.id || index}`}
       style={[
         styles.gridItem,
         {
@@ -201,6 +202,7 @@ function CategoryGridItem({
       ]}
     >
       <Pressable
+        nativeID={`category-item-${category.slug || category.id || index}`}
         accessible={true}
         accessibilityRole="button"
         accessibilityLabel={`Danh mục ${category.name}`}
@@ -301,15 +303,15 @@ export default function CategoryGrid({
   }, [entranceAnims]);
 
   return (
-    <View style={styles.container}>
+    <View nativeID="home-category-grid" style={styles.container}>
       {/* ── Header ────────────────────────────────────────────── */}
-      <View style={styles.headerRow}>
+      <View nativeID="home-category-grid-header" style={styles.headerRow}>
         <Text style={styles.title}>Danh mục dịch vụ</Text>
         <Text style={styles.subtitle}>8 tiện ích gia đình</Text>
       </View>
 
       {/* ── 4x2 Soft-Tint Squircle Grid ───────────────────────── */}
-      <View style={styles.gridContainer}>
+      <View nativeID="home-category-items-wrap" style={styles.gridContainer}>
         {categories.slice(0, 8).map((cat, index) => (
           <CategoryGridItem
             key={cat.id}

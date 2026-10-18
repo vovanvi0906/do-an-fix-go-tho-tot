@@ -90,7 +90,7 @@ export default function PriceEstimateModal({
       onRequestClose={onClose}
       statusBarTranslucent
     >
-      <View style={styles.modalBackdrop}>
+      <View nativeID="modal-price-estimate-container" style={styles.modalBackdrop}>
         {/* Backdrop Touch để đóng */}
         <Animated.View style={[styles.backdropTouchArea, { opacity: fadeAnim }]}>
           <Pressable style={styles.flexOne} onPress={onClose} />
@@ -98,6 +98,7 @@ export default function PriceEstimateModal({
 
         {/* Sheet Content Card */}
         <Animated.View
+          nativeID="modal-price-estimate-sheet"
           style={[
             styles.sheetContainer,
             {
@@ -112,7 +113,7 @@ export default function PriceEstimateModal({
           </View>
 
           {/* ── 1. Header Bảng Giá Minh Bạch ─────────────────────── */}
-          <View style={styles.headerRow}>
+          <View nativeID="modal-price-estimate-header" style={styles.headerRow}>
             <View style={styles.headerLeftGroup}>
               <View style={styles.headerIconSquircle}>
                 <Ionicons name="receipt-outline" size={22} color="#0284C7" />
@@ -122,13 +123,18 @@ export default function PriceEstimateModal({
                 <Text style={styles.headerSubtitle}>Cam kết 100% báo giá trước khi làm • Không phụ phí</Text>
               </View>
             </View>
-            <Pressable hitSlop={10} style={styles.closeBtn} onPress={onClose}>
+            <Pressable
+              nativeID="btn-close-price-estimate-modal"
+              hitSlop={10}
+              style={styles.closeBtn}
+              onPress={onClose}
+            >
               <Ionicons name="close" size={20} color="#64748B" />
             </Pressable>
           </View>
 
           {/* ── 2. Banner AI Scan CTA ─────────────────────────────── */}
-          <View style={styles.aiScanBanner}>
+          <View nativeID="modal-price-estimate-ai-banner" style={styles.aiScanBanner}>
             <View style={styles.aiScanBannerLeft}>
               <View style={styles.aiScanIconBox}>
                 <Ionicons name="sparkles" size={18} color="#0284C7" />
@@ -143,6 +149,7 @@ export default function PriceEstimateModal({
 
             {onOpenAiScan && (
               <Pressable
+                nativeID="btn-modal-open-ai-scan"
                 style={styles.aiScanCtaBtn}
                 onPress={() => {
                   triggerHaptic(Haptics.ImpactFeedbackStyle.Medium);
@@ -157,8 +164,9 @@ export default function PriceEstimateModal({
           </View>
 
           {/* ── 3. Horizontal Tabs Chuyển Ngành Dịch Vụ ───────────── */}
-          <View style={styles.tabBarWrap}>
+          <View nativeID="price-estimate-tabs-wrap" style={styles.tabBarWrap}>
             <ScrollView
+              nativeID="price-estimate-tabs-scroll"
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.tabBarScroll}
@@ -168,6 +176,7 @@ export default function PriceEstimateModal({
                 return (
                   <Pressable
                     key={tier.categoryId}
+                    nativeID={`tab-tier-${tier.slug}`}
                     onPress={() => handleTabChange(tier.slug)}
                     style={[styles.tabItem, isActive && styles.tabItemActive]}
                   >
@@ -188,12 +197,13 @@ export default function PriceEstimateModal({
 
           {/* ── 4. Nội Dung Cấu Trúc Chi Phí 3 Tầng ──────────────── */}
           <ScrollView
+            nativeID="price-estimate-body-scroll"
             style={styles.pricingBodyScroll}
             contentContainerStyle={styles.pricingBodyContent}
             showsVerticalScrollIndicator={false}
           >
             {/* TẦNG 1: KHẢO SÁT TẠI NHÀ */}
-            <View style={[styles.tierCard, styles.tierCardFree]}>
+            <View nativeID="price-estimate-tier-1-card" style={[styles.tierCard, styles.tierCardFree]}>
               <View style={styles.tierHeaderRow}>
                 <View style={styles.tierBadgeFree}>
                   <Text style={styles.tierBadgeFreeText}>TẦNG 1</Text>
@@ -205,7 +215,7 @@ export default function PriceEstimateModal({
             </View>
 
             {/* TẦNG 2: NHÂN CÔNG CHUẨN HÓA */}
-            <View style={styles.tierCard}>
+            <View nativeID="price-estimate-tier-2-card" style={styles.tierCard}>
               <View style={styles.tierHeaderRow}>
                 <View style={styles.tierBadgeLabor}>
                   <Text style={styles.tierBadgeLaborText}>TẦNG 2</Text>
@@ -217,7 +227,7 @@ export default function PriceEstimateModal({
             </View>
 
             {/* TẦNG 3: VẬT TƯ & LINH KIỆN */}
-            <View style={styles.tierCard}>
+            <View nativeID="price-estimate-tier-3-card" style={styles.tierCard}>
               <View style={styles.tierHeaderRow}>
                 <View style={styles.tierBadgeMaterial}>
                   <Text style={styles.tierBadgeMaterialText}>TẦNG 3</Text>
@@ -229,12 +239,13 @@ export default function PriceEstimateModal({
             </View>
 
             {/* BẢNG GIÁ CHI TIẾT TỪNG DỊCH VỤ CON */}
-            <View style={styles.subServicesSection}>
+            <View nativeID="price-estimate-subservices-section" style={styles.subServicesSection}>
               <Text style={styles.subServicesTitle}>Đơn giá tham khảo các ca sửa {currentTier.categoryName}</Text>
               <View style={styles.subServicesTable}>
                 {currentTier.popularServices.map((service, idx) => (
                   <View
                     key={service.id}
+                    nativeID={`price-estimate-subservice-row-${service.id || idx}`}
                     style={[
                       styles.tableRow,
                       idx === currentTier.popularServices.length - 1 && styles.tableRowLast,

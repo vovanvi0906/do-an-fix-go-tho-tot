@@ -70,6 +70,19 @@ class SocketService {
   }
 
   /**
+   * Tham gia phòng quản trị viên Admin (admin_room)
+   */
+  joinAdminRoom() {
+    if (!this.socket) {
+      this.connect();
+    }
+    if (this.socket && this.isConnected) {
+      this.socket.emit('admin:join');
+      console.log('🛡️ [SocketService] Đã gửi yêu cầu tham gia admin_room');
+    }
+  }
+
+  /**
    * Đăng ký lắng nghe sự kiện
    */
   on(event, callback) {

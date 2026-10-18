@@ -11,6 +11,7 @@ import {
   Query,
   UseGuards,
   Dependencies,
+  Header,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -47,6 +48,9 @@ export class AdminServicesV1Controller {
    * Lấy danh sách dịch vụ (hỗ trợ query params: search, categoryId, status, page, limit)
    */
   @Get()
+  @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
+  @Header('Pragma', 'no-cache')
+  @Header('Expires', '0')
   @ApiOperation({
     summary:
       'Lấy danh sách dịch vụ (hỗ trợ search, categoryId, status, page, limit)',
@@ -73,6 +77,9 @@ export class AdminServicesV1Controller {
    * Lấy danh sách nhóm danh mục dịch vụ phục vụ dropdown và phân loại
    */
   @Get('categories')
+  @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
+  @Header('Pragma', 'no-cache')
+  @Header('Expires', '0')
   @ApiOperation({ summary: 'Lấy danh sách tất cả danh mục dịch vụ' })
   async getCategories() {
     return this.adminService.getServiceCategories();

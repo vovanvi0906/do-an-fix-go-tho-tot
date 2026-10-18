@@ -88,6 +88,14 @@ def create_sample_images():
     cv2.ellipse(face_img, (160, 200), (25, 12), 0, 0, 180, (50, 50, 50), 2)  # Miệng
     cv2.imwrite(str(IMAGES_DIR / "sample_face.jpg"), face_img)
 
+    # 4. Ảnh mẫu làm vườn (cỏ sân vườn, cây cảnh)
+    garden_img = np.zeros((300, 300, 3), dtype=np.uint8)
+    garden_img[:, :] = (45, 160, 55)  # Nền cỏ xanh lá
+    for x in range(15, 290, 12):
+        cv2.line(garden_img, (x, 280), (x + np.random.randint(-8, 8), 160), (20, 220, 30), 2)
+    cv2.circle(garden_img, (150, 100), 50, (30, 140, 40), -1)
+    cv2.imwrite(str(IMAGES_DIR / "sample_garden.jpg"), garden_img)
+
 
 def run_benchmark():
     print("=" * 70)
@@ -178,6 +186,36 @@ def run_benchmark():
             })
         except Exception as e:
             print(f"  ❌ Lỗi Test 2: {e}")
+
+        # TEST 2.2: Endpoint /ai/diagnose cho Danh mục Làm vườn (lam-vuon)
+        print("\n🔍 [Test 2.2] Đánh giá Chẩn đoán Danh mục Làm vườn (/ai/diagnose)...")
+        garden_path = IMAGES_DIR / "sample_garden.jpg"
+        try:
+            t0 = time.time()
+            with open(garden_path, "rb") as f:
+                res = do_post(
+                    "/ai/diagnose",
+                    files={"file": ("sample_garden.jpg", f.read(), "image/jpeg")},
+                    data={"description": "Cỏ dại mọc um tùm trong sân vườn cần cắt tỉa dọn dẹp"},
+                )
+            latency = (time.time() - t0) * 1000
+            garden_diag = res.json()
+            is_garden_match = garden_diag.get("suggestedCategoryId") == "lam-vuon"
+            has_sub_service = bool(garden_diag.get("suggestedServiceName"))
+            print(f"  Status Code: {res.status_code} ({latency:.1f}ms)")
+            print(f"  Category đề xuất: {garden_diag.get('suggestedCategoryName')} ({garden_diag.get('suggestedCategoryId')})")
+            print(f"  Dịch vụ con đề xuất: {garden_diag.get('suggestedServiceName')}")
+            print(f"  Khoảng giá: {garden_diag.get('estimatedPriceRange', {}).get('formatted')}")
+
+            results["tests"].append({
+                "name": "AI Diagnose - Gardening (lam-vuon)",
+                "passed": res.status_code == 200 and is_garden_match and has_sub_service,
+                "latency_ms": round(latency, 2),
+                "engine": garden_diag.get("engine"),
+                "data": garden_diag,
+            })
+        except Exception as e:
+            print(f"  ❌ Lỗi Test 2.2: {e}")
 
         # TEST 3: Endpoint /ai/compare-before-after (Thuần OpenCV ORB + RANSAC + Diff Analysis)
         print("\n🔍 [Test 3] Đánh giá So sánh nghiệm thu Before-After (/ai/compare-before-after)...")

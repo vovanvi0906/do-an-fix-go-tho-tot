@@ -157,6 +157,18 @@ export class OrderGateway {
     return { status: 'left', orderId, room: roomName };
   }
 
+  /**
+   * Admin portal subscribe kênh theo dõi đơn hàng toàn hệ thống
+   */
+  @SubscribeMessage('admin:orders:join')
+  @SubscribeMessage('admin:join')
+  @Bind(ConnectedSocket())
+  handleAdminJoinOrders(client) {
+    client.join('admin_orders_room');
+    this.logger.log(`🛡️ Admin Client ${client.id} joined admin_orders_room`);
+    return { status: 'joined', room: 'admin_orders_room' };
+  }
+
   // ==========================================
   // CLIENT -> SERVER: WORKER GPS LOCATION
   // ==========================================
@@ -255,6 +267,12 @@ export class OrderGateway {
       // Compatibility alias
       this.server.to(roomName).emit('order.status', payload);
 
+      // Broadcast to Admin order portal
+      this.server.to('admin_orders_room').emit('order:status_changed', payload);
+      this.server.to('admin_orders_room').emit('order.status', payload);
+      this.server.emit('order:status_changed', payload);
+      this.server.emit('order.status', payload);
+
       // Nếu đơn hàng đã kết thúc (COMPLETED, PAID, CANCELLED), tự động giải phóng room để tránh leak listener
       if (['COMPLETED', 'PAID', 'CANCELLED'].includes(status)) {
         try {
@@ -317,6 +335,12 @@ export class OrderGateway {
       this.server.to(roomName).emit('order:matched', payload);
       // Compatibility alias
       this.server.to(roomName).emit('order.matched', payload);
+
+      // Broadcast to Admin order portal
+      this.server.to('admin_orders_room').emit('order:matched', payload);
+      this.server.to('admin_orders_room').emit('order.matched', payload);
+      this.server.emit('order:matched', payload);
+      this.server.emit('order.matched', payload);
     }
   }
 
@@ -367,12 +391,23 @@ export class OrderGateway {
     );
 
     if (this.server) {
-      this.server.emit('order.new', {
+      const payload = {
         orderId: orderData?.id,
+        id: orderData?.id,
         service: orderData?.service,
         totalPrice: orderData?.totalPrice,
         addressText: orderData?.addressText,
-      });
+        status: orderData?.status || 'SEARCHING',
+        createdAt: orderData?.createdAt || new Date().toISOString(),
+        order: orderData,
+      };
+
+      this.server.emit('order.new', payload);
+      this.server.emit('order.created', payload);
+      this.server.emit('order:created', payload);
+      this.server.to('admin_orders_room').emit('order.created', payload);
+      this.server.to('admin_orders_room').emit('order:created', payload);
+      this.server.to('admin_orders_room').emit('order.new', payload);
     }
   }
 

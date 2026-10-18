@@ -182,9 +182,9 @@ export default function WorkerMapSection({
   const currentLng = location?.lng ?? 106.711;
 
   return (
-    <View style={styles.container}>
+    <View nativeID="home-worker-list-section" style={styles.container}>
       {/* ── 1. Header & Badge Trạng Thái Thực Tế ────────────────── */}
-      <View style={styles.headerRow}>
+      <View nativeID="home-worker-section-header" style={styles.headerRow}>
         <View style={styles.headerTitleGroup}>
           <Text style={styles.title}>Thợ trực tuyến quanh bạn</Text>
 
@@ -202,6 +202,7 @@ export default function WorkerMapSection({
         </View>
 
         <Pressable
+          nativeID="btn-open-worker-full-map-header"
           accessible={true}
           accessibilityRole="button"
           accessibilityLabel="Mở toàn màn hình bản đồ thợ"
@@ -233,8 +234,8 @@ export default function WorkerMapSection({
       </View>
 
       {/* ── 2. Khối Bản Đồ Thật (Leaflet Satellite Hybrid - Toàn bộ ô bản đồ là vùng bấm mở Modal) ─ */}
-      <TouchableOpacity
-        activeOpacity={0.92}
+      <Pressable
+        nativeID="btn-open-worker-full-map-card"
         onPress={handleOpenMapModal}
         accessible={true}
         accessibilityRole="button"
@@ -289,23 +290,25 @@ export default function WorkerMapSection({
             <Ionicons name="chevron-forward" size={13} color="#0284C7" style={{ marginLeft: 3 }} />
           </View>
         </View>
-      </TouchableOpacity>
+      </Pressable>
 
       {/* ── 3. Danh Sách Thẻ Thợ Thật hoặc Khối Empty State ─────── */}
       {workers.length > 0 ? (
         <ScrollView
+          nativeID="home-workers-scroll-list"
           ref={scrollRef}
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.workersScrollContent}
           decelerationRate="fast"
         >
-          {workers.map((worker) => {
+          {workers.map((worker, index) => {
             const isSelected = selectedWorkerId === worker.id;
 
             return (
               <Pressable
                 key={worker.id}
+                nativeID={`worker-card-${worker.id || index}`}
                 accessible={true}
                 accessibilityRole="button"
                 accessibilityLabel={`Thợ ${worker.fullName}, ${worker.specialty}, đã hoàn thành ${worker.completedJobs} đơn, khoảng cách ${worker.distanceKm} km`}
@@ -344,7 +347,7 @@ export default function WorkerMapSection({
                 </View>
 
                 {/* Nút Xem hồ sơ & Gọi thợ */}
-                <View style={[styles.quickCallPill, isSelected && styles.quickCallPillActive]}>
+                <View nativeID={`btn-quick-call-worker-${worker.id || index}`} style={[styles.quickCallPill, isSelected && styles.quickCallPillActive]}>
                   <Text style={[styles.quickCallText, isSelected && styles.quickCallTextActive]}>
                     Xem hồ sơ & Gọi thợ
                   </Text>

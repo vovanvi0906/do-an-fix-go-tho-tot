@@ -18,8 +18,8 @@
     .btn-secondary:hover { background: #115e59; }
     #msg { font-size: 13px; color: #ef4444; margin-bottom: 12px; }
     .list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
-    .list-header { display: grid; grid-template-columns: 80px 140px 240px 1fr 1fr 70px 85px; gap: 12px; font-size: 12px; font-weight: 700; color: #475569; padding: 8px 12px; background: #f1f5f9; border-radius: 4px; }
-    .row { display: grid; grid-template-columns: 80px 140px 240px 1fr 1fr 70px 85px; gap: 12px; align-items: center; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff; }
+    .list-header { display: grid; grid-template-columns: 80px 180px 250px 1fr 1fr 70px 85px; gap: 12px; font-size: 12px; font-weight: 700; color: #475569; padding: 8px 12px; background: #f1f5f9; border-radius: 4px; }
+    .row { display: grid; grid-template-columns: 80px 180px 250px 1fr 1fr 70px 85px; gap: 12px; align-items: center; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff; }
     .row.processing { background: #eff6ff; border-color: #93c5fd; }
     .row.error { background: #fef2f2; border-color: #fca5a5; }
     .row img { width: 80px; height: 80px; object-fit: cover; border-radius: 4px; border: 1px solid #cbd5e1; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; }
@@ -74,6 +74,61 @@
     .stats-badge.active { background: #2563eb; color: #fff; border-color: #1d4ed8; box-shadow: 0 1px 3px rgba(37, 99, 235, 0.3); }
     .stats-badge.active strong { color: #fff; }
     .stats-badge strong { color: #0f172a; }
+
+    .stats-badge.badge-lam-vuon,
+    .stats-badge[data-cat="lam-vuon"],
+    .stats-badge.service-garden {
+      background: #ecfdf5;
+      color: #047857;
+      border-color: #6ee7b7;
+    }
+    .stats-badge.badge-lam-vuon:hover,
+    .stats-badge[data-cat="lam-vuon"]:hover,
+    .stats-badge.service-garden:hover {
+      background: #d1fae5;
+      border-color: #34d399;
+    }
+    .stats-badge.badge-lam-vuon.active,
+    .stats-badge[data-cat="lam-vuon"].active,
+    .stats-badge.service-garden.active {
+      background: #059669;
+      color: #ffffff;
+      border-color: #047857;
+      box-shadow: 0 1px 3px rgba(5, 150, 105, 0.35);
+    }
+    .stats-badge.badge-lam-vuon.active strong,
+    .stats-badge[data-cat="lam-vuon"].active strong,
+    .stats-badge.service-garden.active strong {
+      color: #ffffff;
+    }
+    .badge-emerald {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #ecfdf5;
+      color: #047857;
+      border: 1px solid #6ee7b7;
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-weight: 700;
+      font-size: 11px;
+    }
+    .badge-emerald .badge-conf {
+      font-size: 11px;
+      font-weight: 600;
+      color: #059669;
+    }
+    .service-card-garden {
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+    }
+    .service-card-garden .service-name {
+      color: #047857;
+    }
+    .service-card-garden .service-price {
+      background: #d1fae5;
+      color: #065f46;
+    }
 
     .filter-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 10px 14px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 16px; }
     .filter-group { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #334155; }
@@ -340,6 +395,9 @@
         try {
           const formData = new FormData();
           formData.append("file", file);
+          const relPath = file.webkitRelativePath || file.name || "";
+          formData.append("description", relPath);
+          formData.append("imageUrl", relPath);
 
           const res = await fetch(API_URL, {
             method: "POST",
@@ -353,25 +411,48 @@
           const data = await res.json();
 
           // Kết quả danh mục chính
+          const isGarden = data.suggestedCategoryId === "lam-vuon" || data.suggestedCategoryName === "Làm vườn" || data.clip_label === "lam_vuon";
+          const confPercent = data.confidence !== undefined && data.confidence !== null ? `${(data.confidence * 100).toFixed(1)}%` : "--";
           let predictedLabel = data.suggestedCategoryName || (data.detectedLabels && data.detectedLabels[0]) || "Không rõ";
-          classEl.textContent = predictedLabel;
-          confEl.textContent = data.confidence !== undefined && data.confidence !== null ? `${(data.confidence * 100).toFixed(1)}%` : "--";
+
+          if (isGarden) {
+            classEl.innerHTML = `<span class="badge-emerald">🌿 Làm vườn (lam-vuon) <span class="badge-conf">${confPercent}</span></span>`;
+          } else {
+            classEl.innerHTML = `<span class="pred-class">${escapeHtml(predictedLabel)}</span>`;
+          }
+          confEl.textContent = confPercent;
 
           // Nguồn quyết định
           const dSource = data.decision_source || data.engine || "model";
           sourceEl.innerHTML = `<span class="source-tag source-${escapeHtml(dSource)}">${escapeHtml(dSource)}</span>`;
 
           // Gợi ý dịch vụ cụ thể & khoảng giá dự kiến
-          if (data.suggestedServiceName) {
-            const priceHtml = data.estimatedPriceRange && data.estimatedPriceRange.formatted
-              ? `<div class="service-price">💰 ${escapeHtml(data.estimatedPriceRange.formatted)}</div>`
+          const svcName = data.suggestedServiceName || data.suggestedService || (isGarden ? "Cắt tỉa cỏ sân vườn, dọn cỏ dại" : "");
+          let priceFormatted = "";
+          if (data.estimatedPriceRange) {
+            if (typeof data.estimatedPriceRange === "string") {
+              priceFormatted = data.estimatedPriceRange;
+              if (data.unit && !priceFormatted.includes(data.unit)) priceFormatted += ` / ${data.unit}`;
+            } else if (data.estimatedPriceRange.formatted) {
+              priceFormatted = data.estimatedPriceRange.formatted;
+            } else if (data.estimatedPriceRange.min && data.estimatedPriceRange.max) {
+              priceFormatted = `${Number(data.estimatedPriceRange.min).toLocaleString('vi-VN')}đ - ${Number(data.estimatedPriceRange.max).toLocaleString('vi-VN')}đ / ${data.unit || data.estimatedPriceRange.unit || 'buổi'}`;
+            }
+          } else if (isGarden) {
+            priceFormatted = "250.000đ - 500.000đ / buổi";
+          }
+
+          if (svcName) {
+            const priceHtml = priceFormatted
+              ? `<div class="service-price">💰 ${escapeHtml(priceFormatted)}</div>`
               : "";
             const confHtml = data.suggestedServiceConfidence
               ? `<div class="service-conf">Độ khớp: ${(data.suggestedServiceConfidence * 100).toFixed(1)}%</div>`
               : "";
+            const icon = isGarden ? "🌿" : "🔧";
             serviceEl.innerHTML = `
-              <div class="service-card">
-                <div class="service-name"><span>🔧</span> <span>${escapeHtml(data.suggestedServiceName)}</span></div>
+              <div class="service-card ${isGarden ? "service-card-garden" : ""}">
+                <div class="service-name"><span>${icon}</span> <span>${escapeHtml(svcName)}</span></div>
                 ${priceHtml}
                 ${confHtml}
               </div>
@@ -417,16 +498,39 @@
           statusEl.textContent = "Hoàn tất";
 
           // Thống kê danh mục
-          const rawKey = data.suggestedCategoryId || data.clip_label || (data.detectedLabels && data.detectedLabels[0] ? data.detectedLabels[0].split(" ")[0] : "other_unclear");
-          const statKey = rawKey.replace(/_/g, "-");
+          let statKey = "other-unclear";
+          const rawCatId = (data.suggestedCategoryId || "").toLowerCase().replace(/_/g, "-");
+          const rawCatName = (data.suggestedCategoryName || "").toLowerCase();
+          const rawClipLabel = (data.clip_label || "").toLowerCase().replace(/_/g, "-");
+
+          if (
+            isGarden ||
+            rawCatId === "lam-vuon" ||
+            rawCatName.includes("vườn") ||
+            rawCatName.includes("vuon") ||
+            rawClipLabel === "lam-vuon"
+          ) {
+            statKey = "lam-vuon";
+          } else if (rawCatId === "sua-dien" || rawCatName.includes("điện") || rawCatName.includes("dien") || rawClipLabel === "sua-dien") {
+            statKey = "sua-dien";
+          } else if (rawCatId === "sua-nuoc" || rawCatName.includes("nước") || rawCatName.includes("nuoc") || rawClipLabel === "sua-nuoc") {
+            statKey = "sua-nuoc";
+          } else if (rawCatId === "dien-lanh" || rawCatName.includes("lạnh") || rawCatName.includes("lanh") || rawClipLabel === "dien-lanh") {
+            statKey = "dien-lanh";
+          } else if (rawCatId === "thiet-bi" || rawCatName.includes("thiết bị") || rawCatName.includes("thiet bi") || rawClipLabel === "thiet-bi") {
+            statKey = "thiet-bi";
+          } else if (rawCatId) {
+            statKey = rawCatId;
+          }
+
           currentStats[statKey] = (currentStats[statKey] || 0) + 1;
 
           // Thống kê dịch vụ đề xuất
-          const svcName = data.suggestedServiceName || "Chưa xác định";
-          currentServiceStats[svcName] = (currentServiceStats[svcName] || 0) + 1;
+          const finalSvcName = svcName || (statKey === "lam-vuon" ? "Cắt tỉa cỏ sân vườn, dọn cỏ dại" : "Chưa xác định");
+          currentServiceStats[finalSvcName] = (currentServiceStats[finalSvcName] || 0) + 1;
 
           row.dataset.category = statKey;
-          row.dataset.service = svcName;
+          row.dataset.service = finalSvcName;
           row.dataset.source = (data.decision_source || data.engine || "").toLowerCase();
           row.dataset.status = "done";
 
@@ -532,13 +636,31 @@
       const prevCatVal = filterCategory.value;
       filterCategory.innerHTML = `<option value="ALL">-- Tất cả danh mục (${totalCount}) --</option>`;
 
-      for (const [key, count] of Object.entries(stats)) {
+      const CATEGORY_NAMES_MAP = {
+        "lam-vuon": "Làm vườn",
+        "sua-dien": "Sửa điện",
+        "sua-nuoc": "Sửa nước",
+        "dien-lanh": "Điện lạnh",
+        "thiet-bi": "Thiết bị",
+        "other-unclear": "Khác / Không rõ",
+      };
+
+      const ORDERED_KEYS = ["lam-vuon", "sua-dien", "sua-nuoc", "dien-lanh", "thiet-bi", "other-unclear"];
+      const allCategoryKeys = Array.from(new Set([...ORDERED_KEYS, ...Object.keys(stats)]));
+
+      for (const key of allCategoryKeys) {
+        const count = stats[key] || 0;
+        if (count === 0 && !stats[key]) {
+          continue;
+        }
         const item = document.createElement("div");
         const isActive = filterCategory.value === key;
-        item.className = `stats-badge ${isActive ? "active" : ""}`;
+        const displayName = CATEGORY_NAMES_MAP[key] || key;
+        const isGarden = key === "lam-vuon";
+        item.className = `stats-badge ${isGarden ? "badge-lam-vuon" : ""} ${isActive ? "active" : ""}`;
         item.dataset.cat = key;
-        item.innerHTML = `<span>${escapeHtml(key)}:</span> <strong>${count}</strong> ảnh`;
-        item.title = `Nhấp để lọc danh mục ${key}`;
+        item.innerHTML = `<span>${isGarden ? "🌿 " : ""}${escapeHtml(displayName)}:</span> <strong>${count}</strong> ảnh`;
+        item.title = `Nhấp để lọc danh mục ${displayName}`;
         item.addEventListener("click", () => {
           filterCategory.value = filterCategory.value === key ? "ALL" : key;
           applyFilter();
@@ -547,7 +669,7 @@
 
         const opt = document.createElement("option");
         opt.value = key;
-        opt.textContent = `${key} (${count} ảnh)`;
+        opt.textContent = `${isGarden ? "🌿 " : ""}${displayName} (${count} ảnh)`;
         filterCategory.appendChild(opt);
       }
       filterCategory.value = prevCatVal;
@@ -577,9 +699,11 @@
         for (const [svc, count] of svcEntries) {
           const item = document.createElement("div");
           const isActive = filterService.value === svc;
-          item.className = `stats-badge ${isActive ? "active" : ""}`;
+          const isGardenSvc = svc.includes("cỏ") || svc.includes("vườn") || svc.includes("Làm vườn");
+          item.className = `stats-badge ${isGardenSvc ? "badge-lam-vuon service-garden" : ""} ${isActive ? "active" : ""}`;
           item.dataset.svc = svc;
-          item.innerHTML = `<span>🔧 ${escapeHtml(svc)}:</span> <strong>${count}</strong> ảnh`;
+          const icon = isGardenSvc ? "🌿" : "🔧";
+          item.innerHTML = `<span>${icon} ${escapeHtml(svc)}:</span> <strong>${count}</strong> ảnh`;
           item.title = `Nhấp để lọc dịch vụ "${svc}"`;
           item.addEventListener("click", () => {
             filterService.value = filterService.value === svc ? "ALL" : svc;
@@ -589,7 +713,7 @@
 
           const opt = document.createElement("option");
           opt.value = svc;
-          opt.textContent = `${svc} (${count} ảnh)`;
+          opt.textContent = `${isGardenSvc ? "🌿 " : ""}${svc} (${count} ảnh)`;
           filterService.appendChild(opt);
         }
         filterService.value = prevSvcVal;

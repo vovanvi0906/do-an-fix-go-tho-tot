@@ -1,7 +1,7 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Platform } from 'react-native';
+import { Platform, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function UserTabsLayout() {
@@ -50,6 +50,7 @@ export default function UserTabsLayout() {
         options={{
           title: 'Trang chủ',
           tabBarLabel: 'Trang chủ',
+          tabBarButton: (props) => <Pressable {...props} nativeID="main-bottom-tab-home" />,
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'home' : 'home-outline'} size={22} color={color} />
           ),
@@ -61,6 +62,7 @@ export default function UserTabsLayout() {
           headerShown: false,
           title: 'Đơn của tôi',
           tabBarLabel: 'Đơn hàng',
+          tabBarButton: (props) => <Pressable {...props} nativeID="main-bottom-tab-orders" />,
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'receipt' : 'receipt-outline'} size={22} color={color} />
           ),
@@ -72,6 +74,7 @@ export default function UserTabsLayout() {
           headerShown: true,
           title: 'Thông báo',
           tabBarLabel: 'Thông báo',
+          tabBarButton: (props) => <Pressable {...props} nativeID="main-bottom-tab-notifications" />,
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? 'notifications' : 'notifications-outline'}
@@ -87,6 +90,7 @@ export default function UserTabsLayout() {
           headerShown: true,
           title: 'Cá nhân',
           tabBarLabel: 'Tài khoản',
+          tabBarButton: (props) => <Pressable {...props} nativeID="main-bottom-tab-profile" />,
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'person' : 'person-outline'} size={22} color={color} />
           ),

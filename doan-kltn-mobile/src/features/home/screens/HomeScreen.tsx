@@ -11,18 +11,20 @@
  * 7. Ưu đãi dành cho bạn (Voucher Tickets ở cuối)
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
+  RefreshControl,
   Alert,
   TouchableOpacity,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useHomeData } from '../hooks/useHomeData';
@@ -69,6 +71,27 @@ export default function HomeScreen() {
     claimVoucher,
     refetch,
   } = useHomeData();
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Tự động làm mới khi Focus màn hình (Screen Focus / Window Focus)
+  useFocusEffect(
+    useCallback(() => {
+      refetch().catch((err) => console.warn('⚠️ [HomeScreen] Lỗi refetch khi focus:', err));
+    }, [refetch])
+  );
+
+  // Kéo để làm mới (Pull-to-Refresh)
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await refetch();
+    } catch (err) {
+      console.warn('⚠️ [HomeScreen] Lỗi kéo làm mới:', err);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refetch]);
 
   const { user } = useAuth();
   const hasPhone = typeof user?.phone === 'string' && user.phone.trim().length > 0;
@@ -219,7 +242,7 @@ export default function HomeScreen() {
   // 1. Loading State (Shimmer Skeleton)
   if (isLoading) {
     return (
-      <View style={styles.rootContainer}>
+      <View nativeID="home-screen-loading-container" style={styles.rootContainer}>
         <StatusBar style="light" translucent />
         <View style={{ paddingTop: insets.top, flex: 1, backgroundColor: '#0284c7' }}>
           <HomeSkeleton />
@@ -229,11 +252,11 @@ export default function HomeScreen() {
   }
 
   return (
-    <View style={styles.rootContainer}>
+    <View nativeID="home-screen-container" style={styles.rootContainer}>
       <StatusBar style="light" translucent />
 
       {/* ── 1. Header Gradient & Thanh tìm kiếm với Safe Area Top ─────────── */}
-      <View style={styles.headerSafeAreaWrap}>
+      <View nativeID="home-header-wrap" style={styles.headerSafeAreaWrap}>
         <HomeHeader
           user={data.user}
           searchQuery={searchQuery}
@@ -246,12 +269,21 @@ export default function HomeScreen() {
       </View>
 
       <ScrollView
+        nativeID="home-scroll-container"
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#0284c7']}
+            tintColor="#0284c7"
+          />
+        }
       >
         {/* ── Body Sections (8pt Spacing Grid) ─────────────── */}
-        <View style={styles.bodyWrapper}>
+        <View nativeID="home-body-wrapper" style={styles.bodyWrapper}>
           {/* Error State if any */}
           {isError && (
             <ErrorState message={errorMessage || undefined} onRetry={refetch} />
@@ -288,7 +320,7 @@ export default function HomeScreen() {
           )}
 
           {/* ── 2. Micro Trust Line (1 dòng tinh tế, chữ xám nhẹ #64748B) ── */}
-          <View style={styles.microTrustRow}>
+          <View nativeID="home-micro-trust-row" style={styles.microTrustRow}>
             <Ionicons name="shield-checkmark" size={13} color="#059669" style={{ marginRight: 4 }} />
             <Text style={styles.microTrustText}>
               100% thợ xác thực CCCD • Bảo hành dịch vụ 30 ngày

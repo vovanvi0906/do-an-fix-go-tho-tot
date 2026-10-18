@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { dashboardService } from '../services/dashboard.service';
+import { socketService } from '../../../services/socket/socketService';
 
 /**
  * Custom Hook: useDashboardData
@@ -87,6 +88,35 @@ export function useDashboardData(initialTimeframe = 'month') {
   // Kích hoạt nạp dữ liệu khi timeframe thay đổi
   useEffect(() => {
     fetchData(timeframe, false);
+  }, [timeframe, fetchData]);
+
+  // Real-time WebSocket Subscription for Dashboard
+  useEffect(() => {
+    socketService.connect();
+    socketService.joinAdminRoom();
+
+    const handleRealtimeUpdate = (data) => {
+      console.log('⚡ [Realtime Dashboard] Nhận tín hiệu đồng bộ số liệu:', data);
+      fetchData(timeframe, true);
+    };
+
+    socketService.on('dashboard.refresh', handleRealtimeUpdate);
+    socketService.on('order.created', handleRealtimeUpdate);
+    socketService.on('order.new', handleRealtimeUpdate);
+    socketService.on('order.status', handleRealtimeUpdate);
+    socketService.on('order:status_changed', handleRealtimeUpdate);
+    socketService.on('worker.status_changed', handleRealtimeUpdate);
+    socketService.on('user.created', handleRealtimeUpdate);
+
+    return () => {
+      socketService.off('dashboard.refresh', handleRealtimeUpdate);
+      socketService.off('order.created', handleRealtimeUpdate);
+      socketService.off('order.new', handleRealtimeUpdate);
+      socketService.off('order.status', handleRealtimeUpdate);
+      socketService.off('order:status_changed', handleRealtimeUpdate);
+      socketService.off('worker.status_changed', handleRealtimeUpdate);
+      socketService.off('user.created', handleRealtimeUpdate);
+    };
   }, [timeframe, fetchData]);
 
   const refetch = useCallback(() => {

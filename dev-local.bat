@@ -81,5 +81,5 @@ echo.
 :: Cua so chinh quan ly va hien thi truc tiep log cac dich vu Backend, AI va Web Admin
 npx --yes concurrently -k -n "BACKEND,AI,WEB" -c "blue,magenta,cyan" ^
   "cd doan-kltn-backend && npm run dev" ^
-  "cd ai-service && .venv\Scripts\activate && uvicorn main:app --host 0.0.0.0 --port 8000 --reload" ^
+  "cd ai-service && .venv\Scripts\activate && uvicorn main:app --host 0.0.0.0 --port 8000 --reload --reload-exclude .venv" ^
   "cd doan-kttn-frontend && npm run dev"

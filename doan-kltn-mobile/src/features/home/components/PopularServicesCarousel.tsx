@@ -32,9 +32,9 @@ export default function PopularServicesCarousel({
   onViewAll,
 }: PopularServicesCarouselProps) {
   return (
-    <View style={styles.container}>
+    <View nativeID="home-popular-services-section" style={styles.container}>
       {/* ── 1. Header Row ─────────────────────────────────────── */}
-      <View style={styles.headerRow}>
+      <View nativeID="home-popular-services-header" style={styles.headerRow}>
         <View>
           <Text style={styles.title}>Dịch vụ phổ biến</Text>
           <Text style={styles.subtitle}>Giá niêm yết minh bạch • Đặt nhiều nhất tuần</Text>
@@ -42,6 +42,7 @@ export default function PopularServicesCarousel({
 
         {onViewAll && (
           <Pressable
+            nativeID="btn-view-all-services"
             accessible={true}
             accessibilityRole="button"
             accessibilityLabel="Xem tất cả hơn 40 dịch vụ sửa chữa"
@@ -57,14 +58,16 @@ export default function PopularServicesCarousel({
 
       {/* ── 2. Horizontal Scroll Cards (Tránh cắt cụt nội dung) ─ */}
       <ScrollView
+        nativeID="home-popular-services-scroll"
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
         decelerationRate="fast"
       >
-        {services.map((service) => (
+        {services.map((service, index) => (
           <Pressable
             key={service.id}
+            nativeID={`popular-service-card-${service.id || index}`}
             accessible={true}
             accessibilityRole="button"
             accessibilityLabel={`Dịch vụ ${service.name}, giá ${service.basePrice.toLocaleString('vi-VN')} đồng, đánh giá ${service.rating} sao`}
@@ -118,6 +121,7 @@ export default function PopularServicesCarousel({
 
                 {/* Touch Target 44x44px Button Đặt ngay */}
                 <Pressable
+                  nativeID={`btn-book-service-${service.id || index}`}
                   accessible={true}
                   accessibilityRole="button"
                   accessibilityLabel={`Đặt ngay dịch vụ ${service.name}`}

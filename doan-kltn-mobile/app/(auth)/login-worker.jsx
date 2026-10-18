@@ -175,14 +175,15 @@ export default function WorkerLoginScreen() {
   return (
     <View style={styles.container}>
       <StatusBar style="dark" />
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView nativeID="worker-login-screen-container" style={styles.safeArea}>
         <KeyboardAvoidingView
           style={styles.flex1}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
           {/* ── Top Header Navigation ────────────────────────────────────── */}
-          <View style={styles.headerNav}>
+          <View nativeID="worker-login-nav-bar" style={styles.headerNav}>
             <TouchableOpacity
+              nativeID="btn-back-worker-login"
               style={styles.backBtn}
               onPress={() => router.back()}
               activeOpacity={0.7}
@@ -196,12 +197,13 @@ export default function WorkerLoginScreen() {
           </View>
 
           <ScrollView
+            nativeID="worker-login-scroll"
             contentContainerStyle={styles.scrollContent}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
             {/* ── Header Title & Subtitle ─────────────────────────────────── */}
-            <View style={styles.headerSection}>
+            <View nativeID="worker-login-header" style={styles.headerSection}>
               <Text style={styles.mainTitle}>Đăng nhập Thợ</Text>
               <Text style={styles.subTitle}>
                 Chào mừng đối tác FIXGO! Hãy đăng nhập để nhận đơn và quản lý công việc sửa chữa.
@@ -209,7 +211,7 @@ export default function WorkerLoginScreen() {
             </View>
 
             {/* ── Form Container ─────────────────────────────────────────── */}
-            <View style={styles.formContainer}>
+            <View nativeID="worker-login-form-container" style={styles.formContainer}>
               {/* Input: Số điện thoại hoặc email */}
               <Text style={styles.inputLabel}>Số điện thoại hoặc Email</Text>
               <View
@@ -226,6 +228,7 @@ export default function WorkerLoginScreen() {
                   style={styles.inputIcon}
                 />
                 <TextInput
+                  nativeID="input-worker-login-identifier"
                   style={styles.textInput}
                   placeholder="Nhập số điện thoại hoặc email đối tác"
                   placeholderTextColor={COLORS.textSub}
@@ -260,6 +263,7 @@ export default function WorkerLoginScreen() {
                   style={styles.inputIcon}
                 />
                 <TextInput
+                  nativeID="input-worker-login-password"
                   style={styles.textInput}
                   placeholder="Nhập mật khẩu của bạn"
                   placeholderTextColor={COLORS.textSub}
@@ -277,6 +281,7 @@ export default function WorkerLoginScreen() {
                   editable={!isLoading}
                 />
                 <TouchableOpacity
+                  nativeID="btn-toggle-show-worker-password"
                   style={styles.eyeBtn}
                   onPress={() => setShowPassword(!showPassword)}
                   activeOpacity={0.7}
@@ -292,7 +297,7 @@ export default function WorkerLoginScreen() {
               {/* Link: Quên mật khẩu? */}
               <View style={styles.forgotRow}>
                 <Link href="/(auth)/forgot-password" asChild>
-                  <TouchableOpacity activeOpacity={0.7} disabled={isLoading}>
+                  <TouchableOpacity nativeID="btn-worker-forgot-password" activeOpacity={0.7} disabled={isLoading}>
                     <Text style={styles.forgotText}>Quên mật khẩu?</Text>
                   </TouchableOpacity>
                 </Link>
@@ -300,6 +305,7 @@ export default function WorkerLoginScreen() {
 
               {/* Nút ĐĂNG NHẬP */}
               <TouchableOpacity
+                nativeID="btn-submit-worker-login"
                 style={styles.loginBtn}
                 onPress={handleLogin}
                 disabled={isLoading}
@@ -314,7 +320,7 @@ export default function WorkerLoginScreen() {
 
               {/* Thông báo lỗi */}
               {errorMessage ? (
-                <View style={styles.errorContainer}>
+                <View nativeID="worker-login-error-container" style={styles.errorContainer}>
                   <Ionicons name="alert-circle" size={18} color={COLORS.red} />
                   <Text style={styles.errorText}>{errorMessage}</Text>
                 </View>
@@ -324,7 +330,7 @@ export default function WorkerLoginScreen() {
               <View style={styles.footerRow}>
                 <Text style={styles.footerText}>Chưa có tài khoản đối tác? </Text>
                 <Link href="/(auth)/register-worker" asChild>
-                  <TouchableOpacity activeOpacity={0.7}>
+                  <TouchableOpacity nativeID="btn-open-register-worker" activeOpacity={0.7}>
                     <Text style={styles.footerLink}>Đăng ký ngay</Text>
                   </TouchableOpacity>
                 </Link>
@@ -341,7 +347,11 @@ export default function WorkerLoginScreen() {
               <View style={styles.switchRoleBox}>
                 <Text style={styles.switchRoleSub}>Bạn là khách hàng cần tìm thợ sửa chữa?</Text>
                 <Link href="/(auth)/login" asChild>
-                  <TouchableOpacity style={styles.switchRoleBtn} activeOpacity={0.7}>
+                  <TouchableOpacity
+                    nativeID="btn-switch-to-customer-login"
+                    style={styles.switchRoleBtn}
+                    activeOpacity={0.7}
+                  >
                     <Ionicons name="person" size={16} color={COLORS.primary} style={{ marginRight: 6 }} />
                     <Text style={styles.switchRoleBtnText}>Chuyển sang Đăng nhập Khách hàng</Text>
                   </TouchableOpacity>

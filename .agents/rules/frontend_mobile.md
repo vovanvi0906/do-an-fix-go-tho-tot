@@ -27,3 +27,18 @@ alwaysApply: true
   - Sử dụng `KeyboardAvoidingView` cho các form nhập liệu.
   - IP loopback cho Android Emulator: `10.0.2.2:3000` (hoặc IP Wi-Fi tự động từ `dev.bat`).
 - **Lưu trữ & Socket:** Lưu token trong `AsyncStorage`. Kết nối Socket.io tự động `join_room` theo `profileId`.
+
+## 3. UI Debugging & Identifier Convention (React Native for Web)
+- ALWAYS add `nativeID` to major React Native elements (`View`, `TouchableOpacity`, `Pressable`, `TextInput`, `Modal`, `ScrollView`, `SafeAreaView`) to enable instant inspection in Chrome DevTools (maps directly to HTML `id="..."`).
+- NAMING CONVENTION: Use kebab-case with hierarchical structure:
+  `[screen/feature]-[section]-[element-name]`
+  - Screen containers: `nativeID="home-screen-container"`
+  - Sections/Grids: `nativeID="home-category-grid"`, `nativeID="home-header-search-bar"`
+  - Interactive items: `nativeID="btn-capture-ai-diagnose"`, `nativeID="btn-confirm-booking"`
+  - Dynamic items: `nativeID={`category-item-${item.slug || item.id || index}`}`, `nativeID={`worker-card-${worker.id || index}`}`
+  - Input fields: `nativeID="input-search-service"`
+  - Modals: `nativeID="modal-ai-diagnosis-container"`, `nativeID="btn-close-modal"`
+- CRITICAL RULES:
+  1. Do NOT duplicate `nativeID` within the same view hierarchy.
+  2. For dynamic lists (`FlatList`, `.map()`), append dynamic identifier or index.
+  3. Adding `nativeID` MUST NOT alter existing styles, props, or business logic.

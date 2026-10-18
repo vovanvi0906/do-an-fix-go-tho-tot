@@ -222,13 +222,14 @@ export default function AiScanModal({
 
   return (
     <Modal
+      nativeID="modal-ai-diagnosis-container"
       visible={visible}
       transparent
       animationType="fade"
       onRequestClose={handleCloseModal}
     >
-      <View style={styles.overlay}>
-        <View style={styles.modalCard}>
+      <View nativeID="modal-ai-overlay" style={styles.overlay}>
+        <View nativeID="modal-ai-card" style={styles.modalCard}>
           {/* Header Gradient */}
           <LinearGradient
             colors={['#082F49', '#0C4A6E']}
@@ -247,6 +248,7 @@ export default function AiScanModal({
             </View>
 
             <Pressable
+              nativeID="btn-close-modal"
               accessible={true}
               accessibilityRole="button"
               accessibilityLabel="Đóng cửa sổ chẩn đoán AI"
@@ -260,7 +262,7 @@ export default function AiScanModal({
 
           {/* ── BƯỚC 1: Chọn Nguồn Ảnh (Idle State) ───────────────────────── */}
           {modalStep === 'idle' && (
-            <View style={styles.idleBody}>
+            <View nativeID="modal-ai-idle-body" style={styles.idleBody}>
               <View style={styles.illustrationBox}>
                 <Ionicons name="scan-outline" size={48} color="#0284C7" />
                 <Text style={styles.illustrationTitle}>Chụp ảnh vị trí thiết bị hỏng</Text>
@@ -272,6 +274,7 @@ export default function AiScanModal({
               <View style={styles.pickerActionsContainer}>
                 {/* Nút 1: Mở Camera */}
                 <Pressable
+                  nativeID="btn-launch-camera-ai"
                   accessible={true}
                   accessibilityRole="button"
                   accessibilityLabel="Mở máy ảnh để chụp ngay"
@@ -284,6 +287,7 @@ export default function AiScanModal({
 
                 {/* Nút 2: Chọn từ Thư viện */}
                 <Pressable
+                  nativeID="btn-launch-library-ai"
                   accessible={true}
                   accessibilityRole="button"
                   accessibilityLabel="Chọn ảnh từ bộ sưu tập"
@@ -299,9 +303,9 @@ export default function AiScanModal({
 
           {/* ── BƯỚC 2: Quét Laser Công nghệ cao (Scanning State) ─────────── */}
           {modalStep === 'scanning' && (
-            <View style={styles.scanningBody}>
+            <View nativeID="modal-ai-scanning-body" style={styles.scanningBody}>
               {/* Khung ảnh quét */}
-              <View style={[styles.imageScanContainer, { width: IMAGE_CONTAINER_SIZE, height: IMAGE_CONTAINER_SIZE }]}>
+              <View nativeID="modal-ai-image-scan-container" style={[styles.imageScanContainer, { width: IMAGE_CONTAINER_SIZE, height: IMAGE_CONTAINER_SIZE }]}>
                 {selectedImageUri && (
                   <Image source={{ uri: selectedImageUri }} style={styles.capturedImage} resizeMode="cover" />
                 )}
@@ -333,7 +337,7 @@ export default function AiScanModal({
               </View>
 
               {/* Status Message */}
-              <View style={styles.scanStatusBox}>
+              <View nativeID="modal-ai-scan-status-box" style={styles.scanStatusBox}>
                 <View style={styles.pulsingDot} />
                 <Text style={styles.scanStatusText}>{SCAN_MESSAGES[statusTextIndex]}</Text>
               </View>
@@ -343,10 +347,12 @@ export default function AiScanModal({
           {/* ── BƯỚC 3: Thẻ Kết quả Chẩn đoán & Báo giá (Result State) ────── */}
           {modalStep === 'result' && diagnosisResult && (
             <ScrollView
+              nativeID="modal-ai-result-scroll"
               showsVerticalScrollIndicator={false}
               contentContainerStyle={styles.resultScrollContent}
             >
               <Animated.View
+                nativeID="modal-ai-result-card"
                 style={[
                   styles.resultContainer,
                   {
@@ -432,6 +438,7 @@ export default function AiScanModal({
                 {/* Hành động */}
                 <View style={styles.resultActionsRow}>
                   <Pressable
+                    nativeID="btn-confirm-booking"
                     accessible={true}
                     accessibilityRole="button"
                     accessibilityLabel="Xác nhận chẩn đoán và tìm thợ ngay"
@@ -447,6 +454,7 @@ export default function AiScanModal({
                   </Pressable>
 
                   <Pressable
+                    nativeID="btn-retake-ai-photo"
                     accessible={true}
                     accessibilityRole="button"
                     accessibilityLabel="Chụp lại ảnh khác"

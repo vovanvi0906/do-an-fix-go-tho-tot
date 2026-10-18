@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { adminOrdersService } from '../services/adminOrders.service';
+import { socketService } from '../../../services/socket/socketService';
 import OrderDetailModal from '../components/OrderDetailModal';
 import CancelOrderModal from '../components/CancelOrderModal';
 import {
@@ -113,6 +114,91 @@ export default function OrdersManagementPage() {
     }, 300);
     return () => clearTimeout(timer);
   }, [searchTerm]);
+
+  // Real-time WebSocket Subscription for Orders Management
+  useEffect(() => {
+    socketService.connect();
+    socketService.joinAdminRoom();
+
+    // 1. Khi có đơn hàng mới được tạo (SEARCHING)
+    const handleNewOrder = (data) => {
+      console.log('⚡ [Realtime Order] Nhận đơn hàng mới:', data);
+      const newOrderId = data?.orderId || data?.id;
+      showToast(
+        'success',
+        `⚡ Đơn mới #${newOrderId ? newOrderId.slice(0, 8) : ''} vừa được tạo: ${
+          data?.service?.name || 'Dịch vụ'
+        }`
+      );
+      // Tự động tải lại danh sách để có đầy đủ thông tin quan hệ (User, Worker, Service)
+      fetchOrders();
+    };
+
+    // 2. Khi trạng thái đơn thay đổi (MATCHED, IN_PROGRESS, COMPLETED, CANCELLED,...)
+    const handleOrderStatusChanged = (data) => {
+      console.log('⚡ [Realtime Order] Trạng thái đơn thay đổi:', data);
+      const targetId = data?.orderId || data?.id;
+      if (!targetId) return;
+
+      setOrders((prevOrders) =>
+        prevOrders.map((o) => {
+          if (o.id === targetId) {
+            return {
+              ...o,
+              status: data.status || o.status,
+              ...(data.worker && {
+                worker: {
+                  ...(o.worker || {}),
+                  ...data.worker,
+                },
+              }),
+            };
+          }
+          return o;
+        })
+      );
+    };
+
+    // 3. Khi đơn hàng khớp thợ nhận việc (ASSIGNED / MATCHED)
+    const handleOrderMatched = (data) => {
+      console.log('⚡ [Realtime Order] Khớp thợ nhận đơn:', data);
+      const targetId = data?.orderId || data?.id;
+      if (!targetId) return;
+
+      setOrders((prevOrders) =>
+        prevOrders.map((o) => {
+          if (o.id === targetId) {
+            return {
+              ...o,
+              status: 'ASSIGNED',
+              worker: data.worker || o.worker,
+            };
+          }
+          return o;
+        })
+      );
+    };
+
+    socketService.on('order.new', handleNewOrder);
+    socketService.on('order.created', handleNewOrder);
+    socketService.on('order:created', handleNewOrder);
+
+    socketService.on('order.status', handleOrderStatusChanged);
+    socketService.on('order:status_changed', handleOrderStatusChanged);
+
+    socketService.on('order.matched', handleOrderMatched);
+    socketService.on('order:matched', handleOrderMatched);
+
+    return () => {
+      socketService.off('order.new', handleNewOrder);
+      socketService.off('order.created', handleNewOrder);
+      socketService.off('order:created', handleNewOrder);
+      socketService.off('order.status', handleOrderStatusChanged);
+      socketService.off('order:status_changed', handleOrderStatusChanged);
+      socketService.off('order.matched', handleOrderMatched);
+      socketService.off('order:matched', handleOrderMatched);
+    };
+  }, []);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -234,6 +320,10 @@ export default function OrdersManagementPage() {
             </h1>
             <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-500/10 text-blue-500 border border-blue-500/30">
               ORDERS CRUD
+            </span>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Realtime
             </span>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">

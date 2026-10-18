@@ -112,16 +112,16 @@ export default function WorkerDashboardScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View nativeID="worker-home-container" style={styles.container}>
       {/* Header Thợ */}
-      <View style={styles.header}>
+      <View nativeID="worker-home-header" style={styles.header}>
         <View>
           <Text style={styles.welcomeText}>Xin chào, {user?.fullName || 'Thợ đối tác'} 👋</Text>
           <Text style={styles.subText}>Khu vực hoạt động: TP. Hồ Chí Minh</Text>
         </View>
 
         {/* Nút Bật/Tắt Trực Tuyến */}
-        <View style={styles.onlineToggleBox}>
+        <View nativeID="worker-toggle-online-switch" style={styles.onlineToggleBox}>
           <Text style={isOnline ? styles.onlineText : styles.offlineText}>
             {isOnline ? 'ĐANG BẬT NHẬN ĐƠN' : 'TẠM NGHỈ'}
           </Text>
@@ -134,9 +134,13 @@ export default function WorkerDashboardScreen() {
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        nativeID="worker-home-scroll"
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Banner Trạng thái */}
-        <View style={isOnline ? styles.bannerOnline : styles.bannerOffline}>
+        <View nativeID="worker-online-status-banner" style={isOnline ? styles.bannerOnline : styles.bannerOffline}>
           <Ionicons
             name={isOnline ? 'radio' : 'pause-circle'}
             size={24}
@@ -156,7 +160,7 @@ export default function WorkerDashboardScreen() {
 
         {/* Đơn hàng đang thực hiện (nếu có) */}
         {activeOrder ? (
-          <View style={styles.activeOrderCard}>
+          <View nativeID="worker-active-order-card" style={styles.activeOrderCard}>
             <View style={styles.activeOrderHeader}>
               <View style={styles.activeBadge}>
                 <Text style={styles.activeBadgeText}>ĐƠN ĐANG THỰC HIỆN</Text>
@@ -172,6 +176,7 @@ export default function WorkerDashboardScreen() {
             <Text style={styles.activeAddress}>📍 {activeOrder.pickupAddress || 'Địa chỉ khách hàng'}</Text>
 
             <TouchableOpacity
+              nativeID="btn-worker-view-active-order"
               style={styles.viewOrderDetailBtn}
               onPress={() => router.push(`/job/${activeOrder.id || activeOrder.orderId}`)}
             >
@@ -181,7 +186,7 @@ export default function WorkerDashboardScreen() {
         ) : null}
 
         {/* Thống kê nhanh trong ngày */}
-        <View style={styles.statsRow}>
+        <View nativeID="worker-stats-row" style={styles.statsRow}>
           <View style={styles.statCard}>
             <Text style={styles.statNumber}>3</Text>
             <Text style={styles.statLabel}>Đơn hoàn thành</Text>
@@ -199,8 +204,8 @@ export default function WorkerDashboardScreen() {
 
       {/* POPUP MODAL NHẬN ĐƠN MỚI KÈM BỘ ĐẾM NGƯỢC 30s */}
       <Modal visible={!!incomingOrder} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.incomingCard}>
+        <View nativeID="modal-incoming-order-overlay" style={styles.modalOverlay}>
+          <View nativeID="worker-incoming-order-card" style={styles.incomingCard}>
             {/* Header popup */}
             <View style={styles.incomingHeader}>
               <View style={styles.bellBadge}>
@@ -260,6 +265,7 @@ export default function WorkerDashboardScreen() {
             {/* Nút Nhận Đơn & Từ Chối */}
             <View style={styles.actionRow}>
               <TouchableOpacity
+                nativeID="btn-decline-incoming-order"
                 style={styles.declineBtn}
                 onPress={() => setIncomingOrder(null)}
                 disabled={isAccepting}
@@ -268,6 +274,7 @@ export default function WorkerDashboardScreen() {
               </TouchableOpacity>
 
               <TouchableOpacity
+                nativeID="btn-accept-incoming-order"
                 style={isAccepting ? styles.acceptBtnDisabled : styles.acceptBtn}
                 onPress={handleAcceptOrder}
                 disabled={isAccepting || !!conflictMessage}

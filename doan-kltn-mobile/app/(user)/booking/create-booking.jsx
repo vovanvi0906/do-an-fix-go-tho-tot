@@ -325,7 +325,7 @@ export default function BookingFlowScreen() {
   // ─── 1. TRẠNG THÁI: QUÉT TÌM THỢ (RADAR MATCHING) ────────────────────────
   if (matchingStatus === 'SEARCHING') {
     return (
-      <SafeAreaView style={styles.fullScreen} edges={['top']}>
+      <SafeAreaView nativeID="booking-radar-matching-screen" style={styles.fullScreen} edges={['top']}>
         <MatchingRadarView
           remainingSeconds={remainingSeconds}
           serviceName={jobTitle}
@@ -339,7 +339,7 @@ export default function BookingFlowScreen() {
   // ─── 2. TRẠNG THÁI: ĐÃ TÌM THẤY THỢ ──────────────────────────────────────
   if (matchingStatus === 'FOUND' && assignedWorker) {
     return (
-      <SafeAreaView style={styles.fullScreen} edges={['top']}>
+      <SafeAreaView nativeID="booking-worker-found-screen" style={styles.fullScreen} edges={['top']}>
         <WorkerFoundView
           worker={assignedWorker}
           onTrackOrder={() => {
@@ -354,8 +354,8 @@ export default function BookingFlowScreen() {
   // ─── 3. TRẠNG THÁI: HẾT THỜI GIAN QUÉT (TIMEOUT) ─────────────────────────
   if (matchingStatus === 'TIMEOUT') {
     return (
-      <SafeAreaView style={styles.fullScreen} edges={['top']}>
-        <View style={styles.timeoutContainer}>
+      <SafeAreaView nativeID="booking-timeout-screen" style={styles.fullScreen} edges={['top']}>
+        <View nativeID="booking-timeout-card" style={styles.timeoutContainer}>
           <View style={styles.timeoutIcon}>
             <Ionicons name="time-outline" size={40} color="#0284C7" />
           </View>
@@ -363,10 +363,16 @@ export default function BookingFlowScreen() {
           <Text style={styles.timeoutSub}>
             Hệ thống đang mở rộng bán kính quét thợ thêm 5km. Đơn hàng của bạn đã được lưu lại trong mục Đơn hàng.
           </Text>
-          <TouchableOpacity style={styles.retryBtn} onPress={resetMatching} activeOpacity={0.85}>
+          <TouchableOpacity
+            nativeID="btn-retry-matching"
+            style={styles.retryBtn}
+            onPress={resetMatching}
+            activeOpacity={0.85}
+          >
             <Text style={styles.retryBtnText}>Quét lại tìm thợ</Text>
           </TouchableOpacity>
           <TouchableOpacity
+            nativeID="btn-view-orders-timeout"
             style={styles.backLinkBtn}
             onPress={() => {
               resetMatching();
@@ -382,18 +388,20 @@ export default function BookingFlowScreen() {
 
   // ─── 4. FORM CHÍNH: ĐẶT LỊCH NHANH CHÓNG (TÔNG XANH DƯƠNG FIXGO) ─────────
   return (
-    <SafeAreaView style={styles.fullScreen} edges={['top']}>
+    <SafeAreaView nativeID="booking-flow-container" style={styles.fullScreen} edges={['top']}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         {/* Header với Gradient Xanh Dương FixGo (#E0F2FE -> #FFFFFF) */}
         <LinearGradient
+          nativeID="booking-header-gradient"
           colors={['#E0F2FE', '#F0F9FF', '#FFFFFF']}
           style={styles.headerGradient}
         >
           <View style={styles.headerRow}>
             <TouchableOpacity
+              nativeID="btn-back-booking"
               onPress={() => router.back()}
               style={styles.backBtn}
               activeOpacity={0.7}
@@ -408,6 +416,7 @@ export default function BookingFlowScreen() {
         </LinearGradient>
 
         <ScrollView
+          nativeID="booking-form-scroll"
           style={styles.formScrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
@@ -416,6 +425,7 @@ export default function BookingFlowScreen() {
           {/* Thông báo lỗi nếu có */}
           {errorMessage ? (
             <TouchableOpacity
+              nativeID="booking-error-box"
               style={styles.errorBox}
               onPress={() => setErrorMessage('')}
               activeOpacity={0.85}
@@ -427,7 +437,7 @@ export default function BookingFlowScreen() {
 
           {/* Thông báo hướng dẫn nếu là Dịch vụ theo yêu cầu riêng */}
           {isCustom && (
-            <View style={styles.customNoticeCard}>
+            <View nativeID="booking-custom-notice-card" style={styles.customNoticeCard}>
               <View style={styles.customNoticeIcon}>
                 <Ionicons name="sparkles" size={18} color="#0284C7" />
               </View>
@@ -441,13 +451,14 @@ export default function BookingFlowScreen() {
           )}
 
           {/* ── 1. Nội dung / Tiêu đề công việc * ─────────────────────── */}
-          <View style={styles.fieldGroup}>
+          <View nativeID="booking-field-job-title" style={styles.fieldGroup}>
             <Text style={styles.fieldLabel}>
               {isCustom ? 'Tiêu đề dịch vụ bạn muốn đặt' : 'Nội dung công việc'}{' '}
               <Text style={styles.asterisk}>*</Text>
             </Text>
             <View style={[styles.inputCard, isCustom && styles.inputCardCustom]}>
               <TextInput
+                nativeID="input-booking-job-title"
                 style={styles.textInput}
                 value={jobTitle}
                 onChangeText={setJobTitle}
@@ -463,6 +474,7 @@ export default function BookingFlowScreen() {
 
             {/* Checkbox: KHÔNG tick sẵn theo yêu cầu */}
             <TouchableOpacity
+              nativeID="checkbox-free-survey"
               style={styles.checkboxRow}
               onPress={() => setIsFreeSurvey(!isFreeSurvey)}
               activeOpacity={0.7}
@@ -477,12 +489,13 @@ export default function BookingFlowScreen() {
           </View>
 
           {/* ── 2. Địa chỉ * ─────────────────────────────────────────── */}
-          <View style={styles.fieldGroup}>
+          <View nativeID="booking-field-address" style={styles.fieldGroup}>
             <Text style={styles.fieldLabel}>
               Địa chỉ <Text style={styles.asterisk}>*</Text>
             </Text>
             <View style={styles.inputCardWithAction}>
               <TextInput
+                nativeID="input-booking-address"
                 style={styles.textInputFlex}
                 value={customerAddress}
                 onChangeText={setCustomerAddress}
@@ -490,6 +503,7 @@ export default function BookingFlowScreen() {
                 placeholderTextColor="#94A3B8"
               />
               <TouchableOpacity
+                nativeID="btn-booking-detect-address"
                 style={styles.inputRightAction}
                 activeOpacity={0.7}
                 onPress={() => Alert.alert('Định vị GPS', `Đã nhận diện tọa độ: ${customerAddress}`)}
@@ -500,7 +514,7 @@ export default function BookingFlowScreen() {
           </View>
 
           {/* ── 3. Số điện thoại * ────────────────────────────────────── */}
-          <View style={styles.fieldGroup}>
+          <View nativeID="booking-field-phone" style={styles.fieldGroup}>
             <Text style={styles.fieldLabel}>
               Số điện thoại <Text style={styles.asterisk}>*</Text>
             </Text>
@@ -513,6 +527,7 @@ export default function BookingFlowScreen() {
               {/* Ô nhập số điện thoại */}
               <View style={styles.phoneInputContainer}>
                 <TextInput
+                  nativeID="input-booking-phone"
                   style={styles.textInput}
                   value={customerPhone}
                   onChangeText={setCustomerPhone}
@@ -525,12 +540,13 @@ export default function BookingFlowScreen() {
           </View>
 
           {/* ── 4. Họ và tên * ───────────────────────────────────────── */}
-          <View style={styles.fieldGroup}>
+          <View nativeID="booking-field-customer-name" style={styles.fieldGroup}>
             <Text style={styles.fieldLabel}>
               Họ và tên <Text style={styles.asterisk}>*</Text>
             </Text>
             <View style={styles.inputCard}>
               <TextInput
+                nativeID="input-booking-customer-name"
                 style={styles.textInput}
                 value={customerName}
                 onChangeText={setCustomerName}
@@ -541,10 +557,11 @@ export default function BookingFlowScreen() {
           </View>
 
           {/* ── 5. Ghi chú ───────────────────────────────────────────── */}
-          <View style={styles.fieldGroup}>
+          <View nativeID="booking-field-note" style={styles.fieldGroup}>
             <Text style={styles.fieldLabel}>Ghi chú</Text>
             <View style={[styles.inputCard, styles.textareaCard]}>
               <TextInput
+                nativeID="input-booking-note"
                 style={styles.textareaInput}
                 value={noteText}
                 onChangeText={setNoteText}
@@ -564,7 +581,7 @@ export default function BookingFlowScreen() {
           </View>
 
           {/* ── 6. Card toggle: Yêu cầu thợ cũ ──────────────────────── */}
-          <View style={styles.toggleWorkerCard}>
+          <View nativeID="booking-toggle-previous-worker" style={styles.toggleWorkerCard}>
             <View style={styles.userIconCircle}>
               <Ionicons name="person-outline" size={20} color="#0284C7" />
             </View>
@@ -581,13 +598,14 @@ export default function BookingFlowScreen() {
           </View>
 
           {/* ── 7. Chọn ngày & giờ (Ảnh 2 - Tông Xanh Dương FixGo) ────── */}
-          <View style={styles.scheduleSection}>
+          <View nativeID="booking-schedule-section" style={styles.scheduleSection}>
             <View style={styles.scheduleHeaderRow}>
               <Text style={styles.scheduleTitle}>Chọn ngày & giờ</Text>
             </View>
 
             {/* Dải chọn 7 ngày dạng thẻ Pills */}
             <ScrollView
+              nativeID="booking-schedule-days-scroll"
               horizontal
               showsHorizontalScrollIndicator={false}
               style={styles.daysScroll}
@@ -598,6 +616,7 @@ export default function BookingFlowScreen() {
                 return (
                   <TouchableOpacity
                     key={day.index}
+                    nativeID={`booking-day-pill-${day.dayOfWeek}-${day.dayOfMonth}`}
                     style={[
                       styles.dayPill,
                       isSelected && styles.dayPillActive,
@@ -627,7 +646,7 @@ export default function BookingFlowScreen() {
             </ScrollView>
 
             {/* Dòng tóm tắt ngày */}
-            <View style={styles.scheduleDisplayCard}>
+            <View nativeID="booking-schedule-summary-card" style={styles.scheduleDisplayCard}>
               <Ionicons name="calendar-outline" size={18} color="#0284C7" style={{ marginRight: 8 }} />
               <Text style={styles.scheduleDisplayText}>
                 {selectedDayIndex !== null
@@ -639,6 +658,7 @@ export default function BookingFlowScreen() {
             {/* Khung chọn giờ dropdown - Chỉ hiện khi đã chọn ngày */}
             {selectedDayIndex !== null && (
               <TouchableOpacity
+                nativeID="booking-time-dropdown-btn"
                 style={styles.timeDropdownCard}
                 onPress={() => setIsTimePickerVisible(true)}
                 activeOpacity={0.8}
@@ -658,17 +678,23 @@ export default function BookingFlowScreen() {
           </View>
 
           {/* ── 8. Ảnh chụp sự cố (Tùy chọn) ─────────────────────────── */}
-          <View style={styles.fieldGroup}>
+          <View nativeID="booking-field-photos" style={styles.fieldGroup}>
             <View style={styles.labelWithSubRow}>
               <Text style={styles.fieldLabel}>Ảnh sự cố (Tùy chọn)</Text>
               <Text style={styles.fieldSubLabel}>Tối đa 5 ảnh</Text>
             </View>
 
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.photoScroll}>
+            <ScrollView
+              nativeID="booking-photos-scroll"
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.photoScroll}
+            >
               {evidencePhotos.map((uri, index) => (
-                <View key={index} style={styles.photoThumb}>
+                <View key={index} nativeID={`booking-photo-thumb-${index}`} style={styles.photoThumb}>
                   <Image source={{ uri }} style={styles.photoImage} />
                   <TouchableOpacity
+                    nativeID={`btn-remove-photo-${index}`}
                     style={styles.photoRemoveBtn}
                     onPress={() => removePhoto(index)}
                   >
@@ -679,6 +705,7 @@ export default function BookingFlowScreen() {
 
               {evidencePhotos.length < 5 && (
                 <TouchableOpacity
+                  nativeID="btn-booking-add-photo"
                   style={styles.photoAddBtn}
                   onPress={() => setPhotoActionVisible(true)}
                   activeOpacity={0.7}
@@ -695,8 +722,9 @@ export default function BookingFlowScreen() {
         </ScrollView>
 
         {/* ── 9. Nút "Đặt lịch ngay" Tông XANH DƯƠNG (Bottom Sticky) ── */}
-        <View style={styles.bottomBar}>
+        <View nativeID="booking-bottom-bar" style={styles.bottomBar}>
           <TouchableOpacity
+            nativeID="btn-confirm-booking"
             style={[styles.submitOrderBtn, isSubmitting && styles.submitBtnDisabled]}
             onPress={handleBookingSubmit}
             disabled={isSubmitting}
@@ -718,15 +746,17 @@ export default function BookingFlowScreen() {
           onRequestClose={() => setIsTimePickerVisible(false)}
         >
           <TouchableOpacity
+            nativeID="modal-time-picker-overlay"
             style={styles.actionSheetOverlay}
             activeOpacity={1}
             onPress={() => setIsTimePickerVisible(false)}
           >
-            <View style={styles.timePickerModal}>
+            <View nativeID="modal-booking-time-picker" style={styles.timePickerModal}>
               <Text style={styles.timePickerTitle}>Chọn khung giờ thợ đến</Text>
               {TIME_SLOTS.map((slot) => (
                 <TouchableOpacity
                   key={slot}
+                  nativeID={`time-slot-${slot.replace(/[^a-zA-Z0-9]/g, '-')}`}
                   style={[
                     styles.timeSlotOption,
                     selectedTimeSlot === slot && styles.timeSlotOptionActive,
@@ -761,13 +791,15 @@ export default function BookingFlowScreen() {
           onRequestClose={() => setPhotoActionVisible(false)}
         >
           <TouchableOpacity
+            nativeID="modal-photo-action-overlay"
             style={styles.actionSheetOverlay}
             activeOpacity={1}
             onPress={() => setPhotoActionVisible(false)}
           >
-            <View style={styles.actionSheet}>
+            <View nativeID="modal-booking-photo-picker" style={styles.actionSheet}>
               <Text style={styles.actionSheetTitle}>Ảnh chụp hiện trường sự cố</Text>
               <TouchableOpacity
+                nativeID="btn-booking-photo-camera"
                 style={styles.actionSheetBtn}
                 onPress={() => {
                   setPhotoActionVisible(false);
@@ -778,6 +810,7 @@ export default function BookingFlowScreen() {
                 <Text style={styles.actionSheetBtnText}>Chụp ảnh mới</Text>
               </TouchableOpacity>
               <TouchableOpacity
+                nativeID="btn-booking-photo-gallery"
                 style={styles.actionSheetBtn}
                 onPress={() => {
                   setPhotoActionVisible(false);

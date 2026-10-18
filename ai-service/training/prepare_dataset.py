@@ -52,6 +52,12 @@ CLASSES = {
         "description": "Bếp từ báo lỗi E0-E9, lò vi sóng hỏng biến áp, bình nóng lạnh nhảy ELCB",
         "sources": "Home Appliance Repair Knowledge Base + FixGo Survey",
     },
+    "lam_vuon": {
+        "id": "lam-vuon",
+        "name": "Làm vườn",
+        "description": "Cắt tỉa cỏ sân vườn, dọn cỏ dại, tạo tán cây cảnh, hàng rào, dọn dẹp cảnh quan",
+        "sources": "PlantVillage / Garden Landscape Dataset + FixGo Field Survey",
+    },
     "other_unclear": {
         "id": "other-unclear",
         "name": "Khác / Không rõ",
@@ -110,6 +116,20 @@ def generate_class_images(cls_key: str, count: int, output_dir: Path):
             cv2.circle(img, (112, 100), 45, (80, 80, 80), 3)
             # Màn hình LED báo mã lỗi (E0 / E1)
             cv2.putText(img, "E0", (95, 165), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+
+        elif cls_key == "lam_vuon":
+            # Nền cỏ xanh sân vườn (màu xanh lá BGR)
+            img[:, :] = (np.random.randint(40, 70), np.random.randint(140, 190), np.random.randint(40, 80))
+            # Vẽ các bụi cỏ / cành cây cắt tỉa
+            for _ in range(25):
+                x1 = np.random.randint(10, 214)
+                y1 = np.random.randint(100, 214)
+                x2 = x1 + np.random.randint(-15, 15)
+                y2 = y1 - np.random.randint(20, 60)
+                cv2.line(img, (x1, y1), (x2, y2), (20, np.random.randint(180, 255), 20), 2)
+            # Tán cây cảnh / hoa lá
+            cv2.circle(img, (112, 80), np.random.randint(25, 45), (30, np.random.randint(120, 170), 30), -1)
+            cv2.line(img, (112, 100), (112, 190), (30, 60, 100), 4)
 
         else:  # other_unclear
             # Ảnh mờ, phong cảnh, hoặc nhiễu ngẫu nhiên
