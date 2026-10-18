@@ -366,7 +366,11 @@ export const RealLeafletMap = forwardRef<RealLeafletMapRef, RealLeafletMapProps>
     ]);
 
     return (
-      <View style={[styles.container, { height, width }]} pointerEvents={pointerEvents}>
+      <View
+        nativeID="real-leaflet-map-web-container"
+        style={[styles.container, { height, width }]}
+        pointerEvents={pointerEvents}
+      >
         {/* @ts-ignore - iframe hợp lệ trên Web */}
         <iframe
           ref={iframeRef as any}

@@ -20,13 +20,14 @@ if hasattr(sys.stdout, "reconfigure"):
 import cv2
 import numpy as np
 from ultralytics import YOLO
+from category_helper import normalize_category_key
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATASET_DIR = BASE_DIR / "dataset"
 WEIGHTS_DIR = BASE_DIR / "weights"
 RESULTS_DIR = BASE_DIR / "eval" / "results"
 
-CLASS_NAMES = ["dien_lanh", "other_unclear", "sua_dien", "sua_nuoc", "thiet_bi"]
+CLASS_NAMES = ["dien_lanh", "lam_vuon", "other_unclear", "sua_dien", "sua_nuoc", "thiet_bi"]
 
 
 def evaluate_test_set():
@@ -57,10 +58,11 @@ def evaluate_test_set():
     latencies = []
     misclassified_cases = []
 
-    classes_found = sorted([d.name for d in test_dir.iterdir() if d.is_dir()])
+    folder_list = sorted([d for d in test_dir.iterdir() if d.is_dir()], key=lambda d: d.name)
 
-    for cls_name in classes_found:
-        cls_folder = test_dir / cls_name
+    for cls_folder in folder_list:
+        # Chuẩn hóa tên thư mục: 'lam vuon' -> 'lam_vuon'
+        cls_name = normalize_category_key(cls_folder.name).replace("-", "_")
         for img_path in cls_folder.glob("*.jpg"):
             t0 = time.time()
             results = model.predict(source=str(img_path), verbose=False)
@@ -69,7 +71,8 @@ def evaluate_test_set():
 
             if results and len(results) > 0:
                 top1_idx = results[0].probs.top1
-                pred_label = results[0].names[top1_idx]
+                pred_raw = results[0].names[top1_idx]
+                pred_label = normalize_category_key(pred_raw).replace("-", "_")
                 conf = float(results[0].probs.top1conf.item())
 
                 y_true.append(cls_name)

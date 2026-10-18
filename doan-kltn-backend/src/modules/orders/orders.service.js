@@ -296,9 +296,12 @@ export class OrdersService {
     // 4. Quét thợ lân cận trong bán kính 5km
     const nearbyWorkers = await this.matchNearbyWorkers(order.id, 5);
 
-    // 5. Phát tín hiệu WebSocket thời gian thực đến thợ
+    // 5. Phát tín hiệu WebSocket thời gian thực đến thợ & Admin portal
     try {
-      this.ordersGateway.broadcastNewOrderToWorkers(nearbyWorkers, order);
+      this.ordersGateway.broadcastNewOrderToWorkers(
+        nearbyWorkers.length > 0 ? nearbyWorkers : [{}],
+        order,
+      );
     } catch (e) {
       console.warn('Lỗi broadcast socket:', e.message);
     }

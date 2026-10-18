@@ -11,6 +11,7 @@ import {
   Query,
   UseGuards,
   Dependencies,
+  Header,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -50,6 +51,9 @@ export class AdminCategoriesV1Controller {
    * Hỗ trợ tìm kiếm theo từ khóa (search) và lọc theo trạng thái (status: all | active | inactive)
    */
   @Get()
+  @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
+  @Header('Pragma', 'no-cache')
+  @Header('Expires', '0')
   @ApiOperation({
     summary: 'Lấy danh sách danh mục ngành nghề kèm thống kê số lượng dịch vụ',
     description:

@@ -54,9 +54,15 @@ export default function DashboardPage() {
       {/* ======================================================== */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/80 dark:border-slate-800/80 shrink-0">
         <div>
-          <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Tổng Quan Hoạt Động
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+              Tổng Quan Hoạt Động
+            </h1>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Realtime
+            </span>
+          </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Báo cáo hiệu suất vận hành dịch vụ FixGo thời gian thực từ hệ thống cơ sở dữ liệu
           </p>

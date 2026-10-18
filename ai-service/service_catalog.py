@@ -5,6 +5,22 @@ FixGo AI Service - Service Catalog & Prompts for Zero-Shot Classification
 """
 
 from typing import Dict, List, Any, Optional
+from category_helper import (
+    CATEGORIES,
+    CATEGORY_KEYWORDS,
+    normalize_category_key,
+    match_category_by_keywords,
+    extract_category_from_path,
+    strip_accents,
+)
+
+CANDIDATE_LABELS: Dict[str, List[str]] = {
+    "sua_dien": ["chập cháy điện", "ổ cắm hỏng", "aptomat nhảy", "dây điện hở", "broken electrical socket"],
+    "sua_nuoc": ["rò rỉ nước", "gãy vòi nước", "bục ống nước", "nghẹt bồn rửa", "pipe leaking water"],
+    "dien_lanh": ["máy lạnh chảy nước", "dàn lạnh đóng tuyết", "lưới lọc máy lạnh bẩn", "dirty air conditioner filter"],
+    "thiet_bi": ["bếp từ báo lỗi", "hỏng bo mạch thiết bị", "máy giặt rò nước", "broken home appliance"],
+    "lam_vuon": ["sân vườn cỏ mọc um tùm", "cắt tỉa cỏ dại", "cây cảnh cần tỉa", "sâu bệnh lá cây", "overgrown lawn grass weed garden"]
+}
 
 CLASS_PROMPTS: Dict[str, List[str]] = {
     "sua_dien": [
@@ -13,28 +29,35 @@ CLASS_PROMPTS: Dict[str, List[str]] = {
         "a photo of a broken electrical wall outlet",
         "a photo of home power wiring hazard",
         "a photo of an electrical distribution panel",
-    ],
+    ] + CANDIDATE_LABELS["sua_dien"],
     "sua_nuoc": [
         "a photo of a leaking water pipe under a sink",
         "a photo of a broken water pipe with water leaking",
         "a photo of a dripping faucet or shower head",
         "a photo of water leak damage on wall or floor",
         "a photo of a clogged drainage pipe or toilet",
-    ],
+    ] + CANDIDATE_LABELS["sua_nuoc"],
     "dien_lanh": [
         "a photo of a leaking wall mounted air conditioner",
         "a photo of an indoor air conditioning unit",
         "a photo of a refrigerator appliance interior or exterior",
         "a photo of a washing machine appliance issue",
         "a photo of cooling frost buildup on HVAC equipment",
-    ],
+    ] + CANDIDATE_LABELS["dien_lanh"],
     "thiet_bi": [
         "a photo of a broken kitchen induction cooker stove",
         "a photo of a damaged microwave oven appliance",
         "a photo of an electric water heater cylinder",
         "a photo of a malfunctioning household kitchen appliance",
         "a photo of an appliance digital error code",
-    ],
+    ] + CANDIDATE_LABELS["thiet_bi"],
+    "lam_vuon": [
+        "a photo of an overgrown garden lawn grass",
+        "a photo of lawn mowing or grass trimming",
+        "a photo of pruning garden trees and ornamental plants",
+        "a photo of garden weed clearing and landscaping",
+        "a photo of backyard garden landscaping maintenance",
+    ] + CANDIDATE_LABELS["lam_vuon"],
     "other_unclear": [
         "a photo of an unclear blurry image",
         "a photo of a person portrait or selfie",
@@ -225,6 +248,54 @@ SUB_SERVICES_CATALOG: Dict[str, List[Dict[str, Any]]] = {
             ],
         },
     ],
+    "lam-vuon": [
+        {
+            "slug": "cat-tia-co-san-vuon-don-co-dai",
+            "name": "Cắt tỉa cỏ sân vườn, dọn cỏ dại",
+            "min_price": 250000,
+            "max_price": 500000,
+            "unit": "buổi",
+            "prompts": [
+                "a photo of mowing overgrown lawn grass in garden",
+                "a photo of grass trimming weed clearing in backyard",
+                "a photo of lawnmower cutting green grass",
+            ],
+        },
+        {
+            "slug": "cat-tia-tao-tan-cay-canh-hang-rao",
+            "name": "Cắt tỉa, tạo tán cây cảnh / Hàng rào",
+            "min_price": 180000,
+            "max_price": 400000,
+            "unit": "cây",
+            "prompts": [
+                "a photo of pruning ornamental tree branches in garden",
+                "a photo of shaping garden hedge plants with shears",
+                "a photo of tree pruning and gardening maintenance",
+            ],
+        },
+        {
+            "slug": "trong-co-cai-tao-dat-don-dep-khuon-vien",
+            "name": "Trồng cỏ, cải tạo đất, dọn dẹp khuôn viên vườn",
+            "min_price": 160000,
+            "max_price": 350000,
+            "unit": "m2",
+            "prompts": [
+                "a photo of planting fresh grass turf in yard",
+                "a photo of garden soil cultivation and landscaping cleanup",
+            ],
+        },
+        {
+            "slug": "lap-dat-sua-he-thong-tuoi-nho-giot",
+            "name": "Lắp đặt / Sửa hệ thống tưới nhỏ giọt tự động",
+            "min_price": 200000,
+            "max_price": 500000,
+            "unit": "gói",
+            "prompts": [
+                "a photo of garden automatic drip irrigation watering system",
+                "a photo of irrigation water pipes and garden sprinklers",
+            ],
+        },
+    ],
 }
 
 
@@ -234,6 +305,7 @@ def format_vnd(amount: int) -> str:
 
 
 def get_services_by_category(category_key: str) -> List[Dict[str, Any]]:
-    """Lấy danh sách dịch vụ con theo danh mục (chấp nhận cả sua-nuoc lẫn sua_nuoc)."""
-    norm_key = category_key.replace("_", "-")
+    """Lấy danh sách dịch vụ con theo danh mục (chấp nhận lam-vuon, lam_vuon, lam vuon)."""
+    norm_key = normalize_category_key(category_key) if category_key else ""
     return SUB_SERVICES_CATALOG.get(norm_key, [])
+

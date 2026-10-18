@@ -14,7 +14,7 @@ import {
   Text,
   StyleSheet,
   Modal,
-  TouchableOpacity,
+  Pressable,
   TextInput,
   ScrollView,
   Dimensions,
@@ -132,26 +132,27 @@ export default function CategoryDetailModal({
 
   return (
     <Modal
+      nativeID="modal-category-detail-container"
       visible={visible}
       transparent
       animationType="slide"
       onRequestClose={onClose}
     >
-      <View style={styles.modalOverlay}>
-        <TouchableOpacity
+      <View nativeID="modal-category-detail-overlay" style={styles.modalOverlay}>
+        <Pressable
+          nativeID="btn-backdrop-category-detail"
           style={styles.backdropTouchable}
-          activeOpacity={1}
           onPress={onClose}
         />
 
-        <View style={styles.sheetContainer}>
+        <View nativeID="modal-category-detail-sheet" style={styles.sheetContainer}>
           {/* Thanh gạt trên cùng (Handle Bar) */}
           <View style={styles.handleBarContainer}>
             <View style={styles.handleBar} />
           </View>
 
           {/* Header Danh mục - Tông Xanh Dương FixGo */}
-          <View style={styles.headerRow}>
+          <View nativeID="category-detail-header-row" style={styles.headerRow}>
             {/* Mascot Avatar Thợ FixGo (Nền xanh pastel) */}
             <View style={styles.mascotBox}>
               <Ionicons name="construct" size={24} color="#0284C7" />
@@ -162,19 +163,21 @@ export default function CategoryDetailModal({
               <Text style={styles.categorySubtitle}>Dịch vụ chuyên nghiệp • Thợ uy tín xác thực</Text>
             </View>
 
-            <TouchableOpacity
+            <Pressable
+              nativeID="btn-close-category-detail-modal"
               style={styles.closeBtn}
               onPress={onClose}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
               <Ionicons name="close" size={20} color="#64748B" />
-            </TouchableOpacity>
+            </Pressable>
           </View>
 
           {/* Ô tìm kiếm dịch vụ */}
-          <View style={styles.searchBox}>
+          <View nativeID="category-detail-search-box" style={styles.searchBox}>
             <Ionicons name="search-outline" size={18} color="#0284C7" style={{ marginRight: 8 }} />
             <TextInput
+              nativeID="input-category-detail-search"
               style={styles.searchInput}
               placeholder="Tìm kiếm dịch vụ cần làm..."
               placeholderTextColor="#94A3B8"
@@ -182,9 +185,12 @@ export default function CategoryDetailModal({
               onChangeText={setSearchText}
             />
             {searchText.length > 0 && (
-              <TouchableOpacity onPress={() => setSearchText('')}>
+              <Pressable
+                nativeID="btn-clear-category-detail-search"
+                onPress={() => setSearchText('')}
+              >
                 <Ionicons name="close-circle" size={16} color="#94A3B8" />
-              </TouchableOpacity>
+              </Pressable>
             )}
           </View>
 
@@ -195,6 +201,7 @@ export default function CategoryDetailModal({
 
           {/* Danh sách các dịch vụ con (Tông xanh dương sạch đẹp) */}
           <ScrollView
+            nativeID="category-detail-subservices-list"
             style={styles.servicesList}
             contentContainerStyle={styles.servicesListContent}
             showsVerticalScrollIndicator={false}
@@ -202,10 +209,10 @@ export default function CategoryDetailModal({
             {subServices.length > 0 ? (
               <>
                 {subServices.map((item) => (
-                  <TouchableOpacity
+                  <Pressable
                     key={item.id}
+                    nativeID={`subservice-item-${item.id}`}
                     style={styles.serviceCard}
-                    activeOpacity={0.7}
                     onPress={() => onSelectSubService(item)}
                   >
                     <View style={styles.cardLeft}>
@@ -217,13 +224,13 @@ export default function CategoryDetailModal({
                     </View>
 
                     <Ionicons name="chevron-forward" size={18} color="#0284C7" />
-                  </TouchableOpacity>
+                  </Pressable>
                 ))}
 
                 {/* Thẻ gợi ý đặt dịch vụ theo yêu cầu riêng nếu không thấy trong danh sách */}
-                <TouchableOpacity
+                <Pressable
+                  nativeID="btn-request-custom-subservice-footer"
                   style={styles.otherServiceFooterCard}
-                  activeOpacity={0.8}
                   onPress={() =>
                     onSelectSubService({
                       id: 'custom-sub',
@@ -243,13 +250,14 @@ export default function CategoryDetailModal({
                     </View>
                   </View>
                   <Ionicons name="arrow-forward" size={16} color="#0284C7" />
-                </TouchableOpacity>
+                </Pressable>
               </>
             ) : (
               <View style={styles.emptyContainer}>
                 <Ionicons name="search" size={36} color="#CBD5E1" />
                 <Text style={styles.emptyText}>Không tìm thấy dịch vụ phù hợp</Text>
-                <TouchableOpacity
+                <Pressable
+                  nativeID="btn-request-custom-subservice-empty"
                   style={styles.requestCustomBtn}
                   onPress={() =>
                     onSelectSubService({
@@ -259,7 +267,6 @@ export default function CategoryDetailModal({
                       categoryName: 'Dịch vụ khác',
                     })
                   }
-                  activeOpacity={0.85}
                 >
                   <Ionicons name="sparkles" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
                   <Text style={styles.requestCustomBtnText}>
@@ -267,7 +274,7 @@ export default function CategoryDetailModal({
                       ? `Đặt dịch vụ "${searchText.trim()}" theo yêu cầu`
                       : 'Đặt dịch vụ khác theo yêu cầu riêng'}
                   </Text>
-                </TouchableOpacity>
+                </Pressable>
               </View>
             )}
           </ScrollView>

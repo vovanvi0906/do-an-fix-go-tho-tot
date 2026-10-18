@@ -517,14 +517,16 @@ export default function PriceListScreen() {
   }, [level, selectedGroup, selectedCategory, searchQuery, searchResults.length]);
 
   return (
-    <SafeAreaView style={styles.rootContainer} edges={['top']}>
+    <SafeAreaView nativeID="price-list-screen-container" style={styles.rootContainer} edges={['top']}>
       {/* ── Header Gradient Xanh Dương FixGo ─────────────────────── */}
       <LinearGradient
+        nativeID="price-list-header-gradient"
         colors={['#E0F2FE', '#F0F9FF', '#FFFFFF']}
         style={styles.headerGradient}
       >
         <View style={styles.headerRow}>
           <TouchableOpacity
+            nativeID="btn-back-price-list"
             onPress={handleBack}
             style={styles.backBtn}
             activeOpacity={0.7}
@@ -540,9 +542,10 @@ export default function PriceListScreen() {
         </View>
 
         {/* Thanh tìm kiếm nhanh giá mọi dịch vụ */}
-        <View style={styles.searchBarBox}>
+        <View nativeID="price-list-search-box" style={styles.searchBarBox}>
           <Ionicons name="search" size={18} color="#0284C7" style={{ marginRight: 8 }} />
           <TextInput
+            nativeID="input-search-price-list"
             style={styles.searchInput}
             placeholder="Tìm giá dịch vụ (máy lạnh, bồn nước, bếp từ...)"
             placeholderTextColor="#94A3B8"
@@ -551,7 +554,11 @@ export default function PriceListScreen() {
             clearButtonMode="while-editing"
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <TouchableOpacity
+              nativeID="btn-clear-search-price-list"
+              onPress={() => setSearchQuery('')}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
               <Ionicons name="close-circle" size={18} color="#94A3B8" />
             </TouchableOpacity>
           )}
@@ -561,6 +568,7 @@ export default function PriceListScreen() {
       {/* ── TRƯỜNG HỢP: HIỂN THỊ KẾT QUẢ TÌM KIẾM NHANH ───────────── */}
       {searchQuery.trim().length > 0 ? (
         <ScrollView
+          nativeID="price-list-search-results-scroll"
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
@@ -569,6 +577,7 @@ export default function PriceListScreen() {
             searchResults.map((item) => (
               <TouchableOpacity
                 key={item.id}
+                nativeID={`price-search-item-${item.id}`}
                 style={styles.priceItemCard}
                 activeOpacity={0.75}
                 onPress={() => handleBookItem(item, item.groupName)}
@@ -592,7 +601,7 @@ export default function PriceListScreen() {
               </TouchableOpacity>
             ))
           ) : (
-            <View style={styles.emptySearchBox}>
+            <View nativeID="price-list-empty-search" style={styles.emptySearchBox}>
               <Ionicons name="search-outline" size={48} color="#CBD5E1" />
               <Text style={styles.emptySearchText}>Không tìm thấy đơn giá phù hợp với "{searchQuery}"</Text>
               <Text style={styles.emptySearchSub}>Bạn có thể duyệt theo từng danh mục bên dưới</Text>
@@ -604,6 +613,7 @@ export default function PriceListScreen() {
           {/* ── CẤP 1: DANH SÁCH TẤT CẢ 8 NHÓM DỊCH VỤ CHÍNH ───────── */}
           {level === 0 && (
             <ScrollView
+              nativeID="price-list-groups-scroll"
               style={styles.scrollView}
               contentContainerStyle={styles.scrollContent}
               showsVerticalScrollIndicator={false}
@@ -618,6 +628,7 @@ export default function PriceListScreen() {
               {PRICING_CATALOG.map((group) => (
                 <TouchableOpacity
                   key={group.id}
+                  nativeID={`price-group-card-${group.id}`}
                   style={styles.mainGroupCard}
                   activeOpacity={0.75}
                   onPress={() => handleSelectGroup(group)}
@@ -643,6 +654,7 @@ export default function PriceListScreen() {
           {/* ── CẤP 2: DANH SÁCH HẠNG MỤC CON THEO NHÓM ĐÃ CHỌN ──────── */}
           {level === 1 && selectedGroup && (
             <ScrollView
+              nativeID="price-list-subcategories-scroll"
               style={styles.scrollView}
               contentContainerStyle={styles.scrollContent}
               showsVerticalScrollIndicator={false}
@@ -656,6 +668,7 @@ export default function PriceListScreen() {
               {selectedGroup.categories.map((cat) => (
                 <TouchableOpacity
                   key={cat.id}
+                  nativeID={`price-subcat-card-${cat.id}`}
                   style={styles.subCatCard}
                   activeOpacity={0.75}
                   onPress={() => handleSelectCategory(cat)}
@@ -680,6 +693,7 @@ export default function PriceListScreen() {
           {/* ── CẤP 3: CHI TIẾT ĐƠN GIÁ CỤ THỂ ───────────────────────── */}
           {level === 2 && selectedCategory && (
             <ScrollView
+              nativeID="price-list-items-scroll"
               style={styles.scrollView}
               contentContainerStyle={styles.scrollContent}
               showsVerticalScrollIndicator={false}
@@ -687,6 +701,7 @@ export default function PriceListScreen() {
               {selectedCategory.items.map((item) => (
                 <TouchableOpacity
                   key={item.id}
+                  nativeID={`price-item-card-${item.id}`}
                   style={styles.priceItemCard}
                   activeOpacity={0.75}
                   onPress={() => handleBookItem(item)}
@@ -711,7 +726,7 @@ export default function PriceListScreen() {
               ))}
 
               {/* Ghi chú chân trang minh bạch */}
-              <View style={styles.priceNoteBox}>
+              <View nativeID="price-list-footer-note" style={styles.priceNoteBox}>
                 <Ionicons name="information-circle-outline" size={18} color="#0284C7" style={{ marginRight: 8, marginTop: 1 }} />
                 <Text style={styles.priceNoteText}>
                   Bảng giá mang tính chất tham khảo chuẩn hóa theo giá niêm yết FixGo. Thợ sẽ kiểm tra khảo sát thực tế và báo giá chi tiết trước khi làm. Khách hàng không đồng ý không mất bất kỳ chi phí nào.

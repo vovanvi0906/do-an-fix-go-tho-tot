@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../store/authStore';
 import { userService } from '../services/user.service';
+import { socketService } from '../../../services/socket/socketService';
 import UserModal from '../components/UserModal';
 import DeleteConfirmModal from '../components/DeleteConfirmModal';
 import {
@@ -109,6 +110,61 @@ export default function UsersPage() {
     }, 300);
     return () => clearTimeout(timer);
   }, [searchTerm]);
+
+  // Real-time WebSocket Subscription for Users Management
+  useEffect(() => {
+    socketService.connect();
+    socketService.joinAdminRoom();
+
+    const handleUserCreated = (newUser) => {
+      console.log('⚡ [Realtime User] Tạo người dùng mới:', newUser);
+      showToast('success', `⚡ Realtime: Người dùng mới "${newUser?.fullName || newUser?.email}" vừa tham gia.`);
+      fetchUsers();
+    };
+
+    const handleUserUpdated = (updatedUser) => {
+      console.log('⚡ [Realtime User] Cập nhật người dùng:', updatedUser);
+      setUsers((prevUsers) =>
+        prevUsers.map((u) => {
+          if (u.id === updatedUser.id) {
+            return {
+              ...u,
+              ...updatedUser,
+              fullName: updatedUser.fullName || u.fullName,
+              status: updatedUser.status || u.status,
+              approvalStatus: updatedUser.approvalStatus || u.approvalStatus,
+            };
+          }
+          return u;
+        })
+      );
+    };
+
+    const handleUserDeleted = ({ id }) => {
+      console.log('⚡ [Realtime User] Xóa người dùng ID:', id);
+      setUsers((prevUsers) => prevUsers.filter((u) => u.id !== id));
+      setPagination((prev) => ({
+        ...prev,
+        total: Math.max(0, prev.total - 1),
+      }));
+    };
+
+    socketService.on('user.created', handleUserCreated);
+    socketService.on('user:created', handleUserCreated);
+    socketService.on('user.updated', handleUserUpdated);
+    socketService.on('user:updated', handleUserUpdated);
+    socketService.on('user.deleted', handleUserDeleted);
+    socketService.on('user:deleted', handleUserDeleted);
+
+    return () => {
+      socketService.off('user.created', handleUserCreated);
+      socketService.off('user:created', handleUserCreated);
+      socketService.off('user.updated', handleUserUpdated);
+      socketService.off('user:updated', handleUserUpdated);
+      socketService.off('user.deleted', handleUserDeleted);
+      socketService.off('user:deleted', handleUserDeleted);
+    };
+  }, []);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -239,9 +295,15 @@ export default function UsersPage() {
       {/* ========================================= */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-200/80 dark:border-slate-800/80 shrink-0">
         <div>
-          <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Quản Lý Người Dùng
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+              Quản Lý Người Dùng
+            </h1>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Realtime
+            </span>
+          </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Phân quyền tài khoản Khách hàng, Đối tác Thợ và Quản trị viên hệ thống
           </p>

@@ -179,15 +179,16 @@ export default function OrderHistoryScreen() {
   const dateKeys = Object.keys(groupedOrders);
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView nativeID="orders-screen-container" style={styles.container} edges={['top']}>
       {/* ── Header VietinBank Style: Lịch sử công việc ─────────────── */}
-      <View style={styles.header}>
+      <View nativeID="orders-header" style={styles.header}>
         <Text style={styles.headerTitle}>Lịch sử công việc</Text>
       </View>
 
       {/* ── 2 Tabs Đã đặt vs Đã làm ────────────────────────────────── */}
-      <View style={styles.tabsRow}>
+      <View nativeID="orders-tab-switcher" style={styles.tabsRow}>
         <TouchableOpacity
+          nativeID="tab-btn-orders-active"
           style={[styles.tabBtn, activeTab === 'ordered' && styles.tabBtnActive]}
           onPress={() => setActiveTab('ordered')}
           activeOpacity={0.8}
@@ -199,6 +200,7 @@ export default function OrderHistoryScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
+          nativeID="tab-btn-orders-done"
           style={[styles.tabBtn, activeTab === 'done' && styles.tabBtnActive]}
           onPress={() => setActiveTab('done')}
           activeOpacity={0.8}
@@ -212,12 +214,13 @@ export default function OrderHistoryScreen() {
 
       {/* ── Danh sách đơn hàng theo phong cách VietinBank ───────────── */}
       {isLoading ? (
-        <View style={styles.centerContainer}>
+        <View nativeID="orders-loading-indicator" style={styles.centerContainer}>
           <ActivityIndicator size="large" color="#0284C7" />
           <Text style={styles.loadingText}>Đang tải lịch sử đơn hàng...</Text>
         </View>
       ) : (
         <ScrollView
+          nativeID="orders-scroll-container"
           style={styles.scrollList}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
@@ -232,12 +235,19 @@ export default function OrderHistoryScreen() {
         >
           {dateKeys.length > 0 ? (
             dateKeys.map((dateKey) => (
-              <View key={dateKey} style={styles.dateGroupSection}>
+              <View
+                key={dateKey}
+                nativeID={`orders-date-group-${dateKey.replace(/\//g, '-')}`}
+                style={styles.dateGroupSection}
+              >
                 {/* Tiêu đề Ngày tháng phong cách VietinBank (24/09/2026) */}
                 <Text style={styles.dateGroupHeader}>{dateKey}</Text>
 
                 {/* Khung Card bọc danh sách giao dịch cùng ngày */}
-                <View style={styles.groupCardContainer}>
+                <View
+                  nativeID={`orders-card-group-${dateKey.replace(/\//g, '-')}`}
+                  style={styles.groupCardContainer}
+                >
                   {groupedOrders[dateKey].map((item, index) => {
                     const badge = getStatusBadge(item);
                     const isLast = index === groupedOrders[dateKey].length - 1;
@@ -245,6 +255,7 @@ export default function OrderHistoryScreen() {
                     return (
                       <React.Fragment key={item.id}>
                         <TouchableOpacity
+                          nativeID={`order-item-${item.id || item.orderCode || index}`}
                           style={styles.orderRowTouch}
                           activeOpacity={0.65}
                           onPress={() => handleOpenOrderDetail(item)}
@@ -325,7 +336,7 @@ export default function OrderHistoryScreen() {
               </View>
             ))
           ) : (
-            <View style={styles.emptyContainer}>
+            <View nativeID="orders-empty-container" style={styles.emptyContainer}>
               <View style={styles.emptyIconBox}>
                 <Ionicons name="receipt-outline" size={44} color="#94A3B8" />
               </View>
@@ -339,6 +350,7 @@ export default function OrderHistoryScreen() {
               </Text>
               {activeTab === 'ordered' && (
                 <TouchableOpacity
+                  nativeID="btn-orders-empty-create-booking"
                   style={styles.createOrderBtn}
                   onPress={() => router.push('/(user)/booking/create-booking')}
                   activeOpacity={0.85}

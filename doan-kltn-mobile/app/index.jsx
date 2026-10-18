@@ -197,21 +197,22 @@ export default function FixGoLoginScreen() {
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView nativeID="auth-login-screen-container" style={styles.safeArea}>
         <KeyboardAvoidingView
           style={styles.flex1}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
           <ScrollView
+            nativeID="auth-login-scroll"
             contentContainerStyle={styles.scrollContent}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
             {/* ── Logo FixGo (Figma: centered white bold) ──────────────────── */}
-            <Text style={styles.logo}>FixGo</Text>
+            <Text nativeID="auth-login-logo" style={styles.logo}>FixGo</Text>
 
             {/* ── Form Container ───────────────────────────────────────────── */}
-            <View style={styles.formContainer}>
+            <View nativeID="auth-login-form-container" style={styles.formContainer}>
               {/* Input: Số điện thoại hoặc email */}
               <View
                 style={[
@@ -226,6 +227,7 @@ export default function FixGoLoginScreen() {
                   style={styles.inputIcon}
                 />
                 <TextInput
+                  nativeID="input-auth-identifier"
                   style={styles.textInput}
                   placeholder="Số điện thoại hoặc email"
                   placeholderTextColor={COLORS.gray}
@@ -256,6 +258,7 @@ export default function FixGoLoginScreen() {
                   style={styles.inputIcon}
                 />
                 <TextInput
+                  nativeID="input-auth-password"
                   style={styles.textInput}
                   placeholder="Mật khẩu"
                   placeholderTextColor={COLORS.gray}
@@ -271,6 +274,7 @@ export default function FixGoLoginScreen() {
                   editable={!isLoading}
                 />
                 <TouchableOpacity
+                  nativeID="btn-toggle-show-password"
                   style={styles.eyeBtn}
                   onPress={() => setShowPassword(!showPassword)}
                   activeOpacity={0.7}
@@ -286,7 +290,7 @@ export default function FixGoLoginScreen() {
               {/* Link: Quên mật khẩu? (Figma: căn phải, màu xanh nhạt) */}
               <View style={styles.forgotRow}>
                 <Link href="/(auth)/forgot-password" asChild>
-                  <TouchableOpacity activeOpacity={0.7} disabled={isLoading}>
+                  <TouchableOpacity nativeID="btn-forgot-password" activeOpacity={0.7} disabled={isLoading}>
                     <Text style={styles.forgotText}>Quên mật khẩu?</Text>
                   </TouchableOpacity>
                 </Link>
@@ -294,6 +298,7 @@ export default function FixGoLoginScreen() {
 
               {/* Nút ĐĂNG NHẬP (Figma: dark blue, full-width, rounded) */}
               <TouchableOpacity
+                nativeID="btn-submit-login"
                 style={styles.loginBtn}
                 onPress={handleLogin}
                 disabled={isLoading}
@@ -304,7 +309,7 @@ export default function FixGoLoginScreen() {
 
               {/* Thông báo lỗi (Figma: text đỏ dưới nút Đăng nhập) */}
               {errorMessage ? (
-                <Text style={styles.errorText}>{errorMessage}</Text>
+                <Text nativeID="auth-login-error-message" style={styles.errorText}>{errorMessage}</Text>
               ) : null}
 
               {/* Phân cách: hoặc đăng nhập bằng */}
@@ -315,8 +320,9 @@ export default function FixGoLoginScreen() {
               </View>
 
               {/* Social Login: Facebook + Google (Figma: 2 nút tròn trắng) */}
-              <View style={styles.socialRow}>
+              <View nativeID="auth-login-social-row" style={styles.socialRow}>
                 <TouchableOpacity
+                  nativeID="btn-login-facebook"
                   style={styles.socialBtn}
                   activeOpacity={0.8}
                   onPress={() => console.log('Login Facebook')}
@@ -325,6 +331,7 @@ export default function FixGoLoginScreen() {
                 </TouchableOpacity>
 
                 <TouchableOpacity
+                  nativeID="btn-login-google"
                   style={styles.socialBtn}
                   activeOpacity={0.8}
                   onPress={() => console.log('Login Google')}
@@ -337,6 +344,7 @@ export default function FixGoLoginScreen() {
               <View style={styles.footerRow}>
                 <Text style={styles.footerText}>Chưa có tài khoản? </Text>
                 <TouchableOpacity
+                  nativeID="btn-open-register-modal"
                   activeOpacity={0.7}
                   onPress={() => setShowRegisterModal(true)}
                 >
@@ -356,11 +364,13 @@ export default function FixGoLoginScreen() {
         onRequestClose={() => setShowRegisterModal(false)}
       >
         <TouchableOpacity
+          nativeID="modal-register-roles-backdrop"
           style={styles.modalBackdrop}
           activeOpacity={1}
           onPress={() => setShowRegisterModal(false)}
         >
           <TouchableOpacity
+            nativeID="modal-register-roles-card"
             style={styles.modalCard}
             activeOpacity={1}
             onPress={(e) => {
@@ -376,6 +386,7 @@ export default function FixGoLoginScreen() {
                 <Text style={styles.modalTitle}>Chọn loại tài khoản</Text>
               </View>
               <TouchableOpacity
+                nativeID="btn-close-register-modal"
                 style={styles.modalCloseBtn}
                 onPress={() => setShowRegisterModal(false)}
                 activeOpacity={0.7}
@@ -392,6 +403,7 @@ export default function FixGoLoginScreen() {
             <View style={styles.modalOptions}>
               {/* Option 1: Khách hàng */}
               <TouchableOpacity
+                nativeID="btn-register-role-customer"
                 style={styles.modalOptionItemCustomer}
                 activeOpacity={0.8}
                 onPress={() => {
@@ -418,6 +430,7 @@ export default function FixGoLoginScreen() {
 
               {/* Option 2: Thợ sửa chữa */}
               <TouchableOpacity
+                nativeID="btn-register-role-worker"
                 style={styles.modalOptionItemWorker}
                 activeOpacity={0.8}
                 onPress={() => {

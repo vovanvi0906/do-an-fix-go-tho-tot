@@ -146,7 +146,7 @@ export default function UserOrderDetailScreen() {
 
   if (loading && !order) {
     return (
-      <View style={styles.centerContainer}>
+      <View nativeID="order-detail-loading-container" style={styles.centerContainer}>
         <ActivityIndicator size="large" color="#0284C7" />
         <Text style={styles.loadingText}>Đang tải chi tiết đơn hàng...</Text>
       </View>
@@ -165,20 +165,29 @@ export default function UserOrderDetailScreen() {
   const remainingMins = Math.max(0, 20 - elapsedMins);
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView nativeID="order-detail-screen-container" style={styles.container} edges={['top']}>
       {/* ── Header Đơn hàng ────────────────────────────────────────── */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
+      <View nativeID="order-detail-header" style={styles.header}>
+        <TouchableOpacity
+          nativeID="btn-back-order-detail"
+          onPress={() => router.back()}
+          style={styles.backBtn}
+          activeOpacity={0.7}
+        >
           <Ionicons name="chevron-back" size={22} color="#0F172A" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Chi Tiết Đơn Hàng</Text>
         <View style={{ width: 40 }} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        nativeID="order-detail-scroll-container"
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {/* ── 1. BANNER TRẠNG THÁI: CHỜ ADMIN DUYỆT ──────────────────── */}
         {isAwaitingConfirm && (
-          <View style={styles.awaitingBanner}>
+          <View nativeID="order-detail-awaiting-banner" style={styles.awaitingBanner}>
             <View style={styles.bannerIconCircle}>
               <Ionicons name="time" size={24} color="#D97706" />
             </View>
@@ -198,7 +207,7 @@ export default function UserOrderDetailScreen() {
 
         {/* ── BANNER NẾU ĐƠN ĐÃ HỦY / HẾT HẠN ───────────────────────── */}
         {isCancelled && (
-          <View style={styles.cancelledBanner}>
+          <View nativeID="order-detail-cancelled-banner" style={styles.cancelledBanner}>
             <View style={[styles.bannerIconCircle, { backgroundColor: '#FEE2E2' }]}>
               <Ionicons name="close-circle" size={24} color="#DC2626" />
             </View>
@@ -212,12 +221,13 @@ export default function UserOrderDetailScreen() {
         )}
 
         {/* ── 2. THẺ THÔNG TIN ĐƠN HÀNG ────────────────────────────── */}
-        <View style={styles.card}>
+        <View nativeID="order-detail-info-card" style={styles.card}>
           <View style={styles.cardHeaderRow}>
             <Text style={styles.orderCodeBadge}>
               {order?.orderCode || `#${String(order?.id || '').slice(0, 10).toUpperCase()}`}
             </Text>
             <View
+              nativeID="order-detail-status-pill"
               style={[
                 styles.statusPill,
                 isAwaitingConfirm && styles.pillAmber,
@@ -300,7 +310,7 @@ export default function UserOrderDetailScreen() {
 
         {/* ── 3. THÔNG TIN THỢ PHỤ TRÁCH (Khi đã xác nhận thợ) ─────── */}
         {!isAwaitingConfirm && !isCancelled && (
-          <View style={styles.workerCard}>
+          <View nativeID="order-detail-worker-card" style={styles.workerCard}>
             <View style={styles.workerAvatarCircle}>
               <Text style={styles.workerAvatarText}>👨‍🔧</Text>
             </View>
@@ -313,14 +323,18 @@ export default function UserOrderDetailScreen() {
               </Text>
               <Text style={styles.workerRating}>⭐ 4.9 (128 đánh giá) • Thợ chuyên nghiệp</Text>
             </View>
-            <TouchableOpacity style={styles.callBtn} activeOpacity={0.8}>
+            <TouchableOpacity
+              nativeID="btn-call-assigned-worker"
+              style={styles.callBtn}
+              activeOpacity={0.8}
+            >
               <Ionicons name="call" size={18} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
         )}
 
         {/* ── 4. TIẾN TRÌNH THỰC HIỆN ĐƠN HÀNG ───────────────────────── */}
-        <View style={styles.timelineCard}>
+        <View nativeID="order-detail-timeline-card" style={styles.timelineCard}>
           <Text style={styles.timelineHeading}>Tiến trình đơn hàng</Text>
 
           <View style={styles.timelineItem}>
@@ -368,9 +382,10 @@ export default function UserOrderDetailScreen() {
 
         {/* ── 5. CÁC NÚT THAO TÁC ───────────────────────────────────── */}
         {isAwaitingConfirm && (
-          <View style={styles.actionsContainer}>
+          <View nativeID="order-detail-actions-container" style={styles.actionsContainer}>
             {/* Nút Demo Duyệt cho tester / admin */}
             <TouchableOpacity
+              nativeID="btn-demo-admin-approve-order"
               style={styles.demoApproveBtn}
               onPress={handleAdminApproveDemo}
               activeOpacity={0.85}
@@ -380,6 +395,7 @@ export default function UserOrderDetailScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
+              nativeID="btn-cancel-order"
               style={styles.cancelOrderBtn}
               onPress={handleCancelOrder}
               activeOpacity={0.8}

@@ -5,6 +5,7 @@ import {
   Query,
   Param,
   Dependencies,
+  Header,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { ServicesService } from './services.service';
@@ -18,6 +19,9 @@ export class ServicesController {
   }
 
   @Get('service-categories')
+  @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
+  @Header('Pragma', 'no-cache')
+  @Header('Expires', '0')
   @ApiOperation({
     summary: 'Lấy danh sách các danh mục dịch vụ đang hoạt động',
   })
@@ -26,6 +30,9 @@ export class ServicesController {
   }
 
   @Get('services')
+  @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
+  @Header('Pragma', 'no-cache')
+  @Header('Expires', '0')
   @ApiOperation({
     summary: 'Lấy danh sách các dịch vụ (có thể lọc theo categoryId)',
   })
@@ -36,6 +43,9 @@ export class ServicesController {
   }
 
   @Get('services/:id')
+  @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
+  @Header('Pragma', 'no-cache')
+  @Header('Expires', '0')
   @ApiOperation({ summary: 'Lấy thông tin chi tiết một dịch vụ theo ID' })
   @Bind(Param('id'))
   async getServiceById(id) {

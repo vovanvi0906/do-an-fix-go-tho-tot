@@ -5,12 +5,14 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../../infrastructure/database/prisma.service';
+import { AdminGateway } from '../admin/admin.gateway';
 
 @Injectable()
-@Dependencies(PrismaService)
+@Dependencies(PrismaService, AdminGateway)
 export class WorkersService {
-  constructor(prisma) {
+  constructor(prisma, adminGateway) {
     this.prisma = prisma;
+    this.adminGateway = adminGateway;
   }
 
   async getProfile(userId) {
@@ -230,6 +232,18 @@ export class WorkersService {
       where: { id: worker.id },
       data: { isOnline },
     });
+
+    try {
+      this.adminGateway?.emitWorkerStatusChanged({
+        id: worker.id,
+        workerId: worker.id,
+        userId: worker.userId,
+        isOnline: updated.isOnline,
+        approvalStatus: worker.approvalStatus,
+      });
+    } catch (e) {
+      // Ignore socket error
+    }
 
     return {
       message: `Đã ${isOnline ? 'bật' : 'tắt'} trạng thái sẵn sàng nhận việc thành công`,

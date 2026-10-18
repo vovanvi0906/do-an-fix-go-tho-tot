@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { adminCategoriesService } from '../services/adminCategories.service';
+import { socketService } from '../../../services/socket/socketService';
 import type { CategoryItem, CategoryFormData } from '../../../types/category';
 
 /**
@@ -102,6 +103,40 @@ export function useCategories(showToast?: ShowToastFn) {
   // Kích hoạt fetch khi debouncedSearch hoặc statusFilter thay đổi
   useEffect(() => {
     fetchCategories();
+  }, [fetchCategories]);
+
+  // Tự động làm mới khi người dùng quay lại tab trình duyệt (Window Focus & Visibility Change)
+  useEffect(() => {
+    const handleFocusOrVisible = () => {
+      if (document.visibilityState === 'visible') {
+        fetchCategories();
+      }
+    };
+
+    window.addEventListener('focus', handleFocusOrVisible);
+    document.addEventListener('visibilitychange', handleFocusOrVisible);
+
+    return () => {
+      window.removeEventListener('focus', handleFocusOrVisible);
+      document.removeEventListener('visibilitychange', handleFocusOrVisible);
+    };
+  }, [fetchCategories]);
+
+  // Real-time WebSocket Subscription for Categories
+  useEffect(() => {
+    socketService.connect();
+    socketService.joinAdminRoom();
+
+    const handleCategoryUpdated = (data: any) => {
+      console.log('⚡ [Realtime Categories] Cập nhật danh mục:', data);
+      fetchCategories();
+    };
+
+    socketService.on('category.updated', handleCategoryUpdated);
+
+    return () => {
+      socketService.off('category.updated', handleCategoryUpdated);
+    };
   }, [fetchCategories]);
 
   /**

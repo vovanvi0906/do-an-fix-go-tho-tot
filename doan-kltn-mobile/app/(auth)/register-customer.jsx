@@ -399,7 +399,7 @@ export default function RegisterCustomerScreen() {
   // ═════════════════════════════════════════════════════════════════════════════
   if (step === 6) {
     return (
-      <View style={styles.loadingScreen}>
+      <View nativeID="register-customer-loading-screen" style={styles.loadingScreen}>
         <StatusBar style="dark" />
         <ActivityIndicator size="large" color={COLORS.primary} />
         <Text style={styles.loadingText}>Đang thiết lập tài khoản của bạn...</Text>
@@ -410,12 +410,13 @@ export default function RegisterCustomerScreen() {
   return (
     <View style={styles.container}>
       <StatusBar style="dark" />
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView nativeID="register-customer-screen-container" style={styles.safeArea}>
         <KeyboardAvoidingView
           style={styles.flex1}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
           <ScrollView
+            nativeID="register-customer-scroll"
             contentContainerStyle={styles.scrollContent}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
@@ -424,7 +425,7 @@ export default function RegisterCustomerScreen() {
                 BƯỚC 1: NHẬP SỐ ĐIỆN THOẠI (Figma Screen 83 / 69 / 70)
                ══════════════════════════════════════════════════════════════════ */}
             {step === 1 && (
-              <View style={styles.stepContainer}>
+              <View nativeID="register-step-1-phone-container" style={styles.stepContainer}>
                 <Text style={styles.headerTitle}>Nhập số điện thoại</Text>
                 <Text style={styles.headerSubtitle}>
                   Mã OTP 6 số sẽ được gửi qua SMS để xác thực số điện thoại của bạn.
@@ -441,6 +442,7 @@ export default function RegisterCustomerScreen() {
                   >
                     <Text style={styles.prefixText}>+84</Text>
                     <TextInput
+                      nativeID="input-register-customer-phone"
                       style={styles.phoneInput}
                       placeholder="Số điện thoại"
                       placeholderTextColor={COLORS.textSub}
@@ -459,10 +461,11 @@ export default function RegisterCustomerScreen() {
                 </View>
 
                 {errorMessage ? (
-                  <Text style={styles.errorText}>{errorMessage}</Text>
+                  <Text nativeID="register-error-message-step-1" style={styles.errorText}>{errorMessage}</Text>
                 ) : null}
 
                 <TouchableOpacity
+                  nativeID="btn-register-submit-phone"
                   style={[styles.primaryBtn, isLoading && styles.btnDisabled]}
                   onPress={handlePhoneSubmit}
                   disabled={isLoading}
@@ -482,6 +485,7 @@ export default function RegisterCustomerScreen() {
                 </View>
 
                 <TouchableOpacity
+                  nativeID="btn-register-social-facebook"
                   style={styles.socialFullBtn}
                   activeOpacity={0.8}
                   onPress={() => console.log('Login Facebook')}
@@ -498,6 +502,7 @@ export default function RegisterCustomerScreen() {
                 </TouchableOpacity>
 
                 <TouchableOpacity
+                  nativeID="btn-register-social-google"
                   style={styles.socialFullBtn}
                   activeOpacity={0.8}
                   onPress={() => console.log('Login Google')}
@@ -516,7 +521,7 @@ export default function RegisterCustomerScreen() {
                 <View style={styles.footerRow}>
                   <Text style={styles.footerText}>Đã có tài khoản? </Text>
                   <Link href="/(auth)/login" asChild>
-                    <TouchableOpacity activeOpacity={0.7}>
+                    <TouchableOpacity nativeID="btn-register-goto-login" activeOpacity={0.7}>
                       <Text style={styles.footerLink}>Đăng nhập ngay</Text>
                     </TouchableOpacity>
                   </Link>
@@ -528,16 +533,17 @@ export default function RegisterCustomerScreen() {
                 BƯỚC 2: NHẬP MÃ OTP SĐT 6 CHỮ SỐ (Figma Screen 72 / 45)
                ══════════════════════════════════════════════════════════════════ */}
             {step === 2 && (
-              <View style={styles.stepContainer}>
+              <View nativeID="register-step-2-otp-container" style={styles.stepContainer}>
                 <Text style={styles.headerTitle}>Nhập mã gồm 6 chữ số được gửi đến</Text>
                 <Text style={styles.headerSubtitle}>
                   {phone ? `+84 ${phone.trim().slice(0, 2)}*****${phone.trim().slice(-4)}` : '+84'}
                 </Text>
 
-                <View style={styles.otpContainer}>
+                <View nativeID="register-phone-otp-inputs-row" style={styles.otpContainer}>
                   {otp.map((digit, idx) => (
                     <TextInput
                       key={idx}
+                      nativeID={`input-register-phone-otp-${idx}`}
                       ref={(ref) => (otpInputs.current[idx] = ref)}
                       style={[
                         styles.otpBox,
@@ -566,6 +572,7 @@ export default function RegisterCustomerScreen() {
                 ) : null}
 
                 <TouchableOpacity
+                  nativeID="btn-resend-phone-otp"
                   style={[
                     styles.resendBtn,
                     countdown > 0 ? styles.resendBtnDisabled : styles.resendBtnActive,
@@ -586,6 +593,7 @@ export default function RegisterCustomerScreen() {
 
                 <View style={styles.navRow}>
                   <TouchableOpacity
+                    nativeID="btn-back-to-step-1"
                     style={styles.backCircleBtn}
                     onPress={() => setStep(1)}
                   >
@@ -593,6 +601,7 @@ export default function RegisterCustomerScreen() {
                   </TouchableOpacity>
 
                   <TouchableOpacity
+                    nativeID="btn-register-verify-phone-otp"
                     style={[
                       styles.nextBtn,
                       otp.join('').length === 6 && !isLoading
@@ -619,7 +628,7 @@ export default function RegisterCustomerScreen() {
                 BƯỚC 3: TẠO MẬT KHẨU (Figma Screen 73 - 78)
                ══════════════════════════════════════════════════════════════════ */}
             {step === 3 && (
-              <View style={styles.stepContainer}>
+              <View nativeID="register-step-3-password-container" style={styles.stepContainer}>
                 <Text style={styles.headerTitle}>Tạo mật khẩu</Text>
                 <Text style={styles.headerSubtitle}>
                   Mật khẩu phải có ít nhất 8 ký tự, bao gồm ít nhất một chữ cái và một chữ số
@@ -632,6 +641,7 @@ export default function RegisterCustomerScreen() {
                   ]}
                 >
                   <TextInput
+                    nativeID="input-register-password"
                     style={styles.textInput}
                     placeholder="Nhập mật khẩu"
                     placeholderTextColor={COLORS.textSub}
@@ -643,6 +653,7 @@ export default function RegisterCustomerScreen() {
                     autoFocus
                   />
                   <TouchableOpacity
+                    nativeID="btn-toggle-register-password"
                     style={styles.eyeBtn}
                     onPress={() => setShowPassword(!showPassword)}
                   >
@@ -655,7 +666,7 @@ export default function RegisterCustomerScreen() {
                 </View>
 
                 {/* Checklist */}
-                <View style={styles.checklistContainer}>
+                <View nativeID="register-password-checklist" style={styles.checklistContainer}>
                   <View style={styles.checklistItem}>
                     <Ionicons
                       name={hasMinLength ? 'checkmark-circle' : 'close-circle'}
@@ -712,6 +723,7 @@ export default function RegisterCustomerScreen() {
                   ]}
                 >
                   <TextInput
+                    nativeID="input-register-confirm-password"
                     style={styles.textInput}
                     placeholder="Xác nhận lại mật khẩu"
                     placeholderTextColor={COLORS.textSub}
@@ -722,6 +734,7 @@ export default function RegisterCustomerScreen() {
                     secureTextEntry={!showConfirmPassword}
                   />
                   <TouchableOpacity
+                    nativeID="btn-toggle-register-confirm-password"
                     style={styles.eyeBtn}
                     onPress={() => setShowConfirmPassword(!showConfirmPassword)}
                   >
@@ -752,11 +765,12 @@ export default function RegisterCustomerScreen() {
                 )}
 
                 {errorMessage ? (
-                  <Text style={styles.errorText}>{errorMessage}</Text>
+                  <Text nativeID="register-error-message-step-3" style={styles.errorText}>{errorMessage}</Text>
                 ) : null}
 
                 <View style={styles.navRow}>
                   <TouchableOpacity
+                    nativeID="btn-back-to-step-2"
                     style={styles.backCircleBtn}
                     onPress={() => setStep(2)}
                   >
@@ -764,6 +778,7 @@ export default function RegisterCustomerScreen() {
                   </TouchableOpacity>
 
                   <TouchableOpacity
+                    nativeID="btn-register-submit-password"
                     style={[
                       styles.nextBtn,
                       isPasswordValid && isPasswordMatch
@@ -784,7 +799,7 @@ export default function RegisterCustomerScreen() {
                 BƯỚC 4: NHẬP HỌ TÊN VÀ EMAIL (Xác thực Email OTP)
                ══════════════════════════════════════════════════════════════════ */}
             {step === 4 && (
-              <View style={styles.stepContainer}>
+              <View nativeID="register-step-4-info-container" style={styles.stepContainer}>
                 <Text style={styles.headerTitle}>Nhập họ tên và email</Text>
                 <Text style={styles.headerSubtitle}>
                   Mã OTP sẽ được gửi tới Email để xác thực quyền sở hữu trước khi hoàn tất đăng ký.
@@ -799,6 +814,7 @@ export default function RegisterCustomerScreen() {
                     ]}
                   >
                     <TextInput
+                      nativeID="input-register-first-name"
                       style={styles.textInput}
                       placeholder="Họ"
                       placeholderTextColor={COLORS.textSub}
@@ -820,6 +836,7 @@ export default function RegisterCustomerScreen() {
                     ]}
                   >
                     <TextInput
+                      nativeID="input-register-last-name"
                       style={styles.textInput}
                       placeholder="Tên"
                       placeholderTextColor={COLORS.textSub}
@@ -843,6 +860,7 @@ export default function RegisterCustomerScreen() {
                   ]}
                 >
                   <TextInput
+                    nativeID="input-register-email"
                     style={styles.textInput}
                     placeholder="Email (vd: example@gmail.com)"
                     placeholderTextColor={COLORS.textSub}
@@ -859,11 +877,12 @@ export default function RegisterCustomerScreen() {
                 </View>
 
                 {errorMessage ? (
-                  <Text style={styles.errorText}>{errorMessage}</Text>
+                  <Text nativeID="register-error-message-step-4" style={styles.errorText}>{errorMessage}</Text>
                 ) : null}
 
                 <View style={styles.navRow}>
                   <TouchableOpacity
+                    nativeID="btn-back-to-step-3"
                     style={styles.backCircleBtn}
                     onPress={() => setStep(3)}
                   >
@@ -871,6 +890,7 @@ export default function RegisterCustomerScreen() {
                   </TouchableOpacity>
 
                   <TouchableOpacity
+                    nativeID="btn-register-send-email-otp"
                     style={[
                       styles.nextBtn,
                       firstName.trim() && lastName.trim() && email.trim() && !isLoading
@@ -897,7 +917,7 @@ export default function RegisterCustomerScreen() {
                 BƯỚC 5: NHẬP MÃ OTP EMAIL & HOÀN TẤT ĐĂNG KÝ
                ══════════════════════════════════════════════════════════════════ */}
             {step === 5 && (
-              <View style={styles.stepContainer}>
+              <View nativeID="register-step-5-email-otp-container" style={styles.stepContainer}>
                 <View style={styles.emailIconBox}>
                   <Ionicons name="mail-outline" size={32} color={COLORS.primary} />
                 </View>
@@ -908,10 +928,11 @@ export default function RegisterCustomerScreen() {
                   <Text style={styles.emailHighlight}>{email.trim()}</Text>
                 </Text>
 
-                <View style={styles.otpContainer}>
+                <View nativeID="register-email-otp-inputs-row" style={styles.otpContainer}>
                   {emailOtp.map((digit, idx) => (
                     <TextInput
                       key={idx}
+                      nativeID={`input-register-email-otp-${idx}`}
                       ref={(ref) => (emailOtpInputs.current[idx] = ref)}
                       style={[
                         styles.otpBox,
@@ -940,6 +961,7 @@ export default function RegisterCustomerScreen() {
                 ) : null}
 
                 <TouchableOpacity
+                  nativeID="btn-resend-email-otp"
                   style={[
                     styles.resendBtn,
                     emailCountdown > 0 ? styles.resendBtnDisabled : styles.resendBtnActive,
@@ -960,6 +982,7 @@ export default function RegisterCustomerScreen() {
 
                 <View style={styles.navRow}>
                   <TouchableOpacity
+                    nativeID="btn-back-to-step-4"
                     style={styles.backCircleBtn}
                     onPress={() => setStep(4)}
                   >
@@ -967,6 +990,7 @@ export default function RegisterCustomerScreen() {
                   </TouchableOpacity>
 
                   <TouchableOpacity
+                    nativeID="btn-register-complete"
                     style={[
                       styles.nextBtn,
                       emailOtp.join('').length === 6 && !isLoading

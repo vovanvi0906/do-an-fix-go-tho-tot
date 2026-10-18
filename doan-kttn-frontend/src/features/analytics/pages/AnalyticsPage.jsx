@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { analyticsService } from '../services/analytics.service';
+import { socketService } from '../../../services/socket/socketService';
 import RevenueChart from '../components/RevenueChart';
 import CategoryDistributionCard from '../components/CategoryDistributionCard';
 import TopWorkersCard from '../components/TopWorkersCard';
@@ -82,6 +83,29 @@ export default function AnalyticsPage() {
     fetchData();
   }, [timeRange]);
 
+  // Real-time WebSocket Subscription for Analytics & Reports
+  useEffect(() => {
+    socketService.connect();
+    socketService.joinAdminRoom();
+
+    const handleAnalyticsUpdate = (data) => {
+      console.log('⚡ [Realtime Analytics] Cập nhật số liệu báo cáo:', data);
+      fetchData();
+    };
+
+    socketService.on('analytics.refresh', handleAnalyticsUpdate);
+    socketService.on('dashboard.refresh', handleAnalyticsUpdate);
+    socketService.on('order.status', handleAnalyticsUpdate);
+    socketService.on('order:status_changed', handleAnalyticsUpdate);
+
+    return () => {
+      socketService.off('analytics.refresh', handleAnalyticsUpdate);
+      socketService.off('dashboard.refresh', handleAnalyticsUpdate);
+      socketService.off('order.status', handleAnalyticsUpdate);
+      socketService.off('order:status_changed', handleAnalyticsUpdate);
+    };
+  }, [timeRange]);
+
   // Handle Export CSV
   const handleExport = async () => {
     try {
@@ -135,6 +159,10 @@ export default function AnalyticsPage() {
             </h1>
             <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-500/10 text-blue-500 border border-blue-500/30">
               REAL-TIME ANALYTICS
+            </span>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Realtime
             </span>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">

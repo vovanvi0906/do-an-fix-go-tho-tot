@@ -6,6 +6,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { tokenStorage } from '../../../services/storage/tokenStorage';
+import { catalogService } from '../../../services/api/catalogService';
 import type {
   HomeDataState,
   UserProfile,
@@ -298,25 +299,58 @@ export function useHomeData(): UseHomeDataReturn {
       // =========================================================================
       setNearbyWorkers(MOCK_WORKERS);
 
-      // =========================================================================
-      // 3. TODO: API Integration - GET /api/v1/services/categories
-      // const catRes = await apiClient.get('/api/v1/services/categories');
-      // setCategories(catRes.data);
-      // =========================================================================
-      setCategories(MOCK_CATEGORIES);
+      // 3. API Integration: Lấy danh mục dịch vụ thực tế từ CSDL backend
+      try {
+        const backendCats = await catalogService.getCategories();
+        if (Array.isArray(backendCats) && backendCats.length > 0) {
+          const mappedCats: CategoryItem[] = backendCats.map((cat, idx) => ({
+            id: cat.id,
+            name: cat.name,
+            slug: cat.slug || cat.id,
+            iconName: cat.icon || MOCK_CATEGORIES[idx % MOCK_CATEGORIES.length].iconName,
+            gradientColors: MOCK_CATEGORIES[idx % MOCK_CATEGORIES.length].gradientColors,
+            serviceCount: cat.services?.length || cat._count?.services || 0,
+            isPopular: idx < 4,
+          }));
+          setCategories(mappedCats);
+        } else {
+          setCategories(MOCK_CATEGORIES);
+        }
+      } catch (catErr) {
+        console.warn('⚠️ [useHomeData] Không lấy được danh mục từ API, dùng fallback:', catErr);
+        setCategories(MOCK_CATEGORIES);
+      }
 
-      // =========================================================================
-      // 4. TODO: API Integration - GET /api/v1/services/popular
-      // const popularRes = await apiClient.get('/api/v1/services/popular');
-      // setPopularServices(popularRes.data);
-      // =========================================================================
-      setPopularServices(MOCK_POPULAR_SERVICES);
+      // 4. API Integration: Lấy danh sách dịch vụ phổ biến thực tế từ CSDL backend
+      try {
+        const backendServices = await catalogService.getServices();
+        if (Array.isArray(backendServices) && backendServices.length > 0) {
+          const mappedServices: ServiceItem[] = backendServices.slice(0, 10).map((svc, idx) => ({
+            id: svc.id,
+            name: svc.name,
+            slug: (svc as any).slug || svc.id,
+            categoryName: svc.category?.name || 'Dịch vụ gia đình',
+            basePrice: Number(svc.basePrice) || 150000,
+            unit: svc.unit || 'lần',
+            durationMin: (svc as any).durationMin || 60,
+            rating: 4.9,
+            reviewsCount: 120 + idx * 15,
+            imageUrl:
+              (svc as any).imageUrl ||
+              MOCK_POPULAR_SERVICES[idx % MOCK_POPULAR_SERVICES.length]?.imageUrl ||
+              'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&q=80',
+            tag: idx === 0 ? 'Phổ biến' : undefined,
+          }));
+          setPopularServices(mappedServices);
+        } else {
+          setPopularServices(MOCK_POPULAR_SERVICES);
+        }
+      } catch (svcErr) {
+        console.warn('⚠️ [useHomeData] Không lấy được dịch vụ từ API, dùng fallback:', svcErr);
+        setPopularServices(MOCK_POPULAR_SERVICES);
+      }
 
-      // =========================================================================
-      // 5. TODO: API Integration - GET /api/v1/promotions/active
-      // const promoRes = await apiClient.get('/api/v1/promotions/active');
-      // setVouchers(promoRes.data);
-      // =========================================================================
+      // 5. Khuyến mãi & Vouchers
       setVouchers(MOCK_VOUCHERS);
 
       setIsLoading(false);

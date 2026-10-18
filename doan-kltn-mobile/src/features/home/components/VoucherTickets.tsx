@@ -31,9 +31,9 @@ export default function VoucherTickets({
   onOpenWallet,
 }: VoucherTicketsProps) {
   return (
-    <View style={styles.container}>
+    <View nativeID="home-voucher-section" style={styles.container}>
       {/* ── 1. Header Row ─────────────────────────────────────── */}
-      <View style={styles.headerRow}>
+      <View nativeID="home-voucher-header" style={styles.headerRow}>
         <View style={styles.titleGroup}>
           <Ionicons name="pricetag" size={16} color="#EA580C" style={{ marginRight: 6 }} />
           <Text style={styles.title}>Ưu đãi dành cho bạn</Text>
@@ -41,6 +41,7 @@ export default function VoucherTickets({
 
         {onOpenWallet && (
           <Pressable
+            nativeID="btn-open-voucher-wallet"
             accessible={true}
             accessibilityRole="button"
             accessibilityLabel="Mở danh sách ví voucher"
@@ -56,18 +57,19 @@ export default function VoucherTickets({
 
       {/* ── 2. Horizontal Voucher List ────────────────────────── */}
       <ScrollView
+        nativeID="home-vouchers-scroll"
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {vouchers.map((voucher) => {
+        {vouchers.map((voucher, index) => {
           const isOrange = voucher.theme === 'orange';
           const gradientColors = isOrange
             ? (['#EA580C', '#F59E0B'] as [string, string])
             : (['#2563EB', '#0284C7'] as [string, string]);
 
           return (
-            <View key={voucher.id} style={styles.ticketOuterWrapper}>
+            <View key={voucher.id} nativeID={`voucher-ticket-${voucher.code || voucher.id || index}`} style={styles.ticketOuterWrapper}>
               <LinearGradient
                 colors={gradientColors}
                 start={{ x: 0, y: 0 }}
@@ -101,6 +103,7 @@ export default function VoucherTickets({
                 {/* Right Action Button (Touch Target >= 44x44px) */}
                 <View style={styles.ticketRightAction}>
                   <Pressable
+                    nativeID={`btn-claim-voucher-${voucher.code || voucher.id || index}`}
                     accessible={true}
                     accessibilityRole="button"
                     accessibilityLabel={voucher.isClaimed ? `Mã ${voucher.code} đã lưu` : `Lưu mã ${voucher.code}`}

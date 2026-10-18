@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { X, ShieldAlert, Loader2, AlertTriangle } from 'lucide-react';
+import { X, ShieldAlert, Loader2, AlertTriangle, Trash2 } from 'lucide-react';
 
 /**
  * DeleteCategoryModal Component
  * Modal xác nhận xóa danh mục ngành nghề an toàn.
+ * Hỗ trợ xóa vĩnh viễn cả khi danh mục chứa các dịch vụ con.
  */
 export default function DeleteCategoryModal({
   isOpen,
@@ -13,11 +14,11 @@ export default function DeleteCategoryModal({
   serviceCount = 0,
   isSubmitting = false,
 }) {
-  const [forceDelete, setForceDelete] = useState(false);
+  const [forceDelete, setForceDelete] = useState(true);
 
   useEffect(() => {
     if (isOpen) {
-      setForceDelete(false);
+      setForceDelete(true);
     }
   }, [isOpen]);
 
@@ -56,34 +57,38 @@ export default function DeleteCategoryModal({
           </div>
         </div>
 
-        {/* Force Delete Option */}
-        <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/80 flex items-start gap-2.5">
-          <input
-            id="force-delete-cat-checkbox"
-            type="checkbox"
-            checked={forceDelete}
-            onChange={(e) => setForceDelete(e.target.checked)}
-            className="mt-0.5 w-4 h-4 rounded border-slate-300 dark:border-slate-700 text-rose-600 focus:ring-rose-500 cursor-pointer"
-          />
-          <label
-            htmlFor="force-delete-cat-checkbox"
-            className="text-xs text-slate-700 dark:text-slate-300 cursor-pointer select-none"
-          >
-            <span className="font-bold text-rose-600 dark:text-rose-400 block">
-              Xóa vĩnh viễn (Force Delete)
-            </span>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400 block mt-0.5 leading-relaxed">
-              Xóa triệt để danh mục và toàn bộ các gói dịch vụ trực thuộc khỏi cơ sở dữ liệu.
-            </span>
-          </label>
+        {/* Service Warning & Force Delete Option */}
+        <div className="p-3.5 rounded-xl bg-rose-50/50 dark:bg-rose-950/20 border border-rose-200/60 dark:border-rose-900/40 space-y-2">
+          <div className="flex items-start gap-2.5">
+            <input
+              id="force-delete-cat-checkbox"
+              type="checkbox"
+              checked={forceDelete}
+              onChange={(e) => setForceDelete(e.target.checked)}
+              className="mt-0.5 w-4 h-4 rounded border-slate-300 dark:border-slate-700 text-rose-600 focus:ring-rose-500 cursor-pointer"
+            />
+            <label
+              htmlFor="force-delete-cat-checkbox"
+              className="text-xs text-slate-700 dark:text-slate-300 cursor-pointer select-none"
+            >
+              <span className="font-bold text-rose-600 dark:text-rose-400 block">
+                Xóa vĩnh viễn (kèm {serviceCount} dịch vụ trực thuộc)
+              </span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 block mt-0.5 leading-relaxed">
+                {serviceCount > 0
+                  ? `Xóa triệt để danh mục "${categoryName}" cùng toàn bộ ${serviceCount} gói dịch vụ con khỏi hệ thống.`
+                  : 'Xóa hoàn toàn danh mục này khỏi cơ sở dữ liệu.'}
+              </span>
+            </label>
+          </div>
         </div>
 
-        {/* Safety Note */}
+        {/* Soft delete note when unchecked */}
         {!forceDelete && (
           <p className="text-[11px] text-slate-500 dark:text-slate-400 italic p-2.5 rounded-lg bg-slate-50/70 dark:bg-slate-950/40 border border-slate-200/80 dark:border-slate-800/50 flex items-start gap-1.5">
             <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
             <span>
-              Mặc định: Nếu danh mục đang có dịch vụ liên kết, hệ thống sẽ chuyển sang trạng thái <strong>Tạm Ngưng (Soft Delete)</strong>.
+              Khi bỏ chọn: Hệ thống sẽ giữ lại dữ liệu và chỉ chuyển danh mục sang trạng thái <strong>Tạm ngưng</strong>.
             </span>
           </p>
         )}
@@ -108,10 +113,17 @@ export default function DeleteCategoryModal({
             {isSubmitting ? (
               <>
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                <span>Đang xóa...</span>
+                <span>Đang xử lý...</span>
               </>
             ) : (
-              <span>{forceDelete ? 'Xóa Vĩnh Viễn' : 'Xác nhận xóa'}</span>
+              <>
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>
+                  {forceDelete
+                    ? `Xóa vĩnh viễn${serviceCount > 0 ? ` (${serviceCount} DV)` : ''}`
+                    : 'Chuyển sang tạm ngưng'}
+                </span>
+              </>
             )}
           </button>
         </div>

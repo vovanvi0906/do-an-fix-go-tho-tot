@@ -73,16 +73,17 @@ export default function CustomerProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView nativeID="profile-screen-container" style={styles.safeArea}>
       <StatusBar style="dark" />
       <ScrollView
+        nativeID="profile-scroll-container"
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         {/* ═════════════════════════════════════════════════════════════════════
             PHẦN 1: HEADER AVATAR & THÔNG TIN NGƯỜI DÙNG (Figma FixGo_Home)
            ═════════════════════════════════════════════════════════════════════ */}
-        <View style={styles.headerProfileSection}>
+        <View nativeID="profile-header-card" style={styles.headerProfileSection}>
           <View style={styles.avatarOuterWrapper}>
             <View style={styles.avatarCircle}>
               {avatarUrl ? (
@@ -100,9 +101,10 @@ export default function CustomerProfileScreen() {
         {/* ═════════════════════════════════════════════════════════════════════
             PHẦN 2: DANH SÁCH MENU TÙY CHỌN (Figma Account - Customer Menu)
            ═════════════════════════════════════════════════════════════════════ */}
-        <View style={styles.menuContainer}>
+        <View nativeID="profile-menu-container" style={styles.menuContainer}>
           {/* Menu Item 1: Chỉnh sửa thông tin */}
           <TouchableOpacity
+            nativeID="btn-profile-edit"
             style={styles.menuItem}
             activeOpacity={0.7}
             onPress={() => router.push('/(user)/profile/edit')}
@@ -120,6 +122,7 @@ export default function CustomerProfileScreen() {
 
           {/* Menu Item 2: Ví FixGo */}
           <TouchableOpacity
+            nativeID="btn-profile-wallet"
             style={styles.menuItem}
             activeOpacity={0.7}
             onPress={() => router.push('/(user)/profile/wallet')}
@@ -137,6 +140,7 @@ export default function CustomerProfileScreen() {
 
           {/* Menu Item 3: Mã giảm giá */}
           <TouchableOpacity
+            nativeID="btn-profile-vouchers"
             style={styles.menuItem}
             activeOpacity={0.7}
             onPress={() => router.push('/(user)/profile/vouchers')}
@@ -154,6 +158,7 @@ export default function CustomerProfileScreen() {
 
           {/* Menu Item 4: Đăng xuất */}
           <TouchableOpacity
+            nativeID="btn-profile-open-logout"
             style={styles.menuItem}
             activeOpacity={0.7}
             onPress={() => setShowLogoutModal(true)}
@@ -179,11 +184,13 @@ export default function CustomerProfileScreen() {
         onRequestClose={() => setShowLogoutModal(false)}
       >
         <TouchableOpacity
+          nativeID="modal-logout-overlay"
           style={styles.modalOverlay}
           activeOpacity={1}
           onPress={() => setShowLogoutModal(false)}
         >
           <TouchableOpacity
+            nativeID="modal-logout-card"
             style={styles.modalCard}
             activeOpacity={1}
             onPress={(e) => {
@@ -201,8 +208,9 @@ export default function CustomerProfileScreen() {
               Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng FIXGO không?
             </Text>
 
-            <View style={styles.modalActionRow}>
+            <View nativeID="modal-logout-actions" style={styles.modalActionRow}>
               <TouchableOpacity
+                nativeID="btn-cancel-logout"
                 style={styles.cancelBtn}
                 onPress={() => setShowLogoutModal(false)}
                 activeOpacity={0.7}
@@ -211,6 +219,7 @@ export default function CustomerProfileScreen() {
               </TouchableOpacity>
 
               <TouchableOpacity
+                nativeID="btn-confirm-logout"
                 style={styles.confirmLogoutBtn}
                 onPress={handleLogout}
                 activeOpacity={0.8}

@@ -7,12 +7,14 @@ import {
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../infrastructure/database/prisma.service';
+import { AdminGateway } from './admin.gateway';
 
 @Injectable()
-@Dependencies(PrismaService)
+@Dependencies(PrismaService, AdminGateway)
 export class AdminService {
-  constructor(prisma) {
+  constructor(prisma, adminGateway) {
     this.prisma = prisma;
+    this.adminGateway = adminGateway;
   }
 
   // ==========================================
@@ -195,7 +197,13 @@ export class AdminService {
       },
     });
 
-    return this._formatUserResponse(user);
+    const formatted = this._formatUserResponse(user);
+    try {
+      this.adminGateway?.emitUserCreated(formatted);
+    } catch (e) {
+      // Ignore socket emit error
+    }
+    return formatted;
   }
 
   async updateUser(id, dto) {
@@ -303,7 +311,13 @@ export class AdminService {
       },
     });
 
-    return this._formatUserResponse(updatedUser);
+    const formatted = this._formatUserResponse(updatedUser);
+    try {
+      this.adminGateway?.emitUserUpdated(formatted);
+    } catch (e) {
+      // Ignore socket emit error
+    }
+    return formatted;
   }
 
   async deleteUser(id, currentUserId) {
@@ -423,6 +437,12 @@ export class AdminService {
       });
     });
 
+    try {
+      this.adminGateway?.emitUserDeleted(id);
+    } catch (e) {
+      // Ignore socket emit error
+    }
+
     return {
       success: true,
       message: 'Xóa người dùng thành công',
@@ -436,7 +456,7 @@ export class AdminService {
 
   async createCategory(dto) {
     const { name, description, iconUrl, isActive } = dto;
-    return this.prisma.serviceCategory.create({
+    const category = await this.prisma.serviceCategory.create({
       data: {
         name,
         description: description || null,
@@ -444,6 +464,12 @@ export class AdminService {
         isActive: isActive !== undefined ? isActive : true,
       },
     });
+
+    try {
+      this.adminGateway?.emitCategoryUpdated('create', category);
+    } catch (e) {}
+
+    return category;
   }
 
   async updateCategory(id, dto) {
@@ -456,7 +482,7 @@ export class AdminService {
     }
 
     const { name, description, iconUrl, isActive } = dto;
-    return this.prisma.serviceCategory.update({
+    const updated = await this.prisma.serviceCategory.update({
       where: { id },
       data: {
         ...(name !== undefined && { name }),
@@ -465,6 +491,12 @@ export class AdminService {
         ...(isActive !== undefined && { isActive }),
       },
     });
+
+    try {
+      this.adminGateway?.emitCategoryUpdated('update', updated);
+    } catch (e) {}
+
+    return updated;
   }
 
   // ==========================================
@@ -593,11 +625,21 @@ export class AdminService {
       },
     });
 
-    return {
+    const res = {
       success: true,
       message: 'Phê duyệt hồ sơ thợ thành công',
       worker: updatedWorker,
     };
+    try {
+      this.adminGateway?.emitUserUpdated({
+        id: updatedWorker.userId,
+        approvalStatus: 'APPROVED',
+        workerProfile: updatedWorker,
+      });
+    } catch (e) {
+      // Ignore socket emit error
+    }
+    return res;
   }
 
   async rejectWorker(id, reason) {
@@ -629,12 +671,22 @@ export class AdminService {
       },
     });
 
-    return {
+    const res = {
       success: true,
       message: 'Từ chối hồ sơ thợ thành công',
       reason: reason || 'Hồ sơ chưa đạt tiêu chuẩn phê duyệt',
       worker: updatedWorker,
     };
+    try {
+      this.adminGateway?.emitUserUpdated({
+        id: updatedWorker.userId,
+        approvalStatus: 'REJECTED',
+        workerProfile: updatedWorker,
+      });
+    } catch (e) {
+      // Ignore socket emit error
+    }
+    return res;
   }
 
   async deleteWorker(id, currentUserId) {
@@ -1088,6 +1140,10 @@ export class AdminService {
       },
     });
 
+    try {
+      this.adminGateway?.emitCategoryUpdated('toggle', updated);
+    } catch (e) {}
+
     return {
       success: true,
       message: `Đã ${updated.isActive ? 'kích hoạt' : 'tạm ngưng'} danh mục "${updated.name}"`,
@@ -1111,6 +1167,10 @@ export class AdminService {
       throw new NotFoundException('Không tìm thấy danh mục để xóa');
     }
 
+    try {
+      this.adminGateway?.emitCategoryUpdated('delete', { id });
+    } catch (e) {}
+
     const hasServices = (existing._count?.services || 0) > 0;
 
     // 1. Force Delete: Xóa triệt để các dịch vụ trực thuộc rồi xóa danh mục
@@ -1123,6 +1183,36 @@ export class AdminService {
         for (const s of services) {
           await this.deleteService(s.id, true);
         }
+      }
+
+      // 1.1 Gỡ bỏ liên kết aiSuggestedCategoryId nếu có đơn hàng tham chiếu
+      await this.prisma.order.updateMany({
+        where: { aiSuggestedCategoryId: id },
+        data: { aiSuggestedCategoryId: null },
+      });
+
+      // 1.2 Xóa các đơn hàng trực tiếp tham chiếu categoryId này nếu có
+      const directOrders = await this.prisma.order.findMany({
+        where: { categoryId: id },
+        select: { id: true },
+      });
+      if (directOrders.length > 0) {
+        const directOrderIds = directOrders.map((o) => o.id);
+        await this.prisma.orderStatusHistory.deleteMany({
+          where: { orderId: { in: directOrderIds } },
+        });
+        await this.prisma.orderImage.deleteMany({
+          where: { orderId: { in: directOrderIds } },
+        });
+        await this.prisma.aIAnalysis.deleteMany({
+          where: { orderId: { in: directOrderIds } },
+        });
+        await this.prisma.faceVerification.deleteMany({
+          where: { orderId: { in: directOrderIds } },
+        });
+        await this.prisma.order.deleteMany({
+          where: { id: { in: directOrderIds } },
+        });
       }
 
       await this.prisma.serviceCategory.delete({
@@ -1267,6 +1357,10 @@ export class AdminService {
       },
     });
 
+    try {
+      this.adminGateway?.emitServiceUpdated('create', newService);
+    } catch (e) {}
+
     return {
       success: true,
       message: 'Tạo dịch vụ mới thành công',
@@ -1301,6 +1395,10 @@ export class AdminService {
       },
     });
 
+    try {
+      this.adminGateway?.emitServiceUpdated('update', updated);
+    } catch (e) {}
+
     return {
       success: true,
       message: 'Cập nhật dịch vụ thành công',
@@ -1324,6 +1422,10 @@ export class AdminService {
       },
     });
 
+    try {
+      this.adminGateway?.emitServiceUpdated('toggle', updated);
+    } catch (e) {}
+
     return {
       success: true,
       message: `Đã ${updated.isActive ? 'kích hoạt' : 'tạm ngưng'} dịch vụ "${updated.name}"`,
@@ -1333,6 +1435,10 @@ export class AdminService {
 
   async deleteService(id, force = false) {
     const isForce = force === true || force === 'true';
+
+    try {
+      this.adminGateway?.emitServiceUpdated('delete', { id });
+    } catch (e) {}
 
     const existing = await this.prisma.service.findUnique({
       where: { id },

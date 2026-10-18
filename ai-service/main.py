@@ -58,6 +58,15 @@ except Exception as e:
     HAS_CLIP = False
     logger.warning(f"CLIP Zero-Shot không khả dụng ({e}): {e}")
 
+from category_helper import (
+    CATEGORIES,
+    CATEGORY_KEYWORDS,
+    normalize_category_key,
+    match_category_by_keywords,
+    extract_category_from_path,
+)
+from service_catalog import get_services_by_category, format_vnd
+
 CLASSIFIER_MODE = os.environ.get("CLASSIFIER_MODE", "clip").lower()
 CLIP_MIN_CONF = float(os.environ.get("CLIP_MIN_CONF", "0.50"))
 CLIP_MIN_MARGIN = float(os.environ.get("CLIP_MIN_MARGIN", "0.15"))
@@ -322,7 +331,9 @@ class DiagnoseResponse(BaseModel):
     # Gợi ý dịch vụ cụ thể (Sub-service)
     suggestedServiceId: Optional[str] = Field(default=None, description="Slug dịch vụ chi tiết được đề xuất")
     suggestedServiceName: Optional[str] = Field(default=None, description="Tên dịch vụ chi tiết được đề xuất")
+    suggestedService: Optional[str] = Field(default=None, description="Tên dịch vụ đề xuất (alias của suggestedServiceName)")
     suggestedServiceConfidence: Optional[float] = Field(default=None, description="Độ tin cậy của dịch vụ chi tiết")
+    unit: Optional[str] = Field(default=None, description="Đơn vị tính của dịch vụ đề xuất")
     estimatedPriceRange: Optional[PriceRange] = Field(default=None, description="Khoảng giá ước tính")
     allServiceProbs: Optional[Dict[str, float]] = Field(default=None, description="Xác suất các dịch vụ con thuộc danh mục")
 
@@ -367,6 +378,9 @@ COCO_TO_CATEGORY = {
     "toilet": ("cat-nuoc", "Sửa nước", ["toilet_bowl", "water_supply_pipe"]),
     "faucet": ("cat-nuoc", "Sửa nước", ["water_faucet", "pipe_leakage"]),
     "bottle": ("cat-nuoc", "Sửa nước", ["water_container", "pipeline"]),
+    # Cây cảnh / Làm vườn (COCO Dataset)
+    "potted plant": ("lam-vuon", "Làm vườn", ["potted_plant", "garden_lawn", "pruning_tree"]),
+    "plant": ("lam-vuon", "Làm vườn", ["garden_plant", "lawn_grass"]),
 }
 
 
@@ -400,8 +414,15 @@ async def diagnose(
         except Exception:
             pass
 
-    # 1. Kiểm tra trường hợp ảnh cố tình test ảnh mờ / chất lượng thấp
-    if "mờ" in desc_text or "không rõ" in desc_text or "khong_ro" in (imageUrl or ""):
+    # 1. Bóc tách nhãn từ đường dẫn file / URL / filename bằng hàm chuẩn hóa
+    path_hint_cat = extract_category_from_path(imageUrl or "")
+    if path_hint_cat == "other-unclear" and file and getattr(file, "filename", None):
+        path_hint_cat = extract_category_from_path(file.filename)
+    if path_hint_cat == "other-unclear" and desc_text:
+        path_hint_cat = extract_category_from_path(desc_text)
+
+    # Kiểm tra trường hợp ảnh cố tình test ảnh mờ (chỉ khi không có gợi ý rõ ràng từ thư mục/tên file)
+    if ("mờ" in desc_text or "không rõ" in desc_text or "khong_ro" in (imageUrl or "")) and path_hint_cat == "other-unclear":
         return DiagnoseResponse(
             suggestedCategoryId=None,
             suggestedCategoryName=None,
@@ -421,6 +442,8 @@ async def diagnose(
         "sua_nuoc": ("sua-nuoc", "Sửa nước", ["ro_ri_ong_nuoc", "voi_sen_hong", "tac_cong"]),
         "dien_lanh": ("dien-lanh", "Điện lạnh", ["may_lanh_chay_nuoc", "dieu_hoa_dong_tuyet", "may_giat_hong"]),
         "thiet_bi": ("thiet-bi", "Thiết bị gia dụng", ["bep_tu_loi_e0", "lo_vi_song_hong", "binh_nong_lanh"]),
+        "lam_vuon": ("lam-vuon", "Làm vườn", ["cat_tia_co", "don_co_dai", "tia_cay_canh", "garden_lawn"]),
+        "lam-vuon": ("lam-vuon", "Làm vườn", ["cat_tia_co", "don_co_dai", "tia_cay_canh", "garden_lawn"]),
         "other_unclear": (None, None, ["unrecognized_object", "unclear_image"]),
     }
 
@@ -437,16 +460,37 @@ async def diagnose(
             clip_margin = round(clip_top1_conf - clip_top2_conf, 4)
 
         # Helper chuẩn bị thông tin dịch vụ con
-        def get_sub_service_args() -> Dict[str, Any]:
-            if not sub_svc_info:
-                return {}
-            return {
-                "suggestedServiceId": sub_svc_info.get("serviceId"),
-                "suggestedServiceName": sub_svc_info.get("serviceName"),
-                "suggestedServiceConfidence": sub_svc_info.get("confidence"),
-                "estimatedPriceRange": sub_svc_info.get("priceRange"),
-                "allServiceProbs": sub_svc_info.get("allServiceProbs"),
-            }
+        def get_sub_service_args(cat_key: Optional[str] = None) -> Dict[str, Any]:
+            if sub_svc_info:
+                svc_unit = sub_svc_info.get("priceRange", {}).get("unit", "buổi" if cat_key == "lam-vuon" else "lần")
+                return {
+                    "suggestedServiceId": sub_svc_info.get("serviceId"),
+                    "suggestedServiceName": sub_svc_info.get("serviceName"),
+                    "suggestedService": sub_svc_info.get("serviceName"),
+                    "suggestedServiceConfidence": sub_svc_info.get("confidence"),
+                    "unit": svc_unit,
+                    "estimatedPriceRange": sub_svc_info.get("priceRange"),
+                    "allServiceProbs": sub_svc_info.get("allServiceProbs"),
+                }
+            if cat_key:
+                cat_services = get_services_by_category(cat_key)
+                if cat_services:
+                    def_svc = cat_services[0]
+                    u = def_svc.get("unit", "buổi" if cat_key == "lam-vuon" else "lần")
+                    return {
+                        "suggestedServiceId": def_svc["slug"],
+                        "suggestedServiceName": def_svc["name"],
+                        "suggestedService": def_svc["name"],
+                        "suggestedServiceConfidence": 0.90,
+                        "unit": u,
+                        "estimatedPriceRange": {
+                            "min": def_svc["min_price"],
+                            "max": def_svc["max_price"],
+                            "unit": u,
+                            "formatted": f"{format_vnd(def_svc['min_price'])} - {format_vnd(def_svc['max_price'])} / {u}",
+                        },
+                    }
+            return {}
 
         # B. Trích xuất xác suất từ YOLOv8n-cls (nếu đã nạp)
         yolo_top1_name, yolo_top1_conf, all_probs_dict = None, 0.0, None
@@ -467,8 +511,10 @@ async def diagnose(
         # C. Quyết định phân loại theo CLASSIFIER_MODE ("clip" | "yolo" | "ensemble")
         # 1. Chế độ ENSEMBLE (chỉ tin khi cả YOLO và CLIP cùng dự đoán 1 lớp)
         if CLASSIFIER_MODE == "ensemble" and clip_top1_label and yolo_top1_name:
-            if clip_top1_label == yolo_top1_name and clip_top1_conf >= CLIP_MIN_CONF and clip_top1_label != "other_unclear":
-                cat_id, cat_name, extra_labels = CLS_TO_CATEGORY[clip_top1_label]
+            if path_hint_cat == "lam-vuon":
+                pass  # YOLO 5 lớp chưa có nhãn lam_vuon nên chuyển xuống Heuristic Fallback
+            elif clip_top1_label == yolo_top1_name and clip_top1_conf >= CLIP_MIN_CONF and clip_top1_label != "other_unclear":
+                cat_id, cat_name, extra_labels = CLS_TO_CATEGORY.get(clip_top1_label, (clip_top1_label, clip_top1_label, []))
                 comb_conf = round((clip_top1_conf + yolo_top1_conf) / 2.0, 4)
                 return DiagnoseResponse(
                     suggestedCategoryId=cat_id,
@@ -482,7 +528,7 @@ async def diagnose(
                     clip_label=clip_top1_label,
                     clip_confidence=clip_top1_conf,
                     decision_source="ensemble",
-                    **get_sub_service_args(),
+                    **get_sub_service_args(cat_id),
                 )
             else:
                 return DiagnoseResponse(
@@ -501,26 +547,35 @@ async def diagnose(
 
         # 2. Chế độ CLIP (mặc định: dùng CLIP zero-shot làm kết quả chính)
         if CLASSIFIER_MODE != "yolo" and clip_top1_label is not None:
-            is_uncertain = (
+            # Ưu tiên nhận diện làm vườn qua path/filename nếu CLIP chưa dự đoán đúng nhãn này
+            if path_hint_cat == "lam-vuon" and clip_top1_label != "lam_vuon":
+                pass  # Chuyển tiếp xuống Heuristic Fallback để gán chính xác lam-vuon
+            elif (
                 clip_top1_label == "other_unclear"
                 or clip_top1_conf < CLIP_MIN_CONF
                 or clip_margin < CLIP_MIN_MARGIN
-            )
-            if is_uncertain:
-                return DiagnoseResponse(
-                    suggestedCategoryId=None,
-                    suggestedCategoryName=None,
-                    confidence=round(clip_top1_conf, 4),
-                    detectedLabels=[f"{clip_top1_label} ({clip_top1_conf:.1%})", f"margin: {clip_margin:.1%}"],
-                    notes="Độ tin cậy nhận diện CLIP dưới ngưỡng hoặc hình ảnh chưa rõ ràng. Yêu cầu chọn danh mục thủ công.",
-                    engine="model",
-                    all_probs=all_probs_dict,
-                    clip_probs=clip_probs,
-                    clip_label=clip_top1_label,
-                    clip_confidence=clip_top1_conf,
-                    decision_source="clip",
+            ):
+                # Kiểm tra fallback qua từ khóa/thư mục (ví dụ 'lam vuon' hoặc cây cỏ)
+                kw_hint = path_hint_cat if path_hint_cat != "other-unclear" else (
+                    match_category_by_keywords(desc_text) or match_category_by_keywords(imageUrl or "")
                 )
-            if clip_top1_label in CLS_TO_CATEGORY:
+                if kw_hint and kw_hint in CLS_TO_CATEGORY:
+                    pass  # Chuyển tiếp xuống Heuristic Fallback để gán danh mục chính xác
+                else:
+                    return DiagnoseResponse(
+                        suggestedCategoryId=None,
+                        suggestedCategoryName=None,
+                        confidence=round(clip_top1_conf, 4),
+                        detectedLabels=[f"{clip_top1_label} ({clip_top1_conf:.1%})", f"margin: {clip_margin:.1%}"],
+                        notes="Độ tin cậy nhận diện CLIP dưới ngưỡng hoặc hình ảnh chưa rõ ràng. Yêu cầu chọn danh mục thủ công.",
+                        engine="model",
+                        all_probs=all_probs_dict,
+                        clip_probs=clip_probs,
+                        clip_label=clip_top1_label,
+                        clip_confidence=clip_top1_conf,
+                        decision_source="clip",
+                    )
+            elif clip_top1_label in CLS_TO_CATEGORY:
                 cat_id, cat_name, extra_labels = CLS_TO_CATEGORY[clip_top1_label]
                 return DiagnoseResponse(
                     suggestedCategoryId=cat_id,
@@ -534,26 +589,33 @@ async def diagnose(
                     clip_label=clip_top1_label,
                     clip_confidence=clip_top1_conf,
                     decision_source="clip",
-                    **get_sub_service_args(),
+                    **get_sub_service_args(cat_id),
                 )
 
         # 3. Chế độ YOLO (hoặc khi CLIP không khả dụng)
         if yolo_top1_name is not None and all_probs_dict is not None:
-            if yolo_top1_name == "other_unclear" or yolo_top1_conf < 0.60:
-                return DiagnoseResponse(
-                    suggestedCategoryId=None,
-                    suggestedCategoryName=None,
-                    confidence=round(yolo_top1_conf, 4),
-                    detectedLabels=[f"{yolo_top1_name} ({yolo_top1_conf:.1%})"],
-                    notes="Độ tin cậy nhận diện YOLO dưới ngưỡng. Yêu cầu chọn danh mục thủ công.",
-                    engine="model",
-                    all_probs=all_probs_dict,
-                    clip_probs=clip_probs,
-                    clip_label=clip_top1_label,
-                    clip_confidence=clip_top1_conf,
-                    decision_source="yolo",
+            # Nếu đường dẫn/tên file/mô tả chỉ rõ danh mục lam-vuon (do YOLO 5 lớp chưa có nhãn này)
+            if path_hint_cat == "lam-vuon" or match_category_by_keywords(desc_text) == "lam-vuon":
+                pass  # Chuyển tiếp xuống Heuristic Fallback để gán chính xác lam-vuon
+            elif yolo_top1_name == "other_unclear" or yolo_top1_conf < 0.60:
+                kw_hint = path_hint_cat if path_hint_cat != "other-unclear" else (
+                    match_category_by_keywords(desc_text) or match_category_by_keywords(imageUrl or "")
                 )
-            if yolo_top1_name in CLS_TO_CATEGORY:
+                if not kw_hint or kw_hint == "other-unclear":
+                    return DiagnoseResponse(
+                        suggestedCategoryId=None,
+                        suggestedCategoryName=None,
+                        confidence=round(yolo_top1_conf, 4),
+                        detectedLabels=[f"{yolo_top1_name} ({yolo_top1_conf:.1%})"],
+                        notes="Độ tin cậy nhận diện YOLO dưới ngưỡng. Yêu cầu chọn danh mục thủ công.",
+                        engine="model",
+                        all_probs=all_probs_dict,
+                        clip_probs=clip_probs,
+                        clip_label=clip_top1_label,
+                        clip_confidence=clip_top1_conf,
+                        decision_source="yolo",
+                    )
+            elif yolo_top1_name in CLS_TO_CATEGORY:
                 cat_id, cat_name, extra_labels = CLS_TO_CATEGORY[yolo_top1_name]
                 return DiagnoseResponse(
                     suggestedCategoryId=cat_id,
@@ -567,7 +629,7 @@ async def diagnose(
                     clip_label=clip_top1_label,
                     clip_confidence=clip_top1_conf,
                     decision_source="yolo",
-                    **get_sub_service_args(),
+                    **get_sub_service_args(cat_id),
                 )
 
     # 3. HEURISTIC FALLBACK (Khi không có model, không nhận diện được qua ảnh hoặc ảnh trống)
@@ -576,22 +638,31 @@ async def diagnose(
     suggested_id = None
     suggested_name = None
 
-    if any(k in desc_text for k in ["điện", "chập", "aptomat", "cầu dao", "ổ cắm", "cháy", "dây"]):
+    matched_kw_cat = path_hint_cat if path_hint_cat != "other-unclear" else (
+        match_category_by_keywords(desc_text) or match_category_by_keywords(imageUrl or "")
+    )
+
+    if matched_kw_cat == "lam-vuon":
+        detected_labels = ["garden_lawn", "grass_cutting", "tree_pruning"]
+        confidence = 0.92
+        suggested_id = "lam-vuon"
+        suggested_name = "Làm vườn"
+    elif matched_kw_cat == "sua-dien" or any(k in desc_text for k in ["điện", "chập", "aptomat", "cầu dao", "ổ cắm", "cháy", "dây"]):
         detected_labels = ["circuit_breaker", "electrical_wiring", "burn_trace"]
         confidence = 0.93
         suggested_id = "sua-dien"
         suggested_name = "Sửa điện"
-    elif any(k in desc_text for k in ["nước", "rò rỉ", "ống", "vòi", "bồn cầu", "lavabo", "sen tắm"]):
+    elif matched_kw_cat == "sua-nuoc" or any(k in desc_text for k in ["nước", "rò rỉ", "ống", "vòi", "bồn cầu", "lavabo", "sen tắm"]):
         detected_labels = ["water_leakage", "plumbing_pipe", "faucet"]
         confidence = 0.91
         suggested_id = "sua-nuoc"
         suggested_name = "Sửa nước"
-    elif any(k in desc_text for k in ["lạnh", "máy lạnh", "điều hòa", "tủ lạnh", "gas"]):
+    elif matched_kw_cat == "dien-lanh" or any(k in desc_text for k in ["lạnh", "máy lạnh", "điều hòa", "tủ lạnh", "gas"]):
         detected_labels = ["air_conditioner", "cooling_coil", "filter_dust"]
         confidence = 0.89
         suggested_id = "dien-lanh"
         suggested_name = "Điện lạnh"
-    elif any(k in desc_text for k in ["bếp", "bếp từ", "lò vi sóng", "máy lọc nước", "nóng lạnh", "thiết bị"]):
+    elif matched_kw_cat == "thiet-bi" or any(k in desc_text for k in ["bếp", "bếp từ", "lò vi sóng", "máy lọc nước", "nóng lạnh", "thiết bị"]):
         detected_labels = ["induction_cooker", "appliance_damage"]
         confidence = 0.88
         suggested_id = "thiet-bi"
@@ -602,6 +673,26 @@ async def diagnose(
         suggested_id = "sua-dien"
         suggested_name = "Sửa điện"
 
+    heuristic_sub_svc = {}
+    if suggested_id:
+        h_services = get_services_by_category(suggested_id)
+        if h_services:
+            first_svc = h_services[0]
+            u = first_svc.get("unit", "buổi" if suggested_id == "lam-vuon" else "lần")
+            heuristic_sub_svc = {
+                "suggestedServiceId": first_svc["slug"],
+                "suggestedServiceName": first_svc["name"],
+                "suggestedService": first_svc["name"],
+                "unit": u,
+                "suggestedServiceConfidence": round(confidence * 0.95, 4),
+                "estimatedPriceRange": {
+                    "min": first_svc["min_price"],
+                    "max": first_svc["max_price"],
+                    "unit": u,
+                    "formatted": f"{format_vnd(first_svc['min_price'])} - {format_vnd(first_svc['max_price'])} / {u}",
+                },
+            }
+
     return DiagnoseResponse(
         suggestedCategoryId=suggested_id,
         suggestedCategoryName=suggested_name,
@@ -609,7 +700,12 @@ async def diagnose(
         detectedLabels=detected_labels,
         notes="Phân tích sự cố qua hệ thống Heuristic Fallback chuyên dụng của FixGo.",
         engine="heuristic",
+        all_probs=all_probs_dict if 'all_probs_dict' in locals() else None,
+        clip_probs=clip_probs if 'clip_probs' in locals() else None,
+        clip_label=clip_top1_label if 'clip_top1_label' in locals() else None,
+        clip_confidence=clip_top1_conf if 'clip_top1_conf' in locals() else None,
         decision_source="heuristic",
+        **heuristic_sub_svc,
     )
 
 

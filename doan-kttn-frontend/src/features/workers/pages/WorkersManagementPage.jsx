@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { workersAdminService } from '../services/workersAdminService';
+import { socketService } from '../../../services/socket/socketService';
 import RejectWorkerModal from '../components/RejectWorkerModal';
 import WorkerDetailModal from '../components/WorkerDetailModal';
 import ConfirmActionModal from '../components/ConfirmActionModal';
@@ -120,6 +121,89 @@ export default function WorkersManagementPage() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
+  // Real-time WebSocket Subscription for Worker Management
+  useEffect(() => {
+    socketService.connect();
+    socketService.joinAdminRoom();
+
+    const handleWorkerRegistered = (newWorker) => {
+      console.log('⚡ [Realtime Worker] Thợ mới đăng ký:', newWorker);
+      showToast(
+        'success',
+        `⚡ Realtime: Đối tác thợ mới "${newWorker?.fullName || newWorker?.email || 'Mới'}" vừa tạo hồ sơ!`
+      );
+      fetchWorkers();
+    };
+
+    const handleWorkerStatusChanged = (data) => {
+      console.log('⚡ [Realtime Worker] Trạng thái thợ thay đổi:', data);
+      const targetWorkerId = data?.workerId || data?.id;
+      const targetUserId = data?.userId;
+
+      setWorkers((prevWorkers) =>
+        prevWorkers.map((w) => {
+          const isMatch =
+            (targetWorkerId && (w.id === targetWorkerId || w.workerId === targetWorkerId)) ||
+            (targetUserId && (w.userId === targetUserId || w.user?.id === targetUserId)) ||
+            (data?.id && (w.id === data.id || w.userId === data.id));
+
+          if (isMatch) {
+            return {
+              ...w,
+              ...(data.isOnline !== undefined && { isOnline: data.isOnline }),
+              ...(data.approvalStatus !== undefined && { approvalStatus: data.approvalStatus }),
+              ...(data.workerProfile && { ...data.workerProfile }),
+              ...(data.fullName && { fullName: data.fullName }),
+              ...(data.status && {
+                user: {
+                  ...(w.user || {}),
+                  status: data.status,
+                },
+              }),
+            };
+          }
+          return w;
+        })
+      );
+    };
+
+    const handleUserDeleted = ({ id }) => {
+      console.log('⚡ [Realtime Worker] Xóa thợ / user ID:', id);
+      setWorkers((prevWorkers) =>
+        prevWorkers.filter((w) => w.id !== id && w.userId !== id && w.user?.id !== id)
+      );
+      setPagination((prev) => ({
+        ...prev,
+        total: Math.max(0, prev.total - 1),
+      }));
+    };
+
+    // Subscriptions
+    socketService.on('worker.registered', handleWorkerRegistered);
+    socketService.on('worker:registered', handleWorkerRegistered);
+    socketService.on('worker.status_changed', handleWorkerStatusChanged);
+    socketService.on('worker:status_changed', handleWorkerStatusChanged);
+    socketService.on('user.created', (u) => {
+      if (u?.role === 'WORKER') handleWorkerRegistered(u);
+    });
+    socketService.on('user.updated', handleWorkerStatusChanged);
+    socketService.on('user:updated', handleWorkerStatusChanged);
+    socketService.on('user.deleted', handleUserDeleted);
+    socketService.on('user:deleted', handleUserDeleted);
+
+    return () => {
+      socketService.off('worker.registered', handleWorkerRegistered);
+      socketService.off('worker:registered', handleWorkerRegistered);
+      socketService.off('worker.status_changed', handleWorkerStatusChanged);
+      socketService.off('worker:status_changed', handleWorkerStatusChanged);
+      socketService.off('user.created');
+      socketService.off('user.updated', handleWorkerStatusChanged);
+      socketService.off('user:updated', handleWorkerStatusChanged);
+      socketService.off('user.deleted', handleUserDeleted);
+      socketService.off('user:deleted', handleUserDeleted);
+    };
+  }, []);
+
   const handleRefresh = () => {
     setRefreshing(true);
     fetchWorkers();
@@ -213,6 +297,10 @@ export default function WorkersManagementPage() {
             </h1>
             <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/30">
               CHUYÊN BIỆT
+            </span>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Realtime
             </span>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">

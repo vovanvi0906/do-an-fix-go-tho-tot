@@ -9,14 +9,16 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
 import { OtpService } from './otp.service';
+import { AdminGateway } from '../admin/admin.gateway';
 
 @Injectable()
-@Dependencies(UsersService, JwtService, OtpService)
+@Dependencies(UsersService, JwtService, OtpService, AdminGateway)
 export class AuthService {
-  constructor(usersService, jwtService, otpService) {
+  constructor(usersService, jwtService, otpService, adminGateway) {
     this.usersService = usersService;
     this.jwtService = jwtService;
     this.otpService = otpService;
+    this.adminGateway = adminGateway;
   }
 
   async register(data) {
@@ -120,6 +122,18 @@ export class AuthService {
 
     const { passwordHash: _, ...sanitizedUser } = user;
     const token = this.jwtService.sign({ sub: user.id, role: user.role });
+
+    try {
+      this.adminGateway?.emitWorkerRegistered({
+        ...sanitizedUser,
+        fullName: fullName || null,
+        role: 'WORKER',
+        status: 'ACTIVE',
+        approvalStatus: 'DRAFT',
+      });
+    } catch (e) {
+      // Ignore socket emit error
+    }
 
     return {
       message: 'Đăng ký tài khoản thợ thành công',

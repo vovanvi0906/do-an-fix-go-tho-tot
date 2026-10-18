@@ -83,13 +83,14 @@ export default function HomeHeader({
 
   return (
     <LinearGradient
+      nativeID="home-header-container"
       colors={['#0284C7', '#0EA5E9']}
       start={{ x: 0, y: 0 }}
       end={{ x: 0, y: 1 }}
       style={[styles.container, { paddingTop: Math.max(insets.top, 16) }]}
     >
       {/* ── 1. Top Row: Greeting, District Selector & Action Icons ── */}
-      <View style={styles.topRow}>
+      <View nativeID="home-header-top-row" style={styles.topRow}>
         {/* Left: Greeting & District Dropdown */}
         <View style={styles.topLeftGroup}>
           <Text style={styles.greetingText}>
@@ -97,6 +98,7 @@ export default function HomeHeader({
           </Text>
 
           <Pressable
+            nativeID="home-header-btn-district"
             accessible={true}
             accessibilityRole="button"
             accessibilityLabel={`Khu vực hiện tại: ${selectedDistrict}. Chạm để đổi khu vực.`}
@@ -119,6 +121,7 @@ export default function HomeHeader({
         <View style={styles.topRightGroup}>
           {/* Pill Điểm thưởng FixCoins (Nền đen mờ Sky-950, icon vàng hổ phách, chữ trắng) */}
           <Pressable
+            nativeID="home-header-btn-rewards"
             accessible={true}
             accessibilityRole="button"
             accessibilityLabel={`Số dư: ${user?.rewardPoints ?? 0} FixCoins. Chạm để xem thể lệ và đổi voucher.`}
@@ -135,6 +138,7 @@ export default function HomeHeader({
 
           {/* Nút Cứu hộ khẩn cấp tinh tế (Phone Icon đỏ san hô) */}
           <Pressable
+            nativeID="home-header-btn-hotline"
             accessible={true}
             accessibilityRole="button"
             accessibilityLabel={`Gọi cứu hộ khẩn cấp ${HOTLINE_DISPLAY}`}
@@ -150,6 +154,7 @@ export default function HomeHeader({
 
           {/* Chuông thông báo */}
           <Pressable
+            nativeID="home-header-btn-notifications"
             accessible={true}
             accessibilityRole="button"
             accessibilityLabel={
@@ -171,9 +176,10 @@ export default function HomeHeader({
       </View>
 
       {/* ── 2. Search Bar: Input nền trắng phẳng tinh tế (Touch Target 46px) ─ */}
-      <View style={styles.searchContainer}>
+      <View nativeID="home-header-search-bar" style={styles.searchContainer}>
         <Ionicons name="search" size={18} color="#0284C7" style={styles.searchIcon} />
         <TextInput
+          nativeID="input-search-service"
           accessible={true}
           accessibilityLabel="Ô tìm kiếm dịch vụ sửa chữa"
           style={styles.searchInput}
@@ -185,6 +191,7 @@ export default function HomeHeader({
         />
         {searchQuery.length > 0 && (
           <Pressable
+            nativeID="btn-clear-home-search"
             accessible={true}
             accessibilityRole="button"
             accessibilityLabel="Xóa nội dung tìm kiếm"
@@ -199,16 +206,18 @@ export default function HomeHeader({
 
       {/* ── Modal chọn khu vực (District Picker) ─────────────────── */}
       <Modal
+        nativeID="modal-district-picker"
         visible={isDistrictModalOpen}
         transparent
         animationType="fade"
         onRequestClose={() => setIsDistrictModalOpen(false)}
       >
-        <Pressable style={styles.modalOverlay} onPress={() => setIsDistrictModalOpen(false)}>
+        <Pressable nativeID="modal-district-overlay" style={styles.modalOverlay} onPress={() => setIsDistrictModalOpen(false)}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Chọn khu vực phục vụ</Text>
               <Pressable
+                nativeID="btn-close-district-modal"
                 accessible={true}
                 accessibilityRole="button"
                 accessibilityLabel="Đóng cửa sổ chọn khu vực"
@@ -224,10 +233,11 @@ export default function HomeHeader({
               data={DISTRICT_LIST}
               keyExtractor={(item) => item}
               showsVerticalScrollIndicator={false}
-              renderItem={({ item }) => {
+              renderItem={({ item, index }) => {
                 const isSelected = item === selectedDistrict;
                 return (
                   <Pressable
+                    nativeID={`district-item-${index}`}
                     accessible={true}
                     accessibilityRole="button"
                     accessibilityLabel={`Khu vực ${item}${isSelected ? ', Đang được chọn' : ''}`}
@@ -260,19 +270,21 @@ export default function HomeHeader({
 
       {/* ── Modal Thể Lệ & Đổi Thưởng FixCoins ────────────────────── */}
       <Modal
+        nativeID="modal-rewards-info"
         visible={isRewardsModalOpen}
         transparent
         animationType="fade"
         onRequestClose={() => setIsRewardsModalOpen(false)}
       >
-        <Pressable style={styles.modalOverlay} onPress={() => setIsRewardsModalOpen(false)}>
-          <View style={styles.rewardsModalCard}>
+        <Pressable nativeID="modal-rewards-overlay" style={styles.modalOverlay} onPress={() => setIsRewardsModalOpen(false)}>
+          <View nativeID="modal-rewards-card" style={styles.rewardsModalCard}>
             <View style={styles.rewardsModalHeader}>
               <View style={styles.rewardsIconWrap}>
                 <Ionicons name="sparkles" size={20} color="#F59E0B" />
               </View>
               <Text style={styles.rewardsModalTitle}>Ví FixCoins & Ưu Đãi Thành Viên</Text>
               <Pressable
+                nativeID="btn-close-rewards-modal"
                 onPress={() => setIsRewardsModalOpen(false)}
                 hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
               >
@@ -281,7 +293,7 @@ export default function HomeHeader({
             </View>
 
             {/* Số dư hiện tại */}
-            <View style={styles.rewardsBalanceBox}>
+            <View nativeID="rewards-balance-box" style={styles.rewardsBalanceBox}>
               <Text style={styles.balanceLabel}>Số dư FixCoins của bạn</Text>
               <Text style={styles.balanceNumber}>
                 {user?.rewardPoints ?? 0} <Text style={styles.balanceUnit}>xu</Text>
@@ -306,6 +318,7 @@ export default function HomeHeader({
             </View>
 
             <Pressable
+              nativeID="btn-redeem-rewards"
               style={({ pressed }) => [styles.rewardsActionBtn, pressed && styles.pressedEffect]}
               onPress={() => {
                 setIsRewardsModalOpen(false);
