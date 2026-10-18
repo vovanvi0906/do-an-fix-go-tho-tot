@@ -18,6 +18,7 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -38,6 +39,7 @@ import VoucherTickets from '../components/VoucherTickets';
 import CategoryDetailModal, { type SubServiceItem } from '../components/CategoryDetailModal';
 import type { CategoryItem, ServiceItem, WorkerItem } from '../types/home.types';
 import type { AiDiagnosisResponse } from '../../../services/api/aiService';
+import { useAuth } from '../../auth';
 
 /**
  * Component `HomeScreen`
@@ -68,7 +70,34 @@ export default function HomeScreen() {
     refetch,
   } = useHomeData();
 
+  const { user } = useAuth();
+  const hasPhone = typeof user?.phone === 'string' && user.phone.trim().length > 0;
+
+  const checkPhoneBeforeAction = () => {
+    if (!hasPhone) {
+      Alert.alert(
+        'Cần cập nhật số điện thoại',
+        'Vui lòng cập nhật và xác thực số điện thoại để sẵn sàng đặt dịch vụ và liên hệ thợ FixGo.',
+        [
+          {
+            text: 'Cập nhật ngay',
+            onPress: () => {
+              router.push({
+                pathname: '/(auth)/register-customer',
+                params: { isSocialOnboarding: 'true' },
+              });
+            },
+          },
+          { text: 'Để sau', style: 'cancel' },
+        ]
+      );
+      return false;
+    }
+    return true;
+  };
+
   const handleBookService = (service: ServiceItem) => {
+    if (!checkPhoneBeforeAction()) return;
     router.push({
       pathname: '/(user)/booking/create-booking',
       params: {
@@ -82,6 +111,7 @@ export default function HomeScreen() {
   };
 
   const handleSelectWorker = (worker: WorkerItem) => {
+    if (!checkPhoneBeforeAction()) return;
     Alert.alert(
       'Hồ sơ Thợ trực tuyến',
       `Thợ: ${worker.fullName}\nChuyên môn: ${worker.specialty}\nĐánh giá: ⭐ ${worker.rating.toFixed(1)} (${worker.totalReviews} đánh giá)\nĐã hoàn thành: ${worker.completedJobs} đơn\nKhoảng cách: ~${worker.distanceKm} km`,
@@ -89,6 +119,7 @@ export default function HomeScreen() {
         {
           text: 'Đặt lịch thợ này',
           onPress: () => {
+            if (!checkPhoneBeforeAction()) return;
             router.push({
               pathname: '/(user)/booking/create-booking',
               params: {
@@ -111,6 +142,7 @@ export default function HomeScreen() {
     if (cat) {
       // Khi chọn "Dịch vụ khác" -> Chuyển thẳng đến màn đặt dịch vụ, khách tự nhập tiêu đề
       if (cat.slug === 'dich-vu-khac' || cat.id === 'cat-08') {
+        if (!checkPhoneBeforeAction()) return;
         console.log('⚡ [HomeScreen] Chọn Dịch vụ khác -> Chuyển thẳng tới Đặt dịch vụ theo yêu cầu');
         router.push({
           pathname: '/(user)/booking/create-booking',
@@ -140,6 +172,7 @@ export default function HomeScreen() {
 
   const handleSelectSubService = (subService: SubServiceItem) => {
     setIsCategoryModalOpen(false);
+    if (!checkPhoneBeforeAction()) return;
     console.log('⚡ [HomeScreen] Chọn dịch vụ con:', subService);
     const isCustom = subService.categorySlug === 'dich-vu-khac' || subService.id === 'custom-sub';
     router.push({
@@ -161,6 +194,7 @@ export default function HomeScreen() {
   };
 
   const handleConfirmAiBooking = (diagnosis: AiDiagnosisResponse) => {
+    if (!checkPhoneBeforeAction()) return;
     router.push({
       pathname: '/(user)/booking/create-booking',
       params: {
@@ -221,6 +255,36 @@ export default function HomeScreen() {
           {/* Error State if any */}
           {isError && (
             <ErrorState message={errorMessage || undefined} onRetry={refetch} />
+          )}
+
+          {/* ── Banner Nhắc nhở cập nhật số điện thoại (Khi chưa có SĐT) ── */}
+          {!hasPhone && (
+            <View style={styles.phoneWarningBanner}>
+              <View style={styles.phoneWarningLeft}>
+                <View style={styles.phoneWarningIconBox}>
+                  <Ionicons name="call" size={16} color="#D97706" />
+                </View>
+                <View style={styles.phoneWarningTextBox}>
+                  <Text style={styles.phoneWarningTitle}>Chưa cập nhật số điện thoại</Text>
+                  <Text style={styles.phoneWarningSubtitle} numberOfLines={1}>
+                    Cập nhật số điện thoại để sẵn sàng đặt dịch vụ FixGo
+                  </Text>
+                </View>
+              </View>
+              <TouchableOpacity
+                style={styles.phoneWarningBtn}
+                activeOpacity={0.8}
+                onPress={() => {
+                  router.push({
+                    pathname: '/(auth)/register-customer',
+                    params: { isSocialOnboarding: 'true' },
+                  });
+                }}
+              >
+                <Text style={styles.phoneWarningBtnText}>Cập nhật ngay</Text>
+                <Ionicons name="chevron-forward" size={13} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
           )}
 
           {/* ── 2. Micro Trust Line (1 dòng tinh tế, chữ xám nhẹ #64748B) ── */}
@@ -326,5 +390,60 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#64748B',
     letterSpacing: 0.1,
+  },
+
+  // Phone Warning Banner
+  phoneWarningBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#FFFBEB',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    gap: 8,
+  },
+  phoneWarningLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+  },
+  phoneWarningIconBox: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: '#FEF3C7',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  phoneWarningTextBox: {
+    flex: 1,
+  },
+  phoneWarningTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#92400E',
+  },
+  phoneWarningSubtitle: {
+    fontSize: 11.5,
+    color: '#B45309',
+    marginTop: 2,
+  },
+  phoneWarningBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: '#D97706',
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: 8,
+  },
+  phoneWarningBtnText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
 });

@@ -81,10 +81,10 @@ export default function BookingFlowScreen() {
     params.address || '606/20, Hiệp Bình, Hồ Chí Minh'
   );
   const [customerPhone, setCustomerPhone] = useState(
-    user?.phone || '0366192248'
+    user?.phone || user?.customerProfile?.phone || ''
   );
   const [customerName, setCustomerName] = useState(
-    user?.name || user?.fullName || 'Lữ Hồng Phúc Đại'
+    user?.fullName || user?.name || user?.customerProfile?.fullName || 'Khách hàng'
   );
   const [noteText, setNoteText] = useState(
     params.note || ''

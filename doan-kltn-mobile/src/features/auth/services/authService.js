@@ -101,4 +101,118 @@ export const authService = {
     console.log('✅ [AuthService] Đặt lại mật khẩu thành công');
     return response;
   },
+
+  /**
+   * Đăng nhập hoặc đăng ký nhanh bằng Google
+   * @param {string} idToken - Google JWT ID Token từ Google OAuth
+   */
+  async googleLogin(idToken) {
+    console.log('🌐 [AuthService] Gửi yêu cầu đăng nhập bằng Google...');
+    const response = await apiClient.post('/auth/google-login', { idToken });
+
+    // Hỗ trợ cả chuẩn response { success, data: { accessToken, user } } lẫn flat { accessToken, user }
+    const accessToken = response?.data?.accessToken || response?.accessToken;
+    const user = response?.data?.user || response?.user;
+
+    if (accessToken && user) {
+      console.log('💾 [AuthService] Lưu token và thông tin người dùng Google...');
+      await tokenStorage.saveToken(accessToken);
+      await tokenStorage.saveUser(user);
+      console.log('🎉 [AuthService] Đăng nhập Google thành công, User Role:', user.role);
+    }
+
+    return response;
+  },
+
+  /**
+   * Đăng nhập hoặc đăng ký bằng tài khoản Google thông qua Firebase Authentication
+   * @param {string} idToken - Firebase JWT ID Token
+   */
+  async firebaseGoogleLogin(idToken) {
+    console.log('🔥 [AuthService] Gửi yêu cầu đăng nhập bằng Firebase Google...');
+    const response = await apiClient.post('/auth/firebase-google-login', { idToken });
+
+    const accessToken = response?.data?.accessToken || response?.accessToken;
+    const user = response?.data?.user || response?.user;
+
+    if (accessToken && user) {
+      console.log('💾 [AuthService] Lưu token và thông tin người dùng Firebase Google...');
+      await tokenStorage.saveToken(accessToken);
+      await tokenStorage.saveUser(user);
+      console.log('🎉 [AuthService] Đăng nhập Firebase Google thành công, User Role:', user.role);
+    }
+
+    return response;
+  },
+
+  /**
+   * Tải ảnh đại diện lên Cloudinary qua Backend
+   * @param {string} imageUri - Đường dẫn cục bộ của ảnh từ ImagePicker
+   */
+  async uploadAvatar(imageUri) {
+    console.log('📸 [AuthService] Bắt đầu upload avatar lên Cloudinary...');
+    const filename = imageUri.split('/').pop() || 'avatar.jpg';
+    const match = /\.(\w+)$/.exec(filename);
+    const type = match ? `image/${match[1]}` : 'image/jpeg';
+
+    const formData = new FormData();
+    formData.append('avatar', {
+      uri: imageUri,
+      name: filename,
+      type,
+    });
+
+    // Đảm bảo Token xác thực luôn có mặt trong header của request FormData
+    const token = await tokenStorage.getToken();
+    const headers = {
+      'Content-Type': 'multipart/form-data',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+      apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await apiClient.post('/users/upload-avatar', formData, {
+      headers,
+    });
+
+    const newAvatarUrl = response?.avatarUrl || response?.data?.avatarUrl;
+    if (newAvatarUrl) {
+      const currentUser = await tokenStorage.getUser();
+      if (currentUser) {
+        currentUser.avatarUrl = newAvatarUrl;
+        await tokenStorage.saveUser(currentUser);
+      }
+    }
+
+    return response;
+  },
+
+  /**
+   * Cập nhật số điện thoại cho tài khoản (Phone Onboarding)
+   * @param {string} phone - Số điện thoại 10 số VN
+   */
+  async updatePhone(phone) {
+    console.log('📱 [AuthService] Cập nhật số điện thoại:', phone);
+    const response = await apiClient.patch('/users/update-phone', { phone });
+    const updatedUser = response?.user || response?.data?.user;
+    if (updatedUser) {
+      await tokenStorage.saveUser(updatedUser);
+    }
+    return response;
+  },
+
+  /**
+   * Lấy thông tin cá nhân mới nhất từ máy chủ Database (/api/users/profile)
+   */
+  async getProfile() {
+    console.log('🌐 [AuthService] Lấy thông tin user mới nhất từ /users/profile...');
+    const response = await apiClient.get('/users/profile');
+    const profile = response?.data || response;
+    if (profile && profile.id) {
+      await tokenStorage.saveUser(profile);
+    }
+    return profile;
+  },
 };
+

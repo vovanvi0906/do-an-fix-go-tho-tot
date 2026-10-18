@@ -7,6 +7,8 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { OAuth2Client } from 'google-auth-library';
+import { getFirebaseAdmin, getFirebaseAuth } from '../../config/firebase.config';
 import { UsersService } from '../users/users.service';
 import { OtpService } from './otp.service';
 
@@ -17,6 +19,7 @@ export class AuthService {
     this.usersService = usersService;
     this.jwtService = jwtService;
     this.otpService = otpService;
+    this.googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || '');
   }
 
   async register(data) {
@@ -28,7 +31,7 @@ export class AuthService {
   }
 
   async registerCustomer(data) {
-    const { email, password, phone, fullName, avatarUrl } = data;
+    const { email, password, phone, fullName, firstName, lastName, avatarUrl } = data;
 
     const existingEmail = await this.usersService.findByEmail(email);
     if (existingEmail) {
@@ -45,17 +48,22 @@ export class AuthService {
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
+    const resolvedFullName =
+      fullName ||
+      [lastName, firstName].filter(Boolean).join(' ').trim() ||
+      null;
 
     const user = await this.usersService.create({
       email,
       passwordHash,
       phone: phone || null,
+      name: resolvedFullName,
       role: 'CUSTOMER',
       status: 'ACTIVE',
-      isEmailVerified: true,
+      isEmailVerified: false,
       customerProfile: {
         create: {
-          fullName: fullName || null,
+          fullName: resolvedFullName,
           avatarUrl: avatarUrl || null,
         },
       },
@@ -213,6 +221,218 @@ export class AuthService {
     return {
       message:
         'Đặt lại mật khẩu thành công. Vui lòng đăng nhập với mật khẩu mới.',
+    };
+  }
+
+  /**
+   * Đăng nhập / Đăng ký tự động bằng tài khoản Google (Google Sign-In)
+   * @param {string} idToken - Google JWT idToken gửi từ client
+   */
+  async googleLogin(idToken) {
+    if (!idToken) {
+      throw new BadRequestException('Vui lòng cung cấp idToken của Google');
+    }
+
+    console.log('🌐 [Backend AuthService] Bắt đầu xác thực Google idToken...');
+
+    let payload;
+    try {
+      const allowedAudiences = [
+        process.env.GOOGLE_CLIENT_ID,
+        process.env.GOOGLE_FIREBASE_WEB_CLIENT_ID,
+        process.env.GOOGLE_ANDROID_CLIENT_ID,
+      ].filter(Boolean);
+      const audience = allowedAudiences.length > 0 ? allowedAudiences : undefined;
+      const ticket = await this.googleClient.verifyIdToken({
+        idToken,
+        audience,
+      });
+      payload = ticket.getPayload();
+    } catch (err) {
+      console.error('❌ [Backend AuthService] Xác thực Google idToken thất bại:', err.message);
+      throw new UnauthorizedException('Mã xác thực Google (idToken) không hợp lệ hoặc đã hết hạn');
+    }
+
+    if (!payload || !payload.email) {
+      throw new BadRequestException('Không thể trích xuất địa chỉ email từ tài khoản Google này');
+    }
+
+    const { email, sub: googleId, name, picture } = payload;
+    console.log('👤 [Backend AuthService] Thông tin Google user:', {
+      email,
+      name,
+      googleId,
+    });
+
+    // 1. Tìm user theo googleId
+    let user = await this.usersService.findByGoogleId(googleId);
+
+    // 2. Nếu chưa có theo googleId -> Tìm theo email
+    if (!user) {
+      user = await this.usersService.findByEmail(email);
+      if (user) {
+        // Tài khoản đã có trong hệ thống -> Liên kết Google ID và cập nhật xác thực email
+        user = await this.usersService.linkGoogleAccount(user.id, googleId, {
+          avatarUrl: user.avatarUrl || picture || null,
+          name: user.name || name || null,
+        });
+        console.log('🔗 [Backend AuthService] Đã liên kết tài khoản Google với email hiện có:', email);
+      }
+    }
+
+    // 3. Nếu chưa từng tồn tại tài khoản -> Tự động tạo mới User với vai trò CUSTOMER
+    if (!user) {
+      console.log('🆕 [Backend AuthService] Tự động tạo tài khoản Customer mới từ Google:', email);
+      const displayName = name || 'Khách hàng FixGo';
+      user = await this.usersService.create({
+        email,
+        name: displayName,
+        avatarUrl: picture || null,
+        role: 'CUSTOMER',
+        status: 'ACTIVE',
+        isEmailVerified: true,
+        googleId,
+        customerProfile: {
+          create: {
+            fullName: displayName,
+            avatarUrl: picture || null,
+          },
+        },
+      });
+    }
+
+    if (user.status === 'BLOCKED') {
+      throw new ForbiddenException('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin');
+    }
+
+    // 4. Sinh Access Token và Refresh Token chuẩn JWT
+    const accessToken = this.jwtService.sign(
+      { sub: user.id, role: user.role, email: user.email },
+      { expiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m' },
+    );
+
+    const refreshToken = this.jwtService.sign(
+      { sub: user.id, role: user.role, type: 'refresh' },
+      { expiresIn: '7d' },
+    );
+
+    const { passwordHash: _, ...sanitizedUser } = user;
+
+    console.log('🎉 [Backend AuthService] Đăng nhập Google thành công cho user:', user.email);
+
+    return {
+      success: true,
+      statusCode: 200,
+      message: 'Đăng nhập bằng Google thành công',
+      data: {
+        accessToken,
+        refreshToken,
+        requirePhoneUpdate: !user.phone,
+        user: sanitizedUser,
+      },
+    };
+  }
+
+  /**
+   * Đăng nhập / Đăng ký tự động bằng tài khoản Google thông qua Firebase Authentication
+   * @param {string} idToken - Firebase ID Token từ Mobile Client
+   */
+  async firebaseGoogleLogin(idToken) {
+    if (!idToken) {
+      throw new BadRequestException('Vui lòng cung cấp idToken của Firebase');
+    }
+
+    console.log('🔥 [Backend AuthService] Bắt đầu xác thực Firebase idToken...');
+    const auth = getFirebaseAuth();
+    let decodedToken;
+    try {
+      decodedToken = await auth.verifyIdToken(idToken);
+    } catch (err) {
+      console.error('❌ [Backend AuthService] Xác thực Firebase idToken thất bại:', err.message);
+      throw new UnauthorizedException(
+        'Mã xác thực Firebase (idToken) không hợp lệ hoặc đã hết hạn: ' + err.message,
+      );
+    }
+
+    const { email, uid, name, picture } = decodedToken;
+    if (!email) {
+      throw new BadRequestException(
+        'Không thể trích xuất địa chỉ email từ tài khoản Firebase này',
+      );
+    }
+
+    console.log('👤 [Backend AuthService] Thông tin Firebase user:', {
+      email,
+      name,
+      uid,
+    });
+
+    // 1. Tìm user theo googleId (hoặc uid liên kết)
+    let user = await this.usersService.findByGoogleId(uid);
+
+    // 2. Nếu chưa có -> Tìm theo email để liên kết
+    if (!user) {
+      user = await this.usersService.findByEmail(email);
+      if (user) {
+        user = await this.usersService.linkGoogleAccount(user.id, uid, {
+          avatarUrl: user.avatarUrl || picture || null,
+          name: user.name || name || null,
+        });
+        console.log('🔗 [Backend AuthService] Đã liên kết tài khoản Firebase với email hiện có:', email);
+      }
+    }
+
+    // 3. Nếu chưa từng tồn tại tài khoản -> Tự động tạo mới User với vai trò CUSTOMER
+    if (!user) {
+      console.log('🆕 [Backend AuthService] Tự động tạo tài khoản Customer mới từ Firebase Google:', email);
+      const displayName = name || 'Khách hàng FixGo';
+      user = await this.usersService.create({
+        email,
+        name: displayName,
+        avatarUrl: picture || null,
+        role: 'CUSTOMER',
+        status: 'ACTIVE',
+        isEmailVerified: true,
+        googleId: uid,
+        customerProfile: {
+          create: {
+            fullName: displayName,
+            avatarUrl: picture || null,
+          },
+        },
+      });
+    }
+
+    if (user.status === 'BLOCKED') {
+      throw new ForbiddenException('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin');
+    }
+
+    // 4. Sinh Access Token và Refresh Token chuẩn JWT
+    const accessToken = this.jwtService.sign(
+      { sub: user.id, role: user.role, email: user.email },
+      { expiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m' },
+    );
+
+    const refreshToken = this.jwtService.sign(
+      { sub: user.id, role: user.role, type: 'refresh' },
+      { expiresIn: '7d' },
+    );
+
+    const { passwordHash: _, ...sanitizedUser } = user;
+
+    console.log('🎉 [Backend AuthService] Đăng nhập Firebase Google thành công cho user:', user.email);
+
+    return {
+      success: true,
+      statusCode: 200,
+      message: 'Đăng nhập bằng Google (Firebase) thành công',
+      data: {
+        accessToken,
+        refreshToken,
+        expiresIn: 86400,
+        requirePhoneUpdate: !user.phone,
+        user: sanitizedUser,
+      },
     };
   }
 }

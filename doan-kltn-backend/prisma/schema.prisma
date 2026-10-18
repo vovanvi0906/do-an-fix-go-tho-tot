@@ -85,6 +85,7 @@ model User {
   avatarUrl    String?
   status          UserStatus @default(ACTIVE)
   isEmailVerified Boolean    @default(false) @map("is_email_verified")
+  googleId        String?    @unique @map("google_id")
   createdAt       DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 

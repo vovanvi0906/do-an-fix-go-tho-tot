@@ -11,7 +11,7 @@ import {
   ScrollView,
   SafeAreaView,
 } from 'react-native';
-import { useRouter, Link } from 'expo-router';
+import { useRouter, Link, useLocalSearchParams } from 'expo-router';
 import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import {
@@ -51,7 +51,10 @@ const VietnamFlag = () => (
 
 export default function RegisterCustomerScreen() {
   const router = useRouter();
-  const { registerCustomer } = useAuth();
+  const params = useLocalSearchParams();
+  const isSocialOnboarding = params?.isSocialOnboarding === 'true';
+  const role = params?.role;
+  const { registerCustomer, updatePhone, user } = useAuth();
 
   // ─── Font loading (Inter) ───────────────────────────────────────────────────
   const [fontsLoaded] = useFonts({
@@ -62,13 +65,11 @@ export default function RegisterCustomerScreen() {
   });
 
   /**
-   * Step Flow:
+   * Step Flow (Đơn giản hóa):
    * Step 1: Nhập Số điện thoại (Gửi Phone OTP)
    * Step 2: Nhập & Xác thực OTP Số điện thoại
    * Step 3: Tạo Mật khẩu
-   * Step 4: Nhập Họ, Tên & Email (Gửi Email OTP)
-   * Step 5: Nhập & Xác thực OTP Email
-   * Step 6: Thành công / Đang chuyển hướng
+   * Step 4: Nhập Họ, Tên & Email -> Đăng ký tài khoản trực tiếp
    */
   const [step, setStep] = useState(1);
 
@@ -98,12 +99,6 @@ export default function RegisterCustomerScreen() {
   const [email, setEmail] = useState('');
   const [isEmailFocused, setIsEmailFocused] = useState(false);
 
-  // Email OTP State
-  const [emailOtp, setEmailOtp] = useState(['', '', '', '', '', '']);
-  const [focusedEmailOtpIndex, setFocusedEmailOtpIndex] = useState(null);
-  const [emailCountdown, setEmailCountdown] = useState(60);
-  const emailOtpInputs = useRef([]);
-
   // UI / Error State
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -117,15 +112,6 @@ export default function RegisterCustomerScreen() {
     }
     return () => clearInterval(timer);
   }, [step, countdown]);
-
-  // Timer countdown cho Email OTP (Step 5)
-  useEffect(() => {
-    let timer;
-    if (step === 5 && emailCountdown > 0) {
-      timer = setInterval(() => setEmailCountdown((prev) => prev - 1), 1000);
-    }
-    return () => clearInterval(timer);
-  }, [step, emailCountdown]);
 
   // ─── Password Validation Rules ──────────────────────────────────────────────
   const hasMinLength = password.length >= 8;
@@ -204,6 +190,23 @@ export default function RegisterCustomerScreen() {
       const cleanPhone = phone.trim().replace(/\s/g, '');
       console.log('📱 [RegisterCustomer] Xác thực Phone OTP:', { phone: cleanPhone, code: fullOtp });
       await otpService.verifyPhoneOtp(cleanPhone, fullOtp, 'register');
+
+      if (isSocialOnboarding) {
+        console.log('🔗 [RegisterCustomer] Liên kết số điện thoại cho tài khoản hiện tại:', cleanPhone);
+        await updatePhone(cleanPhone);
+        if (params?.returnTo) {
+          router.replace(params.returnTo);
+          return;
+        }
+        const targetRole = (role || user?.role || 'CUSTOMER').toUpperCase();
+        if (targetRole === 'WORKER') {
+          router.replace('/(worker)/(tabs)');
+        } else {
+          router.replace('/(user)/(tabs)');
+        }
+        return;
+      }
+
       setStep(3);
     } catch (err) {
       console.error('❌ [RegisterCustomer] Verify Phone OTP lỗi:', err);
@@ -261,8 +264,8 @@ export default function RegisterCustomerScreen() {
     setStep(4);
   };
 
-  // ─── Step 4: Nhập Họ Tên & Email -> Bắn Email OTP ──────────────────────────
-  const handleSendEmailOtp = async () => {
+  // ─── Step 4: Nhập Họ Tên & Email -> Đăng ký tài khoản trực tiếp ─────────────
+  const handleRegisterSubmit = async () => {
     setErrorMessage('');
     setHasError(false);
 
@@ -289,123 +292,38 @@ export default function RegisterCustomerScreen() {
       return;
     }
 
-    try {
-      setIsLoading(true);
-      console.log('📧 [RegisterCustomer] Gửi Email OTP tới:', cleanEmail);
-      await otpService.sendEmailOtp(cleanEmail);
-      setEmailCountdown(60);
-      setEmailOtp(['', '', '', '', '', '']);
-      setStep(5);
-    } catch (err) {
-      console.error('❌ [RegisterCustomer] Gửi Email OTP lỗi:', err);
-      setHasError(true);
-      setErrorMessage(err.message || 'Không thể gửi mã xác nhận qua Email. Vui lòng thử lại!');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // ─── Step 5: Nhập & Xác thực OTP Email -> Hoàn tất tạo tài khoản ────────────
-  const handleEmailOtpChange = (val, idx) => {
-    const digit = val.replace(/[^0-9]/g, '');
-    const newOtp = [...emailOtp];
-    newOtp[idx] = digit;
-    setEmailOtp(newOtp);
-    if (errorMessage) {
-      setErrorMessage('');
-      setHasError(false);
-    }
-
-    if (digit && idx < 5) {
-      emailOtpInputs.current[idx + 1]?.focus();
-    }
-  };
-
-  const handleEmailOtpKeyPress = (e, idx) => {
-    if (e.nativeEvent.key === 'Backspace' && !emailOtp[idx] && idx > 0) {
-      emailOtpInputs.current[idx - 1]?.focus();
-    }
-  };
-
-  const handleResendEmailOtp = async () => {
-    if (emailCountdown > 0 || isLoading) return;
-    try {
-      setIsLoading(true);
-      setErrorMessage('');
-      setHasError(false);
-      const cleanEmail = email.trim();
-      await otpService.sendEmailOtp(cleanEmail);
-      setEmailOtp(['', '', '', '', '', '']);
-      setEmailCountdown(60);
-    } catch (err) {
-      setHasError(true);
-      setErrorMessage(err.message || 'Gửi lại mã thất bại');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleVerifyEmailAndComplete = async () => {
-    const fullOtp = emailOtp.join('');
-    if (fullOtp.length < 6) {
-      setHasError(true);
-      setErrorMessage('Vui lòng nhập đủ 6 chữ số mã OTP Email');
-      return;
-    }
-
-    const cleanEmail = email.trim();
     const cleanPhone = phone.trim().replace(/\s/g, '');
-    const fullName = `${firstName.trim()} ${lastName.trim()}`;
+    const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
 
     try {
       setIsLoading(true);
-      setErrorMessage('');
-      setHasError(false);
-
-      // 1. Xác thực OTP Email
-      console.log('📧 [RegisterCustomer] Xác thực Email OTP:', { email: cleanEmail, code: fullOtp });
-      await otpService.verifyEmailOtp(cleanEmail, fullOtp);
-
-      // 2. Chuyển sang Step 6 (Đang tạo tài khoản)
-      setStep(6);
-
-      // 3. Đăng ký tài khoản vào cơ sở dữ liệu
-      console.log('🚀 [FixGo Register Customer] Tạo tài khoản:', {
+      console.log('🚀 [FixGo Register Customer] Đang gửi yêu cầu đăng ký:', {
         fullName,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
         email: cleanEmail,
         phone: cleanPhone,
       });
 
       await registerCustomer({
         fullName,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
         email: cleanEmail,
         phone: cleanPhone,
         password,
       });
 
-      console.log('🎉 [FixGo Register Customer] Đăng ký thành công!');
+      console.log('🎉 [FixGo Register Customer] Đăng ký thành công! Điều hướng vào ứng dụng...');
       router.replace('/(user)/(tabs)');
     } catch (err) {
       console.error('❌ [FixGo Register Customer Error]:', err);
-      setIsLoading(false);
-      setStep(5);
       setHasError(true);
-      setErrorMessage(err.message || 'Xác thực hoặc tạo tài khoản thất bại. Vui lòng thử lại!');
+      setErrorMessage(err.message || 'Đăng ký tài khoản thất bại. Vui lòng thử lại!');
+    } finally {
+      setIsLoading(false);
     }
   };
-
-  // ═════════════════════════════════════════════════════════════════════════════
-  // RENDER: Loading / Success Signup Screen (Figma "Success Signup")
-  // ═════════════════════════════════════════════════════════════════════════════
-  if (step === 6) {
-    return (
-      <View style={styles.loadingScreen}>
-        <StatusBar style="dark" />
-        <ActivityIndicator size="large" color={COLORS.primary} />
-        <Text style={styles.loadingText}>Đang thiết lập tài khoản của bạn...</Text>
-      </View>
-    );
-  }
 
   return (
     <View style={styles.container}>
@@ -425,9 +343,22 @@ export default function RegisterCustomerScreen() {
                ══════════════════════════════════════════════════════════════════ */}
             {step === 1 && (
               <View style={styles.stepContainer}>
-                <Text style={styles.headerTitle}>Nhập số điện thoại</Text>
+                {/* Nút quay lại */}
+                <TouchableOpacity
+                  style={[styles.backCircleBtn, { marginBottom: 16 }]}
+                  onPress={() => router.back()}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons name="arrow-back" size={20} color={COLORS.textDark} />
+                </TouchableOpacity>
+
+                <Text style={styles.headerTitle}>
+                  {isSocialOnboarding ? 'Liên kết số điện thoại' : 'Nhập số điện thoại'}
+                </Text>
                 <Text style={styles.headerSubtitle}>
-                  Mã OTP 6 số sẽ được gửi qua SMS để xác thực số điện thoại của bạn.
+                  {isSocialOnboarding
+                    ? 'Tài khoản Google của bạn cần có số điện thoại để sẵn sàng đặt dịch vụ. Mã OTP sẽ được gửi qua SMS để xác thực.'
+                    : 'Mã OTP 6 số sẽ được gửi qua SMS để xác thực số điện thoại của bạn.'}
                 </Text>
 
                 <View style={styles.phoneInputRow}>
@@ -475,52 +406,56 @@ export default function RegisterCustomerScreen() {
                   )}
                 </TouchableOpacity>
 
-                <View style={styles.dividerRow}>
-                  <View style={styles.dividerLine} />
-                  <Text style={styles.dividerText}>hoặc</Text>
-                  <View style={styles.dividerLine} />
-                </View>
+                {!isSocialOnboarding && (
+                  <>
+                    <View style={styles.dividerRow}>
+                      <View style={styles.dividerLine} />
+                      <Text style={styles.dividerText}>hoặc</Text>
+                      <View style={styles.dividerLine} />
+                    </View>
 
-                <TouchableOpacity
-                  style={styles.socialFullBtn}
-                  activeOpacity={0.8}
-                  onPress={() => console.log('Login Facebook')}
-                >
-                  <FontAwesome
-                    name="facebook"
-                    size={20}
-                    color={COLORS.facebookBlue}
-                    style={styles.socialIcon}
-                  />
-                  <Text style={styles.socialFullText}>
-                    Đăng nhập bằng Facebook
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.socialFullBtn}
-                  activeOpacity={0.8}
-                  onPress={() => console.log('Login Google')}
-                >
-                  <FontAwesome
-                    name="google"
-                    size={20}
-                    color={COLORS.googleRed}
-                    style={styles.socialIcon}
-                  />
-                  <Text style={styles.socialFullText}>
-                    Đăng nhập bằng Google
-                  </Text>
-                </TouchableOpacity>
-
-                <View style={styles.footerRow}>
-                  <Text style={styles.footerText}>Đã có tài khoản? </Text>
-                  <Link href="/(auth)/login" asChild>
-                    <TouchableOpacity activeOpacity={0.7}>
-                      <Text style={styles.footerLink}>Đăng nhập ngay</Text>
+                    <TouchableOpacity
+                      style={styles.socialFullBtn}
+                      activeOpacity={0.8}
+                      onPress={() => console.log('Login Facebook')}
+                    >
+                      <FontAwesome
+                        name="facebook"
+                        size={20}
+                        color={COLORS.facebookBlue}
+                        style={styles.socialIcon}
+                      />
+                      <Text style={styles.socialFullText}>
+                        Đăng nhập bằng Facebook
+                      </Text>
                     </TouchableOpacity>
-                  </Link>
-                </View>
+
+                    <TouchableOpacity
+                      style={styles.socialFullBtn}
+                      activeOpacity={0.8}
+                      onPress={() => console.log('Login Google')}
+                    >
+                      <FontAwesome
+                        name="google"
+                        size={20}
+                        color={COLORS.googleRed}
+                        style={styles.socialIcon}
+                      />
+                      <Text style={styles.socialFullText}>
+                        Đăng nhập bằng Google
+                      </Text>
+                    </TouchableOpacity>
+
+                    <View style={styles.footerRow}>
+                      <Text style={styles.footerText}>Đã có tài khoản? </Text>
+                      <Link href="/(auth)/login" asChild>
+                        <TouchableOpacity activeOpacity={0.7}>
+                          <Text style={styles.footerLink}>Đăng nhập ngay</Text>
+                        </TouchableOpacity>
+                      </Link>
+                    </View>
+                  </>
+                )}
               </View>
             )}
 
@@ -781,13 +716,13 @@ export default function RegisterCustomerScreen() {
             )}
 
             {/* ══════════════════════════════════════════════════════════════════
-                BƯỚC 4: NHẬP HỌ TÊN VÀ EMAIL (Xác thực Email OTP)
+                BƯỚC 4: NHẬP HỌ TÊN VÀ EMAIL -> ĐĂNG KÝ
                ══════════════════════════════════════════════════════════════════ */}
             {step === 4 && (
               <View style={styles.stepContainer}>
                 <Text style={styles.headerTitle}>Nhập họ tên và email</Text>
                 <Text style={styles.headerSubtitle}>
-                  Mã OTP sẽ được gửi tới Email để xác thực quyền sở hữu trước khi hoàn tất đăng ký.
+                  Nhập thông tin cá nhân của bạn để hoàn tất tạo tài khoản FixGo.
                 </Text>
 
                 <View style={styles.nameRow}>
@@ -877,110 +812,14 @@ export default function RegisterCustomerScreen() {
                         ? styles.nextBtnActive
                         : styles.nextBtnDisabled,
                     ]}
-                    onPress={handleSendEmailOtp}
+                    onPress={handleRegisterSubmit}
                     disabled={!firstName.trim() || !lastName.trim() || !email.trim() || isLoading}
                   >
                     {isLoading ? (
                       <ActivityIndicator color={COLORS.white} size="small" />
                     ) : (
                       <>
-                        <Text style={styles.nextBtnText}>Gửi mã Email</Text>
-                        <Ionicons name="arrow-forward" size={18} color={COLORS.white} />
-                      </>
-                    )}
-                  </TouchableOpacity>
-                </View>
-              </View>
-            )}
-
-            {/* ══════════════════════════════════════════════════════════════════
-                BƯỚC 5: NHẬP MÃ OTP EMAIL & HOÀN TẤT ĐĂNG KÝ
-               ══════════════════════════════════════════════════════════════════ */}
-            {step === 5 && (
-              <View style={styles.stepContainer}>
-                <View style={styles.emailIconBox}>
-                  <Ionicons name="mail-outline" size={32} color={COLORS.primary} />
-                </View>
-
-                <Text style={styles.headerTitle}>Xác thực Email của bạn</Text>
-                <Text style={styles.headerSubtitle}>
-                  Vui lòng nhập mã OTP 6 số đã được gửi đến email{'\n'}
-                  <Text style={styles.emailHighlight}>{email.trim()}</Text>
-                </Text>
-
-                <View style={styles.otpContainer}>
-                  {emailOtp.map((digit, idx) => (
-                    <TextInput
-                      key={idx}
-                      ref={(ref) => (emailOtpInputs.current[idx] = ref)}
-                      style={[
-                        styles.otpBox,
-                        focusedEmailOtpIndex === idx && styles.otpBoxFocused,
-                        digit ? styles.otpBoxFilled : null,
-                        hasError && styles.otpBoxError,
-                      ]}
-                      value={digit}
-                      onChangeText={(val) => handleEmailOtpChange(val, idx)}
-                      onKeyPress={(e) => handleEmailOtpKeyPress(e, idx)}
-                      onFocus={() => setFocusedEmailOtpIndex(idx)}
-                      onBlur={() => setFocusedEmailOtpIndex(null)}
-                      keyboardType="number-pad"
-                      maxLength={1}
-                      textAlign="center"
-                      autoFocus={idx === 0}
-                    />
-                  ))}
-                </View>
-
-                {hasError && errorMessage ? (
-                  <View style={styles.errorOtpRow}>
-                    <Ionicons name="close-circle" size={16} color={COLORS.red} />
-                    <Text style={styles.errorOtpText}>{errorMessage}</Text>
-                  </View>
-                ) : null}
-
-                <TouchableOpacity
-                  style={[
-                    styles.resendBtn,
-                    emailCountdown > 0 ? styles.resendBtnDisabled : styles.resendBtnActive,
-                  ]}
-                  disabled={emailCountdown > 0 || isLoading}
-                  activeOpacity={0.8}
-                  onPress={handleResendEmailOtp}
-                >
-                  <Text
-                    style={[
-                      styles.resendBtnText,
-                      emailCountdown > 0 ? styles.resendBtnTextDisabled : styles.resendBtnTextActive,
-                    ]}
-                  >
-                    {emailCountdown > 0 ? `Gửi lại mã: ${emailCountdown}s` : 'Gửi lại mã'}
-                  </Text>
-                </TouchableOpacity>
-
-                <View style={styles.navRow}>
-                  <TouchableOpacity
-                    style={styles.backCircleBtn}
-                    onPress={() => setStep(4)}
-                  >
-                    <Ionicons name="arrow-back" size={20} color={COLORS.textDark} />
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={[
-                      styles.nextBtn,
-                      emailOtp.join('').length === 6 && !isLoading
-                        ? styles.nextBtnActive
-                        : styles.nextBtnDisabled,
-                    ]}
-                    onPress={handleVerifyEmailAndComplete}
-                    disabled={emailOtp.join('').length !== 6 || isLoading}
-                  >
-                    {isLoading ? (
-                      <ActivityIndicator color={COLORS.white} size="small" />
-                    ) : (
-                      <>
-                        <Text style={styles.nextBtnText}>Hoàn tất</Text>
+                        <Text style={styles.nextBtnText}>Đăng ký</Text>
                         <Ionicons name="checkmark-circle-outline" size={18} color={COLORS.white} />
                       </>
                     )}
