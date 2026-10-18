@@ -22,9 +22,9 @@ import type {
 
 const MOCK_USER: UserProfile = {
   id: 'cust-001',
-  fullName: 'Lữ Hồng Phúc Đại',
-  phone: '0366192248',
-  email: 'phucdai@fixgo.vn',
+  fullName: 'Khách hàng FixGo',
+  phone: '',
+  email: '',
   avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
   role: 'CUSTOMER',
   rewardPoints: 0,
@@ -280,9 +280,9 @@ export function useHomeData(): UseHomeDataReturn {
       if (storedUser) {
         setUser({
           id: storedUser.id || 'cust-001',
-          fullName: storedUser.name || storedUser.fullName || 'Lữ Hồng Phúc Đại',
-          phone: storedUser.phone || '0366192248',
-          email: storedUser.email || 'phucdai@fixgo.vn',
+          fullName: storedUser.fullName || storedUser.name || 'Khách hàng FixGo',
+          phone: storedUser.phone || '',
+          email: storedUser.email || '',
           avatarUrl: storedUser.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
           role: storedUser.role || 'CUSTOMER',
           rewardPoints: 0,

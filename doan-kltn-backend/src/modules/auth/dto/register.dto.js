@@ -10,14 +10,32 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ROLES } from '../../../common/constants/roles.constant';
 
 export class RegisterDto {
-  @ApiProperty({
+  @ApiPropertyOptional({
     type: String,
     description: 'Họ và tên người dùng',
     example: 'Nguyễn Văn A',
   })
-  @IsNotEmpty({ message: 'Họ và tên không được để trống' })
+  @IsOptional()
   @IsString({ message: 'Họ và tên phải là chuỗi ký tự' })
   fullName;
+
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Họ người dùng',
+    example: 'Nguyễn',
+  })
+  @IsOptional()
+  @IsString({ message: 'Họ phải là chuỗi ký tự' })
+  firstName;
+
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Tên người dùng',
+    example: 'Văn A',
+  })
+  @IsOptional()
+  @IsString({ message: 'Tên phải là chuỗi ký tự' })
+  lastName;
 
   @ApiProperty({
     type: String,

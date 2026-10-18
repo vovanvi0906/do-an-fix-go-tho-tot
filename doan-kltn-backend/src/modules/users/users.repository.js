@@ -107,4 +107,78 @@ export class UsersRepository {
       data: { isEmailVerified: true },
     });
   }
+
+  async findByGoogleId(googleId) {
+    if (!googleId) return null;
+    return this.prisma.user.findFirst({
+      where: { googleId },
+      include: {
+        customerProfile: true,
+        workerProfile: true,
+      },
+    });
+  }
+
+  async linkGoogleAccount(userId, googleId, extraData = {}) {
+    const data = {
+      googleId,
+      isEmailVerified: true,
+    };
+    if (extraData.avatarUrl) data.avatarUrl = extraData.avatarUrl;
+    if (extraData.name) data.name = extraData.name;
+
+    return this.prisma.user.update({
+      where: { id: userId },
+      data,
+      include: {
+        customerProfile: true,
+        workerProfile: true,
+      },
+    });
+  }
+
+  async updateAvatar(userId, avatarUrl) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { customerProfile: true, workerProfile: true },
+    });
+    const data = { avatarUrl };
+    if (user?.customerProfile) {
+      data.customerProfile = { update: { avatarUrl } };
+    }
+    if (user?.workerProfile) {
+      data.workerProfile = { update: { avatarUrl } };
+    }
+    return this.prisma.user.update({
+      where: { id: userId },
+      data,
+      include: {
+        customerProfile: true,
+        workerProfile: true,
+      },
+    });
+  }
+
+  async updatePhone(userId, phone) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { customerProfile: true, workerProfile: true },
+    });
+    const data = { phone, isPhoneVerified: true };
+    if (user?.customerProfile) {
+      data.customerProfile = { update: { phone } };
+    }
+    if (user?.workerProfile) {
+      data.workerProfile = { update: { phone } };
+    }
+    return this.prisma.user.update({
+      where: { id: userId },
+      data,
+      include: {
+        customerProfile: true,
+        workerProfile: true,
+      },
+    });
+  }
 }
+

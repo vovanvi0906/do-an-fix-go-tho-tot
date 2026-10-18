@@ -328,8 +328,8 @@ export default function EditFieldScreen() {
       const nameParts = currentFullName.trim().split(/\s+/);
 
       let newFullName = currentFullName;
-      let newPhone = user?.phone || '0366192248';
-      let newEmail = user?.email || 'luhongphucdai@gmail.com';
+      let newPhone = user?.phone || user?.customerProfile?.phone || '';
+      let newEmail = user?.email || user?.customerProfile?.email || '';
 
       if (fieldType === 'surname') {
         const currentName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : 'Dai';
@@ -348,7 +348,7 @@ export default function EditFieldScreen() {
         fullName: newFullName,
         phone: newPhone,
         email: newEmail,
-        ...(fieldType === 'email' ? { isEmailVerified: true, emailVerified: true } : {}),
+        ...(fieldType === 'email' ? { isEmailVerified: true, is_email_verified: true, emailVerified: true } : {}),
       });
 
       const fieldNameSuccess =

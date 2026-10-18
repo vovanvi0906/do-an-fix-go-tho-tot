@@ -4,6 +4,8 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { ResetPasswordDto } from './dto/send-otp.dto';
+import { GoogleLoginDto } from './dto/google-login.dto';
+import { FirebaseLoginDto } from './dto/firebase-login.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -82,5 +84,43 @@ export class AuthController {
   @Bind(Body())
   async resetPassword(body) {
     return this.authService.resetPassword(body.resetToken, body.newPassword);
+  }
+
+  @Post(['google-login', 'v1/auth/google-login'])
+  @ApiOperation({
+    summary: 'Đăng nhập hoặc đăng ký nhanh bằng Google (Google Sign-In)',
+  })
+  @ApiBody({ type: GoogleLoginDto })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Đăng nhập Google thành công, trả về accessToken, refreshToken và thông tin User',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Google idToken không hợp lệ hoặc đã hết hạn',
+  })
+  @Bind(Body())
+  async googleLogin(body) {
+    return this.authService.googleLogin(body.idToken);
+  }
+
+  @Post(['firebase-google-login', 'v1/auth/firebase-google-login'])
+  @ApiOperation({
+    summary: 'Đăng nhập hoặc đăng ký nhanh bằng Google qua Firebase Authentication',
+  })
+  @ApiBody({ type: FirebaseLoginDto })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Đăng nhập Firebase Google thành công, trả về accessToken, refreshToken và thông tin User',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Firebase idToken không hợp lệ hoặc đã hết hạn',
+  })
+  @Bind(Body())
+  async firebaseGoogleLogin(body) {
+    return this.authService.firebaseGoogleLogin(body.idToken);
   }
 }

@@ -146,40 +146,32 @@ function detectLanIp() {
   };
 }
 
+async function detectNgrokTunnel() {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 1200);
+    const res = await fetch('http://127.0.0.1:4040/api/tunnels', { signal: controller.signal });
+    clearTimeout(timeout);
+    if (res.ok) {
+      const data = await res.json();
+      const publicUrl = data.tunnels?.[0]?.public_url;
+      if (publicUrl && publicUrl.startsWith('http')) {
+        return publicUrl;
+      }
+    }
+  } catch (err) {
+    // ngrok is not active
+  }
+  return null;
+}
+
 /**
  * Main Runner
  */
-function run() {
+async function run() {
   console.log('================================================================');
-  console.log('  🔍 FIXGO NETWORK SYNC - TỰ ĐỘNG ĐỒNG BỘ IP LAN CHO MOBILE');
+  console.log('  🔍 FIXGO NETWORK SYNC - TỰ ĐỘNG ĐỒNG BỘ IP LAN / NGROK CHO MOBILE');
   console.log('================================================================');
-
-  // Hỗ trợ truyền tham số thủ công từ CLI (ví dụ: node scripts/update-ip.js 192.168.1.50)
-  const args = process.argv.slice(2);
-  let targetIp = null;
-  let adapterName = 'Chỉ định thủ công';
-
-  if (args.length > 0) {
-    const rawArg = args[0].replace(/^--ip=|^--ip/, '').trim();
-    if (rawArg === 'localhost' || rawArg === '127.0.0.1') {
-      targetIp = '127.0.0.1';
-      adapterName = 'Localhost Mode';
-    } else if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(rawArg)) {
-      targetIp = rawArg;
-    }
-  }
-
-  if (!targetIp) {
-    const detection = detectLanIp();
-    targetIp = detection.ip;
-    adapterName = detection.interfaceName;
-
-    if (!detection.isAutoDetected) {
-      console.warn('⚠️ [CẢNH BÁO] Không tìm thấy kết nối Wi-Fi/LAN hợp lệ!');
-      console.warn('   Hệ thống đang tạm thời gán IP = 127.0.0.1 (Localhost).');
-      console.warn('   Nếu dùng điện thoại thật, hãy kết nối máy tính vào cùng Wi-Fi với điện thoại.');
-    }
-  }
 
   // Đường dẫn file .env của Mobile
   const mobileDir = path.resolve(__dirname, '..', 'doan-kltn-mobile');
@@ -189,25 +181,102 @@ function run() {
     fs.mkdirSync(mobileDir, { recursive: true });
   }
 
+  // Hỗ trợ truyền tham số thủ công từ CLI (ví dụ: node scripts/update-ip.js 192.168.1.50)
+  const args = process.argv.slice(2);
+  let targetIp = null;
+  let adapterName = 'Chỉ định thủ công';
+  let apiUrl = null;
+  let socketUrl = null;
+
+  if (args.length > 0) {
+    const rawArg = args[0].replace(/^--ip=|^--ip/, '').trim();
+    if (rawArg.startsWith('http')) {
+      apiUrl = rawArg.endsWith('/api') ? rawArg : `${rawArg}/api`;
+      socketUrl = rawArg.replace(/\/api\/?$/, '');
+      adapterName = 'Chỉ định URL thủ công';
+    } else if (rawArg === 'localhost' || rawArg === '127.0.0.1') {
+      targetIp = '127.0.0.1';
+      adapterName = 'Localhost Mode';
+    } else if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(rawArg)) {
+      targetIp = rawArg;
+    }
+  }
+
+  // 1. Kiểm tra xem ngrok có đang chạy tunnel công khai không
+  if (!apiUrl && !targetIp) {
+    const ngrokUrl = await detectNgrokTunnel();
+    if (ngrokUrl) {
+      apiUrl = `${ngrokUrl}/api`;
+      socketUrl = ngrokUrl;
+      adapterName = `Ngrok HTTPS Tunnel (${ngrokUrl})`;
+      console.log(`🌐 [TỰ ĐỘNG] Phát hiện đường hầm Ngrok HTTPS đang chạy: ${ngrokUrl}`);
+    }
+  }
+
+  // 2. Nếu file .env hiện tại đã có link ngrok và người dùng không yêu cầu --force-ip
+  if (!apiUrl && !targetIp && fs.existsSync(envPath) && !args.includes('--force-ip')) {
+    const currentEnv = fs.readFileSync(envPath, 'utf-8');
+    const ngrokMatch = currentEnv.match(/EXPO_PUBLIC_API_URL=(https?:\/\/[^\s]+ngrok[^\s]*)/);
+    if (ngrokMatch && ngrokMatch[1]) {
+      const existingNgrok = ngrokMatch[1];
+      apiUrl = existingNgrok;
+      socketUrl = existingNgrok.replace(/\/api\/?$/, '');
+      adapterName = 'Bảo tồn cấu hình Ngrok trong .env';
+      console.log(`🔒 [BẢO LƯU] Giữ nguyên cấu hình Ngrok trong file .env: ${apiUrl}`);
+    }
+  }
+
+  // 3. Nếu không có ngrok, fallback sang IP LAN Wi-Fi
+  if (!apiUrl) {
+    if (!targetIp) {
+      const detection = detectLanIp();
+      targetIp = detection.ip;
+      adapterName = detection.interfaceName;
+
+      if (!detection.isAutoDetected) {
+        console.warn('⚠️ [CẢNH BÁO] Không tìm thấy kết nối Wi-Fi/LAN hợp lệ!');
+        console.warn('   Hệ thống đang tạm thời gán IP = 127.0.0.1 (Localhost).');
+      }
+    }
+    apiUrl = `http://${targetIp}:3000/api`;
+    socketUrl = `http://${targetIp}:3000`;
+  }
+
   const envContent = [
     `# ================================================================`,
     `# FIXGO MOBILE - AUTO-GENERATED ENVIRONMENT CONFIGURATION`,
     `# Cập nhật lúc: ${new Date().toLocaleString('vi-VN')}`,
-    `# Card mạng hoạt động: ${adapterName} (${targetIp})`,
+    `# Chế độ kết nối: ${adapterName}`,
     `# ================================================================`,
-    `EXPO_PUBLIC_API_URL=http://${targetIp}:3000/api`,
-    `EXPO_PUBLIC_SOCKET_URL=http://${targetIp}:3000`,
+    `EXPO_PUBLIC_API_URL=${apiUrl}`,
+    `EXPO_PUBLIC_SOCKET_URL=${socketUrl}`,
     `EXPO_PUBLIC_ENV=development`,
+    ``,
+    `# Google Sign-In OAuth Client IDs`,
+    `EXPO_PUBLIC_GOOGLE_CLIENT_ID=255047379055-cu8ifeqgfak7nj3sq8bcve9hqh9v85m4.apps.googleusercontent.com`,
+    `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=255047379055-cu8ifeqgfak7nj3sq8bcve9hqh9v85m4.apps.googleusercontent.com`,
+    `EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID=255047379055-fnfeg3subj9ej2vda53ho0fluo9f8rib.apps.googleusercontent.com`,
+    `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID=`,
+    `EXPO_PUBLIC_GOOGLE_REDIRECT_URI=https://auth.expo.io/@fuxdaj1501/doan-kltn-mobile`,
+    ``,
+    `# Firebase Configuration`,
+    `EXPO_PUBLIC_FIREBASE_API_KEY=AIzaSyBAm_qPVoIMUbrHg2bNM3IbRvmYfsErZ9w`,
+    `EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=fixgo-a0c01.firebaseapp.com`,
+    `EXPO_PUBLIC_FIREBASE_REDIRECT_HANDLER=https://fixgo-a0c01.firebaseapp.com/__/auth/handler`,
+    `EXPO_PUBLIC_FIREBASE_PROJECT_ID=fixgo-a0c01`,
+    `EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=fixgo-a0c01.firebasestorage.app`,
+    `EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=255047379055`,
+    `EXPO_PUBLIC_FIREBASE_APP_ID=1:255047379055:android:d984d72c63a8d10b22059a`,
+    `EXPO_PUBLIC_FIREBASE_GOOGLE_WEB_CLIENT_ID=255047379055-mifsjkk52gvrrrj7jfb6851l8hhqfngp.apps.googleusercontent.com`,
     ``,
   ].join('\n');
 
   fs.writeFileSync(envPath, envContent, 'utf-8');
 
   console.log(`\n✅ [ĐỒNG BỘ THÀNH CÔNG] File: doan-kltn-mobile/.env`);
-  console.log(`   📍 Card mạng nhận diện: ${adapterName}`);
-  console.log(`   🌐 IPv4 Máy tính chủ:   ${targetIp}`);
-  console.log(`   📡 Backend API URL:     http://${targetIp}:3000/api`);
-  console.log(`   ⚡ Realtime Socket URL: http://${targetIp}:3000`);
+  console.log(`   📍 Cấu hình:            ${adapterName}`);
+  console.log(`   📡 Backend API URL:     ${apiUrl}`);
+  console.log(`   ⚡ Realtime Socket URL: ${socketUrl}`);
   console.log('================================================================\n');
 }
 
