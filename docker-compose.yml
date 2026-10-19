@@ -7,8 +7,8 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 1234
-      POSTGRES_DB: fixgodb
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: ondemand_db
     ports:
       - '5432:5432'
     volumes:
@@ -29,7 +29,7 @@ services:
       -c maintenance_work_mem=16MB
       -c max_connections=50
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres -d fixgodb']
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d ondemand_db']
       interval: 3s
       timeout: 3s
       retries: 10

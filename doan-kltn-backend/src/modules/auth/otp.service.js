@@ -301,6 +301,7 @@ export class OtpService {
     await this.redis.del(attemptsKey);
 
     // Cập nhật trạng thái is_email_verified = true trong database PostgreSQL
+    let updatedUser = null;
     try {
       let updated = false;
 
@@ -311,7 +312,15 @@ export class OtpService {
         const decoded = this.jwtService ? this.jwtService.decode(token) : null;
         const userId = decoded?.sub || decoded?.userId || decoded?.id;
         if (userId) {
-          await this.usersRepository.markEmailVerified(userId, email);
+          if (email) {
+            const existingWithEmail = await this.usersRepository.findByEmail(email);
+            if (existingWithEmail && existingWithEmail.id !== userId) {
+              throw new BadRequestException(
+                'Email này đã được liên kết với một tài khoản khác trong hệ thống.',
+              );
+            }
+          }
+          updatedUser = await this.usersRepository.markEmailVerified(userId, email);
           this.logger.log(
             `✅ [OtpService] Đã cập nhật is_email_verified = true cho User ID: ${userId} (Email: ${email})`,
           );
@@ -326,22 +335,34 @@ export class OtpService {
           this.logger.log(
             `✅ [OtpService] Đã cập nhật is_email_verified = true cho ${res.count} user có email ${email}`,
           );
+          updatedUser = await this.usersRepository.findByEmail(email);
         }
       }
     } catch (dbErr) {
       this.logger.warn(
         `⚠️ [OtpService] Lỗi khi cập nhật cờ is_email_verified vào DB: ${dbErr.message}`,
       );
+      if (dbErr instanceof BadRequestException) {
+        throw dbErr;
+      }
     }
 
     this.logger.log(
       `✅ [OtpService] Email OTP verified thành công cho: ${email}`,
     );
 
+    let sanitizedUser = null;
+    if (updatedUser) {
+      const { passwordHash: _, ...rest } = updatedUser;
+      sanitizedUser = rest;
+    }
+
     return {
+      success: true,
       verified: true,
       isEmailVerified: true,
       message: 'Xác thực email thành công',
+      user: sanitizedUser,
     };
   }
 

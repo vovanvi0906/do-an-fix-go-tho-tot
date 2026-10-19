@@ -110,6 +110,7 @@ const COLORS = {
 
 export default function FixGoLoginScreen() {
   const router = useRouter();
+  const tempTokenRef = useRef(null);
   const {
     login,
     googleLogin,
@@ -191,11 +192,9 @@ export default function FixGoLoginScreen() {
       const isSuccess = !!(res?.data?.success ?? res?.success ?? loggedUser);
       const requirePhone = !!(res?.data?.requirePhoneUpdate ?? res?.requirePhoneUpdate ?? !loggedUser?.phone);
       const userRole = (loggedUser?.role || 'CUSTOMER').toUpperCase();
-      setPendingRole(userRole);
 
       // 2. Set trực tiếp Authorization Header cho Axios và lưu token vào Storage
       if (jwtToken) {
-        tempTokenRef.current = jwtToken;
         apiClient.defaults.headers.common['Authorization'] = `Bearer ${jwtToken}`;
         await tokenStorage.saveToken(jwtToken);
       }
@@ -257,10 +256,8 @@ export default function FixGoLoginScreen() {
         const isSuccess = !!(res?.data?.success ?? res?.success ?? loggedUser);
         const requirePhone = !!(res?.data?.requirePhoneUpdate ?? res?.requirePhoneUpdate ?? !loggedUser?.phone);
         const userRole = (loggedUser?.role || 'CUSTOMER').toUpperCase();
-        setPendingRole(userRole);
 
         if (jwtToken) {
-          tempTokenRef.current = jwtToken;
           apiClient.defaults.headers.common['Authorization'] = `Bearer ${jwtToken}`;
           await tokenStorage.saveToken(jwtToken);
         }
@@ -269,10 +266,14 @@ export default function FixGoLoginScreen() {
         }
 
         if (isSuccess && requirePhone) {
-          console.log('📱 [FixGo Web] Google Sign-In thành công, mở Modal cập nhật số điện thoại');
-          setPhoneInput('');
-          setPhoneError('');
-          setShowPhoneModal(true);
+          console.log('📱 [FixGo Web] Google Sign-In thành công, điều hướng sang luồng OTP để bổ sung SĐT...');
+          router.push({
+            pathname: '/(auth)/register-customer',
+            params: {
+              isSocialOnboarding: 'true',
+              role: userRole,
+            },
+          });
           return;
         }
 

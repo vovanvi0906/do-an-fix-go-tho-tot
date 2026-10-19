@@ -113,7 +113,7 @@ export class AuthService {
       phone: phone || null,
       role: 'WORKER',
       status: 'ACTIVE',
-      isEmailVerified: true,
+      isEmailVerified: false,
       workerProfile: {
         create: {
           fullName: fullName || null,
