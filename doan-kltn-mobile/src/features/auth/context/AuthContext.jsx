@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { authService } from '../services/authService';
 import { tokenStorage } from '../../../services/storage/tokenStorage';
 
@@ -122,7 +122,7 @@ export function AuthProvider({ children }) {
     return res;
   };
 
-  const refreshProfile = async () => {
+  const refreshProfile = useCallback(async () => {
     try {
       console.log('🔄 [AuthContext] Đang làm mới dữ liệu người dùng từ Database...');
       const profile = await authService.getProfile();
@@ -135,24 +135,27 @@ export function AuthProvider({ children }) {
       console.warn('⚠️ [AuthContext] Không thể làm mới dữ liệu người dùng:', err);
     }
     return null;
-  };
+  }, []);
 
-  const value = {
-    user,
-    token,
-    role: user?.role || null,
-    isAuthenticated: !!token && !!user,
-    isLoading,
-    login,
-    logout,
-    updateUser,
-    registerCustomer,
-    googleLogin,
-    firebaseGoogleLogin,
-    uploadAvatar,
-    updatePhone,
-    refreshProfile,
-  };
+  const value = useMemo(
+    () => ({
+      user,
+      token,
+      role: user?.role || null,
+      isAuthenticated: !!token && !!user,
+      isLoading,
+      login,
+      logout,
+      updateUser,
+      registerCustomer,
+      googleLogin,
+      firebaseGoogleLogin,
+      uploadAvatar,
+      updatePhone,
+      refreshProfile,
+    }),
+    [user, token, isLoading, refreshProfile]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

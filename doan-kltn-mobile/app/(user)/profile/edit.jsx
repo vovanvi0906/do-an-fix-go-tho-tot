@@ -14,7 +14,7 @@ import {
   TouchableWithoutFeedback,
   ActivityIndicator,
 } from 'react-native';
-import { useRouter, useFocusEffect } from 'expo-router';
+import { useRouter, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import {
@@ -45,6 +45,7 @@ const COLORS = {
 
 export default function EditCustomerProfileScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
   const { user, updateUser, uploadAvatar, updatePhone, refreshProfile } = useAuth();
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [actionModal, setActionModal] = useState({ visible: false, type: 'email' });
@@ -58,7 +59,7 @@ export default function EditCustomerProfileScreen() {
       if (typeof refreshProfile === 'function') {
         refreshProfile();
       }
-    }, [refreshProfile])
+    }, [])
   );
 
   // ─── OTP Modal State (Xác thực Email OTP tại màn hình Tài khoản) ───────────
@@ -94,8 +95,6 @@ export default function EditCustomerProfileScreen() {
   const isEmailVerified = !!(user?.isEmailVerified ?? user?.is_email_verified ?? user?.emailVerified);
   const avatarUrl = user?.avatarUrl || user?.customerProfile?.avatarUrl;
 
-
-
   // Countdown timer cho OTP Email Modal (60s)
   useEffect(() => {
     let timer;
@@ -108,7 +107,22 @@ export default function EditCustomerProfileScreen() {
   // Bắt đầu quy trình gửi OTP và mở Modal xác thực
   const handleStartVerifyEmail = async () => {
     if (!email) {
-      Alert.alert('Thông báo', 'Không tìm thấy địa chỉ email để xác thực.');
+      Alert.alert(
+        'Chưa có Email',
+        'Vui lòng cập nhật địa chỉ email của bạn trước khi thực hiện xác thực.',
+        [
+          { text: 'Hủy', style: 'cancel' },
+          {
+            text: 'Thêm email',
+            onPress: () => {
+              router.push({
+                pathname: '/(user)/profile/edit-field',
+                params: { field: 'email', value: '' },
+              });
+            },
+          },
+        ]
+      );
       return;
     }
     try {
@@ -127,6 +141,13 @@ export default function EditCustomerProfileScreen() {
       setIsSendingOtp(false);
     }
   };
+
+  // Tự động kích hoạt luồng xác thực email nếu điều hướng từ Profile Screen kèm param verifyEmail
+  useEffect(() => {
+    if (params?.verifyEmail === 'true' && !isEmailVerified && email) {
+      handleStartVerifyEmail();
+    }
+  }, [params?.verifyEmail, isEmailVerified, email]);
 
   const handleResendEmailOtp = async () => {
     if (otpCountdown > 0 || isSendingOtp) return;
@@ -171,15 +192,20 @@ export default function EditCustomerProfileScreen() {
       setIsVerifyingOtp(true);
       setOtpError('');
       console.log('📧 [EditProfile] Xác thực Email OTP:', { email, code: fullOtp });
-      await otpService.verifyEmailOtp(email, fullOtp);
+      const res = await otpService.verifyEmailOtp(email, fullOtp);
 
       // Cập nhật User Context & Local Storage
       await updateUser({
         ...user,
+        ...(res?.user || {}),
         isEmailVerified: true,
         is_email_verified: true,
         emailVerified: true,
       });
+
+      if (typeof refreshProfile === 'function') {
+        await refreshProfile();
+      }
 
       setOtpModalVisible(false);
       Alert.alert('Xác thực thành công', 'Email của bạn đã được xác minh bảo mật thành công!');
@@ -451,34 +477,70 @@ export default function EditCustomerProfileScreen() {
 
           <View style={styles.divider} />
 
-          {/* Field 4: Email (Tái cấu trúc giao diện: Hàng 1 Nhãn + Badge [✓ Đã xác thực], Hàng 2 Email trọn vẹn 1 dòng, ẩn mũi tên >, tắt click) */}
+          {/* Field 4: Email */}
           <View style={styles.emailFieldContainer}>
             <View style={styles.emailHeaderRow}>
-              <Text style={styles.fieldLabel}>Email</Text>
-              <View
-                style={[
-                  styles.badgePill,
-                  isEmailVerified ? styles.badgeVerified : styles.badgeUnverified,
-                  { marginLeft: 8 },
-                ]}
-              >
-                <Text
+              <View style={styles.emailHeaderLeft}>
+                <Text style={styles.fieldLabel}>Email</Text>
+                <View
                   style={[
-                    styles.badgeText,
-                    isEmailVerified ? styles.badgeTextVerified : styles.badgeTextUnverified,
+                    styles.badgePill,
+                    isEmailVerified ? styles.badgeVerified : styles.badgeUnverified,
+                    { marginLeft: 8 },
                   ]}
                 >
-                  {isEmailVerified ? '✓ Đã xác thực' : 'Chưa xác thực'}
-                </Text>
+                  <Text
+                    style={[
+                      styles.badgeText,
+                      isEmailVerified ? styles.badgeTextVerified : styles.badgeTextUnverified,
+                    ]}
+                  >
+                    {isEmailVerified ? '✓ Đã xác thực' : 'Chưa xác thực'}
+                  </Text>
+                </View>
               </View>
+
+              {!isEmailVerified && (
+                <TouchableOpacity
+                  style={styles.verifyNowBtn}
+                  activeOpacity={0.8}
+                  onPress={handleStartVerifyEmail}
+                  disabled={isSendingOtp}
+                >
+                  {isSendingOtp ? (
+                    <ActivityIndicator size="small" color="#D97706" />
+                  ) : (
+                    <>
+                      <Ionicons name="shield-checkmark" size={13} color="#D97706" style={{ marginRight: 4 }} />
+                      <Text style={styles.verifyNowBtnText}>Xác thực ngay</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              )}
             </View>
-            <Text
-              style={styles.emailValueFullWidth}
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              {email}
-            </Text>
+
+            <View style={styles.emailValueRow}>
+              <Text
+                style={[
+                  styles.emailValueFullWidth,
+                  !email && styles.fieldValueUnset,
+                  { flex: 1 },
+                ]}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {email || 'Chưa cập nhật email'}
+              </Text>
+              <TouchableOpacity
+                onPress={() => openActionModal('email')}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                style={{ paddingLeft: 8 }}
+              >
+                <Text style={styles.changeEmailText}>
+                  {email ? 'Thay đổi' : 'Thêm email'}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </ScrollView>
@@ -974,7 +1036,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.greenLight,
   },
   badgeUnverified: {
-    backgroundColor: COLORS.redLight,
+    backgroundColor: '#FEF3C7',
   },
   badgeText: {
     fontSize: 11.5,
@@ -985,7 +1047,7 @@ const styles = StyleSheet.create({
     color: COLORS.green,
   },
   badgeTextUnverified: {
-    color: COLORS.red,
+    color: '#D97706',
   },
   badgeUnlinked: {
     backgroundColor: '#FEF3C7',
@@ -1007,7 +1069,41 @@ const styles = StyleSheet.create({
   emailHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  emailHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  emailValueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 2,
+  },
+  changeEmailText: {
+    color: COLORS.primary,
+    fontSize: 13,
+    fontFamily: 'Inter_600SemiBold',
+    fontWeight: '600',
+  },
+  verifyNowBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 10,
+    paddingVertical: 4.5,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#FCD34D',
+  },
+  verifyNowBtnText: {
+    color: '#D97706',
+    fontSize: 12,
+    fontFamily: 'Inter_600SemiBold',
+    fontWeight: '600',
   },
   emailValueFullWidth: {
     fontSize: 15.5,

@@ -50,7 +50,7 @@ export default function CustomerProfileScreen() {
       if (typeof refreshProfile === 'function') {
         refreshProfile();
       }
-    }, [refreshProfile])
+    }, [])
   );
 
   // ─── Font Loading ──────────────────────────────────────────────────────────
