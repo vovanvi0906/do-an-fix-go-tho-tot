@@ -134,3 +134,4 @@ Khi kết thúc phiên làm việc:
 - **Trên Linux**: `./stop.sh`
 - **Trên Windows**: `.\stop.bat`
 Script sẽ tắt toàn bộ tiến trình chạy nền và giải phóng RAM sạch sẽ.
+
