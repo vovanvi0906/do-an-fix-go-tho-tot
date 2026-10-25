@@ -30,6 +30,7 @@
       ]
     },
     "plugins": [
+      "./plugins/withCleartextTraffic",
       "expo-router",
       "expo-asset",
       "expo-font",
