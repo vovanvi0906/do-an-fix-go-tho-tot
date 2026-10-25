@@ -2,7 +2,6 @@
   "expo": {
     "name": "doan-kltn-mobile",
     "slug": "doan-kltn-mobile",
-    "owner": "fuxdaj1501",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icons/icon.png",
@@ -23,7 +22,10 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/icons/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "plugins": [
       "expo-router",
@@ -47,8 +49,9 @@
         "origin": false
       },
       "eas": {
-        "projectId": "1ef87ddd-b13c-4302-8a51-fe70c9b1cbdb"
+        "projectId": "8c2161b8-c8d6-48f0-a368-b3265441210b"
       }
-    }
+    },
+    "owner": "vanvi1906"
   }
 }

@@ -1,44 +1,26 @@
 {
   "project_info": {
-    "project_number": "255047379055",
-    "project_id": "fixgo-a0c01",
-    "storage_bucket": "fixgo-a0c01.firebasestorage.app"
+    "project_number": "579509931869",
+    "project_id": "fixgo-mobile-app",
+    "storage_bucket": "fixgo-mobile-app.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:255047379055:android:d984d72c63a8d10b22059a",
+        "mobilesdk_app_id": "1:579509931869:android:da9c78e79bb71a2363e2b4",
         "android_client_info": {
           "package_name": "com.fixgo.app"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "255047379055-fnfeg3subj9ej2vda53ho0fluo9f8rib.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.fixgo.app",
-            "certificate_hash": "68cf8ea6fe7365cfc6370639640abadc613c9666"
-          }
-        },
-        {
-          "client_id": "255047379055-mifsjkk52gvrrrj7jfb6851l8hhqfngp.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBAm_qPVoIMUbrHg2bNM3IbRvmYfsErZ9w"
+          "current_key": "AIzaSyBK0BJiOEruK5AsacVeeN5tnEvTam0p5NU"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "255047379055-cu8ifeqgfak7nj3sq8bcve9hqh9v85m4.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }
