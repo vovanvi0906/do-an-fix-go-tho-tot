@@ -19,12 +19,14 @@
     "android": {
       "package": "com.fixgo.app",
       "googleServicesFile": "./google-services.json",
+      "usesCleartextTraffic": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/icons/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "permissions": [
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "android.permission.INTERNET"
       ]
     },
     "plugins": [
