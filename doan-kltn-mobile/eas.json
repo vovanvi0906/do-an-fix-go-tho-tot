@@ -16,9 +16,6 @@
       "env": {
         "EXPO_PUBLIC_API_URL": "http://10.0.2.2:3000/api",
         "EXPO_PUBLIC_SOCKET_URL": "http://10.0.2.2:3000",
-        "EXPO_PUBLIC_GOOGLE_CLIENT_ID": "579509931869-d984d72c63a8d10b22059a.apps.googleusercontent.com",
-        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "",
-        "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "",
         "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyBK0BJiOEruK5AsacVeeN5tnEvTam0p5NU",
         "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "fixgo-mobile-app.firebaseapp.com",
         "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "fixgo-mobile-app",
