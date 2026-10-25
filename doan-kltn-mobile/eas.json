@@ -14,17 +14,17 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://pregnant-repeal-fondly.ngrok-free.dev/api",
-        "EXPO_PUBLIC_SOCKET_URL": "https://pregnant-repeal-fondly.ngrok-free.dev",
-        "EXPO_PUBLIC_GOOGLE_CLIENT_ID": "255047379055-cu8ifeqgfak7nj3sq8bcve9hqh9v85m4.apps.googleusercontent.com",
-        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "255047379055-cu8ifeqgfak7nj3sq8bcve9hqh9v85m4.apps.googleusercontent.com",
-        "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "255047379055-fnfeg3subj9ej2vda53ho0fluo9f8rib.apps.googleusercontent.com",
-        "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyBAm_qPVoIMUbrHg2bNM3IbRvmYfsErZ9w",
-        "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "fixgo-a0c01.firebaseapp.com",
-        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "fixgo-a0c01",
-        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "fixgo-a0c01.firebasestorage.app",
-        "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "255047379055",
-        "EXPO_PUBLIC_FIREBASE_APP_ID": "1:255047379055:android:d984d72c63a8d10b22059a"
+        "EXPO_PUBLIC_API_URL": "http://10.0.2.2:3000/api",
+        "EXPO_PUBLIC_SOCKET_URL": "http://10.0.2.2:3000",
+        "EXPO_PUBLIC_GOOGLE_CLIENT_ID": "579509931869-d984d72c63a8d10b22059a.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "",
+        "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "",
+        "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyBK0BJiOEruK5AsacVeeN5tnEvTam0p5NU",
+        "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "fixgo-mobile-app.firebaseapp.com",
+        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "fixgo-mobile-app",
+        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "fixgo-mobile-app.firebasestorage.app",
+        "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "579509931869",
+        "EXPO_PUBLIC_FIREBASE_APP_ID": "1:579509931869:android:da9c78e79bb71a2363e2b4"
       }
     },
     "production": {
