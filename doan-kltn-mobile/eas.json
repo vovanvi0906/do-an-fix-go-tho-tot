@@ -14,8 +14,8 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "http://10.0.2.2:3000/api",
-        "EXPO_PUBLIC_SOCKET_URL": "http://10.0.2.2:3000",
+        "EXPO_PUBLIC_API_URL": "https://constructed-template-considering-parking.trycloudflare.com/api",
+        "EXPO_PUBLIC_SOCKET_URL": "https://constructed-template-considering-parking.trycloudflare.com",
         "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyBK0BJiOEruK5AsacVeeN5tnEvTam0p5NU",
         "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "fixgo-mobile-app.firebaseapp.com",
         "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "fixgo-mobile-app",
