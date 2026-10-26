@@ -28,6 +28,7 @@ export function useGoogleAuth(targetRole = 'CUSTOMER') {
   const [request, response, promptAsync] = Google.useAuthRequest({
     clientId: webClientId,
     webClientId: webClientId,
+    androidClientId: webClientId,
     scopes: ['profile', 'email'],
   });
 

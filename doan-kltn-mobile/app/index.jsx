@@ -141,6 +141,7 @@ export default function FixGoLoginScreen() {
   const [request, response, promptAsync] = Google.useAuthRequest({
     clientId: webClientId,
     webClientId: webClientId,
+    androidClientId: webClientId,
     scopes: ['profile', 'email'],
   });
 
