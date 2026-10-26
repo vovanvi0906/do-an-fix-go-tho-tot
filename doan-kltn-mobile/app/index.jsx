@@ -136,7 +136,7 @@ export default function FixGoLoginScreen() {
   const webClientId =
     process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ||
     process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ||
-    '579509931869-rlrf0332dftgmvrfnqhf90ncl4l3d9v2k.apps.googleusercontent.com';
+    '579509931869-rlrf0332dftgmvrfnqhf90nd4l3d9v2k.apps.googleusercontent.com';
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     clientId: webClientId,
