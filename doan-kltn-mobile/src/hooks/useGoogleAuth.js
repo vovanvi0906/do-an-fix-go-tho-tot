@@ -20,10 +20,14 @@ export function useGoogleAuth(targetRole = 'CUSTOMER') {
   const { firebaseGoogleLogin, googleLogin } = useAuth();
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
+  const webClientId =
+    process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ||
+    process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ||
+    '255047379055-cu8ifeqgfak7nj3sq8bcve9hqh9v85m4.apps.googleusercontent.com';
+
   const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || '255047379055-cu8ifeqgfak7nj3sq8bcve9hqh9v85m4.apps.googleusercontent.com',
-    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || '255047379055-cu8ifeqgfak7nj3sq8bcve9hqh9v85m4.apps.googleusercontent.com',
-    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID || '255047379055-fnfeg3subj9ej2vda53ho0fluo9f8rib.apps.googleusercontent.com',
+    clientId: webClientId,
+    webClientId: webClientId,
     scopes: ['profile', 'email'],
   });
 
