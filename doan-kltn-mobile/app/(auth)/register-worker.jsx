@@ -24,6 +24,7 @@ import {
   Inter_700Bold,
 } from '@expo-google-fonts/inter';
 import { useAuth } from '../../src/features/auth';
+import { useGoogleAuth } from '../../src/hooks';
 
 // ─── Design Tokens (Figma FIXGO – Exact Match) ───────────────────────────────
 const COLORS = {
@@ -133,6 +134,7 @@ const VietnamFlag = () => (
 export default function RegisterWorkerScreen() {
   const router = useRouter();
   const { registerWorker } = useAuth();
+  const { signInWithGoogle, isGoogleLoading } = useGoogleAuth('WORKER');
 
   // ─── Font loading (Inter) ───────────────────────────────────────────────────
   const [fontsLoaded] = useFonts({
@@ -527,14 +529,19 @@ export default function RegisterWorkerScreen() {
                 <TouchableOpacity
                   style={styles.socialFullBtn}
                   activeOpacity={0.8}
-                  onPress={() => console.log('Login Google')}
+                  onPress={signInWithGoogle}
+                  disabled={isLoading || isGoogleLoading}
                 >
-                  <FontAwesome
-                    name="google"
-                    size={20}
-                    color={COLORS.googleRed}
-                    style={styles.socialIcon}
-                  />
+                  {isGoogleLoading ? (
+                    <ActivityIndicator size="small" color={COLORS.googleRed} />
+                  ) : (
+                    <FontAwesome
+                      name="google"
+                      size={20}
+                      color={COLORS.googleRed}
+                      style={styles.socialIcon}
+                    />
+                  )}
                   <Text
                     style={styles.socialFullText}
                     numberOfLines={1}

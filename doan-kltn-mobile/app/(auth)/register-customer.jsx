@@ -22,6 +22,7 @@ import {
   Inter_700Bold,
 } from '@expo-google-fonts/inter';
 import { useAuth } from '../../src/features/auth';
+import { useGoogleAuth } from '../../src/hooks';
 import { otpService } from '../../src/features/auth/services/otpService';
 
 // ─── Design Tokens (Figma FIXGO – Customer Signup) ──────────────────────────
@@ -55,6 +56,7 @@ export default function RegisterCustomerScreen() {
   const isSocialOnboarding = params?.isSocialOnboarding === 'true';
   const role = params?.role;
   const { registerCustomer, updatePhone, user } = useAuth();
+  const { signInWithGoogle, isGoogleLoading } = useGoogleAuth('CUSTOMER');
 
   // ─── Font loading (Inter) ───────────────────────────────────────────────────
   const [fontsLoaded] = useFonts({
@@ -433,14 +435,19 @@ export default function RegisterCustomerScreen() {
                     <TouchableOpacity
                       style={styles.socialFullBtn}
                       activeOpacity={0.8}
-                      onPress={() => console.log('Login Google')}
+                      onPress={signInWithGoogle}
+                      disabled={isSubmitting || isGoogleLoading}
                     >
-                      <FontAwesome
-                        name="google"
-                        size={20}
-                        color={COLORS.googleRed}
-                        style={styles.socialIcon}
-                      />
+                      {isGoogleLoading ? (
+                        <ActivityIndicator size="small" color={COLORS.googleRed} />
+                      ) : (
+                        <FontAwesome
+                          name="google"
+                          size={20}
+                          color={COLORS.googleRed}
+                          style={styles.socialIcon}
+                        />
+                      )}
                       <Text style={styles.socialFullText}>
                         Đăng nhập bằng Google
                       </Text>

@@ -1,2 +1,1 @@
-// Module: hooks
-export {};
+export * from './useGoogleAuth';
