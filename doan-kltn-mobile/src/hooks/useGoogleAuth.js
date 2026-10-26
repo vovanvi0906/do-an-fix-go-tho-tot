@@ -25,12 +25,17 @@ export function useGoogleAuth(targetRole = 'CUSTOMER') {
     process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ||
     '579509931869-rlrf0332dftgmvrfnqhf90nd4l3d9v2k.apps.googleusercontent.com';
 
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: webClientId,
-    webClientId: webClientId,
-    androidClientId: webClientId,
-    scopes: ['profile', 'email'],
-  });
+  const [request, response, promptAsync] = Google.useAuthRequest(
+    {
+      clientId: webClientId,
+      webClientId: webClientId,
+      androidClientId: webClientId,
+      scopes: ['profile', 'email'],
+    },
+    {
+      projectNameForProxy: '@vanvi1906/doan-kltn-mobile',
+    }
+  );
 
   const handleFinishLogin = async (res) => {
     const loggedUser = res?.data?.user || res?.user;

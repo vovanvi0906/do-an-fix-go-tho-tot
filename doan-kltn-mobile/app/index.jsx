@@ -138,12 +138,17 @@ export default function FixGoLoginScreen() {
     process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ||
     '579509931869-rlrf0332dftgmvrfnqhf90nd4l3d9v2k.apps.googleusercontent.com';
 
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: webClientId,
-    webClientId: webClientId,
-    androidClientId: webClientId,
-    scopes: ['profile', 'email'],
-  });
+  const [request, response, promptAsync] = Google.useAuthRequest(
+    {
+      clientId: webClientId,
+      webClientId: webClientId,
+      androidClientId: webClientId,
+      scopes: ['profile', 'email'],
+    },
+    {
+      projectNameForProxy: '@vanvi1906/doan-kltn-mobile',
+    }
+  );
 
   // Lắng nghe kết quả trả về từ cửa sổ Google OAuth WebBrowser
   useEffect(() => {
