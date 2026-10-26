@@ -436,7 +436,7 @@ export default function RegisterCustomerScreen() {
                       style={styles.socialFullBtn}
                       activeOpacity={0.8}
                       onPress={signInWithGoogle}
-                      disabled={isSubmitting || isGoogleLoading}
+                      disabled={isLoading || isGoogleLoading}
                     >
                       {isGoogleLoading ? (
                         <ActivityIndicator size="small" color={COLORS.googleRed} />

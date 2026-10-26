@@ -98,3 +98,4 @@ export function useGoogleAuth(targetRole = 'CUSTOMER') {
 
   return { signInWithGoogle, isGoogleLoading };
 }
+
