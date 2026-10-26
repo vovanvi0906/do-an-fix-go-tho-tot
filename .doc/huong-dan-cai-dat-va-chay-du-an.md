@@ -68,7 +68,28 @@ chmod +x setup.sh dev-local.sh stop.sh
   .\dev-local.bat
   ```
 
-### Bước 2: Nạp dữ liệu mẫu ban đầu (Chỉ chạy 1 lần sau khi tạo database)
+### Bước 2: Chạy Mobile App & Máy ảo Android
+1. **Bật máy ảo Android**:
+   ```bash
+   QT_QPA_PLATFORM=xcb ~/Android/Sdk/emulator/emulator -avd Pixel_8 &
+   ```
+2. **Mở cửa sổ điều khiển mượt mà bằng scrcpy (Khuyên dùng)**:
+   ```bash
+   scrcpy
+   ```
+3. **Mở App FixGo**:
+   - Bấm vào icon **FixGo** trên màn hình điện thoại, hoặc chạy lệnh:
+     ```bash
+     adb shell am start -n com.fixgo.app/.MainActivity
+     ```
+   - Hoặc nếu phát triển code với Expo Metro:
+     ```bash
+     cd doan-kltn-mobile
+     npx expo start -c
+     # Bấm phím 'a' để mở trên Android
+     ```
+
+### Bước 3: Nạp dữ liệu mẫu ban đầu (Chỉ chạy 1 lần sau khi tạo database)
 Mở một tab terminal khác:
 ```bash
 cd doan-kltn-backend
