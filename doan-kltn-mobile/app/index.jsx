@@ -24,7 +24,7 @@ import {
   Inter_700Bold,
 } from '@expo-google-fonts/inter';
 import * as WebBrowser from 'expo-web-browser';
-import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import * as Google from 'expo-auth-session/providers/google';
 import { useAuth } from '../src/features/auth';
 import { apiClient } from '../src/services/api/apiClient';
 import { tokenStorage } from '../src/services/storage/tokenStorage';
@@ -34,18 +34,6 @@ import {
   signInWithCredential,
   signInWithPopup,
 } from '../src/services/firebaseConfig';
-
-// ─── Cấu hình Native Google Sign-In (Chạy ngoài Web) ────────────────────────
-if (Platform.OS !== 'web') {
-  GoogleSignin.configure({
-    webClientId:
-      process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ||
-      process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ||
-      '255047379055-cu8ifeqgfak7nj3sq8bcve9hqh9v85m4.apps.googleusercontent.com',
-    offlineAccess: true,
-    forceCodeForRefreshToken: true,
-  });
-}
 
 // Hoàn tất phiên WebBrowser nếu có
 WebBrowser.maybeCompleteAuthSession();
@@ -144,6 +132,42 @@ export default function FixGoLoginScreen() {
   // Modal chọn vai trò đăng ký (Khách hàng / Thợ)
   const [showRegisterModal, setShowRegisterModal] = useState(false);
 
+  // ─── 3. Cấu hình expo-auth-session Google OAuth (Hoạt động mượt mà trên Expo Go) ───
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    clientId:
+      process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ||
+      '255047379055-cu8ifeqgfak7nj3sq8bcve9hqh9v85m4.apps.googleusercontent.com',
+    webClientId:
+      process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ||
+      '255047379055-cu8ifeqgfak7nj3sq8bcve9hqh9v85m4.apps.googleusercontent.com',
+    androidClientId:
+      process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ||
+      '255047379055-fnfeg3subj9ej2vda53ho0fluo9f8rib.apps.googleusercontent.com',
+    scopes: ['profile', 'email'],
+  });
+
+  // Lắng nghe kết quả trả về từ cửa sổ Google OAuth WebBrowser
+  useEffect(() => {
+    if (response?.type === 'success') {
+      const { id_token, authentication } = response.params;
+      const googleIdToken = id_token || authentication?.idToken;
+      console.log('✅ [FixGo Google AuthSession] Nhận idToken thành công từ trình duyệt WebBrowser');
+      if (googleIdToken) {
+        handleFirebaseGoogleSignIn(googleIdToken);
+      } else {
+        Alert.alert('Đăng nhập thất bại', 'Không nhận được mã xác thực idToken từ Google.');
+        setIsGoogleLoading(false);
+      }
+    } else if (response?.type === 'cancel' || response?.type === 'dismiss') {
+      console.log('ℹ️ [FixGo Google AuthSession] Người dùng đã đóng cửa sổ đăng nhập Google');
+      setIsGoogleLoading(false);
+    } else if (response?.type === 'error') {
+      console.error('❌ [FixGo Google AuthSession Lỗi]:', response.error);
+      Alert.alert('Đăng nhập thất bại', response.error?.message || 'Đăng nhập Google thất bại');
+      setIsGoogleLoading(false);
+    }
+  }, [response]);
+
 
 
 
@@ -232,7 +256,7 @@ export default function FixGoLoginScreen() {
     }
   };
 
-  // ─── 5. KÍCH HOẠT ĐĂNG NHẬP GOOGLE BẰNG GOOGLE SIGNIN NATIVE SDK ──────────
+  // ─── 5. KÍCH HOẠT ĐĂNG NHẬP GOOGLE BẰNG EXPO AUTH SESSION / WEB-BROWSER ───
   const handlePressGoogleSignIn = async () => {
     try {
       setIsGoogleLoading(true);
@@ -285,43 +309,16 @@ export default function FixGoLoginScreen() {
         return;
       }
 
-      // Nền tảng Mobile (Android / iOS): Dùng GoogleSignin Native Play Services
-      console.log('📱 [FixGo Mobile] Kiểm tra Google Play Services...');
-      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-
-      console.log('📱 [FixGo Mobile] Gọi GoogleSignin.signIn()...');
-      const signInResponse = await GoogleSignin.signIn();
-
-      // Bóc tách idToken hỗ trợ cả phiên bản mới (@react-native-google-signin v13+) lẫn cũ
-      let idToken = signInResponse?.data?.idToken || signInResponse?.idToken;
-      if (!idToken) {
-        console.log('🔄 [FixGo Mobile] Gọi GoogleSignin.getTokens() để lấy idToken...');
-        const tokens = await GoogleSignin.getTokens();
-        idToken = tokens?.idToken;
-      }
-
-      if (idToken) {
-        console.log('✅ [FixGo Mobile] Lấy idToken thành công từ Google Play Services');
-        await handleFirebaseGoogleSignIn(idToken);
-      } else {
-        throw new Error('Không nhận được mã xác thực idToken từ Google Play Services.');
-      }
+      // Nền tảng Mobile (Android / iOS qua Expo Go hoặc Standalone APK)
+      console.log('📱 [FixGo Mobile] Mở trình duyệt WebBrowser đăng nhập Google (Expo AuthSession)...');
+      await promptAsync();
     } catch (err) {
       setIsGoogleLoading(false);
-      if (err.code === statusCodes.SIGN_IN_CANCELLED) {
-        console.log('ℹ️ [FixGo GoogleSignin] Người dùng hủy thao tác đăng nhập Google');
-      } else if (err.code === statusCodes.IN_PROGRESS) {
-        console.warn('⚠️ [FixGo GoogleSignin] Đăng nhập Google đang được tiến hành');
-      } else if (err.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        console.error('❌ [FixGo GoogleSignin] Google Play Services không khả dụng hoặc quá cũ');
-        Alert.alert('Lỗi Google Play', 'Google Play Services trên thiết bị không khả dụng hoặc phiên bản quá cũ.');
-      } else {
-        console.error('❌ [FixGo Auth Error]:', err);
-        Alert.alert(
-          'Đăng nhập thất bại',
-          err.message || 'Không thể đăng nhập bằng Google lúc này.'
-        );
-      }
+      console.error('❌ [FixGo Auth Error]:', err);
+      Alert.alert(
+        'Đăng nhập thất bại',
+        err.message || 'Không thể mở trình duyệt đăng nhập Google lúc này.'
+      );
     }
   };
 
