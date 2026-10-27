@@ -14,7 +14,7 @@ import {
 
 const webClientId =
   process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ||
-  '579509931869-rlrf0332dftgmvrfnqhf90nd4l3d9v2k.apps.googleusercontent.com';
+  '579509931869-u2p0e3d5k6l76kmu2ot8rqbgojbq24g0.apps.googleusercontent.com';
 
 if (Platform.OS !== 'web') {
   GoogleSignin.configure({
