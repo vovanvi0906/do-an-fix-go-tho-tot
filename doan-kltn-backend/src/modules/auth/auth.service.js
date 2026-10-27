@@ -255,16 +255,18 @@ export class AuthService {
         process.env.GOOGLE_CLIENT_ID,
         process.env.GOOGLE_FIREBASE_WEB_CLIENT_ID,
         process.env.GOOGLE_ANDROID_CLIENT_ID,
+        '579509931869-u2p0e3d5k6l76kmu2ot8rqbgojbq24g0.apps.googleusercontent.com',
+        '579509931869-mo02sd37kaoe3gsqj3henruemodj4gt1.apps.googleusercontent.com',
+        '579509931869-rfn5qh0rdapucbadnqk71ht2d2fcrtoq.apps.googleusercontent.com',
       ].filter(Boolean);
-      const audience = allowedAudiences.length > 0 ? allowedAudiences : undefined;
       const ticket = await this.googleClient.verifyIdToken({
         idToken,
-        audience,
+        audience: allowedAudiences,
       });
       payload = ticket.getPayload();
     } catch (err) {
       console.error('❌ [Backend AuthService] Xác thực Google idToken thất bại:', err.message);
-      throw new UnauthorizedException('Mã xác thực Google (idToken) không hợp lệ hoặc đã hết hạn');
+      throw new UnauthorizedException('Mã xác thực Google (idToken) không hợp lệ hoặc đã hết hạn: ' + err.message);
     }
 
     if (!payload || !payload.email) {
