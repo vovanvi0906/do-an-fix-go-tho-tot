@@ -64,6 +64,11 @@ export function useGoogleAuth(targetRole = 'CUSTOMER') {
       }
 
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+      try {
+        await GoogleSignin.signOut(); // Xóa sạch session/token cũ đã hết hạn
+      } catch (signOutErr) {
+        // Bỏ qua nếu chưa từng đăng nhập
+      }
       const signInResponse = await GoogleSignin.signIn();
       let idToken = signInResponse?.data?.idToken || signInResponse?.idToken;
       if (!idToken) {
