@@ -12,7 +12,12 @@
           "package_name": "com.fixgo.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "579509931869-rlrf0332dftgmvrfnqhf90nd4l3d9v2k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBK0BJiOEruK5AsacVeeN5tnEvTam0p5NU"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "579509931869-rlrf0332dftgmvrfnqhf90nd4l3d9v2k.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
