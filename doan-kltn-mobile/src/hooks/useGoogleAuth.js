@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Platform, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
-import * as Google from 'expo-auth-session/providers/google';
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import { useAuth } from '../features/auth';
 import { apiClient } from '../services/api/apiClient';
 import { tokenStorage } from '../services/storage/tokenStorage';
@@ -13,29 +12,22 @@ import {
   signInWithPopup,
 } from '../services/firebaseConfig';
 
-WebBrowser.maybeCompleteAuthSession();
+const webClientId =
+  process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ||
+  '579509931869-rlrf0332dftgmvrfnqhf90nd4l3d9v2k.apps.googleusercontent.com';
+
+if (Platform.OS !== 'web') {
+  GoogleSignin.configure({
+    webClientId,
+    offlineAccess: true,
+    forceCodeForRefreshToken: true,
+  });
+}
 
 export function useGoogleAuth(targetRole = 'CUSTOMER') {
   const router = useRouter();
   const { firebaseGoogleLogin, googleLogin } = useAuth();
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-
-  const webClientId =
-    process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ||
-    process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ||
-    '579509931869-rlrf0332dftgmvrfnqhf90nd4l3d9v2k.apps.googleusercontent.com';
-
-  const [request, response, promptAsync] = Google.useAuthRequest(
-    {
-      clientId: webClientId,
-      webClientId: webClientId,
-      androidClientId: webClientId,
-      scopes: ['profile', 'email'],
-    },
-    {
-      projectNameForProxy: '@vanvi1906/doan-kltn-mobile',
-    }
-  );
 
   const handleFinishLogin = async (res) => {
     const loggedUser = res?.data?.user || res?.user;
@@ -59,35 +51,6 @@ export function useGoogleAuth(targetRole = 'CUSTOMER') {
     router.replace(userRole === 'WORKER' ? '/(worker)/(tabs)' : '/(user)/(tabs)');
   };
 
-  const processGoogleIdToken = async (googleIdToken) => {
-    try {
-      setIsGoogleLoading(true);
-      let res;
-      try {
-        const credential = GoogleAuthProvider.credential(googleIdToken);
-        const userCredential = await signInWithCredential(firebaseAuth, credential);
-        res = await firebaseGoogleLogin(await userCredential.user.getIdToken());
-      } catch {
-        res = await googleLogin(googleIdToken);
-      }
-      await handleFinishLogin(res);
-    } catch (err) {
-      Alert.alert('Đăng nhập Google thất bại', err.message || 'Lỗi xác thực');
-    } finally {
-      setIsGoogleLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (response?.type === 'success') {
-      const googleIdToken = response.params?.id_token || response.params?.authentication?.idToken;
-      if (googleIdToken) processGoogleIdToken(googleIdToken);
-      else setIsGoogleLoading(false);
-    } else if (['cancel', 'dismiss', 'error'].includes(response?.type)) {
-      setIsGoogleLoading(false);
-    }
-  }, [response]);
-
   const signInWithGoogle = async () => {
     try {
       setIsGoogleLoading(true);
@@ -99,13 +62,35 @@ export function useGoogleAuth(targetRole = 'CUSTOMER') {
         await handleFinishLogin(res);
         return;
       }
-      await promptAsync();
+
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+      const signInResponse = await GoogleSignin.signIn();
+      let idToken = signInResponse?.data?.idToken || signInResponse?.idToken;
+      if (!idToken) {
+        const tokens = await GoogleSignin.getTokens();
+        idToken = tokens?.idToken;
+      }
+
+      if (!idToken) throw new Error('Không nhận được mã idToken từ Google Play.');
+
+      let res;
+      try {
+        const credential = GoogleAuthProvider.credential(idToken);
+        const userCredential = await signInWithCredential(firebaseAuth, credential);
+        res = await firebaseGoogleLogin(await userCredential.user.getIdToken());
+      } catch {
+        res = await googleLogin(idToken);
+      }
+      await handleFinishLogin(res);
     } catch (err) {
       setIsGoogleLoading(false);
-      Alert.alert('Đăng nhập Google thất bại', err.message);
+      if (err.code !== statusCodes.SIGN_IN_CANCELLED) {
+        Alert.alert('Đăng nhập thất bại', err.message || 'Lỗi Google Sign-In');
+      }
+    } finally {
+      setIsGoogleLoading(false);
     }
   };
 
   return { signInWithGoogle, isGoogleLoading };
 }
-
