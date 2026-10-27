@@ -130,23 +130,54 @@ Nếu máy tính và điện thoại kết nối chung Wi-Fi:
 
 ---
 
-## 🛠 6. Hướng dẫn Build File APK Độc lập (Android)
+## 🛠 6. Hướng dẫn Build File APK & Quy trình Development Build
 
-Để build ra file APK cài trực tiếp cho người khác dùng thử:
+Dự án hỗ trợ 2 loại build APK chính tùy thuộc vào mục đích sử dụng:
+
+### A. Development Build (Khuyên dùng khi lập trình & Chấm đồ án)
+Bản build này tích hợp đầy đủ các native modules như **Google Sign-In Native (`@react-native-google-signin`)**, **Bản đồ thợ thời gian thực (`react-native-maps`)**, **Camera chẩn đoán sự cố (`expo-image-picker`)**. Bạn chỉ cần build **đúng 1 lần duy nhất** để cài vào điện thoại/máy ảo, sau đó sửa code JS/React Native app sẽ **tự động Hot Reload ngay tức thì mà không cần build lại**:
+
+1. **Build qua đám mây EAS (Khuyên dùng - Nhẹ máy nhất, không cần cài đặt Android SDK nặng)**:
+   ```bash
+   cd doan-kltn-mobile
+   eas build --platform android --profile development
+   ```
+   - Terminal sẽ tự động đẩy code lên máy chủ của Expo để đóng gói APK.
+   - Khi hoàn tất (khoảng 5-10 phút), terminal sẽ cung cấp mã QR hoặc đường link tải file `.apk`.
+   - Tải file APK về điện thoại Android và cài đặt (hoặc kéo thả vào máy ảo Android Emulator).
+
+2. **Quy trình Lập trình hàng ngày sau khi đã cài APK Development Client**:
+   - Khởi động Metro Bundler:
+     ```bash
+     cd doan-kltn-mobile
+     npx expo start
+     ```
+   - Mở app **FixGo** trên điện thoại: App sẽ tự động bắt sóng Metro qua Wi-Fi/cáp USB.
+   - Khi bạn chỉnh sửa code giao diện (`.jsx`, `.js`, CSS, logic gọi API) và bấm `Ctrl + S`, màn hình điện thoại **tự động cập nhật thay đổi trong 1 giây (Fast Refresh)**.
+
+3. **Cách Debug khi gặp lỗi trên điện thoại**:
+   - **Xem log trực tiếp**: Mọi câu lệnh `console.log()` và thông báo lỗi đỏ tự động hiển thị ngay trên cửa sổ terminal đang chạy `npx expo start`.
+   - **Mở Chrome DevTools**: Tại terminal Metro, bấm phím **`j`** để mở công cụ debug F12 (Console, Network) trên trình duyệt máy tính.
+   - **Mở Dev Menu trên điện thoại**: Cầm điện thoại **lắc nhẹ (Shake gesture)** để bật menu hỗ trợ (Reload app, Element Inspector).
+
+---
+
+### B. Preview Build (Bản cài đặt độc lập để người khác test thử)
+Dùng khi bạn muốn gửi file APK cho người khác cài đặt và trải nghiệm thử độc lập mà không cần mở máy tính chạy Metro bundler:
 1. Đăng nhập tài khoản Expo:
    ```bash
    eas login
    ```
-2. Khởi tạo cấu hình dự án của bạn:
+2. Khởi tạo cấu hình dự án (nếu chạy lần đầu):
    ```bash
    cd doan-kltn-mobile
    eas init
    ```
-3. Chạy lệnh đóng gói APK:
+3. Chạy lệnh đóng gói APK độc lập:
    ```bash
    eas build --platform android --profile preview
    ```
-4. Khi quá trình build trên Cloud hoàn tất, quét mã QR hoặc tải file `.apk` về cài đặt vào điện thoại hoặc kéo thả vào Android Emulator.
+4. Khi hoàn tất, quét mã QR hoặc tải file `.apk` về cài đặt trực tiếp.
 
 ---
 
