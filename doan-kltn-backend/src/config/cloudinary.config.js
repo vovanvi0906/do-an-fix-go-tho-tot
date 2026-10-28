@@ -17,4 +17,13 @@ export const avatarStorage = new CloudinaryStorage({
   },
 });
 
+export const incidentStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'fixgo/incidents',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+    transformation: [{ width: 1200, height: 1200, crop: 'limit' }],
+  },
+});
+
 export { cloudinary };
