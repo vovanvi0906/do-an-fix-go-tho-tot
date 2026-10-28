@@ -206,6 +206,7 @@ export class OrdersService {
       aiConfidence,
       estimatedPrice,
       scheduledAt,
+      imageUrl,
     } = createOrderDto;
 
     const finalLat = parseFloat(lat || pickupLat);
@@ -281,6 +282,18 @@ export class OrdersService {
           changedBy: userId,
         },
       });
+
+      // Tu dong luu anh su co ban dau vao bang OrderImage voi type = BEFORE
+      if (imageUrl) {
+        await tx.orderImage.create({
+          data: {
+            orderId: newOrder.id,
+            type: 'BEFORE',
+            url: imageUrl,
+            uploadedAt: new Date(),
+          },
+        });
+      }
 
       return newOrder;
     });

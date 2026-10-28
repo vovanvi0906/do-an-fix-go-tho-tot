@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Image } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../../src/features/auth';
@@ -7,7 +7,7 @@ import { useWorkerLocationTracker } from '../../../src/hooks/useWorkerLocationTr
 import { socketService } from '../../../src/services/socket/socketService';
 
 export default function WorkerJobDetailScreen() {
-  const { id, title, customerName, addressText, price, faceVerified } = useLocalSearchParams();
+  const { id, title, customerName, addressText, price, imageUrl, confidence, faceVerified } = useLocalSearchParams();
   const router = useRouter();
   const { user } = useAuth();
 
@@ -43,7 +43,7 @@ export default function WorkerJobDetailScreen() {
     stopTracking();
     setJobStatus('IN_PROGRESS');
     socketService.emit('worker:status_update', { orderId: id, status: 'IN_PROGRESS' });
-    Alert.alert('Đến nơi', 'Đã đến điểm hẹn. GPS đã tự động ngắt để tiết kiệm pin!');
+    Alert.alert('Đến nơi', 'Đã đến nhà khách. GPS đã tự động ngắt để tiết kiệm pin!');
   };
 
   return (
@@ -53,6 +53,18 @@ export default function WorkerJobDetailScreen() {
         <Text style={styles.title}>{title || 'Sửa chữa thiết bị theo yêu cầu'}</Text>
         <Text style={styles.price}>{price ? `${Number(price).toLocaleString('vi-VN')} đ` : '150.000 đ'}</Text>
       </View>
+
+      {imageUrl ? (
+        <View style={styles.aiCard}>
+          <View style={styles.aiBadge}>
+            <Ionicons name="sparkles" size={14} color="#0284C7" />
+            <Text style={styles.aiBadgeText}>
+              🤖 AI Đề xuất dịch vụ (Độ khớp: {confidence ? Math.round(Number(confidence) * 100) : 92}%)
+            </Text>
+          </View>
+          <Image source={{ uri: imageUrl }} style={styles.incidentImg} />
+        </View>
+      ) : null}
 
       <View style={styles.card}>
         <View style={styles.row}>
@@ -76,7 +88,7 @@ export default function WorkerJobDetailScreen() {
           <Ionicons name="radio" size={18} color={isTracking ? '#16A34A' : '#94A3B8'} />
           <Text style={styles.label}>Định vị GPS:</Text>
           <Text style={[styles.val, { color: isTracking ? '#16A34A' : '#64748B' }]}>
-            {isTracking ? 'Đang phát sóng tọa độ' : 'Tạm dừng'}
+            {isTracking ? 'Đang phát sóng tọa độ (3 giây/lần)' : 'Đang tạm dừng'}
           </Text>
         </View>
       </View>
@@ -129,6 +141,10 @@ const styles = StyleSheet.create({
   orderBadge: { fontSize: 12, fontWeight: '700', color: '#0284C7', marginBottom: 4 },
   title: { fontSize: 18, fontWeight: '700', color: '#0F172A', marginBottom: 6 },
   price: { fontSize: 17, fontWeight: '800', color: '#16A34A' },
+  aiCard: { backgroundColor: '#F0F9FF', borderRadius: 16, padding: 14, marginBottom: 12, borderWidth: 1, borderColor: '#BAE6FD' },
+  aiBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
+  aiBadgeText: { fontSize: 12.5, fontWeight: '700', color: '#0284C7' },
+  incidentImg: { width: '100%', height: 160, borderRadius: 10, backgroundColor: '#E2E8F0' },
   card: { backgroundColor: '#FFF', borderRadius: 16, padding: 16, gap: 12, borderWidth: 1, borderColor: '#E2E8F0', marginBottom: 16 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   label: { fontSize: 13, color: '#64748B', width: 90 },
