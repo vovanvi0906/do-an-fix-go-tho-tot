@@ -24,6 +24,9 @@ CANDIDATE_LABELS: Dict[str, List[str]] = {
 
 CLASS_PROMPTS: Dict[str, List[str]] = {
     "sua_dien": [
+        "a photo of burnt black electrical wall outlet with scorch marks",
+        "sparking electrical short circuit hazard with melted copper wires",
+        "tripped miniature circuit breaker switch inside home distribution box",
         "a photo of an electric circuit breaker or breaker box",
         "a photo of burnt electrical wires or short circuit",
         "a photo of a broken electrical wall outlet",
@@ -31,6 +34,9 @@ CLASS_PROMPTS: Dict[str, List[str]] = {
         "a photo of an electrical distribution panel",
     ] + CANDIDATE_LABELS["sua_dien"],
     "sua_nuoc": [
+        "a photo of water spraying out from cracked PVC water pipe",
+        "puddle of leaking water on floor beneath kitchen sink basin",
+        "loose bathroom water faucet dripping droplets continuously",
         "a photo of a leaking water pipe under a sink",
         "a photo of a broken water pipe with water leaking",
         "a photo of a dripping faucet or shower head",
@@ -38,6 +44,9 @@ CLASS_PROMPTS: Dict[str, List[str]] = {
         "a photo of a clogged drainage pipe or toilet",
     ] + CANDIDATE_LABELS["sua_nuoc"],
     "dien_lanh": [
+        "water dripping down from wall mounted air conditioner plastic casing",
+        "thick white ice and frost buildup on evaporator cooling coils",
+        "opened front-load washing machine drum with water drainage issue",
         "a photo of a leaking wall mounted air conditioner",
         "a photo of an indoor air conditioning unit",
         "a photo of a refrigerator appliance interior or exterior",
@@ -45,6 +54,8 @@ CLASS_PROMPTS: Dict[str, List[str]] = {
         "a photo of cooling frost buildup on HVAC equipment",
     ] + CANDIDATE_LABELS["dien_lanh"],
     "thiet_bi": [
+        "cracked induction cooker glass top showing error code on digital display",
+        "home microwave oven interior sparking or damaged turntable plate",
         "a photo of a broken kitchen induction cooker stove",
         "a photo of a damaged microwave oven appliance",
         "a photo of an electric water heater cylinder",
@@ -52,6 +63,8 @@ CLASS_PROMPTS: Dict[str, List[str]] = {
         "a photo of an appliance digital error code",
     ] + CANDIDATE_LABELS["thiet_bi"],
     "lam_vuon": [
+        "overgrown messy garden grass weeds needing lawn mower trimming",
+        "dense garden shrub hedge fence requiring hedge shear trimming",
         "a photo of an overgrown garden lawn grass",
         "a photo of lawn mowing or grass trimming",
         "a photo of pruning garden trees and ornamental plants",
