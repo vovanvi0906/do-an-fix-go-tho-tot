@@ -117,4 +117,6 @@ export class CreateOrderDto {
   pickupAddress;
   @IsOptional()
   description;
+  @IsOptional()
+  imageUrl;
 }
