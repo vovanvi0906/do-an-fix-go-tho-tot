@@ -1,7 +1,7 @@
 task: classify
 mode: train
 model: yolov8n-cls.pt
-data: G:\do-an-fix-go-tho-tot\ai-service\dataset
+data: /home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/dataset
 epochs: 5
 time: null
 patience: 100
@@ -12,7 +12,7 @@ save_period: -1
 cache: false
 device: ''
 workers: 8
-project: G:\do-an-fix-go-tho-tot\ai-service\runs\classify
+project: /home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/runs/classify
 name: fixgo_cls_v1
 exist_ok: true
 pretrained: true
@@ -111,4 +111,4 @@ auto_augment: randaugment
 erasing: 0.4
 cfg: null
 tracker: tracktrack.yaml
-save_dir: G:\do-an-fix-go-tho-tot\ai-service\runs\classify\fixgo_cls_v1
+save_dir: /home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/runs/classify/fixgo_cls_v1

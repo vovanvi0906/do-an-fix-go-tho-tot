@@ -12,7 +12,28 @@
           "package_name": "com.fixgo.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "579509931869-mo02sd37kaoe3gsqj3henruemodj4gt1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fixgo.app",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "579509931869-rfn5qh0rdapucbadnqk71ht2d2fcrtoq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fixgo.app",
+            "certificate_hash": "e95eedb7566dcd5acba76b0c7119099bfca9866e"
+          }
+        },
+        {
+          "client_id": "579509931869-u2p0e3d5k6l76kmu2ot8rqbgojbq24g0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBK0BJiOEruK5AsacVeeN5tnEvTam0p5NU"
@@ -20,7 +41,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "579509931869-rlrf0332dftgmvrfnqhf90nd4l3d9v2k.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

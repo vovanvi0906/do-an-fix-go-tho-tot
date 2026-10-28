@@ -461,17 +461,24 @@ async def diagnose(
 
         # Helper chuẩn bị thông tin dịch vụ con
         def get_sub_service_args(cat_key: Optional[str] = None) -> Dict[str, Any]:
-            if sub_svc_info:
-                svc_unit = sub_svc_info.get("priceRange", {}).get("unit", "buổi" if cat_key == "lam-vuon" else "lần")
-                return {
-                    "suggestedServiceId": sub_svc_info.get("serviceId"),
-                    "suggestedServiceName": sub_svc_info.get("serviceName"),
-                    "suggestedService": sub_svc_info.get("serviceName"),
-                    "suggestedServiceConfidence": sub_svc_info.get("confidence"),
-                    "unit": svc_unit,
-                    "estimatedPriceRange": sub_svc_info.get("priceRange"),
-                    "allServiceProbs": sub_svc_info.get("allServiceProbs"),
-                }
+            # Nếu danh mục được chọn trùng với danh mục của sub_service CLIP dự đoán
+            sub_cat_slug = None
+            if sub_svc_info and cat_key:
+                # Kiểm tra xem sub_service hiện tại có thuộc về cat_key không
+                matching_svcs = get_services_by_category(cat_key)
+                valid_slugs = {s["slug"] for s in matching_svcs}
+                if sub_svc_info.get("serviceId") in valid_slugs:
+                    svc_unit = sub_svc_info.get("priceRange", {}).get("unit", "buổi" if cat_key == "lam-vuon" else "lần")
+                    return {
+                        "suggestedServiceId": sub_svc_info.get("serviceId"),
+                        "suggestedServiceName": sub_svc_info.get("serviceName"),
+                        "suggestedService": sub_svc_info.get("serviceName"),
+                        "suggestedServiceConfidence": sub_svc_info.get("confidence"),
+                        "unit": svc_unit,
+                        "estimatedPriceRange": sub_svc_info.get("priceRange"),
+                        "allServiceProbs": sub_svc_info.get("allServiceProbs"),
+                    }
+
             if cat_key:
                 cat_services = get_services_by_category(cat_key)
                 if cat_services:
@@ -508,20 +515,48 @@ async def diagnose(
             except Exception as e:
                 logger.warning(f"⚠️ [YOLO Inference Error]: {e}")
 
-        # C. Quyết định phân loại theo CLASSIFIER_MODE ("clip" | "yolo" | "ensemble")
-        # 1. Chế độ ENSEMBLE (chỉ tin khi cả YOLO và CLIP cùng dự đoán 1 lớp)
-        if CLASSIFIER_MODE == "ensemble" and clip_top1_label and yolo_top1_name:
-            if path_hint_cat == "lam-vuon":
-                pass  # YOLO 5 lớp chưa có nhãn lam_vuon nên chuyển xuống Heuristic Fallback
-            elif clip_top1_label == yolo_top1_name and clip_top1_conf >= CLIP_MIN_CONF and clip_top1_label != "other_unclear":
-                cat_id, cat_name, extra_labels = CLS_TO_CATEGORY.get(clip_top1_label, (clip_top1_label, clip_top1_label, []))
-                comb_conf = round((clip_top1_conf + yolo_top1_conf) / 2.0, 4)
+        # C. Quyết định phân loại theo cơ chế Ensemble Soft-Voting (YOLO 60% + CLIP 40%)
+        # 1. Chế độ ENSEMBLE SOFT-VOTING (kết hợp cả YOLO và CLIP)
+        CLASSES_ENUM = ["sua_dien", "sua_nuoc", "dien_lanh", "thiet_bi", "lam_vuon", "other_unclear"]
+
+        if yolo_top1_name is not None and clip_probs is not None and all_probs_dict is not None:
+            # Tính điểm Soft-Voting Ensemble
+            ensemble_scores = {}
+            for c in CLASSES_ENUM:
+                p_y = all_probs_dict.get(c, 0.0)
+                p_c = clip_probs.get(c, 0.0)
+                ensemble_scores[c] = round(0.60 * p_y + 0.40 * p_c, 4)
+
+            top_ens_label = max(ensemble_scores, key=ensemble_scores.get)
+            top_ens_conf = ensemble_scores[top_ens_label]
+
+            # Kiểm tra ngưỡng tin cậy tổng hợp
+            if top_ens_label == "other_unclear" or top_ens_conf < 0.50:
+                kw_hint = path_hint_cat if path_hint_cat != "other-unclear" else (
+                    match_category_by_keywords(desc_text) or match_category_by_keywords(imageUrl or "")
+                )
+                if not kw_hint or kw_hint == "other-unclear":
+                    return DiagnoseResponse(
+                        suggestedCategoryId=None,
+                        suggestedCategoryName=None,
+                        confidence=round(top_ens_conf, 4),
+                        detectedLabels=[f"{top_ens_label} ({top_ens_conf:.1%})"],
+                        notes="Độ tin cậy nhận diện tổng hợp dưới ngưỡng hoặc hình ảnh chưa rõ ràng. Yêu cầu chọn thủ công.",
+                        engine="model",
+                        all_probs=all_probs_dict,
+                        clip_probs=clip_probs,
+                        clip_label=clip_top1_label,
+                        clip_confidence=clip_top1_conf,
+                        decision_source="ensemble",
+                    )
+            elif top_ens_label in CLS_TO_CATEGORY:
+                cat_id, cat_name, extra_labels = CLS_TO_CATEGORY[top_ens_label]
                 return DiagnoseResponse(
                     suggestedCategoryId=cat_id,
                     suggestedCategoryName=cat_name,
-                    confidence=comb_conf,
-                    detectedLabels=[clip_top1_label] + extra_labels[:2],
-                    notes=f"Đồng thuận cao giữa CLIP ({clip_top1_conf * 100:.1f}%) và YOLO ({yolo_top1_conf * 100:.1f}%).",
+                    confidence=round(top_ens_conf, 4),
+                    detectedLabels=[top_ens_label] + extra_labels[:2],
+                    notes=f"Chẩn đoán sự cố tối ưu qua mô hình kết hợp Ensemble Soft-Voting (YOLO: {all_probs_dict.get(top_ens_label, 0):.1%}, CLIP: {clip_probs.get(top_ens_label, 0):.1%}, Tổng hợp: {top_ens_conf:.1%}).",
                     engine="model",
                     all_probs=all_probs_dict,
                     clip_probs=clip_probs,
@@ -530,23 +565,9 @@ async def diagnose(
                     decision_source="ensemble",
                     **get_sub_service_args(cat_id),
                 )
-            else:
-                return DiagnoseResponse(
-                    suggestedCategoryId=None,
-                    suggestedCategoryName=None,
-                    confidence=round(max(clip_top1_conf, yolo_top1_conf), 4),
-                    detectedLabels=[f"yolo:{yolo_top1_name}", f"clip:{clip_top1_label}"],
-                    notes=f"YOLO ({yolo_top1_name}) và CLIP ({clip_top1_label}) dự đoán lệch nhau hoặc độ tin cậy thấp. Yêu cầu chọn thủ công.",
-                    engine="model",
-                    all_probs=all_probs_dict,
-                    clip_probs=clip_probs,
-                    clip_label=clip_top1_label,
-                    clip_confidence=clip_top1_conf,
-                    decision_source="ensemble",
-                )
 
-        # 2. Chế độ CLIP (mặc định: dùng CLIP zero-shot làm kết quả chính)
-        if CLASSIFIER_MODE != "yolo" and clip_top1_label is not None:
+        # 2. Chế độ CLIP Độc lập (khi YOLO không khả dụng)
+        if clip_top1_label is not None:
             # Ưu tiên nhận diện làm vườn qua path/filename nếu CLIP chưa dự đoán đúng nhãn này
             if path_hint_cat == "lam-vuon" and clip_top1_label != "lam_vuon":
                 pass  # Chuyển tiếp xuống Heuristic Fallback để gán chính xác lam-vuon

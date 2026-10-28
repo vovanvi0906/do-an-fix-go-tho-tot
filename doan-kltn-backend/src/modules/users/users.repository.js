@@ -160,20 +160,9 @@ export class UsersRepository {
   }
 
   async updatePhone(userId, phone) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      include: { customerProfile: true, workerProfile: true },
-    });
-    const data = { phone, isPhoneVerified: true };
-    if (user?.customerProfile) {
-      data.customerProfile = { update: { phone } };
-    }
-    if (user?.workerProfile) {
-      data.workerProfile = { update: { phone } };
-    }
     return this.prisma.user.update({
       where: { id: userId },
-      data,
+      data: { phone },
       include: {
         customerProfile: true,
         workerProfile: true,
