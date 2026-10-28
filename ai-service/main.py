@@ -461,17 +461,24 @@ async def diagnose(
 
         # Helper chuẩn bị thông tin dịch vụ con
         def get_sub_service_args(cat_key: Optional[str] = None) -> Dict[str, Any]:
-            if sub_svc_info:
-                svc_unit = sub_svc_info.get("priceRange", {}).get("unit", "buổi" if cat_key == "lam-vuon" else "lần")
-                return {
-                    "suggestedServiceId": sub_svc_info.get("serviceId"),
-                    "suggestedServiceName": sub_svc_info.get("serviceName"),
-                    "suggestedService": sub_svc_info.get("serviceName"),
-                    "suggestedServiceConfidence": sub_svc_info.get("confidence"),
-                    "unit": svc_unit,
-                    "estimatedPriceRange": sub_svc_info.get("priceRange"),
-                    "allServiceProbs": sub_svc_info.get("allServiceProbs"),
-                }
+            # Nếu danh mục được chọn trùng với danh mục của sub_service CLIP dự đoán
+            sub_cat_slug = None
+            if sub_svc_info and cat_key:
+                # Kiểm tra xem sub_service hiện tại có thuộc về cat_key không
+                matching_svcs = get_services_by_category(cat_key)
+                valid_slugs = {s["slug"] for s in matching_svcs}
+                if sub_svc_info.get("serviceId") in valid_slugs:
+                    svc_unit = sub_svc_info.get("priceRange", {}).get("unit", "buổi" if cat_key == "lam-vuon" else "lần")
+                    return {
+                        "suggestedServiceId": sub_svc_info.get("serviceId"),
+                        "suggestedServiceName": sub_svc_info.get("serviceName"),
+                        "suggestedService": sub_svc_info.get("serviceName"),
+                        "suggestedServiceConfidence": sub_svc_info.get("confidence"),
+                        "unit": svc_unit,
+                        "estimatedPriceRange": sub_svc_info.get("priceRange"),
+                        "allServiceProbs": sub_svc_info.get("allServiceProbs"),
+                    }
+
             if cat_key:
                 cat_services = get_services_by_category(cat_key)
                 if cat_services:
