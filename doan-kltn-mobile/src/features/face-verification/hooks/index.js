@@ -1,1 +1,1 @@
-// Export hooks of face-verification
+export * from './useFaceVerification';

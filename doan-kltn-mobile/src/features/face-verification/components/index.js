@@ -1,1 +1,2 @@
-// Export components of face-verification
+export * from './BiometricOvalFrame';
+export * from './VerificationResultModal';
