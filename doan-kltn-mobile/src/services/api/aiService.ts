@@ -32,11 +32,41 @@ export async function diagnoseIssueImage(
   description?: string
 ): Promise<AiDiagnosisResponse> {
   try {
-    // 1. Thử gọi API Backend qua /orders/diagnose (có xác thực & liên kết bảng giá)
-    const response = await apiClient.post<any, any>('/orders/diagnose', {
-      imageUrl: imageUri,
-      description: description || '',
-    });
+    let response: any = null;
+
+    // Kiem tra neu imageUri la file cuc bo (chup tu camera hoac thu vien anh)
+    const isLocalFile =
+      imageUri.startsWith('file://') ||
+      imageUri.startsWith('content://') ||
+      imageUri.startsWith('ph://');
+
+    if (isLocalFile) {
+      const formData = new FormData();
+      const filename = imageUri.split('/').pop() || 'incident_photo.jpg';
+      const match = /\.(\w+)$/.exec(filename);
+      const ext = match ? match[1].toLowerCase() : 'jpg';
+      const mimeType = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
+
+      formData.append('image', {
+        uri: imageUri,
+        name: filename,
+        type: mimeType,
+      } as any);
+
+      if (description) {
+        formData.append('description', description);
+      }
+
+      response = await apiClient.post<any, any>('/orders/diagnose-upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+    } else {
+      // Neu da la URL online san
+      response = await apiClient.post<any, any>('/orders/diagnose', {
+        imageUrl: imageUri,
+        description: description || '',
+      });
+    }
 
     if (response) {
       const minPrice = response.estimatedPriceMin || response.estimatedPriceRange?.min || 150000;
