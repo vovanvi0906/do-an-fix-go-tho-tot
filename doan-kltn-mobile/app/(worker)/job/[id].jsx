@@ -16,7 +16,6 @@ export default function WorkerJobDetailScreen() {
   const { isTracking, startTracking, stopTracking } = useWorkerLocationTracker(id, user?.id);
 
   const handleStartMoving = async () => {
-    // Luồng nghiệp vụ: Bắt buộc xác thực khuôn mặt AI trước khi bắt đầu di chuyển
     if (!isFaceChecked) {
       Alert.alert(
         'Xác thực danh tính',
@@ -111,7 +110,7 @@ export default function WorkerJobDetailScreen() {
         {jobStatus === 'IN_PROGRESS' && (
           <TouchableOpacity
             style={styles.btnCamera}
-            onPress={() => router.push({ pathname: '/(worker)/verification/before-after', params: { orderId: id } })}
+            onPress={() => router.push({ pathname: '/(worker)/verification/face', params: { orderId: id } })}
             activeOpacity={0.8}
           >
             <Ionicons name="camera" size={18} color="#FFF" style={{ marginRight: 6 }} />
