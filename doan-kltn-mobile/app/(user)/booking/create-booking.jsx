@@ -275,7 +275,9 @@ export default function BookingFlowScreen() {
       scheduledAt: scheduleDisplay,
       isUrgent,
       status: isUrgent ? 'SEARCHING_WORKER' : 'MATCHED',
-      price: params.basePrice ? Number(params.basePrice) : 150000,
+      price: params.price ? Number(params.price) : params.basePrice ? Number(params.basePrice) : 150000,
+      imageUrl: params.imageUrl || null,
+      aiConfidence: params.confidence ? Number(params.confidence) : null,
       createdAt: new Date().toISOString(),
     };
 
@@ -306,7 +308,9 @@ export default function BookingFlowScreen() {
                   serviceName: jobTitle,
                   addressText: customerAddress,
                   scheduledAt: scheduleDisplay,
-                  price: String(params.basePrice ? Number(params.basePrice) : 150000),
+                  price: String(params.price ? Number(params.price) : params.basePrice ? Number(params.basePrice) : 150000),
+                  imageUrl: params.imageUrl || '',
+                  confidence: params.confidence || '',
                   status: 'MATCHED',
                   createdAt: new Date().toISOString(),
                   note: noteText || '',

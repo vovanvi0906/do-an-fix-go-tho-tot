@@ -10,7 +10,12 @@ import {
   UseGuards,
   Bind,
   Dependencies,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { incidentStorage } from '../../config/cloudinary.config';
 import {
   ApiTags,
   ApiBearerAuth,
@@ -60,7 +65,28 @@ export class OrdersController {
   })
   @Bind(Req(), Body())
   async diagnose(req, diagnoseDto) {
-    return this.ordersService.diagnose(req.user.userId, diagnoseDto);
+    return this.ordersService.diagnose(req.user?.userId || req.user?.id, diagnoseDto);
+  }
+
+  /**
+   * 1.1 POST /orders/diagnose-upload: Upload trực tiếp file ảnh chụp từ mobile + description
+   */
+  @Post('diagnose-upload')
+  @UseInterceptors(FileInterceptor('image', { storage: incidentStorage }))
+  @ApiOperation({
+    summary: 'Upload trực tiếp ảnh sự cố từ mobile, lưu Cloudinary và gọi AI chẩn đoán',
+  })
+  @Bind(Req(), UploadedFile(), Body())
+  async diagnoseUpload(req, file, body) {
+    const imageUrl = file?.path || file?.secure_url || file?.url;
+    if (!imageUrl) {
+      throw new BadRequestException('Vui lòng tải lên file ảnh sự cố hợp lệ (jpg, png, webp)');
+    }
+    const description = body?.description || '';
+    return this.ordersService.diagnose(req.user?.userId || req.user?.id, {
+      imageUrl,
+      description,
+    });
   }
 
   /**

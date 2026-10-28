@@ -226,6 +226,8 @@ export default function HomeScreen() {
         serviceId: diagnosis.suggestedServiceId || '',
         serviceName: diagnosis.suggestedServiceName || diagnosis.categoryName,
         price: String(diagnosis.estimatedPrice.min),
+        imageUrl: diagnosis.imageUrl || '',
+        confidence: String(diagnosis.confidence || 0.9),
         note: diagnosis.suggestedServiceName
           ? `[Dịch vụ đề xuất: ${diagnosis.suggestedServiceName}] ${diagnosis.notes}`
           : diagnosis.notes,

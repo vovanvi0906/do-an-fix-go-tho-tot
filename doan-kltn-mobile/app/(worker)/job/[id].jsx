@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Image } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../../src/features/auth';
@@ -7,11 +7,11 @@ import { useWorkerLocationTracker } from '../../../src/hooks/useWorkerLocationTr
 import { socketService } from '../../../src/services/socket/socketService';
 
 export default function WorkerJobDetailScreen() {
-  const { id, title, customerName, addressText, price } = useLocalSearchParams();
+  const { id, title, customerName, addressText, price, imageUrl, confidence } = useLocalSearchParams();
   const router = useRouter();
   const { user } = useAuth();
 
-  const [jobStatus, setJobStatus] = useState('ASSIGNED'); // ASSIGNED | WORKER_ARRIVING | IN_PROGRESS | COMPLETED
+  const [jobStatus, setJobStatus] = useState('ASSIGNED');
   const { isTracking, startTracking, stopTracking } = useWorkerLocationTracker(id, user?.id);
 
   const handleStartMoving = async () => {
@@ -19,7 +19,7 @@ export default function WorkerJobDetailScreen() {
     if (ok) {
       setJobStatus('WORKER_ARRIVING');
       socketService.emit('worker:status_update', { orderId: id, status: 'WORKER_ARRIVING' });
-      Alert.alert('Thanh cong', 'Da bat dinh vi GPS truyen truc tiep lo trinh cho khach hang!');
+      Alert.alert('Thành công', 'Đã bật định vị GPS truyền trực tiếp lộ trình cho khách hàng!');
     }
   };
 
@@ -27,33 +27,45 @@ export default function WorkerJobDetailScreen() {
     stopTracking();
     setJobStatus('IN_PROGRESS');
     socketService.emit('worker:status_update', { orderId: id, status: 'IN_PROGRESS' });
-    Alert.alert('Den noi', 'Da den nha khach. GPS da tu dong ngat de tiet kiem pin!');
+    Alert.alert('Đến nơi', 'Đã đến nhà khách. GPS đã tự động ngắt để tiết kiệm pin!');
   };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.headerBox}>
-        <Text style={styles.orderBadge}>MA DON #{String(id || '').slice(0, 8).toUpperCase()}</Text>
-        <Text style={styles.title}>{title || 'Sua chua thiet bi theo yeu cau'}</Text>
-        <Text style={styles.price}>{price ? `${Number(price).toLocaleString('vi-VN')} d` : '150.000 d'}</Text>
+        <Text style={styles.orderBadge}>MÃ ĐƠN #{String(id || '').slice(0, 8).toUpperCase()}</Text>
+        <Text style={styles.title}>{title || 'Sửa chữa thiết bị theo yêu cầu'}</Text>
+        <Text style={styles.price}>{price ? `${Number(price).toLocaleString('vi-VN')} đ` : '150.000 đ'}</Text>
       </View>
+
+      {imageUrl ? (
+        <View style={styles.aiCard}>
+          <View style={styles.aiBadge}>
+            <Ionicons name="sparkles" size={14} color="#0284C7" />
+            <Text style={styles.aiBadgeText}>
+              🤖 AI Đề xuất dịch vụ (Độ khớp: {confidence ? Math.round(Number(confidence) * 100) : 92}%)
+            </Text>
+          </View>
+          <Image source={{ uri: imageUrl }} style={styles.incidentImg} />
+        </View>
+      ) : null}
 
       <View style={styles.card}>
         <View style={styles.row}>
           <Ionicons name="location" size={18} color="#0284C7" />
-          <Text style={styles.label}>Dia chi:</Text>
-          <Text style={styles.val}>{addressText || '606/20 Hiep Binh, TP. Thu Duc'}</Text>
+          <Text style={styles.label}>Địa chỉ:</Text>
+          <Text style={styles.val}>{addressText || '606/20 Hiệp Bình, TP. Thủ Đức'}</Text>
         </View>
         <View style={styles.row}>
           <Ionicons name="person" size={18} color="#0284C7" />
-          <Text style={styles.label}>Khach hang:</Text>
-          <Text style={styles.val}>{customerName || 'Nguyen Van A (0988.123.456)'}</Text>
+          <Text style={styles.label}>Khách hàng:</Text>
+          <Text style={styles.val}>{customerName || 'Nguyễn Văn A (0988.123.456)'}</Text>
         </View>
         <View style={styles.row}>
           <Ionicons name="radio" size={18} color={isTracking ? '#16A34A' : '#94A3B8'} />
-          <Text style={styles.label}>Dinh vi GPS:</Text>
+          <Text style={styles.label}>Định vị GPS:</Text>
           <Text style={[styles.val, { color: isTracking ? '#16A34A' : '#64748B' }]}>
-            {isTracking ? 'Dang phat song toa do (3 giay/lan)' : 'Dang tam dung'}
+            {isTracking ? 'Đang phát sóng tọa độ (3 giây/lần)' : 'Đang tạm dừng'}
           </Text>
         </View>
       </View>
@@ -62,14 +74,14 @@ export default function WorkerJobDetailScreen() {
         {jobStatus === 'ASSIGNED' && (
           <TouchableOpacity style={styles.btnPrimary} onPress={handleStartMoving} activeOpacity={0.8}>
             <Ionicons name="navigate" size={18} color="#FFF" style={{ marginRight: 6 }} />
-            <Text style={styles.btnText}>BAT DAU DI CHUYEN DEN KHACH</Text>
+            <Text style={styles.btnText}>BẮT ĐẦU DI CHUYỂN ĐẾN KHÁCH</Text>
           </TouchableOpacity>
         )}
 
         {jobStatus === 'WORKER_ARRIVING' && (
           <TouchableOpacity style={styles.btnSuccess} onPress={handleArrived} activeOpacity={0.8}>
             <Ionicons name="checkmark-circle" size={18} color="#FFF" style={{ marginRight: 6 }} />
-            <Text style={styles.btnText}>DA DEN NOI - BAT DAU SUA</Text>
+            <Text style={styles.btnText}>ĐÃ ĐẾN NƠI - BẮT ĐẦU SỬA</Text>
           </TouchableOpacity>
         )}
 
@@ -80,7 +92,7 @@ export default function WorkerJobDetailScreen() {
             activeOpacity={0.8}
           >
             <Ionicons name="camera" size={18} color="#FFF" style={{ marginRight: 6 }} />
-            <Text style={styles.btnText}>CHUP ANH NGHIEM THU (AFTER)</Text>
+            <Text style={styles.btnText}>CHỤP ẢNH NGHIỆM THU (AFTER)</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -95,6 +107,10 @@ const styles = StyleSheet.create({
   orderBadge: { fontSize: 12, fontWeight: '700', color: '#0284C7', marginBottom: 4 },
   title: { fontSize: 18, fontWeight: '700', color: '#0F172A', marginBottom: 6 },
   price: { fontSize: 17, fontWeight: '800', color: '#16A34A' },
+  aiCard: { backgroundColor: '#F0F9FF', borderRadius: 16, padding: 14, marginBottom: 12, borderWidth: 1, borderColor: '#BAE6FD' },
+  aiBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
+  aiBadgeText: { fontSize: 12.5, fontWeight: '700', color: '#0284C7' },
+  incidentImg: { width: '100%', height: 160, borderRadius: 10, backgroundColor: '#E2E8F0' },
   card: { backgroundColor: '#FFF', borderRadius: 16, padding: 16, gap: 12, borderWidth: 1, borderColor: '#E2E8F0', marginBottom: 16 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   label: { fontSize: 13, color: '#64748B', width: 90 },
