@@ -29,6 +29,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { orderService } from '../../../src/services/api/orderService';
 import { socketService } from '../../../src/services/socket/socketService';
 import { orderStorage } from '../../../src/services/storage/orderStorage';
+import { routingService } from '../../../src/services/api/routingService';
+import WorkerTrackingMapView from '../../../src/components/WorkerTrackingMapView';
 
 export default function UserOrderDetailScreen() {
   const params = useLocalSearchParams();
@@ -59,6 +61,8 @@ export default function UserOrderDetailScreen() {
 
   const [loading, setLoading] = useState(!order);
   const [currentStatus, setCurrentStatus] = useState(() => params?.status || 'AWAITING_CONFIRM');
+  const [workerLocation, setWorkerLocation] = useState(null);
+  const [routeInfo, setRouteInfo] = useState({ coordinates: [], formattedEta: '~8 - 12 phút (1.5 km)' });
 
   const fetchOrderData = async () => {
     try {
@@ -109,10 +113,30 @@ export default function UserOrderDetailScreen() {
       socketService.on(`order:${id}:status`, handleStatusUpdate);
     }
 
+    // Lắng nghe vị trí GPS của thợ thời gian thực từ Socket
+    const handleLocationUpdate = async (locData) => {
+      console.log('📍 [OrderDetail Socket] Nhận vị trí thợ:', locData);
+      if (locData && locData.lat && locData.lng) {
+        const wCoord = { latitude: Number(locData.lat), longitude: Number(locData.lng) };
+        setWorkerLocation(wCoord);
+
+        // Lấy tọa độ khách hàng
+        const cLat = Number(order?.lat || 10.7769);
+        const cLng = Number(order?.lng || 106.7009);
+        const rData = await routingService.getRoute(wCoord, { latitude: cLat, longitude: cLng });
+        if (rData) {
+          setRouteInfo(rData);
+        }
+      }
+    };
+
+    socketService.on('worker:location_update', handleLocationUpdate);
+
     return () => {
       if (id) {
         socketService.off(`order:${id}:status`, handleStatusUpdate);
       }
+      socketService.off('worker:location_update', handleLocationUpdate);
     };
   }, [id]);
 
@@ -310,7 +334,19 @@ export default function UserOrderDetailScreen() {
 
         {/* ── 3. THÔNG TIN THỢ PHỤ TRÁCH (Khi đã xác nhận thợ) ─────── */}
         {!isAwaitingConfirm && !isCancelled && (
-          <View nativeID="order-detail-worker-card" style={styles.workerCard}>
+          <>
+            {/* Bản đồ định vị và lộ trình thời gian thực OSRM */}
+            <WorkerTrackingMapView
+              customerCoord={{
+                latitude: Number(order?.lat || 10.7769),
+                longitude: Number(order?.lng || 106.7009),
+              }}
+              workerCoord={workerLocation}
+              routeCoordinates={routeInfo.coordinates}
+              formattedEta={routeInfo.formattedEta}
+            />
+
+            <View nativeID="order-detail-worker-card" style={styles.workerCard}>
             <View style={styles.workerAvatarCircle}>
               <Text style={styles.workerAvatarText}>👨‍🔧</Text>
             </View>
@@ -331,6 +367,7 @@ export default function UserOrderDetailScreen() {
               <Ionicons name="call" size={18} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
+        </>
         )}
 
         {/* ── 4. TIẾN TRÌNH THỰC HIỆN ĐƠN HÀNG ───────────────────────── */}
