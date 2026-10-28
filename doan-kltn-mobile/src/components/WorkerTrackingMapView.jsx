@@ -82,3 +82,4 @@ const styles = StyleSheet.create({
   },
   etaText: { fontSize: 12.5, fontWeight: '700', color: '#0F172A' },
 });
+

@@ -46,3 +46,4 @@ export const getTrackingMapHtml = (custLat, custLng, workLat, workLng, polylineJ
 </body>
 </html>
 `;
+
