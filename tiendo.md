@@ -110,3 +110,5 @@ Mục tiêu đề tài yêu cầu 3 tính năng AI:
    - Gắn kết nối API thống kê hoa hồng thực tế trên Dashboard Admin.
 3. **Tuần cuối (Ưu tiên số 3 - Chốt báo cáo & Demo rehearsal):**
    - Chuẩn bị sẵn bộ 5 kịch bản ảnh mẫu (1 ảnh chập điện, 1 ảnh vỡ ống nước, 1 ảnh khuôn mặt đúng, 1 ảnh mặt giả, 1 ảnh chụp Before/After sạch sẽ) để demo trực tiếp mượt mà trước hội đồng.
+
+   - Chuẩn bị sẵn bộ 5 kịch bản ảnh mẫu (1 ảnh chập điện, 1 ảnh vỡ ống nước, 1 ảnh khuôn mặt đúng, 1 ảnh mặt giả, 1 ảnh chụp Before/After sạch sẽ) để demo trực tiếp mượt mà trước hội đồng.

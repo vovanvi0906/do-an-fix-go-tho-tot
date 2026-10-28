@@ -3,17 +3,37 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Image } fr
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../../src/features/auth';
+import { useWorkerLocationTracker } from '../../../src/hooks/useWorkerLocationTracker';
+import { socketService } from '../../../src/services/socket/socketService';
 
 export default function WorkerJobDetailScreen() {
   const { id, title, customerName, addressText, price, imageUrl, confidence } = useLocalSearchParams();
   const router = useRouter();
   const { user } = useAuth();
+
   const [jobStatus, setJobStatus] = useState('ASSIGNED');
+  const { isTracking, startTracking, stopTracking } = useWorkerLocationTracker(id, user?.id);
+
+  const handleStartMoving = async () => {
+    const ok = await startTracking();
+    if (ok) {
+      setJobStatus('WORKER_ARRIVING');
+      socketService.emit('worker:status_update', { orderId: id, status: 'WORKER_ARRIVING' });
+      Alert.alert('Thành công', 'Đã bật định vị GPS truyền trực tiếp lộ trình cho khách hàng!');
+    }
+  };
+
+  const handleArrived = () => {
+    stopTracking();
+    setJobStatus('IN_PROGRESS');
+    socketService.emit('worker:status_update', { orderId: id, status: 'IN_PROGRESS' });
+    Alert.alert('Đến nơi', 'Đã đến nhà khách. GPS đã tự động ngắt để tiết kiệm pin!');
+  };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.headerBox}>
-        <Text style={styles.orderBadge}>MÃ VIỆC #{String(id || '').slice(0, 8).toUpperCase()}</Text>
+        <Text style={styles.orderBadge}>MÃ ĐƠN #{String(id || '').slice(0, 8).toUpperCase()}</Text>
         <Text style={styles.title}>{title || 'Sửa chữa thiết bị theo yêu cầu'}</Text>
         <Text style={styles.price}>{price ? `${Number(price).toLocaleString('vi-VN')} đ` : '150.000 đ'}</Text>
       </View>
@@ -41,20 +61,27 @@ export default function WorkerJobDetailScreen() {
           <Text style={styles.label}>Khách hàng:</Text>
           <Text style={styles.val}>{customerName || 'Nguyễn Văn A (0988.123.456)'}</Text>
         </View>
+        <View style={styles.row}>
+          <Ionicons name="radio" size={18} color={isTracking ? '#16A34A' : '#94A3B8'} />
+          <Text style={styles.label}>Định vị GPS:</Text>
+          <Text style={[styles.val, { color: isTracking ? '#16A34A' : '#64748B' }]}>
+            {isTracking ? 'Đang phát sóng tọa độ (3 giây/lần)' : 'Đang tạm dừng'}
+          </Text>
+        </View>
       </View>
 
       <View style={styles.actionContainer}>
         {jobStatus === 'ASSIGNED' && (
-          <TouchableOpacity
-            style={styles.btnPrimary}
-            onPress={() => {
-              setJobStatus('IN_PROGRESS');
-              Alert.alert('Thành công', 'Đã bắt đầu nhận ca làm việc');
-            }}
-            activeOpacity={0.8}
-          >
+          <TouchableOpacity style={styles.btnPrimary} onPress={handleStartMoving} activeOpacity={0.8}>
             <Ionicons name="navigate" size={18} color="#FFF" style={{ marginRight: 6 }} />
-            <Text style={styles.btnText}>BẮT ĐẦU THỰC HIỆN CA LÀM</Text>
+            <Text style={styles.btnText}>BẮT ĐẦU DI CHUYỂN ĐẾN KHÁCH</Text>
+          </TouchableOpacity>
+        )}
+
+        {jobStatus === 'WORKER_ARRIVING' && (
+          <TouchableOpacity style={styles.btnSuccess} onPress={handleArrived} activeOpacity={0.8}>
+            <Ionicons name="checkmark-circle" size={18} color="#FFF" style={{ marginRight: 6 }} />
+            <Text style={styles.btnText}>ĐÃ ĐẾN NƠI - BẮT ĐẦU SỬA</Text>
           </TouchableOpacity>
         )}
 
@@ -90,6 +117,7 @@ const styles = StyleSheet.create({
   val: { flex: 1, fontSize: 13.5, fontWeight: '600', color: '#1E293B' },
   actionContainer: { gap: 10 },
   btnPrimary: { height: 50, borderRadius: 14, backgroundColor: '#0284C7', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' },
+  btnSuccess: { height: 50, borderRadius: 14, backgroundColor: '#16A34A', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' },
   btnCamera: { height: 50, borderRadius: 14, backgroundColor: '#7C3AED', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' },
   btnText: { color: '#FFF', fontSize: 14, fontWeight: '800' },
 });
