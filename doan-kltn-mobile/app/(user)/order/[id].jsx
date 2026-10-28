@@ -22,6 +22,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -263,6 +264,19 @@ export default function UserOrderDetailScreen() {
           <Text style={styles.serviceMainTitle}>
             {order?.title || order?.serviceName || 'Dịch vụ sửa chữa'}
           </Text>
+
+          {/* Huy hieu chan doan AI kem anh su co */}
+          {(order?.imageUrl || params?.imageUrl) && (
+            <View style={styles.aiIncidentCard}>
+              <View style={styles.aiIncidentBadge}>
+                <Ionicons name="sparkles" size={14} color="#0284C7" />
+                <Text style={styles.aiIncidentBadgeText}>
+                  AI Chẩn đoán sự cố • Độ khớp: {params?.confidence ? Math.round(Number(params.confidence) * 100) : 92}%
+                </Text>
+              </View>
+              <Image source={{ uri: order?.imageUrl || params?.imageUrl }} style={styles.aiIncidentImg} />
+            </View>
+          )}
 
           <View style={styles.divider} />
 
@@ -796,5 +810,31 @@ const styles = StyleSheet.create({
     fontSize: 13.5,
     fontFamily: 'Inter_600SemiBold',
     color: '#DC2626',
+  },
+  aiIncidentCard: {
+    marginTop: 8,
+    marginBottom: 6,
+    backgroundColor: '#F0F9FF',
+    borderRadius: 12,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#BAE6FD',
+  },
+  aiIncidentBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 8,
+  },
+  aiIncidentBadgeText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#0284C7',
+  },
+  aiIncidentImg: {
+    width: '100%',
+    height: 140,
+    borderRadius: 8,
+    backgroundColor: '#E2E8F0',
   },
 });
