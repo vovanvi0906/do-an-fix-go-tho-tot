@@ -152,15 +152,15 @@ export class FastApiAiClient {
 
   /**
    * 3. POST /ai/face-verify: Xác thực khuôn mặt thợ
-   * input: workerId, selfieUrl
+   * input: workerId, selfieUrl, idCardImageUrl
    * output: { verified: boolean, confidence (0-1) }
    */
-  async verifyFace(workerId, selfieUrl) {
+  async verifyFace(workerId, selfieUrl, idCardImageUrl = '') {
     try {
       const response = await fetch(`${this.baseUrl}/ai/face-verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ workerId, photoUrl: selfieUrl }),
+        body: JSON.stringify({ workerId, photoUrl: selfieUrl, idCardImageUrl }),
       });
 
       if (response.ok) {
