@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import * as Location from 'expo-location';
-import { socketService } from '../../../services/socket/socketService';
+import { socketService } from '../services/socket/socketService';
 
 export function useWorkerLocationTracker(orderId, workerId) {
   const [isTracking, setIsTracking] = useState(false);
