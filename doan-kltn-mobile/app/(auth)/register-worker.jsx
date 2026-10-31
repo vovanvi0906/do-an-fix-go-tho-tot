@@ -23,7 +23,7 @@ import {
   Inter_600SemiBold,
   Inter_700Bold,
 } from '@expo-google-fonts/inter';
-import { useAuth } from '../../src/features/auth';
+import { useAuth, StepIndicator } from '../../src/features/auth';
 import { useGoogleAuth } from '../../src/hooks';
 
 // ─── Design Tokens (Figma FIXGO – Exact Match) ───────────────────────────────
@@ -438,6 +438,9 @@ export default function RegisterWorkerScreen() {
     <View style={styles.container}>
       <StatusBar style="dark" />
       <SafeAreaView style={styles.safeArea}>
+        {step >= 1 && step <= 6 && (
+          <StepIndicator currentStep={step} totalSteps={6} />
+        )}
         <KeyboardAvoidingView
           style={styles.flex1}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
