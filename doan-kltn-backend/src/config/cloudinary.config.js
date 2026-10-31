@@ -17,6 +17,15 @@ export const avatarStorage = new CloudinaryStorage({
   },
 });
 
+export const workerFaceStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'fixgo/worker-faces',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+    transformation: [{ width: 800, height: 800, crop: 'limit' }],
+  },
+});
+
 export const incidentStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {

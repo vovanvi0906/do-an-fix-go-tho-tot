@@ -722,14 +722,29 @@ export class OrdersService {
 
     const worker = await this.prisma.workerProfile.findUnique({
       where: { userId: workerUserId },
+      include: {
+        faceProfile: true,
+        user: { select: { avatarUrl: true } },
+      },
     });
 
     if (!worker) {
       throw new BadRequestException('Không tìm thấy hồ sơ kỹ thuật viên');
     }
 
-    // Gọi FastAPI AI Service so khớp khuôn mặt
-    const aiResult = await this.fastApiAiClient.verifyFace(worker.id, photoUrl);
+    // Lay anh the goc (tu faceProfile, avatarUrl hoac CCCD cua tho) de truyen sang OpenCV SFace so sanh
+    const referenceFaceUrl =
+      worker.faceProfile?.facePhotoUrl ||
+      worker.avatarUrl ||
+      worker.user?.avatarUrl ||
+      '';
+
+    // Gọi FastAPI AI Service so khớp khuôn mặt giữa ảnh selfie và ảnh thẻ gốc
+    const aiResult = await this.fastApiAiClient.verifyFace(
+      worker.id,
+      photoUrl,
+      referenceFaceUrl,
+    );
     const confidence = parseFloat(aiResult.confidence ?? 0.95);
     const verifiedAt = new Date();
 

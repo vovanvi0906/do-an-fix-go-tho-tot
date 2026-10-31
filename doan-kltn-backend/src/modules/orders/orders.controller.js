@@ -15,7 +15,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { incidentStorage } from '../../config/cloudinary.config';
+import { workerFaceStorage, incidentStorage } from '../../config/cloudinary.config';
 import {
   ApiTags,
   ApiBearerAuth,
@@ -277,7 +277,26 @@ export class OrdersController {
   })
   @Bind(Req(), Param('id'), Body())
   async verifyFace(req, id, faceVerifyDto) {
-    return this.ordersService.verifyFace(id, req.user.userId, faceVerifyDto);
+    return this.ordersService.verifyFace(id, req.user?.userId || req.user?.id, faceVerifyDto);
+  }
+
+  /**
+   * 8.1 POST /orders/:id/face-verify-upload: Upload trực tiếp ảnh selfie từ mobile
+   */
+  @Post(':id/face-verify-upload')
+  @Roles('WORKER')
+  @UseInterceptors(FileInterceptor('image', { storage: workerFaceStorage }))
+  @ApiOperation({
+    summary: 'Upload trực tiếp ảnh selfie của thợ từ mobile, lưu Cloudinary và đối chiếu AI',
+  })
+  @ApiParam({ name: 'id', description: 'Order UUID' })
+  @Bind(Req(), Param('id'), UploadedFile())
+  async verifyFaceUpload(req, id, file) {
+    const photoUrl = file?.path || file?.secure_url || file?.url;
+    if (!photoUrl) {
+      throw new BadRequestException('Vui lòng tải lên ảnh khuôn mặt selfie hợp lệ');
+    }
+    return this.ordersService.verifyFace(id, req.user?.userId || req.user?.id, { photoUrl });
   }
 
   /**

@@ -35,6 +35,12 @@ const getDefaultBaseUrl = () => {
 export const API_BASE_URL = getDefaultBaseUrl();
 console.log(`🌐 [API Client] Đã khởi tạo kết nối Base URL: ${API_BASE_URL} (Platform: ${Platform.OS})`);
 
+// Callback xử lý khi nhận mã lỗi 401 Unauthorized
+let onUnauthorizedCallback = null;
+export const setOnUnauthorizedCallback = (callback) => {
+  onUnauthorizedCallback = callback;
+};
+
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 15000,
@@ -84,6 +90,12 @@ apiClient.interceptors.response.use(
 
     if (status === 401) {
       message = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!';
+      // 1. Dọn dẹp storage ngay lập tức
+      tokenStorage.clearAll().catch((e) => console.warn('Lỗi khi xóa token storage:', e));
+      // 2. Kích hoạt AuthContext reset state
+      if (onUnauthorizedCallback) {
+        onUnauthorizedCallback();
+      }
     } else if (errorResponse) {
       if (Array.isArray(errorResponse.message)) {
         message = errorResponse.message.join(', ');

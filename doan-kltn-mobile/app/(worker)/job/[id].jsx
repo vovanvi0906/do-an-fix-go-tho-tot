@@ -7,14 +7,30 @@ import { useWorkerLocationTracker } from '../../../src/hooks/useWorkerLocationTr
 import { socketService } from '../../../src/services/socket/socketService';
 
 export default function WorkerJobDetailScreen() {
-  const { id, title, customerName, addressText, price, imageUrl, confidence } = useLocalSearchParams();
+  const { id, title, customerName, addressText, price, imageUrl, confidence, faceVerified } = useLocalSearchParams();
   const router = useRouter();
   const { user } = useAuth();
 
   const [jobStatus, setJobStatus] = useState('ASSIGNED');
+  const [isFaceChecked, setIsFaceChecked] = useState(faceVerified === 'true');
   const { isTracking, startTracking, stopTracking } = useWorkerLocationTracker(id, user?.id);
 
   const handleStartMoving = async () => {
+    if (!isFaceChecked) {
+      Alert.alert(
+        'Xác thực danh tính',
+        'Vui lòng chụp selfie xác thực khuôn mặt thợ với hệ thống AI trước khi khởi hành.',
+        [
+          { text: 'Hủy', style: 'cancel' },
+          {
+            text: 'Xác thực ngay',
+            onPress: () => router.push({ pathname: '/(worker)/verification/face', params: { orderId: id } }),
+          },
+        ]
+      );
+      return;
+    }
+
     const ok = await startTracking();
     if (ok) {
       setJobStatus('WORKER_ARRIVING');
@@ -62,6 +78,13 @@ export default function WorkerJobDetailScreen() {
           <Text style={styles.val}>{customerName || 'Nguyễn Văn A (0988.123.456)'}</Text>
         </View>
         <View style={styles.row}>
+          <Ionicons name="scan-circle" size={18} color={isFaceChecked ? '#16A34A' : '#F59E0B'} />
+          <Text style={styles.label}>Face ID:</Text>
+          <Text style={[styles.val, { color: isFaceChecked ? '#16A34A' : '#D97706' }]}>
+            {isFaceChecked ? 'Đã xác thực AI đạt chuẩn' : 'Chưa check-in khuôn mặt'}
+          </Text>
+        </View>
+        <View style={styles.row}>
           <Ionicons name="radio" size={18} color={isTracking ? '#16A34A' : '#94A3B8'} />
           <Text style={styles.label}>Định vị GPS:</Text>
           <Text style={[styles.val, { color: isTracking ? '#16A34A' : '#64748B' }]}>
@@ -71,6 +94,17 @@ export default function WorkerJobDetailScreen() {
       </View>
 
       <View style={styles.actionContainer}>
+        {!isFaceChecked && (
+          <TouchableOpacity
+            style={styles.btnFace}
+            onPress={() => router.push({ pathname: '/(worker)/verification/face', params: { orderId: id } })}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="finger-print" size={18} color="#FFF" style={{ marginRight: 6 }} />
+            <Text style={styles.btnText}>CHECK-IN KHUÔN MẶT THỢ (AI FACE)</Text>
+          </TouchableOpacity>
+        )}
+
         {jobStatus === 'ASSIGNED' && (
           <TouchableOpacity style={styles.btnPrimary} onPress={handleStartMoving} activeOpacity={0.8}>
             <Ionicons name="navigate" size={18} color="#FFF" style={{ marginRight: 6 }} />
@@ -116,6 +150,7 @@ const styles = StyleSheet.create({
   label: { fontSize: 13, color: '#64748B', width: 90 },
   val: { flex: 1, fontSize: 13.5, fontWeight: '600', color: '#1E293B' },
   actionContainer: { gap: 10 },
+  btnFace: { height: 50, borderRadius: 14, backgroundColor: '#4F46E5', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' },
   btnPrimary: { height: 50, borderRadius: 14, backgroundColor: '#0284C7', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' },
   btnSuccess: { height: 50, borderRadius: 14, backgroundColor: '#16A34A', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' },
   btnCamera: { height: 50, borderRadius: 14, backgroundColor: '#7C3AED', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' },
