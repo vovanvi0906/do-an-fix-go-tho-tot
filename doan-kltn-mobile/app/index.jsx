@@ -23,7 +23,7 @@ import {
   Inter_600SemiBold,
   Inter_700Bold,
 } from '@expo-google-fonts/inter';
-import { useAuth } from '../src/features/auth';
+import { useAuth, RoleSelectionSheet } from '../src/features/auth';
 import { useGoogleAuth } from '../src/hooks';
 
 const COLORS = {
@@ -237,36 +237,18 @@ export default function FixGoLoginScreen() {
         </KeyboardAvoidingView>
       </SafeAreaView>
 
-      <Modal visible={showRegisterModal} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Chọn loại tài khoản</Text>
-            <TouchableOpacity
-              style={styles.modalBtn}
-              onPress={() => {
-                setShowRegisterModal(false);
-                router.push('/(auth)/register-customer');
-              }}
-            >
-              <Text style={styles.modalBtnText}>Khách hàng</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.modalBtn, { backgroundColor: '#10B981', marginTop: 10 }]}
-              onPress={() => {
-                setShowRegisterModal(false);
-                router.push('/(auth)/register-worker');
-              }}
-            >
-              <Text style={styles.modalBtnText}>Thợ sửa chữa</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={{ marginTop: 15 }} onPress={() => setShowRegisterModal(false)}>
-              <Text style={{ color: '#64748B' }}>Đóng</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      <RoleSelectionSheet
+        visible={showRegisterModal}
+        onClose={() => setShowRegisterModal(false)}
+        onSelectRole={(role) => {
+          setShowRegisterModal(false);
+          if (role === 'WORKER') {
+            router.push('/(auth)/register-worker');
+          } else {
+            router.push('/(auth)/register-customer');
+          }
+        }}
+      />
     </View>
   );
 }
