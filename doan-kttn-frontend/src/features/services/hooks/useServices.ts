@@ -125,8 +125,9 @@ export function useServices(showToast?: ShowToastFn) {
 
       if (res && res.data && Array.isArray(res.data)) {
         setServices(res.data);
-        const total = res.meta?.total !== undefined ? res.meta.total : res.data.length;
-        const pages = res.meta?.totalPages || Math.ceil(total / pageSize) || 1;
+        const meta = res.meta || res.pagination;
+        const total = meta?.total !== undefined ? meta.total : res.data.length;
+        const pages = meta?.totalPages || Math.ceil(total / pageSize) || 1;
         setTotalCount(total);
         setTotalPages(pages);
       } else if (Array.isArray(res)) {
@@ -195,11 +196,19 @@ export function useServices(showToast?: ShowToastFn) {
     };
 
     socketService.on('service.updated', handleServiceUpdated);
+    socketService.on('service:updated', handleServiceUpdated);
+    socketService.on('service.created', handleServiceUpdated);
     socketService.on('category.updated', handleCategoryUpdated);
+    socketService.on('category:updated', handleCategoryUpdated);
+    socketService.on('dashboard.refresh', handleServiceUpdated);
 
     return () => {
       socketService.off('service.updated', handleServiceUpdated);
+      socketService.off('service:updated', handleServiceUpdated);
+      socketService.off('service.created', handleServiceUpdated);
       socketService.off('category.updated', handleCategoryUpdated);
+      socketService.off('category:updated', handleCategoryUpdated);
+      socketService.off('dashboard.refresh', handleServiceUpdated);
     };
   }, [fetchServices, fetchCategories]);
 
