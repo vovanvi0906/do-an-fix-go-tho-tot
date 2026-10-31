@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { authService } from '../services/authService';
 import { tokenStorage } from '../../../services/storage/tokenStorage';
+import { setOnUnauthorizedCallback } from '../../../services/api/apiClient';
 
 const AuthContext = createContext(null);
 
@@ -10,6 +11,13 @@ export function AuthProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Đăng ký nhận thông báo khi apiClient gặp 401 Unauthorized
+    setOnUnauthorizedCallback(() => {
+      console.warn('🔒 [AuthContext] Nhận tín hiệu 401 -> Reset phiên đăng nhập về null');
+      setToken(null);
+      setUser(null);
+    });
+
     // Tự động kiểm tra phiên đăng nhập đã lưu khi khởi động ứng dụng
     const checkSession = async () => {
       try {
