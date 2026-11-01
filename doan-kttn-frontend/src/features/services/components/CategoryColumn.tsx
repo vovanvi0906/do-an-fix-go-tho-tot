@@ -111,3 +111,4 @@ export const CategoryColumn: React.FC<CategoryColumnProps> = ({
 };
 
 export default CategoryColumn;
+

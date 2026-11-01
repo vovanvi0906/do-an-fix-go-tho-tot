@@ -93,3 +93,4 @@ export const HierarchyDetailFooter: React.FC<HierarchyDetailFooterProps> = ({
 };
 
 export default HierarchyDetailFooter;
+

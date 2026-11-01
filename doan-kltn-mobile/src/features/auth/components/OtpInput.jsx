@@ -36,7 +36,7 @@ const COLORS = {
  * @param {string} targetLabel - Nhãn mục tiêu (ví dụ: "0987654321" hoặc "user@gmail.com")
  * @param {string} type - Loại OTP: 'phone' hoặc 'email'
  */
-export default function OtpInput({
+export function OtpInput({
   length = 6,
   onComplete,
   onResend,
@@ -304,3 +304,5 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
   },
 });
+
+export default OtpInput;

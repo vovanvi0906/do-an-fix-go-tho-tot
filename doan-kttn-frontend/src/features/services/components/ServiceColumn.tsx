@@ -118,3 +118,4 @@ export const ServiceColumn: React.FC<ServiceColumnProps> = ({
 };
 
 export default ServiceColumn;
+
