@@ -45,6 +45,7 @@ export default function CategoryManagementPage() {
   } = useCategories(showToast);
 
   const totalServices = categories.reduce((sum, c) => sum + (c._count?.services || 0), 0);
+  const totalTargets = categories.reduce((sum, c) => sum + (c._count?.targets || 0), 0);
   const activeCount = categories.filter((c) => c.isActive).length;
   const inactiveCount = categories.length - activeCount;
 
@@ -62,6 +63,7 @@ export default function CategoryManagementPage() {
         totalCount={categories.length}
         activeCount={activeCount}
         totalServices={totalServices}
+        totalTargets={totalTargets}
       />
 
       <CategoryToolbar

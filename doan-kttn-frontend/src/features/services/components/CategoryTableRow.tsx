@@ -1,5 +1,5 @@
 import React from 'react';
-import { Power, Edit2, Trash2, Tag, Eye } from 'lucide-react';
+import { Power, Edit2, Trash2, Tag, Eye, Wrench } from 'lucide-react';
 import { getCategoryFallbackIcon } from '../utils/getCategoryFallbackIcon';
 import type { CategoryItem } from '../../../types/category';
 
@@ -21,6 +21,7 @@ export default function CategoryTableRow({
   const FallbackIcon = getCategoryFallbackIcon(category.name);
   const iconSource = category.iconUrl || category.icon;
   const serviceCount = category._count?.services || 0;
+  const targetCount = category._count?.targets || 0;
 
   return (
     <tr
@@ -67,7 +68,16 @@ export default function CategoryTableRow({
         </p>
       </td>
 
-      {/* 3. Số dịch vụ trực thuộc */}
+      {/* 3. Số nhóm thiết bị / Đối tượng */}
+      <td className="py-3 px-4 text-center whitespace-nowrap">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/60">
+          <Wrench className="w-3 h-3 text-indigo-500" />
+          <strong className="font-mono">{targetCount}</strong>
+          <span>nhóm</span>
+        </span>
+      </td>
+
+      {/* 4. Số dịch vụ trực thuộc */}
       <td className="py-3 px-4 text-center whitespace-nowrap">
         <button
           type="button"

@@ -61,6 +61,7 @@ export default function CategoryTable({
             <tr className="border-b border-slate-200/80 dark:border-slate-800/80 text-[11px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50/50 dark:bg-slate-900/40">
               <th className="py-3 px-4">Ngành Nghề</th>
               <th className="py-3 px-4">Mô Tả</th>
+              <th className="py-3 px-4 text-center">Thiết Bị</th>
               <th className="py-3 px-4 text-center">Số Dịch Vụ</th>
               <th className="py-3 px-4 text-center">Trạng Thái</th>
               <th className="py-3 px-4 text-right">Thao Tác</th>
@@ -83,6 +84,9 @@ export default function CategoryTable({
                     <Skeleton className="w-48 h-3.5 rounded" />
                   </td>
                   <td className="py-3.5 px-4 text-center">
+                    <Skeleton className="w-12 h-5 rounded-md mx-auto" />
+                  </td>
+                  <td className="py-3.5 px-4 text-center">
                     <Skeleton className="w-14 h-5 rounded-md mx-auto" />
                   </td>
                   <td className="py-3.5 px-4 text-center">
@@ -96,7 +100,7 @@ export default function CategoryTable({
 
             {!loading && categories.length === 0 && (
               <tr>
-                <td colSpan={5} className="py-16 text-center">
+                <td colSpan={6} className="py-16 text-center">
                   <div className="flex flex-col items-center justify-center space-y-3 max-w-sm mx-auto">
                     <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800/80 flex items-center justify-center text-slate-400">
                       <Inbox className="w-6 h-6" />

@@ -617,6 +617,7 @@ export default function ServiceManagementPage() {
         onClose={handleCloseFormModal}
         onSave={handleSaveService}
         categories={categories}
+        targets={targets}
         initialData={editingService}
         isSubmitting={isSaving}
       />

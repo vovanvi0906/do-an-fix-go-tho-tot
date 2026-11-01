@@ -69,6 +69,7 @@ export interface ServiceItem {
 export interface ServiceFormData {
   name: string;
   categoryId: string;
+  targetId?: string;
   basePrice: number | string;
   unit: string;
   estimatedDurationMin: number | string;
@@ -95,6 +96,7 @@ export interface ServiceModalProps {
   onSave: (data: ServiceFormData) => Promise<void> | void;
   initialData?: ServiceItem | null;
   categories: ServiceCategoryItem[];
+  targets?: ServiceTargetItem[];
   isSubmitting?: boolean;
 }
 

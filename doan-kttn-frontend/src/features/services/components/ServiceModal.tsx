@@ -6,6 +6,7 @@ import {
   DollarSign,
   Clock,
   Layers,
+  Tag,
   FileText,
   Loader2,
   CheckCircle2,
@@ -23,6 +24,7 @@ export default function ServiceModal({
   onSave,
   initialData = null,
   categories = [],
+  targets = [],
   isSubmitting = false,
 }: ServiceModalProps) {
   const isEditing = Boolean(initialData);
@@ -30,6 +32,7 @@ export default function ServiceModal({
   const [formData, setFormData] = useState<ServiceFormData>({
     name: '',
     categoryId: '',
+    targetId: '',
     basePrice: '',
     unit: 'lần',
     estimatedDurationMin: 60,
@@ -42,6 +45,7 @@ export default function ServiceModal({
       setFormData({
         name: initialData.name || '',
         categoryId: initialData.category?.id || initialData.categoryId || categories[0]?.id || '',
+        targetId: initialData.target?.id || initialData.targetId || '',
         basePrice: initialData.basePrice ? Number(initialData.basePrice) : '',
         unit: initialData.unit || 'lần',
         estimatedDurationMin: initialData.estimatedDurationMin || 60,
@@ -52,6 +56,7 @@ export default function ServiceModal({
       setFormData({
         name: '',
         categoryId: categories[0]?.id || '',
+        targetId: '',
         basePrice: 150000,
         unit: 'lần',
         estimatedDurationMin: 60,
@@ -127,27 +132,50 @@ export default function ServiceModal({
               />
             </div>
 
-            {/* 2. Phân loại ngành nghề (Dropdown Category) */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                <Layers className="w-3.5 h-3.5 text-blue-500" />
-                <span>Phân Loại Ngành Nghề / Danh Mục *</span>
-              </label>
-              <select
-                required
-                value={formData.categoryId}
-                onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
-              >
-                {categories.length === 0 && (
-                  <option value="">Chưa có danh mục nào - Đang tải...</option>
-                )}
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
+            {/* 2. Phân loại ngành nghề & Đối tượng thiết bị (Grid 2 cột) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                  <Layers className="w-3.5 h-3.5 text-blue-500" />
+                  <span>Danh Mục Ngành Nghề *</span>
+                </label>
+                <select
+                  required
+                  value={formData.categoryId}
+                  onChange={(e) => setFormData({ ...formData, categoryId: e.target.value, targetId: '' })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
+                >
+                  {categories.length === 0 && (
+                    <option value="">Chưa có danh mục nào - Đang tải...</option>
+                  )}
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                  <Tag className="w-3.5 h-3.5 text-indigo-500" />
+                  <span>Đối Tượng / Thiết Bị</span>
+                </label>
+                <select
+                  value={formData.targetId || ''}
+                  onChange={(e) => setFormData({ ...formData, targetId: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
+                >
+                  <option value="">-- Chọn đối tượng thiết bị --</option>
+                  {targets
+                    .filter((t) => !formData.categoryId || t.categoryId === formData.categoryId)
+                    .map((tgt) => (
+                      <option key={tgt.id} value={tgt.id}>
+                        {tgt.name}
+                      </option>
+                    ))}
+                </select>
+              </div>
             </div>
 
             {/* 3. Giá khởi điểm & Đơn vị tính (Grid 2 cột) */}
