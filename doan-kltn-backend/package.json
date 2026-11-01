@@ -19,7 +19,9 @@
     "test:cov": "jest --coverage",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "db:clear-services": "node prisma/clear_services.js",
+    "db:import-services": "node prisma/import_services.js"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
