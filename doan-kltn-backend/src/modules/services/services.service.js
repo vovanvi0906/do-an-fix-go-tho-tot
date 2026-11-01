@@ -20,16 +20,51 @@ export class ServicesService {
     });
   }
 
-  async getServices(categoryId) {
+  async getCategoryTree() {
+    return this.prisma.serviceCategory.findMany({
+      where: { isActive: true },
+      include: {
+        targets: {
+          where: { isActive: true },
+          orderBy: { sortOrder: 'asc' },
+          include: {
+            services: {
+              where: { isActive: true },
+              orderBy: { name: 'asc' },
+            },
+          },
+        },
+      },
+      orderBy: { name: 'asc' },
+    });
+  }
+
+  async getTargets(categoryId) {
     const where = {
       isActive: true,
       ...(categoryId ? { categoryId } : {}),
+    };
+    return this.prisma.serviceTarget.findMany({
+      where,
+      include: {
+        _count: { select: { services: true } },
+      },
+      orderBy: { sortOrder: 'asc' },
+    });
+  }
+
+  async getServices(categoryId, targetId) {
+    const where = {
+      isActive: true,
+      ...(categoryId ? { categoryId } : {}),
+      ...(targetId ? { targetId } : {}),
     };
 
     return this.prisma.service.findMany({
       where,
       include: {
         category: true,
+        target: true,
       },
       orderBy: { name: 'asc' },
     });
@@ -40,6 +75,7 @@ export class ServicesService {
       where: { id },
       include: {
         category: true,
+        target: true,
       },
     });
 

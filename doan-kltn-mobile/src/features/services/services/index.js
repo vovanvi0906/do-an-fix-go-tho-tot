@@ -1,1 +1,1 @@
-// Export services of services
+export * from './serviceCatalog.service';
