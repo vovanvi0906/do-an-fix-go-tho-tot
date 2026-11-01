@@ -10,10 +10,10 @@ import apiClient from '../../../services/api/client';
 export const adminServicesService = {
   /**
    * API ENDPOINT: GET /api/v1/admin/services
-   * Lấy danh sách toàn bộ dịch vụ (hỗ trợ search, categoryId, status, page, limit)
-   * @param {{ status?: string, isActive?: string, categoryId?: string, search?: string, page?: number, limit?: number }} params
+   * Lấy danh sách toàn bộ dịch vụ (hỗ trợ search, categoryId, targetId, status, page, limit)
+   * @param {{ status?: string, isActive?: string, categoryId?: string, targetId?: string, search?: string, page?: number, limit?: number }} params
    */
-  async getServices({ status, isActive, categoryId, search, page = 1, limit = 10 } = {}) {
+  async getServices({ status, isActive, categoryId, targetId, search, page = 1, limit = 10 } = {}) {
     const params = { page, limit };
 
     if (status && status !== 'ALL') {
@@ -24,6 +24,10 @@ export const adminServicesService = {
 
     if (categoryId && categoryId !== 'ALL') {
       params.categoryId = categoryId;
+    }
+
+    if (targetId && targetId !== 'ALL') {
+      params.targetId = targetId;
     }
 
     if (search && search.trim()) {
@@ -39,6 +43,57 @@ export const adminServicesService = {
       const response = await apiClient.get('/admin/services', { params });
       return response.data || response;
     }
+  },
+
+  /**
+   * API ENDPOINT: GET /api/v1/admin/services/targets
+   * Lấy danh sách đối tượng/thiết bị sửa chữa (Targets)
+   * @param {string} [categoryId]
+   */
+  async getTargets(categoryId) {
+    const params = {};
+    if (categoryId && categoryId !== 'ALL') {
+      params.categoryId = categoryId;
+    }
+    try {
+      const response = await apiClient.get('/v1/admin/services/targets', { params });
+      return response.data || response;
+    } catch (err) {
+      console.warn('[adminServicesService] Lỗi gọi /admin/services/targets:', err.message);
+      return [];
+    }
+  },
+
+  /**
+   * Tạo mới đối tượng/thiết bị
+   */
+  async createTarget(data) {
+    const response = await apiClient.post('/v1/admin/services/targets', data);
+    return response.data || response;
+  },
+
+  /**
+   * Cập nhật đối tượng/thiết bị
+   */
+  async updateTarget(id, data) {
+    const response = await apiClient.patch(`/v1/admin/services/targets/${id}`, data);
+    return response.data || response;
+  },
+
+  /**
+   * Đổi trạng thái hoạt động của đối tượng
+   */
+  async toggleTargetStatus(id) {
+    const response = await apiClient.patch(`/v1/admin/services/targets/${id}/toggle`);
+    return response.data || response;
+  },
+
+  /**
+   * Xóa đối tượng/thiết bị
+   */
+  async deleteTarget(id) {
+    const response = await apiClient.delete(`/v1/admin/services/targets/${id}`);
+    return response.data || response;
   },
 
   /**

@@ -101,29 +101,48 @@ model Address {
 }
 
 model ServiceCategory {
-  id                String    @id @default(uuid())
+  id                String          @id @default(uuid())
   name              String
-  basePrice         Decimal   @default(100000) @db.Decimal(12, 2)
-  unit              String    @default("lần")
-  estimatedMinutes  Int       @default(60)
-  warrantyDays      Int       @default(30)
-  slug              String?   @unique
+  basePrice         Decimal         @default(100000) @db.Decimal(12, 2)
+  unit              String          @default("lần")
+  estimatedMinutes  Int             @default(60)
+  warrantyDays      Int             @default(30)
+  slug              String?         @unique
   description       String?
   icon              String?
   iconUrl           String?
-  isActive          Boolean   @default(true)
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  aiSuggestedOrders Order[]   @relation("AISuggestedCategoryOrders")
-  orders            Order[]   @relation("CategoryOrders")
+  isActive          Boolean         @default(true)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  aiSuggestedOrders Order[]         @relation("AISuggestedCategoryOrders")
+  orders            Order[]         @relation("CategoryOrders")
+  targets           ServiceTarget[]
   services          Service[]
 
   @@map("service_categories")
 }
 
+model ServiceTarget {
+  id          String          @id @default(uuid())
+  categoryId  String
+  name        String
+  slug        String?         @unique
+  icon        String?
+  description String?
+  isActive    Boolean         @default(true)
+  sortOrder   Int             @default(0)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  category    ServiceCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  services    Service[]
+
+  @@map("service_targets")
+}
+
 model Service {
   id                   String          @id @default(uuid())
   categoryId           String
+  targetId             String?
   name                 String
   slug                 String?         @unique
   description          String?
@@ -137,6 +156,7 @@ model Service {
   updatedAt            DateTime        @updatedAt
   orders               Order[]
   category             ServiceCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  target               ServiceTarget?  @relation(fields: [targetId], references: [id], onDelete: SetNull)
   workerServices       WorkerService[]
 
   @@map("services")

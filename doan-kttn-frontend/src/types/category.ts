@@ -24,9 +24,10 @@ export interface CategoryItem {
   iconUrl?: string | null;
   /** Trạng thái cung cấp (Hoạt động / Tạm ngưng) */
   isActive: boolean;
-  /** Số lượng gói dịch vụ trực thuộc danh mục */
+  /** Số lượng gói dịch vụ và đối tượng thiết bị trực thuộc danh mục */
   _count?: {
     services?: number;
+    targets?: number;
   };
   createdAt?: string;
   updatedAt?: string;
