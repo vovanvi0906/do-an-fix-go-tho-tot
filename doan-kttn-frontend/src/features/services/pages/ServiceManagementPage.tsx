@@ -31,6 +31,7 @@ import { useServices } from '../hooks/useServices';
 import ServiceModal from '../components/ServiceModal';
 import ServiceDetailModal from '../components/ServiceDetailModal';
 import DeleteServiceModal from '../components/DeleteServiceModal';
+import CategoryFilterPills from '../components/CategoryFilterPills';
 import Skeleton from '../../../components/ui/Skeleton';
 import type { ServiceItem } from '../../../types/service';
 
@@ -297,6 +298,16 @@ export default function ServiceManagementPage() {
             </select>
           </div>
         </div>
+
+        {/* Thanh Chips Danh Mục Ngành Nghề (Bộ lọc 1-click) */}
+        {categories.length > 0 && (
+          <CategoryFilterPills
+            categories={categories}
+            selectedCategory={selectedCategory}
+            onSelectCategory={setSelectedCategory}
+            totalServicesCount={pagination.total || services.length}
+          />
+        )}
       </div>
 
       {/* ======================================================== */}
