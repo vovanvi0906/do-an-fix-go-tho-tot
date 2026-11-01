@@ -107,3 +107,4 @@ export const CategoryFilterPills: React.FC<CategoryFilterPillsProps> = ({
 };
 
 export default CategoryFilterPills;
+
