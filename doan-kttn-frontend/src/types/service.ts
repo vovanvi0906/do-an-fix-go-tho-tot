@@ -12,9 +12,29 @@
 export interface ServiceCategoryItem {
   id: string;
   name: string;
+  slug?: string | null;
   description?: string | null;
   iconUrl?: string | null;
   isActive?: boolean;
+  _count?: {
+    services?: number;
+    targets?: number;
+  };
+}
+
+/**
+ * Thông tin nhóm đối tượng/thiết bị sửa chữa (Target)
+ */
+export interface ServiceTargetItem {
+  id: string;
+  categoryId: string;
+  name: string;
+  slug?: string | null;
+  icon?: string | null;
+  description?: string | null;
+  isActive?: boolean;
+  sortOrder?: number;
+  category?: ServiceCategoryItem;
   _count?: {
     services?: number;
   };
@@ -32,7 +52,9 @@ export interface ServiceItem {
   estimatedDurationMin?: number | null;
   isActive: boolean;
   categoryId: string;
+  targetId?: string | null;
   category?: ServiceCategoryItem | null;
+  target?: ServiceTargetItem | null;
   _count?: {
     orders?: number;
     workerServices?: number;

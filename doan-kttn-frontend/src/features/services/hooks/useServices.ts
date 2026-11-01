@@ -5,6 +5,7 @@ import type {
   ServiceItem,
   ServiceFormData,
   CategoryOption,
+  ServiceTargetItem,
   ServiceFilterParams,
   ServicePagination,
 } from '../../../types/service';
@@ -37,6 +38,7 @@ export function useServices(showToast?: ShowToastFn) {
   // 2. States dữ liệu và trạng thái UI
   const [services, setServices] = useState<ServiceItem[]>([]);
   const [categories, setCategories] = useState<CategoryOption[]>([]);
+  const [targets, setTargets] = useState<ServiceTargetItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,6 +53,7 @@ export function useServices(showToast?: ShowToastFn) {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [debouncedSearch, setDebouncedSearch] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+  const [selectedTarget, setSelectedTarget] = useState<string>('ALL');
   const [activeStatusTab, setActiveStatusTab] = useState<ServiceStatusTab>('ALL');
 
   // Debounce tìm kiếm dịch vụ
@@ -93,6 +96,27 @@ export function useServices(showToast?: ShowToastFn) {
 
   /**
    * ============================================================================
+   * RESTFUL API: GET /api/v1/admin/services/targets
+   * ============================================================================
+   * Tải danh sách đối tượng / thiết bị theo categoryId đang chọn
+   */
+  const fetchTargets = useCallback(async (catId?: string) => {
+    try {
+      const res = await adminServicesService.getTargets(catId);
+      if (Array.isArray(res)) {
+        setTargets(res);
+      } else if ((res as any)?.data && Array.isArray((res as any).data)) {
+        setTargets((res as any).data);
+      } else {
+        setTargets([]);
+      }
+    } catch (err) {
+      console.warn('[useServices] Không thể tải danh sách đối tượng thiết bị:', err);
+    }
+  }, []);
+
+  /**
+   * ============================================================================
    * RESTFUL API: GET /api/v1/admin/services
    * ============================================================================
    * Tải danh sách gói dịch vụ có phân trang, lọc theo danh mục, trạng thái và từ khóa.
@@ -102,7 +126,7 @@ export function useServices(showToast?: ShowToastFn) {
       setLoading(true);
       setError(null);
 
-      const params: ServiceFilterParams = {
+      const params: any = {
         page: currentPage,
         limit: pageSize,
       };
@@ -113,6 +137,10 @@ export function useServices(showToast?: ShowToastFn) {
 
       if (selectedCategory && selectedCategory !== 'ALL') {
         params.categoryId = selectedCategory;
+      }
+
+      if (selectedTarget && selectedTarget !== 'ALL') {
+        params.targetId = selectedTarget;
       }
 
       if (activeStatusTab === 'ACTIVE') {
@@ -149,12 +177,16 @@ export function useServices(showToast?: ShowToastFn) {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [currentPage, pageSize, debouncedSearch, selectedCategory, activeStatusTab]);
+  }, [currentPage, pageSize, debouncedSearch, selectedCategory, selectedTarget, activeStatusTab]);
 
-  // 7. Khởi chạy fetchCategories 1 lần duy nhất khi mount
+  // 7. Khởi chạy fetchCategories và fetchTargets khi mount hoặc đổi category
   useEffect(() => {
     fetchCategories();
   }, [fetchCategories]);
+
+  useEffect(() => {
+    fetchTargets(selectedCategory);
+  }, [selectedCategory, fetchTargets]);
 
   // 8. Tự động fetchServices khi filter hoặc page thay đổi
   useEffect(() => {
@@ -238,6 +270,15 @@ export function useServices(showToast?: ShowToastFn) {
    */
   const handleCategoryChange = useCallback((catId: string) => {
     setSelectedCategory(catId);
+    setSelectedTarget('ALL'); // Reset lọc đối tượng khi chuyển danh mục cha
+    setCurrentPage(1);
+  }, []);
+
+  /**
+   * Thay đổi lọc đối tượng thiết bị
+   */
+  const handleTargetChange = useCallback((targetId: string) => {
+    setSelectedTarget(targetId);
     setCurrentPage(1);
   }, []);
 
@@ -407,6 +448,7 @@ export function useServices(showToast?: ShowToastFn) {
   return {
     services,
     categories,
+    targets,
     loading,
     refreshing,
     error,
@@ -418,6 +460,9 @@ export function useServices(showToast?: ShowToastFn) {
     selectedCategory,
     setSelectedCategory: handleCategoryChange,
     handleCategoryChange,
+    selectedTarget,
+    setSelectedTarget: handleTargetChange,
+    handleTargetChange,
     activeStatusTab,
     setActiveStatusTab: handleStatusTabChange,
     handleStatusTabChange,

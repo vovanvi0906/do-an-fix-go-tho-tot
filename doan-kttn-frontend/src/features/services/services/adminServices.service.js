@@ -10,10 +10,10 @@ import apiClient from '../../../services/api/client';
 export const adminServicesService = {
   /**
    * API ENDPOINT: GET /api/v1/admin/services
-   * Lấy danh sách toàn bộ dịch vụ (hỗ trợ search, categoryId, status, page, limit)
-   * @param {{ status?: string, isActive?: string, categoryId?: string, search?: string, page?: number, limit?: number }} params
+   * Lấy danh sách toàn bộ dịch vụ (hỗ trợ search, categoryId, targetId, status, page, limit)
+   * @param {{ status?: string, isActive?: string, categoryId?: string, targetId?: string, search?: string, page?: number, limit?: number }} params
    */
-  async getServices({ status, isActive, categoryId, search, page = 1, limit = 10 } = {}) {
+  async getServices({ status, isActive, categoryId, targetId, search, page = 1, limit = 10 } = {}) {
     const params = { page, limit };
 
     if (status && status !== 'ALL') {
@@ -24,6 +24,10 @@ export const adminServicesService = {
 
     if (categoryId && categoryId !== 'ALL') {
       params.categoryId = categoryId;
+    }
+
+    if (targetId && targetId !== 'ALL') {
+      params.targetId = targetId;
     }
 
     if (search && search.trim()) {
@@ -38,6 +42,25 @@ export const adminServicesService = {
       console.warn('[adminServicesService] Thử gọi endpoint dự phòng /admin/services:', err.message);
       const response = await apiClient.get('/admin/services', { params });
       return response.data || response;
+    }
+  },
+
+  /**
+   * API ENDPOINT: GET /api/v1/admin/services/targets
+   * Lấy danh sách đối tượng/thiết bị sửa chữa (Targets)
+   * @param {string} [categoryId]
+   */
+  async getTargets(categoryId) {
+    const params = {};
+    if (categoryId && categoryId !== 'ALL') {
+      params.categoryId = categoryId;
+    }
+    try {
+      const response = await apiClient.get('/v1/admin/services/targets', { params });
+      return response.data || response;
+    } catch (err) {
+      console.warn('[adminServicesService] Lỗi gọi /admin/services/targets:', err.message);
+      return [];
     }
   },
 

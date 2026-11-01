@@ -989,9 +989,26 @@ export class AdminService {
       orderBy: { name: 'asc' },
       include: {
         _count: {
+          select: { services: true, targets: true },
+        },
+      },
+    });
+  }
+
+  async getServiceTargets(categoryId) {
+    const where = {};
+    if (categoryId && categoryId !== 'ALL') {
+      where.categoryId = categoryId;
+    }
+    return this.prisma.serviceTarget.findMany({
+      where,
+      include: {
+        category: true,
+        _count: {
           select: { services: true },
         },
       },
+      orderBy: { sortOrder: 'asc' },
     });
   }
 
@@ -1261,6 +1278,7 @@ export class AdminService {
   async getAdminServices(query = {}) {
     const isActiveParam = query?.isActive;
     const categoryId = query?.categoryId;
+    const targetId = query?.targetId;
     const search = query?.search ? query.search.trim() : undefined;
     const page = query?.page ? Math.max(1, parseInt(query.page, 10)) : 1;
     const limit = query?.limit ? Math.max(1, parseInt(query.limit, 10)) : 10;
@@ -1285,11 +1303,16 @@ export class AdminService {
       where.categoryId = categoryId;
     }
 
+    if (targetId && targetId !== 'ALL') {
+      where.targetId = targetId;
+    }
+
     if (search) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
         { description: { contains: search, mode: 'insensitive' } },
         { category: { name: { contains: search, mode: 'insensitive' } } },
+        { target: { name: { contains: search, mode: 'insensitive' } } },
       ];
     }
 
@@ -1301,6 +1324,7 @@ export class AdminService {
         take: limit,
         include: {
           category: true,
+          target: true,
           _count: {
             select: {
               orders: true,
@@ -1351,9 +1375,11 @@ export class AdminService {
           : 60,
         isActive: data.isActive !== undefined ? Boolean(data.isActive) : true,
         categoryId,
+        targetId: data.targetId || null,
       },
       include: {
         category: true,
+        target: true,
       },
     });
 
@@ -1386,12 +1412,14 @@ export class AdminService {
     if (data.isActive !== undefined)
       updateData.isActive = Boolean(data.isActive);
     if (data.categoryId) updateData.categoryId = data.categoryId;
+    if (data.targetId !== undefined) updateData.targetId = data.targetId || null;
 
     const updated = await this.prisma.service.update({
       where: { id },
       data: updateData,
       include: {
         category: true,
+        target: true,
       },
     });
 

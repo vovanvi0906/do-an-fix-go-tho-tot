@@ -32,6 +32,7 @@ import ServiceModal from '../components/ServiceModal';
 import ServiceDetailModal from '../components/ServiceDetailModal';
 import DeleteServiceModal from '../components/DeleteServiceModal';
 import CategoryFilterPills from '../components/CategoryFilterPills';
+import TargetFilterPills from '../components/TargetFilterPills';
 import Skeleton from '../../../components/ui/Skeleton';
 import type { ServiceItem } from '../../../types/service';
 
@@ -88,6 +89,8 @@ export default function ServiceManagementPage() {
     setSearchTerm,
     selectedCategory,
     setSelectedCategory,
+    selectedTarget,
+    setSelectedTarget,
     activeStatusTab,
     setActiveStatusTab,
     isFormModalOpen,
@@ -109,10 +112,12 @@ export default function ServiceManagementPage() {
     handleSaveService,
     handleToggleStatus,
     handleDeleteService,
+    targets,
   } = useServices(showToast);
 
-  // Tìm danh mục đang chọn để hiển thị badge
+  // Tìm danh mục và đối tượng đang chọn để hiển thị badge
   const activeCategoryObj = categories.find((c) => c.id === selectedCategory);
+  const activeTargetObj = targets.find((t) => t.id === selectedTarget);
 
   return (
     <div className="h-full flex flex-col justify-between select-none space-y-3.5 overflow-hidden transition-colors duration-200">
@@ -216,6 +221,21 @@ export default function ServiceManagementPage() {
                 </button>
               </span>
             )}
+
+            {/* Badge đang lọc đối tượng/thiết bị */}
+            {selectedTarget !== 'ALL' && activeTargetObj && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                <span>Thiết bị: {activeTargetObj.name}</span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedTarget('ALL')}
+                  className="hover:text-indigo-900 dark:hover:text-white cursor-pointer"
+                  title="Bỏ lọc thiết bị này"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            )}
           </div>
 
           {/* Tabs Trạng thái hoạt động */}
@@ -306,6 +326,16 @@ export default function ServiceManagementPage() {
             selectedCategory={selectedCategory}
             onSelectCategory={setSelectedCategory}
             totalServicesCount={pagination.total || services.length}
+          />
+        )}
+
+        {/* Thanh Chips Con: Thiết bị / Đối tượng sửa chữa (Level 2 Filter) */}
+        {targets.length > 0 && (
+          <TargetFilterPills
+            targets={targets}
+            selectedTarget={selectedTarget}
+            onSelectTarget={setSelectedTarget}
+            categoryName={activeCategoryObj?.name}
           />
         )}
       </div>
@@ -442,12 +472,19 @@ export default function ServiceManagementPage() {
                         </div>
                       </td>
 
-                      {/* Ngành nghề */}
+                      {/* Ngành nghề & Thiết bị */}
                       <td className="py-3 px-4 whitespace-nowrap">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/60">
-                          <Tag className="w-3 h-3 text-slate-400" />
-                          <span>{categoryName}</span>
-                        </span>
+                        <div className="flex flex-col gap-1 items-start">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/60">
+                            <Tag className="w-3 h-3 text-slate-400" />
+                            <span>{categoryName}</span>
+                          </span>
+                          {service.target?.name && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-blue-50/70 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-900/50">
+                              <span>• {service.target.name}</span>
+                            </span>
+                          )}
+                        </div>
                       </td>
 
                       {/* Giá khởi điểm (Font Mono chuẩn Vercel) */}

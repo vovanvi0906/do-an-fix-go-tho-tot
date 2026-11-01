@@ -242,6 +242,14 @@ export class AdminController {
     return this.adminService.getServiceCategories();
   }
 
+  @Get('services/targets')
+  @ApiOperation({ summary: 'Lấy danh sách các nhóm đối tượng/thiết bị sửa chữa (Service Targets)' })
+  @ApiQuery({ name: 'categoryId', required: false, type: String })
+  @Bind(Query('categoryId'))
+  async getServiceTargets(categoryId) {
+    return this.adminService.getServiceTargets(categoryId);
+  }
+
   @Get('services')
   @ApiOperation({
     summary:
@@ -249,6 +257,7 @@ export class AdminController {
   })
   @ApiQuery({ name: 'isActive', required: false, type: String })
   @ApiQuery({ name: 'categoryId', required: false, type: String })
+  @ApiQuery({ name: 'targetId', required: false, type: String })
   @ApiQuery({ name: 'search', required: false, type: String })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
