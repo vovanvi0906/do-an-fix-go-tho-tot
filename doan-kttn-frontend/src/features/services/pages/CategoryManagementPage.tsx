@@ -71,12 +71,6 @@ export default function CategoryManagementPage() {
       const res = await adminServicesService.getTargets(catId);
       const data = Array.isArray(res) ? res : (res as any)?.data || [];
       setTargets(data);
-      // Auto select first target nếu có
-      if (data.length > 0) {
-        setSelectedTarget(data[0]);
-      } else {
-        setSelectedTarget(null);
-      }
     } catch {
       setTargets([]);
       setSelectedTarget(null);
@@ -218,7 +212,7 @@ export default function CategoryManagementPage() {
         <CategoryColumn
           categories={categories}
           selectedCategory={selectedCategory}
-          onSelect={(cat) => setSelectedCategory(cat)}
+          onSelect={(cat) => { setSelectedCategory(cat); setSelectedTarget(null); }}
           onAdd={() => { setEditingCat(null); setIsCatModalOpen(true); }}
           onEdit={(cat) => { setEditingCat(cat); setIsCatModalOpen(true); }}
           onToggle={handleToggleCat}
@@ -228,7 +222,7 @@ export default function CategoryManagementPage() {
         <TargetColumn
           targets={targets}
           selectedTarget={selectedTarget}
-          onSelect={(tgt) => setSelectedTarget(tgt)}
+          onSelect={(tgt) => setSelectedTarget((prev) => (prev?.id === tgt.id ? null : tgt))}
           onAdd={() => { setEditingTarget(null); setIsTargetModalOpen(true); }}
           onEdit={(tgt) => { setEditingTarget(tgt); setIsTargetModalOpen(true); }}
           onToggle={handleToggleTarget}

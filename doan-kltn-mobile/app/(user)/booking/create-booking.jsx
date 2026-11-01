@@ -162,6 +162,19 @@ export default function BookingFlowScreen() {
     resetMatching,
   } = useBooking();
 
+  useEffect(() => {
+    if (params.serviceId && params.serviceName) {
+      setSelectedService({
+        id: params.serviceId,
+        name: params.serviceName,
+        basePrice: Number(params.basePrice || params.price || 150000),
+        categoryId: params.categoryId,
+        targetId: params.targetId,
+        unit: 'lần',
+      });
+    }
+  }, [params.serviceId, params.serviceName, params.basePrice, params.price, params.categoryId, params.targetId, setSelectedService]);
+
   // ─── Xử lý gửi đơn đặt lịch ─────────────────────────────────────────────
   const handleBookingSubmit = async () => {
     if (!jobTitle.trim()) {
@@ -266,6 +279,11 @@ export default function BookingFlowScreen() {
       orderCode: generatedOrderCode,
       title: jobTitle,
       serviceName: jobTitle,
+      serviceId: params.serviceId || null,
+      categoryId: params.categoryId || null,
+      categoryName: params.categoryName || null,
+      targetId: params.targetId || null,
+      targetName: params.targetName || null,
       addressText: customerAddress,
       customerName,
       customerPhone,
@@ -451,6 +469,16 @@ export default function BookingFlowScreen() {
                   Dịch vụ này chưa có trong hệ thống. Quý khách vui lòng nhập rõ tiêu đề dịch vụ muốn đặt (VD: Chơi với mèo, Chăm thú cưng...). Đơn sẽ ở trạng thái Chờ xác nhận (tối đa 20 phút) để Admin duyệt thợ phù hợp.
                 </Text>
               </View>
+            </View>
+          )}
+
+          {/* ── Breadcrumb Danh mục > Đối tượng ── */}
+          {(params.categoryName || params.targetName) && (
+            <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#EFF6FF', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, marginBottom: 14, gap: 6 }}>
+              <Ionicons name="layers-outline" size={16} color="#0084FF" />
+              <Text style={{ fontSize: 13, fontWeight: '700', color: '#0084FF' }}>
+                {params.categoryName || ''} {params.targetName ? `› ${params.targetName}` : ''}
+              </Text>
             </View>
           )}
 

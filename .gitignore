@@ -54,6 +54,7 @@ weights/
 *.pt
 *.onnx
 *.weights
+*.cache
 eval/results/
 */eval/results/
 
