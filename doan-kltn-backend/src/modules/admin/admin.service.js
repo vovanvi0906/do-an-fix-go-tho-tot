@@ -1012,6 +1012,150 @@ export class AdminService {
     });
   }
 
+  async createServiceTarget(data) {
+    if (!data.name || !data.name.trim()) {
+      throw new BadRequestException('Tên đối tượng/thiết bị không được để trống');
+    }
+    if (!data.categoryId) {
+      throw new BadRequestException('Vui lòng chọn danh mục cha');
+    }
+
+    const name = data.name.trim();
+    let slug = data.slug ? data.slug.trim().toLowerCase() : null;
+    if (!slug) {
+      slug = name
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[đĐ]/g, 'd')
+        .replace(/([^0-9a-z-\s])/g, '')
+        .replace(/(\s+)/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-+|-+$/g, '');
+    }
+
+    const created = await this.prisma.serviceTarget.create({
+      data: {
+        name,
+        slug,
+        categoryId: data.categoryId,
+        icon: data.icon?.trim() || null,
+        description: data.description ? data.description.trim() : null,
+        isActive: data.isActive !== undefined ? Boolean(data.isActive) : true,
+        sortOrder: data.sortOrder ? parseInt(data.sortOrder, 10) : 0,
+      },
+      include: {
+        category: true,
+        _count: {
+          select: { services: true },
+        },
+      },
+    });
+
+    try {
+      this.adminGateway?.emitCategoryUpdated('target_created', created);
+    } catch (e) {}
+
+    return {
+      success: true,
+      message: `Tạo mới đối tượng "${created.name}" thành công`,
+      target: created,
+    };
+  }
+
+  async updateServiceTarget(id, data) {
+    const existing = await this.prisma.serviceTarget.findUnique({ where: { id } });
+    if (!existing) {
+      throw new NotFoundException('Không tìm thấy đối tượng/thiết bị để cập nhật');
+    }
+
+    const updateData = {};
+    if (data.name !== undefined) updateData.name = data.name.trim();
+    if (data.slug !== undefined) updateData.slug = data.slug ? data.slug.trim().toLowerCase() : null;
+    if (data.categoryId !== undefined) updateData.categoryId = data.categoryId;
+    if (data.icon !== undefined) updateData.icon = data.icon ? data.icon.trim() : null;
+    if (data.description !== undefined) updateData.description = data.description ? data.description.trim() : null;
+    if (data.isActive !== undefined) updateData.isActive = Boolean(data.isActive);
+    if (data.sortOrder !== undefined) updateData.sortOrder = parseInt(data.sortOrder, 10);
+
+    const updated = await this.prisma.serviceTarget.update({
+      where: { id },
+      data: updateData,
+      include: {
+        category: true,
+        _count: {
+          select: { services: true },
+        },
+      },
+    });
+
+    try {
+      this.adminGateway?.emitCategoryUpdated('target_updated', updated);
+    } catch (e) {}
+
+    return {
+      success: true,
+      message: `Cập nhật đối tượng "${updated.name}" thành công`,
+      target: updated,
+    };
+  }
+
+  async toggleServiceTargetStatus(id) {
+    const existing = await this.prisma.serviceTarget.findUnique({ where: { id } });
+    if (!existing) {
+      throw new NotFoundException('Không tìm thấy đối tượng/thiết bị');
+    }
+
+    const updated = await this.prisma.serviceTarget.update({
+      where: { id },
+      data: { isActive: !existing.isActive },
+      include: {
+        category: true,
+        _count: { select: { services: true } },
+      },
+    });
+
+    try {
+      this.adminGateway?.emitCategoryUpdated('target_toggled', updated);
+    } catch (e) {}
+
+    return {
+      success: true,
+      message: `Đã ${updated.isActive ? 'kích hoạt' : 'tạm ngưng'} đối tượng "${updated.name}"`,
+      target: updated,
+    };
+  }
+
+  async deleteServiceTarget(id) {
+    const existing = await this.prisma.serviceTarget.findUnique({
+      where: { id },
+      include: { _count: { select: { services: true } } },
+    });
+    if (!existing) {
+      throw new NotFoundException('Không tìm thấy đối tượng/thiết bị để xóa');
+    }
+
+    if (existing._count?.services > 0) {
+      // Nếu có dịch vụ trực thuộc -> Tạm ngưng
+      const updated = await this.prisma.serviceTarget.update({
+        where: { id },
+        data: { isActive: false },
+      });
+      return {
+        success: true,
+        message: `Đối tượng "${existing.name}" đang có ${existing._count.services} dịch vụ liên kết. Đã chuyển sang trạng thái tạm ngưng.`,
+        target: updated,
+      };
+    }
+
+    await this.prisma.serviceTarget.delete({ where: { id } });
+    return {
+      success: true,
+      message: `Đã xóa đối tượng "${existing.name}" thành công`,
+      id,
+    };
+  }
+
   /**
    * Tạo mới một danh mục ngành nghề
    * @param {import('./dto/create-service-category.dto').CreateServiceCategoryDto} data

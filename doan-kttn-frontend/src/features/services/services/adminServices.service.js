@@ -65,6 +65,38 @@ export const adminServicesService = {
   },
 
   /**
+   * Tạo mới đối tượng/thiết bị
+   */
+  async createTarget(data) {
+    const response = await apiClient.post('/v1/admin/services/targets', data);
+    return response.data || response;
+  },
+
+  /**
+   * Cập nhật đối tượng/thiết bị
+   */
+  async updateTarget(id, data) {
+    const response = await apiClient.patch(`/v1/admin/services/targets/${id}`, data);
+    return response.data || response;
+  },
+
+  /**
+   * Đổi trạng thái hoạt động của đối tượng
+   */
+  async toggleTargetStatus(id) {
+    const response = await apiClient.patch(`/v1/admin/services/targets/${id}/toggle`);
+    return response.data || response;
+  },
+
+  /**
+   * Xóa đối tượng/thiết bị
+   */
+  async deleteTarget(id) {
+    const response = await apiClient.delete(`/v1/admin/services/targets/${id}`);
+    return response.data || response;
+  },
+
+  /**
    * API ENDPOINT: GET /api/v1/admin/services/categories
    * Lấy danh sách toàn bộ danh mục dịch vụ phục vụ dropdown và lọc
    */

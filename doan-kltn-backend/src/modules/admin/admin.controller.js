@@ -250,6 +250,34 @@ export class AdminController {
     return this.adminService.getServiceTargets(categoryId);
   }
 
+  @Post('services/targets')
+  @ApiOperation({ summary: 'Tạo mới một đối tượng/thiết bị sửa chữa' })
+  @Bind(Body())
+  async createServiceTarget(body) {
+    return this.adminService.createServiceTarget(body);
+  }
+
+  @Patch('services/targets/:id')
+  @ApiOperation({ summary: 'Cập nhật đối tượng/thiết bị sửa chữa' })
+  @Bind(Param('id'), Body())
+  async updateServiceTarget(id, body) {
+    return this.adminService.updateServiceTarget(id, body);
+  }
+
+  @Patch('services/targets/:id/toggle')
+  @ApiOperation({ summary: 'Bật/tắt trạng thái đối tượng/thiết bị' })
+  @Bind(Param('id'))
+  async toggleServiceTargetStatus(id) {
+    return this.adminService.toggleServiceTargetStatus(id);
+  }
+
+  @Delete('services/targets/:id')
+  @ApiOperation({ summary: 'Xóa hoặc tạm ngưng đối tượng/thiết bị' })
+  @Bind(Param('id'))
+  async deleteServiceTarget(id) {
+    return this.adminService.deleteServiceTarget(id);
+  }
+
   @Get('services')
   @ApiOperation({
     summary:
