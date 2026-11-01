@@ -438,10 +438,16 @@ async def diagnose(
     yolo_cls_model = getattr(request.app.state, "yolo_cls_model", None)
 
     CLS_TO_CATEGORY = {
+        "giup_viec": ("giup-viec", "Giúp việc", ["don_dep_nha", "ve_sinh_san", "giat_sofa"]),
+        "giup-viec": ("giup-viec", "Giúp việc", ["don_dep_nha", "ve_sinh_san", "giat_sofa"]),
         "sua_dien": ("sua-dien", "Sửa điện", ["aptomat_chay", "chap_dien", "day_dien_dut"]),
+        "sua-dien": ("sua-dien", "Sửa điện", ["aptomat_chay", "chap_dien", "day_dien_dut"]),
         "sua_nuoc": ("sua-nuoc", "Sửa nước", ["ro_ri_ong_nuoc", "voi_sen_hong", "tac_cong"]),
+        "sua-nuoc": ("sua-nuoc", "Sửa nước", ["ro_ri_ong_nuoc", "voi_sen_hong", "tac_cong"]),
         "dien_lanh": ("dien-lanh", "Điện lạnh", ["may_lanh_chay_nuoc", "dieu_hoa_dong_tuyet", "may_giat_hong"]),
+        "dien-lanh": ("dien-lanh", "Điện lạnh", ["may_lanh_chay_nuoc", "dieu_hoa_dong_tuyet", "may_giat_hong"]),
         "thiet_bi": ("thiet-bi", "Thiết bị gia dụng", ["bep_tu_loi_e0", "lo_vi_song_hong", "binh_nong_lanh"]),
+        "thiet-bi": ("thiet-bi", "Thiết bị gia dụng", ["bep_tu_loi_e0", "lo_vi_song_hong", "binh_nong_lanh"]),
         "lam_vuon": ("lam-vuon", "Làm vườn", ["cat_tia_co", "don_co_dai", "tia_cay_canh", "garden_lawn"]),
         "lam-vuon": ("lam-vuon", "Làm vườn", ["cat_tia_co", "don_co_dai", "tia_cay_canh", "garden_lawn"]),
         "other_unclear": (None, None, ["unrecognized_object", "unclear_image"]),
@@ -517,7 +523,7 @@ async def diagnose(
 
         # C. Quyết định phân loại theo cơ chế Ensemble Soft-Voting (YOLO 60% + CLIP 40%)
         # 1. Chế độ ENSEMBLE SOFT-VOTING (kết hợp cả YOLO và CLIP)
-        CLASSES_ENUM = ["sua_dien", "sua_nuoc", "dien_lanh", "thiet_bi", "lam_vuon", "other_unclear"]
+        CLASSES_ENUM = ["giup_viec", "sua_dien", "sua_nuoc", "dien_lanh", "thiet_bi", "lam_vuon", "other_unclear"]
 
         if yolo_top1_name is not None and clip_probs is not None and all_probs_dict is not None:
             # Tính điểm Soft-Voting Ensemble
@@ -663,31 +669,36 @@ async def diagnose(
         match_category_by_keywords(desc_text) or match_category_by_keywords(imageUrl or "")
     )
 
-    if matched_kw_cat == "lam-vuon":
+    if matched_kw_cat == "giup-viec":
+        detected_labels = ["house_cleaning", "floor_mopping", "maid_service"]
+        confidence = 0.93
+        suggested_id = "giup-viec"
+        suggested_name = "Giúp việc"
+    elif matched_kw_cat == "dien-lanh":
+        detected_labels = ["air_conditioner", "cooling_coil", "filter_dust"]
+        confidence = 0.91
+        suggested_id = "dien-lanh"
+        suggested_name = "Điện lạnh"
+    elif matched_kw_cat == "thiet-bi":
+        detected_labels = ["induction_cooker", "appliance_damage"]
+        confidence = 0.90
+        suggested_id = "thiet-bi"
+        suggested_name = "Thiết bị gia dụng"
+    elif matched_kw_cat == "lam-vuon":
         detected_labels = ["garden_lawn", "grass_cutting", "tree_pruning"]
         confidence = 0.92
         suggested_id = "lam-vuon"
         suggested_name = "Làm vườn"
-    elif matched_kw_cat == "sua-dien" or any(k in desc_text for k in ["điện", "chập", "aptomat", "cầu dao", "ổ cắm", "cháy", "dây"]):
-        detected_labels = ["circuit_breaker", "electrical_wiring", "burn_trace"]
-        confidence = 0.93
-        suggested_id = "sua-dien"
-        suggested_name = "Sửa điện"
-    elif matched_kw_cat == "sua-nuoc" or any(k in desc_text for k in ["nước", "rò rỉ", "ống", "vòi", "bồn cầu", "lavabo", "sen tắm"]):
+    elif matched_kw_cat == "sua-nuoc":
         detected_labels = ["water_leakage", "plumbing_pipe", "faucet"]
         confidence = 0.91
         suggested_id = "sua-nuoc"
         suggested_name = "Sửa nước"
-    elif matched_kw_cat == "dien-lanh" or any(k in desc_text for k in ["lạnh", "máy lạnh", "điều hòa", "tủ lạnh", "gas"]):
-        detected_labels = ["air_conditioner", "cooling_coil", "filter_dust"]
-        confidence = 0.89
-        suggested_id = "dien-lanh"
-        suggested_name = "Điện lạnh"
-    elif matched_kw_cat == "thiet-bi" or any(k in desc_text for k in ["bếp", "bếp từ", "lò vi sóng", "máy lọc nước", "nóng lạnh", "thiết bị"]):
-        detected_labels = ["induction_cooker", "appliance_damage"]
-        confidence = 0.88
-        suggested_id = "thiet-bi"
-        suggested_name = "Thiết bị gia dụng"
+    elif matched_kw_cat == "sua-dien":
+        detected_labels = ["circuit_breaker", "electrical_wiring", "burn_trace"]
+        confidence = 0.93
+        suggested_id = "sua-dien"
+        suggested_name = "Sửa điện"
     else:
         detected_labels = ["home_appliance_damage"]
         confidence = 0.85

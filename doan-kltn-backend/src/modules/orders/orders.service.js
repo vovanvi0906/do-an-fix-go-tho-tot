@@ -117,6 +117,7 @@ export class OrdersService {
       matchedCategory = categories.find(
         (c) =>
           c.id === aiResult.suggestedCategoryId ||
+          c.slug === aiResult.suggestedCategoryId ||
           (aiResult.suggestedCategoryName &&
             c.name
               .toLowerCase()
