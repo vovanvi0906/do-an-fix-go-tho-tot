@@ -1,5 +1,6 @@
 import { Injectable, Dependencies } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { getFallbackDiagnosis, getFallbackCompare, getFallbackFaceVerify } from './aiFallbackHelper';
 
 @Injectable()
 @Dependencies(ConfigService)
@@ -44,74 +45,7 @@ export class FastApiAiClient {
     }
 
     // Heuristic Fallback khi AI Service chưa bật hoặc offline
-    const descLower = (description || '').toLowerCase();
-    const isBlurry =
-      descLower.includes('mờ') ||
-      descLower.includes('không rõ') ||
-      (imageUrl || '').includes('khong_ro');
-
-    if (isBlurry) {
-      return {
-        suggestedCategoryId: null,
-        suggestedCategoryName: null,
-        suggestedServiceId: null,
-        suggestedServiceName: null,
-        suggestedServiceConfidence: null,
-        estimatedPriceRange: null,
-        confidence: 0.45,
-        detectedLabels: ['unrecognized_object', 'blurry_image'],
-        notes: 'Ảnh không rõ nét, độ tin cậy thấp (< 60%)',
-      };
-    }
-
-    if (
-      descLower.includes('điện') ||
-      descLower.includes('chập') ||
-      descLower.includes('aptomat')
-    ) {
-      return {
-        suggestedCategoryId: 'cat-dien',
-        suggestedCategoryName: 'Sửa điện',
-        suggestedServiceId: 'thay-aptomat-cb',
-        suggestedServiceName: 'Xử lý chập điện / Thay CB Aptomat',
-        suggestedServiceConfidence: 0.90,
-        estimatedPriceRange: { min: 150000, max: 300000, formatted: '150.000đ - 300.000đ' },
-        confidence: 0.92,
-        detectedLabels: ['circuit_breaker', 'electrical_spark'],
-        issueDetected: 'Sự cố chập aptomat điện',
-      };
-    }
-
-    if (
-      descLower.includes('nước') ||
-      descLower.includes('vòi') ||
-      descLower.includes('ống') ||
-      descLower.includes('bồn')
-    ) {
-      return {
-        suggestedCategoryId: 'cat-nuoc',
-        suggestedCategoryName: 'Sửa nước',
-        suggestedServiceId: 'sua-voi-nuoc-ro-ri',
-        suggestedServiceName: 'Sửa vòi nước rò rỉ / Thay vòi sen tắm',
-        suggestedServiceConfidence: 0.88,
-        estimatedPriceRange: { min: 100000, max: 220000, formatted: '100.000đ - 220.000đ' },
-        confidence: 0.89,
-        detectedLabels: ['pipe_leak', 'faucet_damage'],
-        issueDetected: 'Rò rỉ đường ống nước',
-      };
-    }
-
-    return {
-      suggestedCategoryId: 'cat-dien-nuoc',
-      suggestedCategoryName: 'Sửa điện - nước',
-      suggestedServiceId: 'kiem-tra-tong-quat',
-      suggestedServiceName: 'Kiểm tra & Xử lý sự cố thiết bị',
-      suggestedServiceConfidence: 0.85,
-      estimatedPriceRange: { min: 120000, max: 250000, formatted: '120.000đ - 250.000đ' },
-      confidence: 0.85,
-      detectedLabels: ['appliance_damage'],
-      issueDetected: description || 'Sự cố thiết bị gia đình',
-    };
+    return getFallbackDiagnosis(description, imageUrl);
   }
 
   /**
@@ -126,35 +60,13 @@ export class FastApiAiClient {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ beforeImageUrl, afterImageUrl }),
       });
-
-      if (response.ok) {
-        return await response.json();
-      }
+      if (response.ok) return await response.json();
     } catch (err) {
-      console.warn(
-        'FastAPI AI Service (/ai/compare-before-after) không phản hồi, chạy chế độ fallback:',
-        err.message,
-      );
+      console.warn('FastAPI AI Service (/ai/compare-before-after) không phản hồi:', err.message);
     }
-
-    // Heuristic Fallback
-    const isDirty =
-      (afterImageUrl || '').includes('chua_xong') ||
-      (afterImageUrl || '').includes('dirty');
-    return {
-      matchScore: isDirty ? 0.55 : 0.92,
-      passed: !isDirty,
-      notes: isDirty
-        ? 'Chưa đạt chuẩn nghiệm thu: Vẫn còn vết bẩn hoặc linh kiện chưa hoàn tất'
-        : 'Nghiệm thu đạt chuẩn: Sự cố đã được xử lý triệt để và vệ sinh sạch sẽ',
-    };
+    return getFallbackCompare(afterImageUrl);
   }
 
-  /**
-   * 3. POST /ai/face-verify: Xác thực khuôn mặt thợ
-   * input: workerId, selfieUrl, idCardImageUrl
-   * output: { verified: boolean, confidence (0-1) }
-   */
   async verifyFace(workerId, selfieUrl, idCardImageUrl = '') {
     try {
       const response = await fetch(`${this.baseUrl}/ai/face-verify`, {
@@ -162,29 +74,11 @@ export class FastApiAiClient {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ workerId, photoUrl: selfieUrl, idCardImageUrl }),
       });
-
-      if (response.ok) {
-        return await response.json();
-      }
+      if (response.ok) return await response.json();
     } catch (err) {
-      console.warn(
-        'FastAPI AI Service (/ai/face-verify) không phản hồi, chạy chế độ fallback:',
-        err.message,
-      );
+      console.warn('FastAPI AI Service (/ai/face-verify) không phản hồi:', err.message);
     }
-
-    // Heuristic Fallback
-    const isLowMatch =
-      (selfieUrl || '').includes('unmatched') ||
-      (selfieUrl || '').includes('low_confidence');
-    return {
-      verified: !isLowMatch,
-      confidence: isLowMatch ? 0.48 : 0.95,
-      workerId,
-      message: isLowMatch
-        ? 'Độ khớp khuôn mặt thấp (< 60%). Chuyển vào hàng đợi kiểm duyệt thủ công bởi Admin.'
-        : 'Xác thực khuôn mặt thành công.',
-    };
+    return getFallbackFaceVerify(workerId, selfieUrl);
   }
 
   // Compatibility aliases
