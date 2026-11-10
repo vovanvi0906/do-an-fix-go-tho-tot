@@ -4,7 +4,7 @@
     "slug": "doan-kltn-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icons/icon.png",
+    "icon": "./assets/favicon.png",
     "scheme": "doankltn",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
@@ -21,7 +21,7 @@
       "googleServicesFile": "./google-services.json",
       "usesCleartextTraffic": true,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icons/adaptive-icon.png",
+        "foregroundImage": "./assets/favicon.png",
         "backgroundColor": "#ffffff"
       },
       "permissions": [

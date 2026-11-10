@@ -139,8 +139,7 @@ Bản build này tích hợp đầy đủ các native modules như **Google Sign
 
 1. **Build qua đám mây EAS (Khuyên dùng - Nhẹ máy nhất, không cần cài đặt Android SDK nặng)**:
    ```bash
-   cd doan-kltn-mobile
-   eas build --platform android --profile development
+   cd doan-kltn-mobile && eas build --platform android --profile development
    ```
    - Terminal sẽ tự động đẩy code lên máy chủ của Expo để đóng gói APK.
    - Khi hoàn tất (khoảng 5-10 phút), terminal sẽ cung cấp mã QR hoặc đường link tải file `.apk`.
