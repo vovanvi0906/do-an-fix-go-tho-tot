@@ -1,3 +1,4 @@
+import DiagnosisChoices from '../../../components/diagnosis/DiagnosisChoices';
 /**
  * @file AiScanModal.tsx
  * @description Modal Quét & Chẩn đoán Sự cố bằng AI Computer Vision (YOLOv8).
@@ -46,6 +47,7 @@ export default function AiScanModal({
   const [modalStep, setModalStep] = useState<'idle' | 'scanning' | 'result'>('idle');
   const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
   const [diagnosisResult, setDiagnosisResult] = useState<AiDiagnosisResponse | null>(null);
+  const scanGeneration = useRef(0);
   const [statusTextIndex, setStatusTextIndex] = useState(0);
 
   // ── Animated Values ─────────────────────────────────────────────────────
@@ -54,10 +56,10 @@ export default function AiScanModal({
   const resultSlideAnim = useRef(new Animated.Value(20)).current;
 
   const SCAN_MESSAGES = [
-    'AI đang trích xuất dữ liệu hỏng hóc từ hình ảnh...',
-    'Đang nhận diện nhãn vật thể & linh kiện...',
+    'Đang phân tích hình ảnh...',
+    'Đang nhận diện nhóm thiết bị...',
     'Đang đối chiếu cơ sở dữ liệu kỹ thuật FixGo...',
-    'Tính toán khoảng giá & thời gian thợ có mặt...',
+    'Đang chuẩn bị câu hỏi xác nhận triệu chứng...',
   ];
 
   // ── Laser Beam Loop Animation ───────────────────────────────────────────
@@ -121,6 +123,7 @@ export default function AiScanModal({
 
   // Reset state khi mở/đóng modal
   const handleCloseModal = () => {
+    scanGeneration.current += 1;
     setModalStep('idle');
     setSelectedImageUri(null);
     setDiagnosisResult(null);
@@ -180,6 +183,8 @@ export default function AiScanModal({
 
   // ── Bắt đầu Quy trình Quét Laser AI ─────────────────────────────────────
   const startAiScanProcess = async (uri: string) => {
+    const generation = ++scanGeneration.current;
+    setDiagnosisResult(null);
     setSelectedImageUri(uri);
     setModalStep('scanning');
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
@@ -189,28 +194,23 @@ export default function AiScanModal({
 
     try {
       const result = await diagnoseIssueImage(uri);
+      if (generation !== scanGeneration.current) return;
       const elapsedTime = Date.now() - startTime;
       const remainingTime = Math.max(2200 - elapsedTime, 0);
 
       setTimeout(() => {
+        if (generation !== scanGeneration.current) return;
         setDiagnosisResult(result);
         setModalStep('result');
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
       }, remainingTime);
-    } catch (error) {
-      setTimeout(() => {
-        // Fallback tự động
-        setDiagnosisResult({
-          suggestedCategoryId: 'sua-dien',
-          categoryName: 'Sửa điện gia đình',
-          confidence: 0.91,
-          detectedLabels: ['chập_aptomat', 'tia_lửa_điện'],
-          estimatedPrice: { min: 150000, max: 220000 },
-          notes: 'Phát hiện dấu hiệu chập điện ổ cắm. Kỹ thuật viên sẽ kiểm tra đồng hồ vạn năng & xử lý triệt để.',
-          imageUrl: uri,
-        });
-        setModalStep('result');
-      }, 2000);
+    } catch (error: any) {
+      if (generation !== scanGeneration.current) return;
+      setModalStep('idle');
+      Alert.alert(
+        'Không thể phân tích',
+        error?.message || 'Không thể kết nối máy chủ. Vui lòng thử lại sau.'
+      );
     }
   };
 
@@ -370,9 +370,9 @@ export default function AiScanModal({
                     <View style={{ flex: 1, marginLeft: 8 }}>
                       <Text style={styles.resultCategoryTitle}>{diagnosisResult.categoryName}</Text>
                       <Text style={styles.confidenceText}>
-                        Độ tin cậy AI:{' '}
+                        Điểm nhận diện nhóm:{' '}
                         <Text style={styles.confidenceHighlight}>
-                          {(diagnosisResult.confidence * 100).toFixed(0)}%
+                          {diagnosisResult.confidence == null ? 'Chưa có' : `${(diagnosisResult.confidence * 100).toFixed(0)}%`}
                         </Text>
                       </Text>
                     </View>
@@ -416,16 +416,16 @@ export default function AiScanModal({
                     <Text style={styles.priceEstimateLabel}>Báo giá dự toán minh bạch</Text>
                     <View style={styles.arrivalChip}>
                       <Ionicons name="flash" size={11} color="#0284C7" style={{ marginRight: 2 }} />
-                      <Text style={styles.arrivalChipText}>Thợ đến sau 15p</Text>
+                      <Text style={styles.arrivalChipText}>Theo lịch đặt</Text>
                     </View>
                   </View>
 
                   <Text style={styles.priceRangeText}>
                     {diagnosisResult.estimatedPriceRange?.formatted ||
-                      `${diagnosisResult.estimatedPrice.min.toLocaleString('vi-VN')} đ - ${diagnosisResult.estimatedPrice.max.toLocaleString('vi-VN')} đ`}
+                      'Chưa có giá tham khảo'}
                   </Text>
                   <Text style={styles.priceNoteText}>
-                    *Đã bao gồm công kiểm tra & sửa chữa cơ bản. Bảo hành 30 ngày.
+                    *Giá tham khảo từ catalog. Thợ kiểm tra và báo giá thực tế.
                   </Text>
                 </View>
 
@@ -435,22 +435,26 @@ export default function AiScanModal({
                   <Text style={styles.notesText}>{diagnosisResult.notes}</Text>
                 </View>
 
+                <DiagnosisChoices result={diagnosisResult} imageUrl={selectedImageUri}
+                  onResult={setDiagnosisResult} onReset={() => setDiagnosisResult(prev => prev ? { ...prev, status: 'needs_more_info' } : prev)} />
                 {/* Hành động */}
                 <View style={styles.resultActionsRow}>
                   <Pressable
                     nativeID="btn-confirm-booking"
+                    disabled={diagnosisResult.status !== 'suggested' || !diagnosisResult.suggestedServiceId}
                     accessible={true}
                     accessibilityRole="button"
                     accessibilityLabel="Xác nhận chẩn đoán và tìm thợ ngay"
                     style={({ pressed }) => [styles.confirmOrderBtn, pressed && styles.pressedEffect]}
                     onPress={() => {
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+                      if (diagnosisResult.status !== 'suggested' || !diagnosisResult.suggestedServiceId) return;
                       onConfirmBooking(diagnosisResult);
                       handleCloseModal();
                     }}
                   >
                     <Ionicons name="shield-checkmark" size={18} color="#FFFFFF" style={{ marginRight: 6 }} />
-                    <Text style={styles.confirmOrderText}>Xác nhận & Tìm thợ ngay</Text>
+                    <Text style={styles.confirmOrderText}>{diagnosisResult.status === 'suggested' ? 'Xác nhận dịch vụ' : 'Chọn dịch vụ để tiếp tục'}</Text>
                   </Pressable>
 
                   <Pressable

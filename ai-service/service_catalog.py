@@ -95,6 +95,8 @@ SUB_SERVICES_CATALOG: Dict[str, List[Dict[str, Any]]] = {
         {
             "slug": "don-dep-nha-theo-gio",
             "name": "Dọn dẹp nhà theo giờ",
+            "target_name": "Nhà ở / Căn hộ",
+            "target_slug": "nha-o-can-ho",
             "min_price": 100000,
             "max_price": 150000,
             "unit": "giờ",
@@ -107,6 +109,8 @@ SUB_SERVICES_CATALOG: Dict[str, List[Dict[str, Any]]] = {
         {
             "slug": "tong-ve-sinh-nha-o",
             "name": "Tổng vệ sinh nhà ở",
+            "target_name": "Nhà ở / Căn hộ",
+            "target_slug": "nha-o-can-ho",
             "min_price": 500000,
             "max_price": 1500000,
             "unit": "buổi",
@@ -118,6 +122,8 @@ SUB_SERVICES_CATALOG: Dict[str, List[Dict[str, Any]]] = {
         {
             "slug": "giat-sofa-vai",
             "name": "Giặt sofa vải",
+            "target_name": "Sofa / Nệm / Thảm / Rèm",
+            "target_slug": "sofa-nem-tham-rem",
             "min_price": 250000,
             "max_price": 500000,
             "unit": "bộ",
@@ -129,6 +135,8 @@ SUB_SERVICES_CATALOG: Dict[str, List[Dict[str, Any]]] = {
         {
             "slug": "ve-sinh-cua-kinh",
             "name": "Vệ sinh cửa kính",
+            "target_name": "Cửa kính / Cửa sổ / Ban công",
+            "target_slug": "cua-kinh-cua-so-ban-cong",
             "min_price": 120000,
             "max_price": 250000,
             "unit": "lần",
@@ -140,6 +148,8 @@ SUB_SERVICES_CATALOG: Dict[str, List[Dict[str, Any]]] = {
         {
             "slug": "ve-sinh-van-phong-theo-gio",
             "name": "Vệ sinh văn phòng theo giờ",
+            "target_name": "Văn phòng / Cửa hàng",
+            "target_slug": "van-phong-cua-hang",
             "min_price": 120000,
             "max_price": 200000,
             "unit": "giờ",
@@ -153,6 +163,8 @@ SUB_SERVICES_CATALOG: Dict[str, List[Dict[str, Any]]] = {
         {
             "slug": "cat-co-dinh-ky",
             "name": "Cắt cỏ định kỳ",
+            "target_name": "Thảm cỏ / Bãi cỏ",
+            "target_slug": "tham-co-bai-co",
             "min_price": 150000,
             "max_price": 350000,
             "unit": "lần",
@@ -165,6 +177,8 @@ SUB_SERVICES_CATALOG: Dict[str, List[Dict[str, Any]]] = {
         {
             "slug": "cat-tia-cay-canh",
             "name": "Cắt tỉa cây cảnh",
+            "target_name": "Cây cảnh / Chậu cây",
+            "target_slug": "cay-canh-chau-cay",
             "min_price": 150000,
             "max_price": 400000,
             "unit": "lần",
@@ -177,6 +191,8 @@ SUB_SERVICES_CATALOG: Dict[str, List[Dict[str, Any]]] = {
         {
             "slug": "nho-don-co-dai",
             "name": "Nhổ / dọn cỏ dại",
+            "target_name": "Thảm cỏ / Bãi cỏ",
+            "target_slug": "tham-co-bai-co",
             "min_price": 150000,
             "max_price": 300000,
             "unit": "lần",
@@ -188,6 +204,8 @@ SUB_SERVICES_CATALOG: Dict[str, List[Dict[str, Any]]] = {
         {
             "slug": "cat-tia-hang-rao-cay",
             "name": "Cắt tỉa hàng rào cây",
+            "target_name": "Hàng rào cây / Bồn hoa / Vườn rau",
+            "target_slug": "hang-rao-cay-bon-hoa-vuon-rau",
             "min_price": 150000,
             "max_price": 350000,
             "unit": "lần",
@@ -199,6 +217,8 @@ SUB_SERVICES_CATALOG: Dict[str, List[Dict[str, Any]]] = {
         {
             "slug": "lap-he-thong-tuoi-tu-dong",
             "name": "Lắp hệ thống tưới tự động",
+            "target_name": "Hệ thống tưới / Sân vườn tổng thể",
+            "target_slug": "he-thong-tuoi-san-vuon-tong-the",
             "min_price": 200000,
             "max_price": 600000,
             "unit": "lần",
@@ -212,6 +232,8 @@ SUB_SERVICES_CATALOG: Dict[str, List[Dict[str, Any]]] = {
         {
             "slug": "lap-dat-voi-moi",
             "name": "Lắp đặt vòi mới",
+            "target_name": "Vòi nước / Vòi sen",
+            "target_slug": "voi-nuoc-voi-sen",
             "min_price": 150000,
             "max_price": 250000,
             "unit": "điểm",
@@ -224,6 +246,8 @@ SUB_SERVICES_CATALOG: Dict[str, List[Dict[str, Any]]] = {
         {
             "slug": "sua-bon-cau-xa-yeu",
             "name": "Sửa bồn cầu xả yếu",
+            "target_name": "Bồn cầu / Két nước",
+            "target_slug": "bon-cau-ket-nuoc",
             "min_price": 150000,
             "max_price": 350000,
             "unit": "điểm",
@@ -235,6 +259,8 @@ SUB_SERVICES_CATALOG: Dict[str, List[Dict[str, Any]]] = {
         {
             "slug": "xu-ly-mui-hoi-quanh-bon-cau",
             "name": "Xử lý mùi hôi quanh bồn cầu",
+            "target_name": "Bồn cầu / Két nước",
+            "target_slug": "bon-cau-ket-nuoc",
             "min_price": 150000,
             "max_price": 400000,
             "unit": "điểm",
@@ -246,6 +272,8 @@ SUB_SERVICES_CATALOG: Dict[str, List[Dict[str, Any]]] = {
         {
             "slug": "sua-bom-khong-chay",
             "name": "Sửa bơm không chạy",
+            "target_name": "Bồn nước / Máy bơm / Phao nước",
+            "target_slug": "bon-nuoc-may-bom-phao-nuoc",
             "min_price": 200000,
             "max_price": 500000,
             "unit": "điểm",
@@ -259,6 +287,8 @@ SUB_SERVICES_CATALOG: Dict[str, List[Dict[str, Any]]] = {
         {
             "slug": "sua-cong-tac-khong-hoat-dong",
             "name": "Sửa công tắc không hoạt động",
+            "target_name": "Công tắc điện",
+            "target_slug": "cong-tac-dien",
             "min_price": 100000,
             "max_price": 180000,
             "unit": "điểm",
@@ -271,6 +301,8 @@ SUB_SERVICES_CATALOG: Dict[str, List[Dict[str, Any]]] = {
         {
             "slug": "lap-tu-dien-dan-dung",
             "name": "Lắp tủ điện dân dụng",
+            "target_name": "Tủ điện / Bảng điện",
+            "target_slug": "tu-dien-bang-dien",
             "min_price": 250000,
             "max_price": 600000,
             "unit": "điểm",
@@ -282,6 +314,8 @@ SUB_SERVICES_CATALOG: Dict[str, List[Dict[str, Any]]] = {
         {
             "slug": "thay-day-cu-xuong-cap",
             "name": "Thay dây cũ / xuống cấp",
+            "target_name": "Dây điện / Cáp điện",
+            "target_slug": "day-dien-cap-dien",
             "min_price": 150000,
             "max_price": 450000,
             "unit": "điểm",
@@ -295,6 +329,8 @@ SUB_SERVICES_CATALOG: Dict[str, List[Dict[str, Any]]] = {
         {
             "slug": "kiem-tra-may-lanh-khong-lanh-hoac-lanh-yeu",
             "name": "Kiểm tra máy lạnh không lạnh hoặc lạnh yếu",
+            "target_name": "Máy lạnh / Điều hòa",
+            "target_slug": "may-lanh-dieu-hoa",
             "min_price": 180000,
             "max_price": 300000,
             "unit": "máy",
@@ -306,6 +342,8 @@ SUB_SERVICES_CATALOG: Dict[str, List[Dict[str, Any]]] = {
         {
             "slug": "sua-may-lanh-chay-nuoc",
             "name": "Sửa máy lạnh chảy nước",
+            "target_name": "Máy lạnh / Điều hòa",
+            "target_slug": "may-lanh-dieu-hoa",
             "min_price": 180000,
             "max_price": 350000,
             "unit": "máy",
@@ -317,6 +355,8 @@ SUB_SERVICES_CATALOG: Dict[str, List[Dict[str, Any]]] = {
         {
             "slug": "sua-tu-lanh-khong-lanh",
             "name": "Sửa tủ lạnh không lạnh",
+            "target_name": "Tủ lạnh / Tủ lạnh side-by-side",
+            "target_slug": "tu-lanh-tu-lanh-side-by-side",
             "min_price": 200000,
             "max_price": 550000,
             "unit": "máy",
@@ -328,6 +368,8 @@ SUB_SERVICES_CATALOG: Dict[str, List[Dict[str, Any]]] = {
         {
             "slug": "sua-may-giat-khong-vat",
             "name": "Sửa máy giặt không vắt",
+            "target_name": "Máy giặt / Máy giặt sấy",
+            "target_slug": "may-giat-may-giat-say",
             "min_price": 180000,
             "max_price": 450000,
             "unit": "máy",
@@ -341,6 +383,8 @@ SUB_SERVICES_CATALOG: Dict[str, List[Dict[str, Any]]] = {
         {
             "slug": "sua-bep-khong-len-nguon",
             "name": "Sửa bếp không lên nguồn",
+            "target_name": "Bếp từ / Bếp hồng ngoại",
+            "target_slug": "bep-tu-bep-hong-ngoai",
             "min_price": 150000,
             "max_price": 400000,
             "unit": "máy",
@@ -352,6 +396,8 @@ SUB_SERVICES_CATALOG: Dict[str, List[Dict[str, Any]]] = {
         {
             "slug": "sua-bep-khong-nong-nong-yeu",
             "name": "Sửa bếp không nóng / nóng yếu",
+            "target_name": "Bếp từ / Bếp hồng ngoại",
+            "target_slug": "bep-tu-bep-hong-ngoai",
             "min_price": 150000,
             "max_price": 450000,
             "unit": "máy",
@@ -363,6 +409,8 @@ SUB_SERVICES_CATALOG: Dict[str, List[Dict[str, Any]]] = {
         {
             "slug": "thay-loi-loc-dinh-ky",
             "name": "Thay lõi lọc định kỳ",
+            "target_name": "Máy lọc nước RO / Nano",
+            "target_slug": "may-loc-nuoc-ro-nano",
             "min_price": 120000,
             "max_price": 300000,
             "unit": "máy",
@@ -374,6 +422,8 @@ SUB_SERVICES_CATALOG: Dict[str, List[Dict[str, Any]]] = {
         {
             "slug": "sua-binh-khong-nong",
             "name": "Sửa bình không nóng",
+            "target_name": "Bình nóng lạnh điện",
+            "target_slug": "binh-nong-lanh-dien",
             "min_price": 150000,
             "max_price": 400000,
             "unit": "máy",

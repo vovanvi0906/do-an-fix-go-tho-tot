@@ -1034,6 +1034,19 @@ export class AdminService {
         .replace(/^-+|-+$/g, '');
     }
 
+    let aiPrompts = [];
+    if (Array.isArray(data.aiPrompts) && data.aiPrompts.length > 0) {
+      aiPrompts = data.aiPrompts.map((p) => String(p).trim()).filter(Boolean);
+    } else if (typeof data.aiPrompts === 'string' && data.aiPrompts.trim()) {
+      aiPrompts = data.aiPrompts.split('\n').map((p) => p.trim()).filter(Boolean);
+    }
+    if (aiPrompts.length === 0) {
+      aiPrompts = [
+        `a photo of a ${name} device in home repair`,
+        `a photo of ${slug.replace(/-/g, ' ')}`,
+      ];
+    }
+
     const created = await this.prisma.serviceTarget.create({
       data: {
         name,
@@ -1041,6 +1054,7 @@ export class AdminService {
         categoryId: data.categoryId,
         icon: data.icon?.trim() || null,
         description: data.description ? data.description.trim() : null,
+        aiPrompts,
         isActive: data.isActive !== undefined ? Boolean(data.isActive) : true,
         sortOrder: data.sortOrder ? parseInt(data.sortOrder, 10) : 0,
       },
@@ -1054,6 +1068,7 @@ export class AdminService {
 
     try {
       this.adminGateway?.emitCategoryUpdated('target_created', created);
+      this.notifyAiServiceSync();
     } catch (e) {}
 
     return {
@@ -1061,6 +1076,11 @@ export class AdminService {
       message: `Tạo mới đối tượng "${created.name}" thành công`,
       target: created,
     };
+  }
+
+  notifyAiServiceSync() {
+    const aiBase = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+    fetch(`${aiBase}/ai/sync-targets`, { method: 'POST' }).catch(() => {});
   }
 
   async updateServiceTarget(id, data) {
@@ -1075,6 +1095,13 @@ export class AdminService {
     if (data.categoryId !== undefined) updateData.categoryId = data.categoryId;
     if (data.icon !== undefined) updateData.icon = data.icon ? data.icon.trim() : null;
     if (data.description !== undefined) updateData.description = data.description ? data.description.trim() : null;
+    if (data.aiPrompts !== undefined) {
+      if (Array.isArray(data.aiPrompts)) {
+        updateData.aiPrompts = data.aiPrompts.map((p) => String(p).trim()).filter(Boolean);
+      } else if (typeof data.aiPrompts === 'string') {
+        updateData.aiPrompts = data.aiPrompts.split('\n').map((p) => p.trim()).filter(Boolean);
+      }
+    }
     if (data.isActive !== undefined) updateData.isActive = Boolean(data.isActive);
     if (data.sortOrder !== undefined) updateData.sortOrder = parseInt(data.sortOrder, 10);
 
@@ -1091,6 +1118,7 @@ export class AdminService {
 
     try {
       this.adminGateway?.emitCategoryUpdated('target_updated', updated);
+      this.notifyAiServiceSync();
     } catch (e) {}
 
     return {
@@ -1117,6 +1145,7 @@ export class AdminService {
 
     try {
       this.adminGateway?.emitCategoryUpdated('target_toggled', updated);
+      this.notifyAiServiceSync();
     } catch (e) {}
 
     return {
@@ -1141,6 +1170,7 @@ export class AdminService {
         where: { id },
         data: { isActive: false },
       });
+      this.notifyAiServiceSync();
       return {
         success: true,
         message: `Đối tượng "${existing.name}" đang có ${existing._count.services} dịch vụ liên kết. Đã chuyển sang trạng thái tạm ngưng.`,
@@ -1149,6 +1179,7 @@ export class AdminService {
     }
 
     await this.prisma.serviceTarget.delete({ where: { id } });
+    this.notifyAiServiceSync();
     return {
       success: true,
       message: `Đã xóa đối tượng "${existing.name}" thành công`,

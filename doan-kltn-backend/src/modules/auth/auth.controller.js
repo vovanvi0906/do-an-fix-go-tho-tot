@@ -123,4 +123,20 @@ export class AuthController {
   async firebaseGoogleLogin(body) {
     return this.authService.firebaseGoogleLogin(body.idToken);
   }
+
+  @Post(['refresh', 'refresh-token'])
+  @ApiOperation({ summary: 'Làm mới accessToken bằng refreshToken' })
+  @ApiResponse({
+    status: 200,
+    description: 'Làm mới token thành công, trả về accessToken và refreshToken mới',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'RefreshToken không hợp lệ hoặc đã hết hạn',
+  })
+  @Bind(Body())
+  async refresh(body) {
+    const refreshToken = body.refreshToken || body.refresh_token;
+    return this.authService.refreshToken(refreshToken);
+  }
 }

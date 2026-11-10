@@ -1,14 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const TOKEN_KEY = 'AUTH_ACCESS_TOKEN';
+const REFRESH_TOKEN_KEY = 'AUTH_REFRESH_TOKEN';
 const USER_KEY = 'AUTH_USER_INFO';
 
 export const tokenStorage = {
   async saveToken(token) {
     try {
-      if (token) {
-        await AsyncStorage.setItem(TOKEN_KEY, token);
-      }
+      if (token) await AsyncStorage.setItem(TOKEN_KEY, token);
     } catch (e) {
       console.error('Failed to save token to storage', e);
     }
@@ -31,11 +30,34 @@ export const tokenStorage = {
     }
   },
 
+  async saveRefreshToken(refreshToken) {
+    try {
+      if (refreshToken) await AsyncStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+    } catch (e) {
+      console.error('Failed to save refresh token to storage', e);
+    }
+  },
+
+  async getRefreshToken() {
+    try {
+      return await AsyncStorage.getItem(REFRESH_TOKEN_KEY);
+    } catch (e) {
+      console.error('Failed to get refresh token from storage', e);
+      return null;
+    }
+  },
+
+  async removeRefreshToken() {
+    try {
+      await AsyncStorage.removeItem(REFRESH_TOKEN_KEY);
+    } catch (e) {
+      console.error('Failed to remove refresh token from storage', e);
+    }
+  },
+
   async saveUser(user) {
     try {
-      if (user) {
-        await AsyncStorage.setItem(USER_KEY, JSON.stringify(user));
-      }
+      if (user) await AsyncStorage.setItem(USER_KEY, JSON.stringify(user));
     } catch (e) {
       console.error('Failed to save user to storage', e);
     }
@@ -61,7 +83,7 @@ export const tokenStorage = {
 
   async clearAll() {
     try {
-      await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
+      await AsyncStorage.multiRemove([TOKEN_KEY, REFRESH_TOKEN_KEY, USER_KEY]);
     } catch (e) {
       console.error('Failed to clear storage', e);
     }

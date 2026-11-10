@@ -121,6 +121,7 @@ export default function ConfirmOrderScreen({ navigation, onBack, onNext }) {
       scheduledAt: selectedTime === 'now' ? null : new Date().toISOString(),
       aiSuggestedCategoryId: diagnoseResult?.suggestedCategoryId,
       aiConfidence: diagnoseResult?.confidence,
+      imageUrl: diagnoseResult?.imageUrl,
     };
 
     createOrderMutation.mutate(payload);

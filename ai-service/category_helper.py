@@ -17,12 +17,12 @@ CATEGORIES: Dict[str, Dict[str, Any]] = {
 }
 
 CATEGORY_KEYWORDS: Dict[str, List[str]] = {
-    "giup-viec": ["giup viec", "giup-viec", "giup_viec", "don dep", "ve sinh", "lau nha", "giat sofa", "housekeeping", "cleaning"],
-    "lam-vuon": ["lam vuon", "lam-vuon", "lam_vuon", "san vuon", "cay canh", "co dai", "cat co", "tia cay", "garden", "lawn", "grass"],
-    "sua-dien": ["sua dien", "sua-dien", "sua_dien", "chap dien", "aptomat", "cau dao", "o cam", "cong tac", "chay no", "day dien"],
-    "sua-nuoc": ["sua nuoc", "sua-nuoc", "sua_nuoc", "ro ri nuoc", "ong nuoc", "duong ong", "voi nuoc", "bon cau", "lavabo", "sen tam"],
-    "dien-lanh": ["dien lanh", "dien-lanh", "dien_lanh", "may lanh", "dieu hoa", "tu lanh", "may giat", "may say", "nap gas", "hvac"],
-    "thiet-bi": ["thiet bi", "thiet-bi", "thiet_bi", "bep tu", "bep hong ngoai", "lo vi song", "may loc nuoc", "binh nong lanh", "noi com"],
+    "giup-viec": ["giup viec", "giup-viec", "giup_viec", "don dep", "ve sinh", "lau nha", "giat sofa", "giat nem", "tong ve sinh", "housekeeping", "cleaning"],
+    "lam-vuon": ["lam vuon", "lam-vuon", "lam_vuon", "san vuon", "cay canh", "co dai", "cat co", "tia cay", "chat cay", "garden", "lawn", "grass"],
+    "sua-dien": ["sua dien", "sua-dien", "sua_dien", "chap dien", "aptomat", "cau dao", "o cam", "cong tac", "chay no", "day dien", "nhay cb", "mat dien", "ro dien"],
+    "sua-nuoc": ["sua nuoc", "sua-nuoc", "sua_nuoc", "ro ri nuoc", "ong nuoc", "duong ong", "vo ong", "buc ong", "xi nuoc", "voi nuoc", "bon cau", "lavabo", "sen tam", "thong tac", "nghet"],
+    "dien-lanh": ["dien lanh", "dien-lanh", "dien_lanh", "may lanh", "dieu hoa", "tu lanh", "may giat", "may say", "nap gas", "tu dong", "tu mat", "hvac"],
+    "thiet-bi": ["thiet bi", "thiet-bi", "thiet_bi", "bep tu", "bep hong ngoai", "bep gas", "lo vi song", "may loc nuoc", "binh nong lanh", "noi com", "may hut mui", "robot hut bui"],
 }
 
 

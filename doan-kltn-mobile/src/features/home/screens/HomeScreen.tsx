@@ -221,6 +221,7 @@ export default function HomeScreen() {
 
   const handleConfirmAiBooking = (diagnosis: AiDiagnosisResponse) => {
     if (!checkPhoneBeforeAction()) return;
+    if (diagnosis.status !== 'suggested' || !diagnosis.suggestedCategoryId || !diagnosis.suggestedServiceId) return;
     router.push({
       pathname: '/(user)/booking/create-booking',
       params: {
@@ -230,7 +231,7 @@ export default function HomeScreen() {
         serviceName: diagnosis.suggestedServiceName || diagnosis.categoryName,
         price: String(diagnosis.estimatedPrice.min),
         imageUrl: diagnosis.imageUrl || '',
-        confidence: String(diagnosis.confidence || 0.9),
+        confidence: diagnosis.confidence == null ? '' : String(diagnosis.confidence),
         note: diagnosis.suggestedServiceName
           ? `[Dịch vụ đề xuất: ${diagnosis.suggestedServiceName}] ${diagnosis.notes}`
           : diagnosis.notes,

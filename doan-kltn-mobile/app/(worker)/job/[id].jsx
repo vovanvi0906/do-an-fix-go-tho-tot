@@ -59,7 +59,7 @@ export default function WorkerJobDetailScreen() {
           <View style={styles.aiBadge}>
             <Ionicons name="sparkles" size={14} color="#0284C7" />
             <Text style={styles.aiBadgeText}>
-              🤖 AI Đề xuất dịch vụ (Độ khớp: {confidence ? Math.round(Number(confidence) * 100) : 92}%)
+              🤖 AI Đề xuất dịch vụ (Điểm nhận diện nhóm: {confidence ? `${Math.round(Number(confidence) * 100)}%` : 'Chưa xác định'})
             </Text>
           </View>
           <Image source={{ uri: imageUrl }} style={styles.incidentImg} />

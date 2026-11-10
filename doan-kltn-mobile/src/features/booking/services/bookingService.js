@@ -22,6 +22,10 @@ export const bookingService = {
     try {
       const orderPayload = {
         serviceId: payload.serviceId,
+        categoryId: payload.categoryId,
+        imageUrl: payload.imageUrl,
+        aiConfidence: payload.aiConfidence ?? undefined,
+        aiSuggestedCategoryId: payload.aiSuggestedCategoryId,
         lat: payload.lat,
         lng: payload.lng,
         addressText: payload.addressText,
@@ -34,8 +38,9 @@ export const bookingService = {
       };
 
       const result = await orderService.createOrder(orderPayload);
-      const orderId = result?.orderId || result?.order?.id || `ORD-${Date.now()}`;
+      const orderId = result?.id || result?.orderId || result?.order?.id;
 
+      if (!orderId) throw new Error('Máy chủ chưa xác nhận mã đơn hàng');
       console.log('🚀 [BookingService] ✅ Đã tạo đơn thành công:', orderId);
       return { orderId, ...result };
     } catch (error) {

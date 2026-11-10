@@ -52,7 +52,15 @@ except Exception as e:
 
 # Kiểm tra module CLIP Zero-Shot
 try:
-    from clip_classifier import load_clip, predict_clip, predict_clip_full, is_ready as is_clip_ready
+    from clip_classifier import (
+        load_clip,
+        predict_clip,
+        predict_clip_full,
+        predict_target_from_feat,
+        predict_sub_service_from_feat,
+        reload_targets,
+        is_ready as is_clip_ready,
+    )
     HAS_CLIP = True
 except Exception as e:
     HAS_CLIP = False
@@ -65,6 +73,8 @@ from category_helper import (
     match_category_by_keywords,
     extract_category_from_path,
 )
+from target_helper import match_target_by_keywords
+from target_catalog import TARGET_PROMPTS
 from service_catalog import get_services_by_category, format_vnd
 
 CLASSIFIER_MODE = os.environ.get("CLASSIFIER_MODE", "clip").lower()
@@ -318,7 +328,7 @@ class PriceRange(BaseModel):
 class DiagnoseResponse(BaseModel):
     suggestedCategoryId: Optional[str] = None
     suggestedCategoryName: Optional[str] = None
-    confidence: float
+    confidence: Optional[float] = None
     detectedLabels: List[str]
     notes: Optional[str] = None
     engine: str = Field(default="heuristic", description="'model' | 'heuristic'")
@@ -328,7 +338,9 @@ class DiagnoseResponse(BaseModel):
     clip_label: Optional[str] = Field(default=None, description="Nhãn dự đoán cao nhất từ CLIP")
     clip_confidence: Optional[float] = Field(default=None, description="Độ tin cậy của nhãn CLIP cao nhất")
     decision_source: Optional[str] = Field(default=None, description="'clip' | 'yolo' | 'ensemble' | 'heuristic'")
-    # Gợi ý dịch vụ cụ thể (Sub-service)
+    # Gợi ý Đối tượng / Thiết bị (Target) & Dịch vụ chi tiết (Sub-service)
+    suggestedTargetId: Optional[str] = Field(default=None, description="Slug đối tượng/thiết bị được đề xuất")
+    suggestedTargetName: Optional[str] = Field(default=None, description="Tên đối tượng/thiết bị được đề xuất")
     suggestedServiceId: Optional[str] = Field(default=None, description="Slug dịch vụ chi tiết được đề xuất")
     suggestedServiceName: Optional[str] = Field(default=None, description="Tên dịch vụ chi tiết được đề xuất")
     suggestedService: Optional[str] = Field(default=None, description="Tên dịch vụ đề xuất (alias của suggestedServiceName)")
@@ -401,343 +413,185 @@ async def diagnose(
     -> Chạy mô hình YOLOv8n Deep Learning để phát hiện vật thể, hư hại
     -> Tự động fallback Heuristic text matching khi ảnh mờ hoặc không có model.
     """
-    image_bytes = None
-    desc_text = (description or "").lower()
-
-    if file:
-        image_bytes = await file.read()
-    else:
+    image_bytes = await file.read() if file else None
+    if not file:
         try:
-            body_json = await request.json()
-            imageUrl = body_json.get("imageUrl") or imageUrl
-            desc_text = (body_json.get("description") or desc_text).lower()
+            body = await request.json()
+            imageUrl = body.get("imageUrl") or imageUrl
         except Exception:
             pass
 
-    # 1. Bóc tách nhãn từ đường dẫn file / URL / filename bằng hàm chuẩn hóa
-    path_hint_cat = extract_category_from_path(imageUrl or "")
-    if path_hint_cat == "other-unclear" and file and getattr(file, "filename", None):
-        path_hint_cat = extract_category_from_path(file.filename)
-    if path_hint_cat == "other-unclear" and desc_text:
-        path_hint_cat = extract_category_from_path(desc_text)
-
-    # Kiểm tra trường hợp ảnh cố tình test ảnh mờ (chỉ khi không có gợi ý rõ ràng từ thư mục/tên file)
-    if ("mờ" in desc_text or "không rõ" in desc_text or "khong_ro" in (imageUrl or "")) and path_hint_cat == "other-unclear":
-        return DiagnoseResponse(
-            suggestedCategoryId=None,
-            suggestedCategoryName=None,
-            confidence=0.42,
-            detectedLabels=["unrecognized_object", "blurry_image"],
-            notes="Độ tin cậy quá thấp (< 0.6). Yêu cầu khách hàng chọn danh mục thủ công.",
-            engine="heuristic",
-            decision_source="heuristic",
-        )
-
-    # 2. XỬ LÝ HÌNH ẢNH QUA DEEP LEARNING (CLIP ZERO-SHOT & YOLOV8N-CLS)
+    # Chỉ phân loại từ pixel ảnh. Tên file và URL không phải bằng chứng sự cố.
     cv_img = decode_image_to_cv2(image_bytes or imageUrl)
-    yolo_cls_model = getattr(request.app.state, "yolo_cls_model", None)
+    if cv_img is None:
+        return DiagnoseResponse(confidence=None, detectedLabels=[], engine="unavailable",
+                                notes="Không đọc được ảnh. Vui lòng chụp lại hoặc chọn dịch vụ.")
 
-    CLS_TO_CATEGORY = {
-        "giup_viec": ("giup-viec", "Giúp việc", ["don_dep_nha", "ve_sinh_san", "giat_sofa"]),
-        "giup-viec": ("giup-viec", "Giúp việc", ["don_dep_nha", "ve_sinh_san", "giat_sofa"]),
-        "sua_dien": ("sua-dien", "Sửa điện", ["aptomat_chay", "chap_dien", "day_dien_dut"]),
-        "sua-dien": ("sua-dien", "Sửa điện", ["aptomat_chay", "chap_dien", "day_dien_dut"]),
-        "sua_nuoc": ("sua-nuoc", "Sửa nước", ["ro_ri_ong_nuoc", "voi_sen_hong", "tac_cong"]),
-        "sua-nuoc": ("sua-nuoc", "Sửa nước", ["ro_ri_ong_nuoc", "voi_sen_hong", "tac_cong"]),
-        "dien_lanh": ("dien-lanh", "Điện lạnh", ["may_lanh_chay_nuoc", "dieu_hoa_dong_tuyet", "may_giat_hong"]),
-        "dien-lanh": ("dien-lanh", "Điện lạnh", ["may_lanh_chay_nuoc", "dieu_hoa_dong_tuyet", "may_giat_hong"]),
-        "thiet_bi": ("thiet-bi", "Thiết bị gia dụng", ["bep_tu_loi_e0", "lo_vi_song_hong", "binh_nong_lanh"]),
-        "thiet-bi": ("thiet-bi", "Thiết bị gia dụng", ["bep_tu_loi_e0", "lo_vi_song_hong", "binh_nong_lanh"]),
-        "lam_vuon": ("lam-vuon", "Làm vườn", ["cat_tia_co", "don_co_dai", "tia_cay_canh", "garden_lawn"]),
-        "lam-vuon": ("lam-vuon", "Làm vườn", ["cat_tia_co", "don_co_dai", "tia_cay_canh", "garden_lawn"]),
-        "other_unclear": (None, None, ["unrecognized_object", "unclear_image"]),
-    }
+    clip_result = predict_clip_full(cv_img) if HAS_CLIP and is_clip_ready() else None
+    clip_probs = clip_result["category_probs"] if clip_result else None
+    yolo_probs = None
+    model = getattr(request.app.state, "yolo_cls_model", None)
+    if model is not None:
+        try:
+            predictions = model.predict(source=cv_img, verbose=False)
+            if predictions and predictions[0].probs is not None:
+                prediction = predictions[0]
+                yolo_probs = {prediction.names[i].replace("-", "_"): float(value)
+                              for i, value in enumerate(prediction.probs.data.tolist())}
+        except Exception as exc:
+            logger.warning("Diagnosis model error: %s", exc)
 
-    if cv_img is not None:
-        # A. Trích xuất xác suất từ CLIP Zero-Shot (nếu đã nạp)
-        clip_full_res = predict_clip_full(cv_img) if HAS_CLIP and is_clip_ready() else None
-        clip_probs = clip_full_res["category_probs"] if clip_full_res else None
-        sub_svc_info = clip_full_res.get("sub_service") if clip_full_res else None
-        clip_top1_label, clip_top1_conf, clip_margin = None, 0.0, 0.0
-        if clip_probs:
-            sorted_clip = sorted(clip_probs.items(), key=lambda x: x[1], reverse=True)
-            clip_top1_label, clip_top1_conf = sorted_clip[0]
-            clip_top2_conf = sorted_clip[1][1] if len(sorted_clip) > 1 else 0.0
-            clip_margin = round(clip_top1_conf - clip_top2_conf, 4)
+    # Multimodal: Khai thác văn bản mô tả của người dùng
+    matched_desc_cat = match_category_by_keywords(description) if description else None
+    matched_desc_target = match_target_by_keywords(description) if description else None
 
-        # Helper chuẩn bị thông tin dịch vụ con
-        def get_sub_service_args(cat_key: Optional[str] = None) -> Dict[str, Any]:
-            # Nếu danh mục được chọn trùng với danh mục của sub_service CLIP dự đoán
-            sub_cat_slug = None
-            if sub_svc_info and cat_key:
-                # Kiểm tra xem sub_service hiện tại có thuộc về cat_key không
-                matching_svcs = get_services_by_category(cat_key)
-                valid_slugs = {s["slug"] for s in matching_svcs}
-                if sub_svc_info.get("serviceId") in valid_slugs:
-                    svc_unit = sub_svc_info.get("priceRange", {}).get("unit", "buổi" if cat_key == "lam-vuon" else "lần")
-                    return {
-                        "suggestedServiceId": sub_svc_info.get("serviceId"),
-                        "suggestedServiceName": sub_svc_info.get("serviceName"),
-                        "suggestedService": sub_svc_info.get("serviceName"),
-                        "suggestedServiceConfidence": sub_svc_info.get("confidence"),
-                        "unit": svc_unit,
-                        "estimatedPriceRange": sub_svc_info.get("priceRange"),
-                        "allServiceProbs": sub_svc_info.get("allServiceProbs"),
-                    }
+    if clip_probs and yolo_probs:
+        clip_top = max(clip_probs, key=clip_probs.get)
+        clip_conf = clip_probs[clip_top]
+        yolo_top = max(yolo_probs, key=yolo_probs.get)
+        yolo_conf = yolo_probs[yolo_top]
 
-            if cat_key:
-                cat_services = get_services_by_category(cat_key)
-                if cat_services:
-                    def_svc = cat_services[0]
-                    u = def_svc.get("unit", "buổi" if cat_key == "lam-vuon" else "lần")
-                    return {
-                        "suggestedServiceId": def_svc["slug"],
-                        "suggestedServiceName": def_svc["name"],
-                        "suggestedService": def_svc["name"],
-                        "suggestedServiceConfidence": 0.90,
-                        "unit": u,
-                        "estimatedPriceRange": {
-                            "min": def_svc["min_price"],
-                            "max": def_svc["max_price"],
-                            "unit": u,
-                            "formatted": f"{format_vnd(def_svc['min_price'])} - {format_vnd(def_svc['max_price'])} / {u}",
-                        },
-                    }
-            return {}
+        # 1. Logic giải quyết mâu thuẫn / hòa giải thông minh giữa YOLO và CLIP:
+        # A. Cả hai cùng đồng thuận danh mục (clip_top == yolo_top != other_unclear):
+        # Đây là sự đồng thuận vững chắc nhất -> Ensemble
+        if clip_top == yolo_top and clip_top != "other_unclear":
+            yolo_valid = {k: v for k, v in yolo_probs.items() if k != "other_unclear"}
+            yolo_sum = sum(yolo_valid.values()) or 1.0
+            norm_yolo = {k: v / yolo_sum for k, v in yolo_valid.items()}
 
-        # B. Trích xuất xác suất từ YOLOv8n-cls (nếu đã nạp)
-        yolo_top1_name, yolo_top1_conf, all_probs_dict = None, 0.0, None
-        if yolo_cls_model is not None:
-            try:
-                y_res = yolo_cls_model.predict(source=cv_img, verbose=False)
-                if y_res and len(y_res) > 0 and y_res[0].probs is not None:
-                    y_probs = y_res[0].probs
-                    yolo_top1_name = y_res[0].names[y_probs.top1]
-                    yolo_top1_conf = float(y_probs.top1conf.item())
-                    all_probs_dict = {
-                        y_res[0].names[i]: round(float(y_probs.data[i].item()), 4)
-                        for i in range(len(y_res[0].names))
-                    }
-            except Exception as e:
-                logger.warning(f"⚠️ [YOLO Inference Error]: {e}")
+            w_clip = clip_conf ** 2
+            w_yolo = yolo_conf ** 2
+            total_w = (w_clip + w_yolo) or 1.0
+            norm_w_clip = w_clip / total_w
+            norm_w_yolo = w_yolo / total_w
 
-        # C. Quyết định phân loại theo cơ chế Ensemble Soft-Voting (YOLO 60% + CLIP 40%)
-        # 1. Chế độ ENSEMBLE SOFT-VOTING (kết hợp cả YOLO và CLIP)
-        CLASSES_ENUM = ["giup_viec", "sua_dien", "sua_nuoc", "dien_lanh", "thiet_bi", "lam_vuon", "other_unclear"]
+            keys = set(clip_probs) | set(norm_yolo)
+            scores = {key: norm_w_yolo * norm_yolo.get(key, 0) + norm_w_clip * clip_probs.get(key, 0) for key in keys}
+            source = "ensemble"
+        # B. YOLO không nhận diện được (other_unclear) HOẶC YOLO cực kỳ phân vân (conf < 0.40):
+        # Nếu CLIP nhận diện được một danh mục rõ ràng (conf >= 0.50):
+        elif (yolo_top == "other_unclear" or yolo_conf < 0.40) and clip_top != "other_unclear" and clip_conf >= 0.50:
+            scores = clip_probs
+            source = "clip (yolo unclear override)" if yolo_top == "other_unclear" else "clip (yolo low confidence override)"
+        # C. CLIP không nhận diện được hoặc cực kỳ phân vân (conf < 0.40):
+        elif (clip_top == "other_unclear" or clip_conf < 0.40) and yolo_top != "other_unclear" and yolo_conf >= 0.50:
+            scores = yolo_probs
+            source = "yolo (clip unclear override)" if clip_top == "other_unclear" else "yolo (clip low confidence override)"
+        # D. Xung đột ý kiến (clip_top != yolo_top): Bên nào tự tin vượt trội hơn thì thắng
+        elif clip_top != "other_unclear" and clip_conf >= 0.60 and (clip_conf - yolo_conf >= 0.18):
+            scores = clip_probs
+            source = "clip"
+        elif yolo_top != "other_unclear" and yolo_conf >= 0.65 and (yolo_conf - clip_conf >= 0.18):
+            scores = yolo_probs
+            source = "yolo"
+        else:
+            # E. Cả hai cùng phân vân ở các nhãn khác nhau: Ensemble có trọng số mềm theo độ tự tin
+            yolo_valid = {k: v for k, v in yolo_probs.items() if k != "other_unclear"}
+            yolo_sum = sum(yolo_valid.values()) or 1.0
+            norm_yolo = {k: v / yolo_sum for k, v in yolo_valid.items()}
 
-        if yolo_top1_name is not None and clip_probs is not None and all_probs_dict is not None:
-            # Tính điểm Soft-Voting Ensemble
-            ensemble_scores = {}
-            for c in CLASSES_ENUM:
-                p_y = all_probs_dict.get(c, 0.0)
-                p_c = clip_probs.get(c, 0.0)
-                ensemble_scores[c] = round(0.60 * p_y + 0.40 * p_c, 4)
+            w_clip = clip_conf ** 2
+            w_yolo = yolo_conf ** 2
+            total_w = (w_clip + w_yolo) or 1.0
+            norm_w_clip = w_clip / total_w
+            norm_w_yolo = w_yolo / total_w
 
-            top_ens_label = max(ensemble_scores, key=ensemble_scores.get)
-            top_ens_conf = ensemble_scores[top_ens_label]
-
-            # Kiểm tra ngưỡng tin cậy tổng hợp
-            if top_ens_label == "other_unclear" or top_ens_conf < 0.50:
-                kw_hint = path_hint_cat if path_hint_cat != "other-unclear" else (
-                    match_category_by_keywords(desc_text) or match_category_by_keywords(imageUrl or "")
-                )
-                if not kw_hint or kw_hint == "other-unclear":
-                    return DiagnoseResponse(
-                        suggestedCategoryId=None,
-                        suggestedCategoryName=None,
-                        confidence=round(top_ens_conf, 4),
-                        detectedLabels=[f"{top_ens_label} ({top_ens_conf:.1%})"],
-                        notes="Độ tin cậy nhận diện tổng hợp dưới ngưỡng hoặc hình ảnh chưa rõ ràng. Yêu cầu chọn thủ công.",
-                        engine="model",
-                        all_probs=all_probs_dict,
-                        clip_probs=clip_probs,
-                        clip_label=clip_top1_label,
-                        clip_confidence=clip_top1_conf,
-                        decision_source="ensemble",
-                    )
-            elif top_ens_label in CLS_TO_CATEGORY:
-                cat_id, cat_name, extra_labels = CLS_TO_CATEGORY[top_ens_label]
-                return DiagnoseResponse(
-                    suggestedCategoryId=cat_id,
-                    suggestedCategoryName=cat_name,
-                    confidence=round(top_ens_conf, 4),
-                    detectedLabels=[top_ens_label] + extra_labels[:2],
-                    notes=f"Chẩn đoán sự cố tối ưu qua mô hình kết hợp Ensemble Soft-Voting (YOLO: {all_probs_dict.get(top_ens_label, 0):.1%}, CLIP: {clip_probs.get(top_ens_label, 0):.1%}, Tổng hợp: {top_ens_conf:.1%}).",
-                    engine="model",
-                    all_probs=all_probs_dict,
-                    clip_probs=clip_probs,
-                    clip_label=clip_top1_label,
-                    clip_confidence=clip_top1_conf,
-                    decision_source="ensemble",
-                    **get_sub_service_args(cat_id),
-                )
-
-        # 2. Chế độ CLIP Độc lập (khi YOLO không khả dụng)
-        if clip_top1_label is not None:
-            # Ưu tiên nhận diện làm vườn qua path/filename nếu CLIP chưa dự đoán đúng nhãn này
-            if path_hint_cat == "lam-vuon" and clip_top1_label != "lam_vuon":
-                pass  # Chuyển tiếp xuống Heuristic Fallback để gán chính xác lam-vuon
-            elif (
-                clip_top1_label == "other_unclear"
-                or clip_top1_conf < CLIP_MIN_CONF
-                or clip_margin < CLIP_MIN_MARGIN
-            ):
-                # Kiểm tra fallback qua từ khóa/thư mục (ví dụ 'lam vuon' hoặc cây cỏ)
-                kw_hint = path_hint_cat if path_hint_cat != "other-unclear" else (
-                    match_category_by_keywords(desc_text) or match_category_by_keywords(imageUrl or "")
-                )
-                if kw_hint and kw_hint in CLS_TO_CATEGORY:
-                    pass  # Chuyển tiếp xuống Heuristic Fallback để gán danh mục chính xác
-                else:
-                    return DiagnoseResponse(
-                        suggestedCategoryId=None,
-                        suggestedCategoryName=None,
-                        confidence=round(clip_top1_conf, 4),
-                        detectedLabels=[f"{clip_top1_label} ({clip_top1_conf:.1%})", f"margin: {clip_margin:.1%}"],
-                        notes="Độ tin cậy nhận diện CLIP dưới ngưỡng hoặc hình ảnh chưa rõ ràng. Yêu cầu chọn danh mục thủ công.",
-                        engine="model",
-                        all_probs=all_probs_dict,
-                        clip_probs=clip_probs,
-                        clip_label=clip_top1_label,
-                        clip_confidence=clip_top1_conf,
-                        decision_source="clip",
-                    )
-            elif clip_top1_label in CLS_TO_CATEGORY:
-                cat_id, cat_name, extra_labels = CLS_TO_CATEGORY[clip_top1_label]
-                return DiagnoseResponse(
-                    suggestedCategoryId=cat_id,
-                    suggestedCategoryName=cat_name,
-                    confidence=round(clip_top1_conf, 4),
-                    detectedLabels=[clip_top1_label] + extra_labels[:2],
-                    notes=f"Chẩn đoán sự cố thành công qua mô hình CLIP Zero-Shot (Độ khớp: {clip_top1_conf * 100:.1f}%, Margin: {clip_margin * 100:.1f}%).",
-                    engine="model",
-                    all_probs=all_probs_dict,
-                    clip_probs=clip_probs,
-                    clip_label=clip_top1_label,
-                    clip_confidence=clip_top1_conf,
-                    decision_source="clip",
-                    **get_sub_service_args(cat_id),
-                )
-
-        # 3. Chế độ YOLO (hoặc khi CLIP không khả dụng)
-        if yolo_top1_name is not None and all_probs_dict is not None:
-            # Nếu đường dẫn/tên file/mô tả chỉ rõ danh mục lam-vuon (do YOLO 5 lớp chưa có nhãn này)
-            if path_hint_cat == "lam-vuon" or match_category_by_keywords(desc_text) == "lam-vuon":
-                pass  # Chuyển tiếp xuống Heuristic Fallback để gán chính xác lam-vuon
-            elif yolo_top1_name == "other_unclear" or yolo_top1_conf < 0.60:
-                kw_hint = path_hint_cat if path_hint_cat != "other-unclear" else (
-                    match_category_by_keywords(desc_text) or match_category_by_keywords(imageUrl or "")
-                )
-                if not kw_hint or kw_hint == "other-unclear":
-                    return DiagnoseResponse(
-                        suggestedCategoryId=None,
-                        suggestedCategoryName=None,
-                        confidence=round(yolo_top1_conf, 4),
-                        detectedLabels=[f"{yolo_top1_name} ({yolo_top1_conf:.1%})"],
-                        notes="Độ tin cậy nhận diện YOLO dưới ngưỡng. Yêu cầu chọn danh mục thủ công.",
-                        engine="model",
-                        all_probs=all_probs_dict,
-                        clip_probs=clip_probs,
-                        clip_label=clip_top1_label,
-                        clip_confidence=clip_top1_conf,
-                        decision_source="yolo",
-                    )
-            elif yolo_top1_name in CLS_TO_CATEGORY:
-                cat_id, cat_name, extra_labels = CLS_TO_CATEGORY[yolo_top1_name]
-                return DiagnoseResponse(
-                    suggestedCategoryId=cat_id,
-                    suggestedCategoryName=cat_name,
-                    confidence=round(yolo_top1_conf, 4),
-                    detectedLabels=[yolo_top1_name] + extra_labels[:2],
-                    notes=f"Chẩn đoán sự cố thành công qua mô hình Deep Learning YOLOv8n-cls (Độ khớp: {yolo_top1_conf * 100:.1f}%).",
-                    engine="model",
-                    all_probs=all_probs_dict,
-                    clip_probs=clip_probs,
-                    clip_label=clip_top1_label,
-                    clip_confidence=clip_top1_conf,
-                    decision_source="yolo",
-                    **get_sub_service_args(cat_id),
-                )
-
-    # 3. HEURISTIC FALLBACK (Khi không có model, không nhận diện được qua ảnh hoặc ảnh trống)
-    detected_labels = []
-    confidence = 0.88
-    suggested_id = None
-    suggested_name = None
-
-    matched_kw_cat = path_hint_cat if path_hint_cat != "other-unclear" else (
-        match_category_by_keywords(desc_text) or match_category_by_keywords(imageUrl or "")
-    )
-
-    if matched_kw_cat == "giup-viec":
-        detected_labels = ["house_cleaning", "floor_mopping", "maid_service"]
-        confidence = 0.93
-        suggested_id = "giup-viec"
-        suggested_name = "Giúp việc"
-    elif matched_kw_cat == "dien-lanh":
-        detected_labels = ["air_conditioner", "cooling_coil", "filter_dust"]
-        confidence = 0.91
-        suggested_id = "dien-lanh"
-        suggested_name = "Điện lạnh"
-    elif matched_kw_cat == "thiet-bi":
-        detected_labels = ["induction_cooker", "appliance_damage"]
-        confidence = 0.90
-        suggested_id = "thiet-bi"
-        suggested_name = "Thiết bị gia dụng"
-    elif matched_kw_cat == "lam-vuon":
-        detected_labels = ["garden_lawn", "grass_cutting", "tree_pruning"]
-        confidence = 0.92
-        suggested_id = "lam-vuon"
-        suggested_name = "Làm vườn"
-    elif matched_kw_cat == "sua-nuoc":
-        detected_labels = ["water_leakage", "plumbing_pipe", "faucet"]
-        confidence = 0.91
-        suggested_id = "sua-nuoc"
-        suggested_name = "Sửa nước"
-    elif matched_kw_cat == "sua-dien":
-        detected_labels = ["circuit_breaker", "electrical_wiring", "burn_trace"]
-        confidence = 0.93
-        suggested_id = "sua-dien"
-        suggested_name = "Sửa điện"
+            keys = set(clip_probs) | set(norm_yolo)
+            scores = {key: norm_w_yolo * norm_yolo.get(key, 0) + norm_w_clip * clip_probs.get(key, 0) for key in keys}
+            source = "ensemble"
+    elif clip_probs:
+        scores, source = clip_probs, "clip"
+    elif yolo_probs:
+        scores, source = yolo_probs, "yolo"
     else:
-        detected_labels = ["home_appliance_damage"]
-        confidence = 0.85
-        suggested_id = "sua-dien"
-        suggested_name = "Sửa điện"
+        return DiagnoseResponse(confidence=None, detectedLabels=[], engine="unavailable",
+                                notes="Mô hình chưa khả dụng. Vui lòng chọn dịch vụ.")
 
-    heuristic_sub_svc = {}
-    if suggested_id:
-        h_services = get_services_by_category(suggested_id)
-        if h_services:
-            first_svc = h_services[0]
-            u = first_svc.get("unit", "buổi" if suggested_id == "lam-vuon" else "lần")
-            heuristic_sub_svc = {
-                "suggestedServiceId": first_svc["slug"],
-                "suggestedServiceName": first_svc["name"],
-                "suggestedService": first_svc["name"],
-                "unit": u,
-                "suggestedServiceConfidence": round(confidence * 0.95, 4),
-                "estimatedPriceRange": {
-                    "min": first_svc["min_price"],
-                    "max": first_svc["max_price"],
-                    "unit": u,
-                    "formatted": f"{format_vnd(first_svc['min_price'])} - {format_vnd(first_svc['max_price'])} / {u}",
+    # 2. Khai thác ô Mô tả chung (Multimodal text boosting)
+    if matched_desc_cat:
+        desc_cat_key = matched_desc_cat.replace("-", "_")
+        if desc_cat_key in scores:
+            scores[desc_cat_key] = min(1.0, scores[desc_cat_key] + 0.35)
+            source = f"{source} + text"
+
+    ranked = sorted(scores.items(), key=lambda item: item[1], reverse=True)
+    label, score = ranked[0]
+    margin = score - ranked[1][1] if len(ranked) > 1 else score
+
+    # Ngưỡng vận hành linh hoạt theo mức độ tự tin và biên độ chênh lệch
+    minimum = 0.48 if ("clip" in source or "text" in source or margin >= 0.15) else 0.55
+    min_margin = 0.10 if ("clip" in source or "text" in source) else CLIP_MIN_MARGIN
+    accepted = label != "other_unclear" and score >= minimum and margin >= min_margin
+    names = {"sua_dien": "Sửa điện", "sua_nuoc": "Sửa nước", "dien_lanh": "Điện lạnh",
+             "thiet_bi": "Thiết bị gia dụng", "lam_vuon": "Làm vườn", "giup_viec": "Giúp việc"}
+    accepted = accepted and label in names
+
+    target_info = None
+    sub_svc = None
+    if accepted and clip_result:
+        img_feat = clip_result.get("img_feat")
+        if img_feat is not None:
+            # Luôn trích xuất đối tượng và dịch vụ chuyên biệt cho đúng category label được chấp nhận
+            target_info = predict_target_from_feat(img_feat, label)
+            sub_svc = predict_sub_service_from_feat(img_feat, label)
+        else:
+            target_info = clip_result.get("target")
+            sub_svc = clip_result.get("sub_service")
+
+    # Nếu trong mô tả khách nói rõ tên thiết bị (ví dụ: "vỡ ống nước", "thay ổ cắm"):
+    if matched_desc_target and TARGET_PROMPTS.get(matched_desc_target):
+        desc_meta = TARGET_PROMPTS[matched_desc_target]
+        target_info = {
+            "targetId": matched_desc_target,
+            "targetName": desc_meta.get("name", matched_desc_target),
+            "targetCategory": desc_meta.get("category"),
+            "confidence": 0.95,
+        }
+
+    if accepted and not sub_svc:
+        cat_key = label.replace("_", "-")
+        svcs = get_services_by_category(cat_key)
+        if svcs:
+            first_s = svcs[0]
+            unit_str = first_s.get("unit", "lần")
+            sub_svc = {
+                "serviceId": first_s["slug"],
+                "serviceName": first_s["name"],
+                "targetId": target_info.get("targetId") if target_info else first_s.get("target_slug"),
+                "targetName": target_info.get("targetName") if target_info else first_s.get("target_name"),
+                "confidence": round(score * 0.92, 4),
+                "priceRange": {
+                    "min": first_s["min_price"],
+                    "max": first_s["max_price"],
+                    "unit": unit_str,
+                    "formatted": f"{format_vnd(first_s['min_price'])} - {format_vnd(first_s['max_price'])} / {unit_str}",
                 },
             }
 
+    target_id = (target_info.get("targetId") if target_info else None) or (sub_svc.get("targetId") if sub_svc else None)
+    target_name = (target_info.get("targetName") if target_info else None) or (sub_svc.get("targetName") if sub_svc else None)
+
     return DiagnoseResponse(
-        suggestedCategoryId=suggested_id,
-        suggestedCategoryName=suggested_name,
-        confidence=confidence,
-        detectedLabels=detected_labels,
-        notes="Phân tích sự cố qua hệ thống Heuristic Fallback chuyên dụng của FixGo.",
-        engine="heuristic",
-        all_probs=all_probs_dict if 'all_probs_dict' in locals() else None,
-        clip_probs=clip_probs if 'clip_probs' in locals() else None,
-        clip_label=clip_top1_label if 'clip_top1_label' in locals() else None,
-        clip_confidence=clip_top1_conf if 'clip_top1_conf' in locals() else None,
-        decision_source="heuristic",
-        **heuristic_sub_svc,
+        suggestedCategoryId=label.replace("_", "-") if accepted else None,
+        suggestedCategoryName=names.get(label) if accepted else None,
+        suggestedTargetId=target_id if accepted else None,
+        suggestedTargetName=target_name if accepted else None,
+        suggestedServiceId=sub_svc.get("serviceId") if sub_svc else None,
+        suggestedServiceName=sub_svc.get("serviceName") if sub_svc else None,
+        suggestedService=sub_svc.get("serviceName") if sub_svc else None,
+        suggestedServiceConfidence=sub_svc.get("confidence") if sub_svc else None,
+        unit=sub_svc.get("priceRange", {}).get("unit") if sub_svc else None,
+        estimatedPriceRange=sub_svc.get("priceRange") if sub_svc else None,
+        allServiceProbs=sub_svc.get("allServiceProbs") if sub_svc else None,
+        confidence=round(score, 4),
+        detectedLabels=[label] if accepted else [],
+        clip_label=max(clip_probs, key=clip_probs.get) if clip_probs else None,
+        clip_confidence=round(max(clip_probs.values()), 4) if clip_probs else None,
+        notes="Chẩn đoán sự cố và đề xuất đối tượng, dịch vụ thành công." if accepted else "Ảnh chưa đủ rõ để phân loại.",
+        engine="model",
+        decision_source=source,
+        all_probs=yolo_probs,
+        clip_probs=clip_probs,
     )
 
 
@@ -1088,6 +942,27 @@ async def face_verify(
         message="Xác thực sinh trắc học khuôn mặt thợ thành công (Chế độ Heuristic).",
         engine="heuristic",
     )
+
+
+# ==========================================
+# ENDPOINT 4: POST /ai/sync-targets
+# ==========================================
+@app.post("/ai/sync-targets")
+@app.post("/api/v1/ai/sync-targets")
+async def sync_targets():
+    """Đồng bộ động danh sách Đối tượng kèm aiPrompts từ Backend/Database vào CLIP RAM."""
+    if not HAS_CLIP or not is_clip_ready():
+        return {"success": False, "message": "CLIP chưa sẵn sàng"}
+    try:
+        count = reload_targets()
+        return {
+            "success": True,
+            "count": count,
+            "message": f"Đã đồng bộ {count} đối tượng từ Database vào bộ nhớ AI thành công",
+        }
+    except Exception as exc:
+        logger.error(f"Lỗi đồng bộ targets: {exc}")
+        return {"success": False, "error": str(exc)}
 
 
 # ==========================================

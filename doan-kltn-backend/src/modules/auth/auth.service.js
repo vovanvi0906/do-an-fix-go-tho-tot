@@ -24,6 +24,46 @@ export class AuthService {
     this.googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || '');
   }
 
+  generateTokens(user) {
+    const payload = { sub: user.id, role: user.role, email: user.email };
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m',
+    });
+    const refreshToken = this.jwtService.sign(
+      { sub: user.id, role: user.role, type: 'refresh' },
+      { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '30d' },
+    );
+    return { accessToken, refreshToken };
+  }
+
+  async refreshToken(refreshToken) {
+    if (!refreshToken) {
+      throw new UnauthorizedException('Thiếu Refresh Token');
+    }
+    try {
+      const payload = this.jwtService.verify(refreshToken, {
+        secret: process.env.JWT_SECRET || 'super-secret',
+      });
+      if (payload.type !== 'refresh') {
+        throw new UnauthorizedException('Token không phải là Refresh Token hợp lệ');
+      }
+      const user = await this.usersService.findById(payload.sub);
+      if (!user || user.status === 'BLOCKED') {
+        throw new UnauthorizedException('Tài khoản không tồn tại hoặc đã bị khóa');
+      }
+      const tokens = this.generateTokens(user);
+      const { passwordHash: _, ...sanitizedUser } = user;
+      return {
+        message: 'Làm mới token thành công',
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        user: sanitizedUser,
+      };
+    } catch (err) {
+      throw new UnauthorizedException('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+    }
+  }
+
   async register(data) {
     const role = (data.role || 'CUSTOMER').toUpperCase();
     if (role === 'WORKER') {
@@ -72,12 +112,13 @@ export class AuthService {
     });
 
     const { passwordHash: _, ...sanitizedUser } = user;
-    const token = this.jwtService.sign({ sub: user.id, role: user.role });
+    const tokens = this.generateTokens(user);
 
     return {
       message: 'Đăng ký tài khoản khách hàng thành công',
       user: sanitizedUser,
-      accessToken: token,
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
     };
   }
 
@@ -129,7 +170,7 @@ export class AuthService {
     });
 
     const { passwordHash: _, ...sanitizedUser } = user;
-    const token = this.jwtService.sign({ sub: user.id, role: user.role });
+    const tokens = this.generateTokens(user);
 
     try {
       this.adminGateway?.emitWorkerRegistered({
@@ -146,7 +187,8 @@ export class AuthService {
     return {
       message: 'Đăng ký tài khoản thợ thành công',
       user: sanitizedUser,
-      accessToken: token,
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
     };
   }
 
@@ -189,7 +231,7 @@ export class AuthService {
       );
     }
 
-    const token = this.jwtService.sign({ sub: user.id, role: user.role });
+    const tokens = this.generateTokens(user);
     const { passwordHash: _, ...sanitizedUser } = user;
 
     console.log('✅ [Backend AuthService] Đăng nhập thành công:', {
@@ -202,7 +244,8 @@ export class AuthService {
     return {
       message: 'Đăng nhập thành công',
       user: sanitizedUser,
-      accessToken: token,
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
     };
   }
 
@@ -322,16 +365,7 @@ export class AuthService {
     }
 
     // 4. Sinh Access Token và Refresh Token chuẩn JWT
-    const accessToken = this.jwtService.sign(
-      { sub: user.id, role: user.role, email: user.email },
-      { expiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m' },
-    );
-
-    const refreshToken = this.jwtService.sign(
-      { sub: user.id, role: user.role, type: 'refresh' },
-      { expiresIn: '7d' },
-    );
-
+    const tokens = this.generateTokens(user);
     const { passwordHash: _, ...sanitizedUser } = user;
 
     console.log('🎉 [Backend AuthService] Đăng nhập Google thành công cho user:', user.email);
@@ -341,8 +375,8 @@ export class AuthService {
       statusCode: 200,
       message: 'Đăng nhập bằng Google thành công',
       data: {
-        accessToken,
-        refreshToken,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
         requirePhoneUpdate: !user.phone,
         user: sanitizedUser,
       },
@@ -424,16 +458,7 @@ export class AuthService {
     }
 
     // 4. Sinh Access Token và Refresh Token chuẩn JWT
-    const accessToken = this.jwtService.sign(
-      { sub: user.id, role: user.role, email: user.email },
-      { expiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m' },
-    );
-
-    const refreshToken = this.jwtService.sign(
-      { sub: user.id, role: user.role, type: 'refresh' },
-      { expiresIn: '7d' },
-    );
-
+    const tokens = this.generateTokens(user);
     const { passwordHash: _, ...sanitizedUser } = user;
 
     console.log('🎉 [Backend AuthService] Đăng nhập Firebase Google thành công cho user:', user.email);
@@ -443,8 +468,8 @@ export class AuthService {
       statusCode: 200,
       message: 'Đăng nhập bằng Google (Firebase) thành công',
       data: {
-        accessToken,
-        refreshToken,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
         expiresIn: 86400,
         requirePhoneUpdate: !user.phone,
         user: sanitizedUser,

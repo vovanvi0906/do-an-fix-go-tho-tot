@@ -129,6 +129,7 @@ model ServiceTarget {
   slug        String?         @unique
   icon        String?
   description String?
+  aiPrompts   String[]        @default([])
   isActive    Boolean         @default(true)
   sortOrder   Int             @default(0)
   createdAt   DateTime        @default(now())

@@ -1,41 +1,12 @@
 import axios from 'axios';
 import { Platform } from 'react-native';
-import Constants from 'expo-constants';
 import { tokenStorage } from '../storage/tokenStorage';
+import { API_BASE_URL } from './apiConfig';
+import { handleTokenRefresh } from './tokenRefreshHandler';
 
-// Tự động nhận diện Base URL API tùy theo môi trường (Điện thoại thật qua Wi-Fi, Android Emulator, Web/iOS)
-const getDefaultBaseUrl = () => {
-  if (
-    process.env.EXPO_PUBLIC_API_URL &&
-    !process.env.EXPO_PUBLIC_API_URL.includes('localhost') &&
-    !process.env.EXPO_PUBLIC_API_URL.includes('127.0.0.1')
-  ) {
-    return process.env.EXPO_PUBLIC_API_URL;
-  }
-  // Tự động lấy IP máy tính chủ từ Expo server để điện thoại thật kết nối thẳng vào Backend
-  const hostUri =
-    Constants.expoConfig?.hostUri ||
-    Constants.manifest2?.extra?.expoClient?.hostUri ||
-    Constants.manifest?.debuggerHost;
-
-  if (hostUri) {
-    const hostIp = hostUri.split(':')[0];
-    if (hostIp && hostIp !== 'localhost' && hostIp !== '127.0.0.1') {
-      return `http://${hostIp}:3000/api`;
-    }
-  }
-
-  // Android Emulator map localhost qua địa chỉ IP 10.0.2.2
-  if (Platform.OS === 'android') {
-    return 'http://10.0.2.2:3000/api';
-  }
-  return 'http://localhost:3000/api';
-};
-
-export const API_BASE_URL = getDefaultBaseUrl();
+export { API_BASE_URL };
 console.log(`🌐 [API Client] Đã khởi tạo kết nối Base URL: ${API_BASE_URL} (Platform: ${Platform.OS})`);
 
-// Callback xử lý khi nhận mã lỗi 401 Unauthorized
 let onUnauthorizedCallback = null;
 export const setOnUnauthorizedCallback = (callback) => {
   onUnauthorizedCallback = callback;
@@ -51,13 +22,10 @@ export const apiClient = axios.create({
   },
 });
 
-// Request interceptor: tự động đính kèm accessToken nếu có & log request
 apiClient.interceptors.request.use(
   async (config) => {
     try {
-      // Đảm bảo request ngrok không bao giờ bị chặn bởi landing page cảnh báo
       config.headers['ngrok-skip-browser-warning'] = 'true';
-
       const token = await tokenStorage.getToken();
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -77,25 +45,32 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Response interceptor: chuẩn hóa xử lý lỗi từ NestJS backend & log response
 apiClient.interceptors.response.use(
   (response) => {
     console.log(`✅ [API Response] ${response.status} ${response.config.url}:`, response.data);
     return response.data;
   },
-  (error) => {
-    const errorResponse = error.response?.data;
+  async (error) => {
+    const originalRequest = error.config;
     const status = error.response?.status;
-    let message = 'Đã có lỗi xảy ra. Vui lòng thử lại sau!';
+    const errorResponse = error.response?.data;
 
+    // Silent refresh token khi gặp 401 (loại trừ endpoint auth login và request đã retry)
+    if (
+      status === 401 &&
+      originalRequest &&
+      !originalRequest._retry &&
+      !originalRequest.url?.includes('/auth/login') &&
+      !originalRequest.url?.includes('/auth/refresh')
+    ) {
+      return handleTokenRefresh(apiClient, originalRequest, onUnauthorizedCallback);
+    }
+
+    let message = 'Đã có lỗi xảy ra. Vui lòng thử lại sau!';
     if (status === 401) {
       message = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!';
-      // 1. Dọn dẹp storage ngay lập tức
       tokenStorage.clearAll().catch((e) => console.warn('Lỗi khi xóa token storage:', e));
-      // 2. Kích hoạt AuthContext reset state
-      if (onUnauthorizedCallback) {
-        onUnauthorizedCallback();
-      }
+      if (onUnauthorizedCallback) onUnauthorizedCallback();
     } else if (errorResponse) {
       if (Array.isArray(errorResponse.message)) {
         message = errorResponse.message.join(', ');

@@ -295,7 +295,7 @@ export default function UserOrderDetailScreen() {
               <View style={styles.aiIncidentBadge}>
                 <Ionicons name="sparkles" size={14} color="#0284C7" />
                 <Text style={styles.aiIncidentBadgeText}>
-                  AI Chẩn đoán sự cố • Độ khớp: {params?.confidence ? Math.round(Number(params.confidence) * 100) : 92}%
+                  AI Chẩn đoán sự cố • Điểm nhận diện nhóm: {params?.confidence ? `${Math.round(Number(params.confidence) * 100)}%` : 'Chưa xác định'}
                 </Text>
               </View>
               <Image source={{ uri: order?.imageUrl || params?.imageUrl }} style={styles.aiIncidentImg} />

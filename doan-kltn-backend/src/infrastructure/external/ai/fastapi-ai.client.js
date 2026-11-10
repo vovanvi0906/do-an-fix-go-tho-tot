@@ -1,6 +1,6 @@
 import { Injectable, Dependencies } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { getFallbackDiagnosis, getFallbackCompare, getFallbackFaceVerify } from './aiFallbackHelper';
+import { getFallbackCompare, getFallbackFaceVerify } from './aiFallbackHelper';
 
 @Injectable()
 @Dependencies(ConfigService)
@@ -32,20 +32,22 @@ export class FastApiAiClient {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ imageUrl, description }),
+        signal: AbortSignal.timeout(15000),
       });
 
       if (response.ok) {
-        return await response.json();
+        const result = await response.json();
+        if (result && typeof result === 'object' && !Array.isArray(result)) return result;
       }
     } catch (err) {
       console.warn(
-        'FastAPI AI Service (/ai/diagnose) không phản hồi, chạy chế độ fallback:',
+        'FastAPI AI Service (/ai/diagnose) không phản hồi, chuyển sang chọn dịch vụ thủ công:',
         err.message,
       );
     }
 
-    // Heuristic Fallback khi AI Service chưa bật hoặc offline
-    return getFallbackDiagnosis(description, imageUrl);
+    // Không sinh kết quả nhận diện khi AI chưa bật hoặc offline
+    return { status: 'unavailable', engine: 'unavailable', confidence: null, detectedLabels: [], notes: 'AI chưa khả dụng. Vui lòng chọn dịch vụ.' };
   }
 
   /**

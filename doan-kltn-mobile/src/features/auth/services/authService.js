@@ -1,6 +1,16 @@
 import { apiClient } from '../../../services/api/apiClient';
 import { tokenStorage } from '../../../services/storage/tokenStorage';
 
+async function saveAuthSession(response) {
+  const accessToken = response?.accessToken || response?.data?.accessToken;
+  const refreshToken = response?.refreshToken || response?.data?.refreshToken;
+  const user = response?.user || response?.data?.user;
+
+  if (accessToken) await tokenStorage.saveToken(accessToken);
+  if (refreshToken) await tokenStorage.saveRefreshToken(refreshToken);
+  if (user) await tokenStorage.saveUser(user);
+}
+
 export const authService = {
   /**
    * Đăng nhập với email, số điện thoại hoặc username + mật khẩu
@@ -15,14 +25,7 @@ export const authService = {
     };
 
     const response = await apiClient.post('/auth/login', payload);
-
-    if (response?.accessToken && response?.user) {
-      console.log('💾 [AuthService] Lưu token và thông tin người dùng vào bộ nhớ cục bộ...');
-      await tokenStorage.saveToken(response.accessToken);
-      await tokenStorage.saveUser(response.user);
-      console.log('🎉 [AuthService] Đăng nhập thành công, User Role:', response.user.role);
-    }
-
+    await saveAuthSession(response);
     return response;
   },
 
@@ -32,10 +35,7 @@ export const authService = {
   async registerCustomer(customerData) {
     console.log('👤 [AuthService] Đang gửi yêu cầu đăng ký Khách hàng:', customerData.email);
     const response = await apiClient.post('/auth/register/customer', customerData);
-    if (response?.accessToken && response?.user) {
-      await tokenStorage.saveToken(response.accessToken);
-      await tokenStorage.saveUser(response.user);
-    }
+    await saveAuthSession(response);
     return response;
   },
 
@@ -45,10 +45,7 @@ export const authService = {
   async registerWorker(workerData) {
     console.log('🛠️ [AuthService] Đang gửi yêu cầu đăng ký Thợ:', workerData.email);
     const response = await apiClient.post('/auth/register/worker', workerData);
-    if (response?.accessToken && response?.user) {
-      await tokenStorage.saveToken(response.accessToken);
-      await tokenStorage.saveUser(response.user);
-    }
+    await saveAuthSession(response);
     return response;
   },
 
@@ -58,10 +55,7 @@ export const authService = {
   async register(registerData) {
     console.log('📝 [AuthService] Đang gửi yêu cầu đăng ký:', registerData.email);
     const response = await apiClient.post('/auth/register', registerData);
-    if (response?.accessToken && response?.user) {
-      await tokenStorage.saveToken(response.accessToken);
-      await tokenStorage.saveUser(response.user);
-    }
+    await saveAuthSession(response);
     return response;
   },
 
@@ -109,18 +103,7 @@ export const authService = {
   async googleLogin(idToken) {
     console.log('🌐 [AuthService] Gửi yêu cầu đăng nhập bằng Google...');
     const response = await apiClient.post('/auth/google-login', { idToken });
-
-    // Hỗ trợ cả chuẩn response { success, data: { accessToken, user } } lẫn flat { accessToken, user }
-    const accessToken = response?.data?.accessToken || response?.accessToken;
-    const user = response?.data?.user || response?.user;
-
-    if (accessToken && user) {
-      console.log('💾 [AuthService] Lưu token và thông tin người dùng Google...');
-      await tokenStorage.saveToken(accessToken);
-      await tokenStorage.saveUser(user);
-      console.log('🎉 [AuthService] Đăng nhập Google thành công, User Role:', user.role);
-    }
-
+    await saveAuthSession(response);
     return response;
   },
 
@@ -131,17 +114,7 @@ export const authService = {
   async firebaseGoogleLogin(idToken) {
     console.log('🔥 [AuthService] Gửi yêu cầu đăng nhập bằng Firebase Google...');
     const response = await apiClient.post('/auth/firebase-google-login', { idToken });
-
-    const accessToken = response?.data?.accessToken || response?.accessToken;
-    const user = response?.data?.user || response?.user;
-
-    if (accessToken && user) {
-      console.log('💾 [AuthService] Lưu token và thông tin người dùng Firebase Google...');
-      await tokenStorage.saveToken(accessToken);
-      await tokenStorage.saveUser(user);
-      console.log('🎉 [AuthService] Đăng nhập Firebase Google thành công, User Role:', user.role);
-    }
-
+    await saveAuthSession(response);
     return response;
   },
 

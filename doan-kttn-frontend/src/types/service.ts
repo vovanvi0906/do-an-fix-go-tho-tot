@@ -32,6 +32,7 @@ export interface ServiceTargetItem {
   slug?: string | null;
   icon?: string | null;
   description?: string | null;
+  aiPrompts?: string[];
   isActive?: boolean;
   sortOrder?: number;
   category?: ServiceCategoryItem;

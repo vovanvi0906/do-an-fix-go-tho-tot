@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsObject } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class DiagnoseOrderDto {
@@ -19,4 +19,9 @@ export class DiagnoseOrderDto {
   @IsOptional()
   @IsString({ message: 'description phải là chuỗi ký tự' })
   description;
+
+  @ApiPropertyOptional({ type: Object, description: "Câu trả lời: categoryId, serviceId hoặc symptom" })
+  @IsOptional()
+  @IsObject()
+  answers;
 }

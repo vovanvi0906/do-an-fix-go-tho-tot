@@ -41,20 +41,20 @@ export const useOrderStore = create((set, get) => ({
   setDiagnoseResult: (result) =>
     set({
       diagnoseResult: result,
-      selectedCategory: result?.suggestedCategoryId
+      selectedCategory: result?.status === 'suggested' && result?.suggestedCategoryId
         ? {
             id: result.suggestedCategoryId,
             name: result.suggestedCategoryName || 'Dịch vụ được gợi ý',
-            basePrice: result.estimatedPriceMin || 150000,
+            basePrice: result.estimatedPriceMin ?? 0,
           }
         : null,
-      selectedService: result?.suggestedServiceName
+      selectedService: result?.status === 'suggested' && result?.suggestedServiceId
         ? {
             id: result.suggestedServiceId || null,
             name: result.suggestedServiceName,
-            price: result.estimatedPriceMin || 150000,
+            price: result.estimatedPriceMin ?? 0,
             priceRange: result.estimatedPriceRange || null,
-            confidence: result.suggestedServiceConfidence || null,
+            confidence: result.suggestedServiceConfidence ?? null,
           }
         : null,
     }),

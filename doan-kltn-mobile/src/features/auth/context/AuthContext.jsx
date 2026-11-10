@@ -45,9 +45,11 @@ export function AuthProvider({ children }) {
   const login = async (identifier, password) => {
     console.log('🚀 [AuthContext] Bắt đầu gọi đăng nhập từ UI:', { identifier });
     const res = await authService.login(identifier, password);
-    if (res?.accessToken && res?.user) {
-      setToken(res.accessToken);
-      setUser(res.user);
+    const accessToken = res?.accessToken || res?.data?.accessToken;
+    const user = res?.user || res?.data?.user;
+    if (accessToken && user) {
+      setToken(accessToken);
+      setUser(user);
       console.log('✨ [AuthContext] State đã cập nhật user & token mới');
     }
     return res;

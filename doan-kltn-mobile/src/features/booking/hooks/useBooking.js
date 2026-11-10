@@ -10,46 +10,12 @@ import { bookingService } from '../services/bookingService';
 
 const MATCHING_TIMEOUT_SECONDS = 120;
 
-const DEFAULT_SERVICES = [
-  {
-    id: 'srv-electric-01',
-    name: 'Sửa chữa điện gia dụng',
-    basePrice: 150000,
-    icon: 'flash-outline',
-    unit: 'lần',
-    desc: 'Chập điện, hỏng atomat, sửa ổ cắm & đèn',
-  },
-  {
-    id: 'srv-plumbing-02',
-    name: 'Sửa ống nước & thiết bị vệ sinh',
-    basePrice: 180000,
-    icon: 'water-outline',
-    unit: 'lần',
-    desc: 'Rò rỉ ống, thay vòi sen, thông tắc bồn rửa',
-  },
-  {
-    id: 'srv-aircon-03',
-    name: 'Bảo trì & Nạp gas máy lạnh',
-    basePrice: 250000,
-    icon: 'snow-outline',
-    unit: 'bộ',
-    desc: 'Vệ sinh máy lạnh, nạp gas R32/R410A, xử lý chảy nước',
-  },
-  {
-    id: 'srv-lock-04',
-    name: 'Sửa khóa & Mở khóa khẩn cấp',
-    basePrice: 200000,
-    icon: 'key-outline',
-    unit: 'lần',
-    desc: 'Mở khóa cửa nhà, thay ổ khóa vân tay, đánh chìa',
-  },
-];
 
 export function useBooking(initialService = null) {
   // ─── Services list ─────────────────────────────────────────────────
-  const [services, setServices] = useState(DEFAULT_SERVICES);
+  const [services, setServices] = useState([]);
   const [selectedService, setSelectedService] = useState(
-    initialService || DEFAULT_SERVICES[0]
+    initialService || null
   );
 
   // ─── Form fields ──────────────────────────────────────────────────
@@ -88,7 +54,7 @@ export function useBooking(initialService = null) {
       const fetched = await bookingService.getAvailableServices();
       if (Array.isArray(fetched) && fetched.length > 0) {
         setServices(fetched);
-        if (!initialService) setSelectedService(fetched[0]);
+
       }
     };
     loadServices();
@@ -185,20 +151,26 @@ export function useBooking(initialService = null) {
   }, []);
 
   // ─── Submit order ──────────────────────────────────────────────────
-  const submitOrder = useCallback(async () => {
+  const submitOrder = useCallback(async (options = {}) => {
     setErrorMessage('');
     setIsSubmitting(true);
 
     try {
+      if (!selectedService?.id) throw new Error('Vui lòng chọn dịch vụ hợp lệ');
+      const requestedSchedule = options.scheduleType ?? scheduleType;
       const payload = {
         serviceId: selectedService.id,
+        categoryId: selectedService.categoryId,
+        imageUrl: options.imageUrl,
+        aiConfidence: options.aiConfidence,
+        aiSuggestedCategoryId: options.aiSuggestedCategoryId,
         lat,
         lng,
-        addressText: address,
-        note: note || `Yêu cầu dịch vụ: ${selectedService.name}`,
+        addressText: options.addressText ?? address,
+        note: options.note ?? (note || `Yêu cầu dịch vụ: ${selectedService.name}`),
         evidencePhotos,
-        scheduleType,
-        scheduledAt: scheduleType === 'SCHEDULED' ? scheduledDate.toISOString() : null,
+        scheduleType: requestedSchedule,
+        scheduledAt: requestedSchedule === 'SCHEDULED' ? (options.scheduledAt ?? scheduledDate.toISOString()) : null,
         urgency,
         proposedPrice: parseFloat(proposedPrice) || 0,
         voucherCode: voucherCode.trim(),
@@ -229,9 +201,11 @@ export function useBooking(initialService = null) {
       // Join socket room for this order
       console.log('📡 [SocketService] Joining order room:', newOrderId);
       socketService.joinOrderRoom(newOrderId);
+      return result;
     } catch (err) {
       console.error('🚀 [BookingService] ❌ Lỗi tạo đơn:', err);
       setErrorMessage(err.message || 'Không thể tạo đơn hàng. Vui lòng thử lại!');
+      return null;
     } finally {
       setIsSubmitting(false);
     }

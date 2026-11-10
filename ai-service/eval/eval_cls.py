@@ -36,6 +36,10 @@ def evaluate_test_set():
     print(f" Test Dataset: {DATASET_DIR / 'test'}")
     print("=" * 70)
 
+    from audit_dataset import audit_dataset
+    audit = audit_dataset(DATASET_DIR)
+    if not audit['valid']:
+        raise RuntimeError(f"Dataset thiếu split hoặc bị trùng ảnh giữa các split: {audit['overlaps']}. Không báo cáo accuracy trên dữ liệu này.")
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
     # Nạp mô hình đã train
@@ -105,6 +109,7 @@ def evaluate_test_set():
     print(f"{'Class Name':<16} | {'Samples':<8} | {'Precision':<10} | {'Recall':<10} | {'F1-Score':<10}")
     print("-" * 65)
 
+    classes_found = sorted(set(y_true) | set(y_pred))
     cls_metrics = {}
     for c in classes_found:
         tp = sum(1 for yt, yp in zip(y_true, y_pred) if yt == c and yp == c)

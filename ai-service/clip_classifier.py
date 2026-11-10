@@ -1,17 +1,23 @@
 """FixGo Pro - Zero-Shot Incident & Sub-Service Classifier using CLIP ViT-B/32."""
 
 import logging
+import os
 from typing import Dict, List, Optional, Tuple, Union, Any
+import httpx
 import numpy as np
 from PIL import Image
 import torch
 from service_catalog import CLASS_PROMPTS, CLASSES, SUB_SERVICES_CATALOG, format_vnd
+from target_catalog import TARGET_PROMPTS
 
 logger = logging.getLogger("ai-service.clip")
 MODEL_NAME = "openai/clip-vit-base-patch32"
+BACKEND_API_URL = os.environ.get("BACKEND_API_URL", "http://localhost:3000/api")
 
 _model, _processor, _text_features = None, None, None
 _sub_service_embeddings: Dict[str, Tuple[List[Dict[str, Any]], torch.Tensor]] = {}
+_target_embeddings: Optional[Tuple[List[str], torch.Tensor]] = None
+_dynamic_targets: Dict[str, Dict[str, Any]] = {}
 
 
 def _to_tensor(feat) -> torch.Tensor:
@@ -30,9 +36,57 @@ def _embed_prompts(prompts: List[str]) -> torch.Tensor:
     return mean_feat / mean_feat.norm(dim=-1, keepdim=True)
 
 
+def fetch_targets_from_backend() -> Dict[str, Dict[str, Any]]:
+    """Tải danh sách Đối tượng kèm aiPrompts trực tiếp từ Backend/Database."""
+    try:
+        url = f"{BACKEND_API_URL}/service-targets"
+        resp = httpx.get(url, timeout=3.5)
+        if resp.status_code == 200:
+            items = resp.json()
+            targets_dict = {}
+            for item in items:
+                slug = item.get("slug")
+                if not slug:
+                    continue
+                name = item.get("name", slug)
+                cat = item.get("category")
+                cat_slug = cat.get("slug") if isinstance(cat, dict) else None
+                prompts = item.get("aiPrompts") or []
+                if not prompts:
+                    prompts = [
+                        f"a photo of a {name} device in home repair",
+                        f"a photo of {slug.replace('-', ' ')}",
+                    ]
+                targets_dict[slug] = {
+                    "name": name,
+                    "category": cat_slug,
+                    "prompts": prompts,
+                }
+            if targets_dict:
+                logger.info(f"🌐 [CLIP] Tải thành công {len(targets_dict)} đối tượng từ DB ({url}).")
+                return targets_dict
+    except Exception as e:
+        logger.warning(f"⚠️ [CLIP] Không thể kết nối Backend ({e}). Sử dụng target_catalog fallback.")
+    return TARGET_PROMPTS
+
+
+def reload_targets() -> int:
+    """Nạp lại đối tượng động từ Database và tính toán lại Embeddings ngay lập tức."""
+    global _target_embeddings, _dynamic_targets
+    if not is_ready():
+        return 0
+    _dynamic_targets = fetch_targets_from_backend()
+    target_keys = list(_dynamic_targets.keys())
+    with torch.no_grad():
+        target_embeds = [_embed_prompts(_dynamic_targets[k]["prompts"]) for k in target_keys]
+        _target_embeddings = (target_keys, torch.cat(target_embeds, dim=0))
+    logger.info(f"🔄 [CLIP] Đã đồng bộ và tính Embeddings cho {len(target_keys)} đối tượng.")
+    return len(target_keys)
+
+
 def load_clip() -> bool:
-    """Nạp CLIP ViT-B/32 và tính sẵn Text Embeddings cho danh mục lớn & dịch vụ con."""
-    global _model, _processor, _text_features, _sub_service_embeddings
+    """Nạp CLIP ViT-B/32 và tính sẵn Text Embeddings cho danh mục, đối tượng & dịch vụ."""
+    global _model, _processor, _text_features, _sub_service_embeddings, _target_embeddings
     try:
         from transformers import CLIPModel, CLIPProcessor
 
@@ -50,12 +104,15 @@ def load_clip() -> bool:
                 svc_embeds = [_embed_prompts(s["prompts"]) for s in services]
                 _sub_service_embeddings[cat_slug] = (services, torch.cat(svc_embeds, dim=0))
 
-        logger.info("✅ [CLIP] Đã nạp thành công và tính sẵn Embeddings danh mục & dịch vụ con.")
+            reload_targets()
+
+        logger.info("✅ [CLIP] Đã nạp thành công và tính sẵn Embeddings 3 tầng từ Database.")
         return True
     except Exception as e:
         logger.error(f"❌ [CLIP] Không thể nạp mô hình: {e}")
         _model, _processor, _text_features = None, None, None
         _sub_service_embeddings.clear()
+        _target_embeddings = None
         return False
 
 
@@ -76,6 +133,42 @@ def _encode_image(image_input: Union[np.ndarray, Image.Image]) -> Optional[torch
     with torch.no_grad():
         img_feat = _to_tensor(_model.get_image_features(**inputs))
         return img_feat / img_feat.norm(dim=-1, keepdim=True)
+
+
+def predict_target_from_feat(
+    img_feat: torch.Tensor, category_hint: Optional[str] = None
+) -> Optional[Dict[str, Any]]:
+    """Dự đoán đối tượng / thiết bị cụ thể từ vector ảnh."""
+    if not is_ready() or _target_embeddings is None:
+        return None
+    target_keys, target_feats = _target_embeddings
+    with torch.no_grad():
+        logits = _model.logit_scale.exp() * (img_feat @ target_feats.T)
+        probs = torch.softmax(logits, dim=-1).squeeze(0)
+
+    active_dict = _dynamic_targets or TARGET_PROMPTS
+    norm_cat = category_hint.replace("_", "-") if category_hint else None
+    best_idx, best_prob = None, -1.0
+    for idx, key in enumerate(target_keys):
+        meta = active_dict.get(key, {})
+        if norm_cat and meta.get("category") and meta.get("category") != norm_cat:
+            continue
+        prob = float(probs[idx].item())
+        if prob > best_prob:
+            best_prob, best_idx = prob, idx
+
+    if best_idx is None:
+        best_idx = int(torch.argmax(probs).item())
+        best_prob = float(probs[best_idx].item())
+
+    target_key = target_keys[best_idx]
+    meta = active_dict.get(target_key, {})
+    return {
+        "targetId": target_key,
+        "targetName": meta.get("name", target_key),
+        "targetCategory": meta.get("category"),
+        "confidence": round(best_prob, 4),
+    }
 
 
 def predict_sub_service_from_feat(
@@ -102,6 +195,8 @@ def predict_sub_service_from_feat(
     return {
         "serviceId": best_svc["slug"],
         "serviceName": best_svc["name"],
+        "targetId": best_svc.get("target_slug"),
+        "targetName": best_svc.get("target_name"),
         "confidence": round(best_conf, 4),
         "priceRange": {
             "min": best_svc["min_price"],
@@ -116,7 +211,7 @@ def predict_sub_service_from_feat(
 def predict_clip_full(
     image_input: Union[np.ndarray, Image.Image], category_hint: Optional[str] = None
 ) -> Optional[Dict[str, Any]]:
-    """Phân loại 2 bước: 1. Dự đoán danh mục lớn -> 2. Dự đoán dịch vụ con chi tiết."""
+    """Phân loại 3 bước: 1. Danh mục lớn -> 2. Đối tượng thiết bị -> 3. Gói dịch vụ chi tiết."""
     if not is_ready():
         return None
     try:
@@ -133,8 +228,21 @@ def predict_clip_full(
         top_cat, top_conf = sorted_cls[0]
 
         target_cat = category_hint or top_cat
+        target_info = predict_target_from_feat(img_feat, target_cat) if target_cat != "other_unclear" else None
         sub_svc = predict_sub_service_from_feat(img_feat, target_cat) if target_cat != "other_unclear" else None
-        return {"category_probs": probs_dict, "top_category": top_cat, "top_category_conf": top_conf, "sub_service": sub_svc}
+
+        if target_info and sub_svc:
+            sub_svc["targetId"] = target_info["targetId"]
+            sub_svc["targetName"] = target_info["targetName"]
+
+        return {
+            "category_probs": probs_dict,
+            "top_category": top_cat,
+            "top_category_conf": top_conf,
+            "target": target_info,
+            "sub_service": sub_svc,
+            "img_feat": img_feat,
+        }
     except Exception as e:
         logger.warning(f"⚠️ [CLIP] Lỗi dự đoán: {e}")
         return None

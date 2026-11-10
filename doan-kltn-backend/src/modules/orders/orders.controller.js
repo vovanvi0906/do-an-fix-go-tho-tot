@@ -29,6 +29,7 @@ import { OrdersService } from './orders.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { Public } from '../auth/decorators/public.decorator';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { CancelOrderDto } from './dto/cancel-order.dto';
 import { DiagnoseOrderDto } from './dto/diagnose-order.dto';
@@ -52,6 +53,7 @@ export class OrdersController {
   /**
    * 1. POST /orders/diagnose: Upload ảnh sự cố, gọi AI service, trả về gợi ý category + confidence + khoảng giá ước tính
    */
+  @Public()
   @Post('diagnose')
   @ApiOperation({
     summary:
@@ -71,6 +73,7 @@ export class OrdersController {
   /**
    * 1.1 POST /orders/diagnose-upload: Upload trực tiếp file ảnh chụp từ mobile + description
    */
+  @Public()
   @Post('diagnose-upload')
   @UseInterceptors(FileInterceptor('image', { storage: incidentStorage }))
   @ApiOperation({
@@ -83,9 +86,13 @@ export class OrdersController {
       throw new BadRequestException('Vui lòng tải lên file ảnh sự cố hợp lệ (jpg, png, webp)');
     }
     const description = body?.description || '';
+    let answers = {};
+    try { answers = body?.answers ? JSON.parse(body.answers) : {}; }
+    catch { throw new BadRequestException('Câu trả lời không hợp lệ'); }
     return this.ordersService.diagnose(req.user?.userId || req.user?.id, {
       imageUrl,
       description,
+      answers,
     });
   }
 

@@ -47,6 +47,7 @@ export class ServicesService {
     return this.prisma.serviceTarget.findMany({
       where,
       include: {
+        category: true,
         _count: { select: { services: true } },
       },
       orderBy: { sortOrder: 'asc' },

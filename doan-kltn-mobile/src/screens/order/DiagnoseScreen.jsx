@@ -1,3 +1,4 @@
+import DiagnosisChoices from '../../components/diagnosis/DiagnosisChoices';
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -63,23 +64,10 @@ export default function DiagnoseScreen({ navigation, onNext }) {
     mutationFn: async (payload) => {
       return orderService.diagnose(payload);
     },
+    onMutate: () => { setDiagnoseResult(null); setDiagnoseData(null); },
     onSuccess: (data) => {
       setDiagnoseData(data);
       setDiagnoseResult(data);
-
-      if (data.suggestedCategoryId && !data.requiresManualSelection) {
-        const found = categories.find((c) => c.id === data.suggestedCategoryId);
-        if (found) setSelectedCategory(found);
-      }
-
-      if (data.suggestedServiceName) {
-        setSelectedService({
-          id: data.suggestedServiceId || null,
-          name: data.suggestedServiceName,
-          price: data.estimatedPriceMin || 150000,
-          priceRange: data.estimatedPriceRange || null,
-        });
-      }
     },
   });
 
@@ -87,6 +75,7 @@ export default function DiagnoseScreen({ navigation, onNext }) {
     setImageUrl(sample.url);
     setDescription(sample.desc);
     setDiagnoseData(null);
+    setDiagnoseResult(null);
   };
 
   const handleRunDiagnose = () => {
@@ -94,6 +83,7 @@ export default function DiagnoseScreen({ navigation, onNext }) {
   };
 
   const handleProceed = () => {
+    if (!selectedService?.id) return;
     if (onNext) {
       onNext();
     } else if (navigation?.navigate) {
@@ -278,47 +268,16 @@ export default function DiagnoseScreen({ navigation, onNext }) {
           </View>
         )}
 
-        {/* Khối cho phép khách sửa hoặc chọn Category thủ công */}
-        <View style={styles.categorySection}>
-          <Text style={styles.sectionHeading}>
-            {diagnoseData?.requiresManualSelection
-              ? '👉 Vui lòng chọn Danh mục dịch vụ thủ công:'
-              : 'Danh mục dịch vụ áp dụng (Có thể đổi thủ công):'}
-          </Text>
-
-          <View style={styles.categoryGrid}>
-            {categories.map((cat) => {
-              const isSelected = selectedCategory?.id === cat.id;
-              return (
-                <TouchableOpacity
-                  key={cat.id}
-                  style={[styles.categoryCard, isSelected && styles.categoryCardSelected]}
-                  onPress={() => setSelectedCategory(cat)}
-                >
-                  <View style={styles.categoryIconCircle}>
-                    <Ionicons
-                      name={cat.name.toLowerCase().includes('điện') ? 'flash' : 'water'}
-                      size={20}
-                      color={isSelected ? '#2563EB' : '#64748B'}
-                    />
-                  </View>
-                  <Text style={[styles.categoryCardTitle, isSelected && styles.categoryCardTitleSelected]}>
-                    {cat.name}
-                  </Text>
-                  <Text style={styles.categoryCardPrice}>
-                    Từ {Number(cat.basePrice || 150000).toLocaleString('vi-VN')} đ
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </View>
+        <DiagnosisChoices result={diagnoseData || { availableCategories: categories }}
+          imageUrl={imageUrl} description={description}
+          onReset={() => setDiagnoseResult(null)}
+          onResult={(data) => { setDiagnoseData(data); setDiagnoseResult(data); }} />
 
         {/* Nút xác nhận chuyển Bước 2 */}
         <TouchableOpacity
-          style={[styles.proceedBtn, !selectedCategory && styles.actionBtnDisabled]}
+          style={[styles.proceedBtn, !selectedService?.id && styles.actionBtnDisabled]}
           onPress={handleProceed}
-          disabled={!selectedCategory}
+          disabled={!selectedService?.id}
         >
           <Text style={styles.proceedBtnText}>
             Tiếp Tục Đặt Đơn ({selectedService?.name ? (selectedService.name.length > 25 ? selectedService.name.slice(0, 25) + '...' : selectedService.name) : selectedCategory?.name || 'Chưa chọn ngành'})

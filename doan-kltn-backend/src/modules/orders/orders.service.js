@@ -1,3 +1,4 @@
+import { resolveDiagnosis } from './diagnosis/diagnosis-resolver';
 import {
   Injectable,
   Dependencies,
@@ -72,120 +73,7 @@ export class OrdersService {
    * Business Rule Fallback: Nếu confidence < 0.6 (ngưỡng cấu hình) thì fallback cho khách tự chọn category thủ công, không chặn luồng
    */
   async diagnose(userId, diagnoseDto) {
-    const { imageUrl, description } = diagnoseDto;
-    const threshold = this.fastApiAiClient.confidenceThreshold || 0.6;
-
-    // Gọi AI service để phân tích hình ảnh và mô tả
-    const aiResult = await this.fastApiAiClient.diagnoseIncident(
-      imageUrl,
-      description || '',
-    );
-    const confidence = parseFloat(aiResult.confidence ?? 0.85);
-
-    // Lấy toàn bộ Category đang hoạt động
-    const categories = await this.prisma.serviceCategory.findMany({
-      where: { isActive: true },
-    });
-
-    // FALLBACK RULE: Nếu confidence < ngưỡng cấu hình (0.6) -> Cho khách tự chọn category thủ công
-    if (confidence < threshold) {
-      return {
-        requiresManualSelection: true,
-        confidence,
-        detectedLabels: aiResult.detectedLabels || [],
-        suggestedCategoryId: null,
-        suggestedCategoryName: null,
-        estimatedPriceMin: null,
-        estimatedPriceMax: null,
-        issueDescription:
-          aiResult.notes ||
-          description ||
-          'Ảnh chưa đủ rõ để AI phân loại chính xác',
-        message: `Độ tin cậy nhận diện (${(confidence * 100).toFixed(0)}%) dưới ngưỡng ${threshold * 100}%. Vui lòng chọn danh mục dịch vụ phù hợp bên dưới.`,
-        availableCategories: categories.map((c) => ({
-          id: c.id,
-          name: c.name,
-          basePrice: Number(c.basePrice || 150000),
-        })),
-        imageUrl,
-      };
-    }
-
-    // Khi confidence >= threshold: Tự động đề xuất Category phù hợp nhất
-    let matchedCategory = null;
-    if (aiResult.suggestedCategoryId) {
-      matchedCategory = categories.find(
-        (c) =>
-          c.id === aiResult.suggestedCategoryId ||
-          c.slug === aiResult.suggestedCategoryId ||
-          (aiResult.suggestedCategoryName &&
-            c.name
-              .toLowerCase()
-              .includes(aiResult.suggestedCategoryName.toLowerCase())),
-      );
-    }
-
-    if (!matchedCategory && aiResult.issueDetected) {
-      const issueLower = String(aiResult.issueDetected).toLowerCase();
-      matchedCategory = categories.find((c) =>
-        issueLower.includes(c.name.toLowerCase()),
-      );
-    }
-
-    if (!matchedCategory) {
-      matchedCategory =
-        categories.find(
-          (c) =>
-            c.name.toLowerCase().includes('điện') ||
-            c.name.toLowerCase().includes('nước'),
-        ) || categories[0];
-    }
-
-    let matchedService = null;
-    if (matchedCategory && (aiResult.suggestedServiceId || aiResult.suggestedServiceName)) {
-      try {
-        matchedService = await this.prisma.service.findFirst({
-          where: {
-            categoryId: matchedCategory.id,
-            isActive: true,
-            OR: [
-              { slug: aiResult.suggestedServiceId },
-              { name: { contains: aiResult.suggestedServiceName ? aiResult.suggestedServiceName.slice(0, 15) : '', mode: 'insensitive' } },
-            ],
-          },
-        });
-      } catch (svcErr) {
-        console.warn('Không thể tìm kiếm service item trong DB:', svcErr.message);
-      }
-    }
-
-    const basePrice = Number(matchedService?.basePrice || matchedCategory?.basePrice || 150000);
-    const estimatedPriceMin = aiResult.estimatedPriceRange?.min ?? Math.round(basePrice * 0.9);
-    const estimatedPriceMax = aiResult.estimatedPriceRange?.max ?? Math.round(basePrice * 1.3);
-
-    return {
-      requiresManualSelection: false,
-      suggestedCategoryId: matchedCategory?.id,
-      suggestedCategoryName: matchedCategory?.name,
-      suggestedServiceId: matchedService?.id || aiResult.suggestedServiceId || null,
-      suggestedServiceName: matchedService?.name || aiResult.suggestedServiceName || null,
-      suggestedServiceConfidence: aiResult.suggestedServiceConfidence || null,
-      confidence,
-      detectedLabels: aiResult.detectedLabels || [],
-      estimatedPriceMin,
-      estimatedPriceMax,
-      estimatedPriceRange: aiResult.estimatedPriceRange || {
-        min: estimatedPriceMin,
-        max: estimatedPriceMax,
-        formatted: `${estimatedPriceMin.toLocaleString('vi-VN')} đ ~ ${estimatedPriceMax.toLocaleString('vi-VN')} đ`,
-      },
-      issueDescription:
-        aiResult.issueDetected ||
-        description ||
-        'Sự cố thiết bị gia đình cần kiểm tra',
-      message: `AI đã chẩn đoán thành công với độ tin cậy ${(confidence * 100).toFixed(0)}%`,
-      imageUrl,
-    };
+    return resolveDiagnosis(this.prisma, this.fastApiAiClient, diagnoseDto);
   }
 
   /**
@@ -218,35 +106,28 @@ export class OrdersService {
       throw new BadRequestException('Tọa độ GPS (lat, lng) không hợp lệ');
     }
 
-    // 1. Xác định Category & lấy % hoa hồng từ cấu hình (không hardcode)
+    let service = null;
     let category = null;
-    if (categoryId) {
-      category = await this.prisma.serviceCategory.findUnique({
-        where: { id: categoryId },
-      });
-    } else if (serviceId) {
-      const srv = await this.prisma.service.findUnique({
-        where: { id: serviceId },
+    if (serviceId) {
+      service = await this.prisma.service.findFirst({
+        where: { id: serviceId, isActive: true, category: { isActive: true } },
         include: { category: true },
       });
-      category = srv?.category;
-    }
-
-    if (!category) {
+      if (!service || (categoryId && categoryId !== service.categoryId)) {
+        throw new BadRequestException('Dịch vụ không khả dụng hoặc không thuộc danh mục đã chọn');
+      }
+      category = service.category;
+    } else if (categoryId) {
       category = await this.prisma.serviceCategory.findFirst({
-        where: { isActive: true },
+        where: { id: categoryId, isActive: true },
       });
     }
-
     if (!category) {
-      throw new NotFoundException('Không tìm thấy danh mục dịch vụ phù hợp');
+      throw new BadRequestException('Vui lòng chọn danh mục hoặc dịch vụ hợp lệ');
     }
-
-    // Lấy commissionPercent từ config category (mặc định 15%)
-    const commissionPercent = Number(category.commissionPercent || 15.0);
-    const finalEstimatedPrice = Number(
-      estimatedPrice || category.basePrice || 150000,
-    );
+    const commissionPercent = Number(category.commissionPercent ?? 15);
+    // Giá tham khảo lấy từ catalog server, không tin giá do client gửi.
+    const finalEstimatedPrice = Number(service?.basePrice ?? category.basePrice);
 
     // 2. Dùng Prisma $transaction tạo đơn và ghi log trạng thái ban đầu SEARCHING_WORKER
     const order = await this.prisma.$transaction(async (tx) => {
@@ -291,7 +172,6 @@ export class OrdersService {
             orderId: newOrder.id,
             type: 'BEFORE',
             url: imageUrl,
-            uploadedAt: new Date(),
           },
         });
       }

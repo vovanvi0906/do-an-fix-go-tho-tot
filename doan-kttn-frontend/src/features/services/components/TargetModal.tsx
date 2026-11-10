@@ -30,6 +30,7 @@ export const TargetModal: React.FC<TargetModalProps> = ({
     slug: '',
     categoryId: '',
     description: '',
+    aiPrompts: '',
     isActive: true,
   });
 
@@ -40,6 +41,7 @@ export const TargetModal: React.FC<TargetModalProps> = ({
         slug: initialData.slug || '',
         categoryId: initialData.categoryId || defaultCategoryId || categories[0]?.id || '',
         description: initialData.description || '',
+        aiPrompts: Array.isArray(initialData.aiPrompts) ? initialData.aiPrompts.join('\n') : '',
         isActive: initialData.isActive !== undefined ? initialData.isActive : true,
       });
     } else {
@@ -48,6 +50,7 @@ export const TargetModal: React.FC<TargetModalProps> = ({
         slug: '',
         categoryId: defaultCategoryId || categories[0]?.id || '',
         description: '',
+        aiPrompts: '',
         isActive: true,
       });
     }
@@ -143,6 +146,19 @@ export const TargetModal: React.FC<TargetModalProps> = ({
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Mô tả phạm vi các dịch vụ thuộc thiết bị này..."
+                className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="font-semibold text-slate-700 dark:text-slate-300">
+                Gợi ý nhận diện AI (mỗi câu 1 dòng, tùy chọn)
+              </label>
+              <textarea
+                rows={2}
+                value={formData.aiPrompts}
+                onChange={(e) => setFormData({ ...formData, aiPrompts: e.target.value })}
+                placeholder="VD: a photo of a washing machine..."
                 className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white"
               />
             </div>

@@ -301,47 +301,29 @@ export default function BookingFlowScreen() {
 
     console.log('🚀 [BookingService] Tạo đơn hàng mới:', orderData);
 
-    // 1. Lưu ngay vào AsyncStorage để xuất hiện trong mục Đơn hàng
-    await orderStorage.saveOrder(orderData);
-
-    // 2. Gửi lên backend hoặc kích hoạt tìm thợ
-    if (isUrgent) {
-      setScheduleType('INSTANT');
-      await submitOrder();
-    } else {
-      setScheduleType('SCHEDULED');
-      Alert.alert(
-        'Đặt lịch thành công!',
-        `Đơn hàng "${jobTitle}" đã được lên lịch vào ${scheduleDisplay}.\nBạn có thể theo dõi trong mục Đơn hàng.`,
-        [
-          {
-            text: 'Xem chi tiết đơn',
-            onPress: () =>
-              router.replace({
-                pathname: '/(user)/order/[id]',
-                params: {
-                  id: newOrderId,
-                  orderCode: generatedOrderCode,
-                  title: jobTitle,
-                  serviceName: jobTitle,
-                  addressText: customerAddress,
-                  scheduledAt: scheduleDisplay,
-                  price: String(params.price ? Number(params.price) : params.basePrice ? Number(params.basePrice) : 150000),
-                  imageUrl: params.imageUrl || '',
-                  confidence: params.confidence || '',
-                  status: 'MATCHED',
-                  createdAt: new Date().toISOString(),
-                  note: noteText || '',
-                },
-              }),
-          },
-          {
-            text: 'Mục Đơn hàng',
-            onPress: () => router.replace('/(user)/(tabs)/orders'),
-          },
-        ]
-      );
+    let scheduledAt = null;
+    if (!isUrgent) {
+      const [hours, minutes] = selectedTimeSlot.split(' - ')[0].split(':').map(Number);
+      const date = new Date(selectedDay.year, selectedDay.month - 1, selectedDay.dayOfMonth, hours, minutes);
+      if (date.getTime() <= Date.now()) {
+        Alert.alert('Lịch hẹn không hợp lệ', 'Vui lòng chọn thời gian trong tương lai.');
+        return;
+      }
+      scheduledAt = date.toISOString();
     }
+    const result = await submitOrder({
+      scheduleType: isUrgent ? 'INSTANT' : 'SCHEDULED', scheduledAt,
+      addressText: customerAddress, note: noteText,
+      imageUrl: params.imageUrl || undefined,
+      aiConfidence: params.confidence ? Number(params.confidence) : undefined,
+      aiSuggestedCategoryId: params.confidence ? params.categoryId : undefined,
+    });
+    if (!result) return;
+    // Chỉ cache đơn đã được backend xác nhận, dùng ID và trạng thái thật.
+    await orderStorage.saveOrder({
+      ...orderData, ...result, id: result.orderId,
+      status: result.status, price: Number(result.estimatedPrice ?? orderData.price),
+    });
   };
 
   // ─── 1. TRẠNG THÁI: QUÉT TÌM THỢ (RADAR MATCHING) ────────────────────────
