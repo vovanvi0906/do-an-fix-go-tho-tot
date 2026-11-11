@@ -1,0 +1,61 @@
+{
+  "expo": {
+    "name": "FixGo Khách Hàng",
+    "slug": "doan-kltn-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/favicon.png",
+    "scheme": "fixgocustomer",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": false,
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.fixgo.app"
+    },
+    "android": {
+      "package": "com.fixgo.app",
+      "googleServicesFile": "./google-services.json",
+      "usesCleartextTraffic": true,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/favicon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.INTERNET"
+      ]
+    },
+    "plugins": [
+      "./plugins/withCleartextTraffic",
+      "expo-router",
+      "expo-asset",
+      "expo-font",
+      "expo-secure-store",
+      "@react-native-google-signin/google-signin",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "FixGo cần truy cập thư viện ảnh để phân tích sự cố.",
+          "cameraPermission": "FixGo cần truy cập máy ảnh để chụp và chẩn đoán sự cố."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "8c2161b8-c8d6-48f0-a368-b3265441210b"
+      }
+    },
+    "owner": "vanvi1906"
+  }
+}

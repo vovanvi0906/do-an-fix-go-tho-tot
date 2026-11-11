@@ -1,0 +1,36 @@
+{
+  "cli": {
+    "version": ">= 12.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://constructed-template-considering-parking.trycloudflare.com/api",
+        "EXPO_PUBLIC_SOCKET_URL": "https://constructed-template-considering-parking.trycloudflare.com",
+        "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyBK0BJiOEruK5AsacVeeN5tnEvTam0p5NU",
+        "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "fixgo-mobile-app.firebaseapp.com",
+        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "fixgo-mobile-app",
+        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "fixgo-mobile-app.firebasestorage.app",
+        "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "579509931869",
+        "EXPO_PUBLIC_FIREBASE_APP_ID": "1:579509931869:android:da9c78e79bb71a2363e2b4"
+      }
+    },
+    "production": {
+      "android": {
+        "buildType": "app-bundle"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

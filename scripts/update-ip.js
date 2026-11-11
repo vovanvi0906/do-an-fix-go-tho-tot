@@ -173,13 +173,14 @@ async function run() {
   console.log('  🔍 FIXGO NETWORK SYNC - TỰ ĐỘNG ĐỒNG BỘ IP LAN / NGROK CHO MOBILE');
   console.log('================================================================');
 
-  // Đường dẫn file .env của Mobile
-  const mobileDir = path.resolve(__dirname, '..', 'doan-kltn-mobile');
-  const envPath = path.join(mobileDir, '.env');
+  // Đường dẫn file .env của Customer App và Worker App
+  const customerDir = path.resolve(__dirname, '..', 'customer-app');
+  const workerDir = path.resolve(__dirname, '..', 'worker-app');
+  const customerEnvPath = path.join(customerDir, '.env');
+  const workerEnvPath = path.join(workerDir, '.env');
 
-  if (!fs.existsSync(mobileDir)) {
-    fs.mkdirSync(mobileDir, { recursive: true });
-  }
+  if (!fs.existsSync(customerDir)) fs.mkdirSync(customerDir, { recursive: true });
+  if (!fs.existsSync(workerDir)) fs.mkdirSync(workerDir, { recursive: true });
 
   // Hỗ trợ truyền tham số thủ công từ CLI (ví dụ: node scripts/update-ip.js 192.168.1.50)
   const args = process.argv.slice(2);
@@ -214,8 +215,8 @@ async function run() {
   }
 
   // 2. Nếu file .env hiện tại đã có link ngrok và người dùng không yêu cầu --force-ip
-  if (!apiUrl && !targetIp && fs.existsSync(envPath) && !args.includes('--force-ip')) {
-    const currentEnv = fs.readFileSync(envPath, 'utf-8');
+  if (!apiUrl && !targetIp && fs.existsSync(customerEnvPath) && !args.includes('--force-ip')) {
+    const currentEnv = fs.readFileSync(customerEnvPath, 'utf-8');
     const ngrokMatch = currentEnv.match(/EXPO_PUBLIC_API_URL=(https?:\/\/[^\s]+ngrok[^\s]*)/);
     if (ngrokMatch && ngrokMatch[1]) {
       const existingNgrok = ngrokMatch[1];
@@ -271,9 +272,10 @@ async function run() {
     ``,
   ].join('\n');
 
-  fs.writeFileSync(envPath, envContent, 'utf-8');
+  fs.writeFileSync(customerEnvPath, envContent, 'utf-8');
+  fs.writeFileSync(workerEnvPath, envContent, 'utf-8');
 
-  console.log(`\n✅ [ĐỒNG BỘ THÀNH CÔNG] File: doan-kltn-mobile/.env`);
+  console.log(`\n✅ [ĐỒNG BỘ THÀNH CÔNG] File: customer-app/.env & worker-app/.env`);
   console.log(`   📍 Cấu hình:            ${adapterName}`);
   console.log(`   📡 Backend API URL:     ${apiUrl}`);
   console.log(`   ⚡ Realtime Socket URL: ${socketUrl}`);
