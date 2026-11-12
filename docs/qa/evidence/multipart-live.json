@@ -1,0 +1,12 @@
+{
+  "transport": "curl multipart from development host, not Android",
+  "imageKind": "existing synthetic dataset image",
+  "http": 201,
+  "durationSeconds": 5.163095,
+  "status": "needs_more_info",
+  "source": "model",
+  "confidence": 0.9999,
+  "suggestedCategoryName": "Sửa điện",
+  "suggestedServiceId": null,
+  "availableServicesCount": 289
+}

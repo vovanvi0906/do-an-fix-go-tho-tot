@@ -212,9 +212,9 @@ export function useHomeData(): UseHomeDataReturn {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const [user, setUser] = useState<UserProfile>(MOCK_USER);
-  const [categories, setCategories] = useState<CategoryItem[]>(MOCK_CATEGORIES);
+  const [categories, setCategories] = useState<CategoryItem[]>([]);
   const [nearbyWorkers, setNearbyWorkers] = useState<WorkerItem[]>([]);
-  const [popularServices, setPopularServices] = useState<ServiceItem[]>(MOCK_POPULAR_SERVICES);
+  const [popularServices, setPopularServices] = useState<ServiceItem[]>([]);
   const [vouchers, setVouchers] = useState<VoucherItem[]>(MOCK_VOUCHERS);
 
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -280,11 +280,11 @@ export function useHomeData(): UseHomeDataReturn {
           }));
           setCategories(mappedCats);
         } else {
-          setCategories(MOCK_CATEGORIES);
+          setCategories([]);
         }
       } catch (catErr) {
         console.warn('⚠️ [useHomeData] Không lấy được danh mục từ API, dùng fallback:', catErr);
-        setCategories(MOCK_CATEGORIES);
+        setCategories([]);
       }
 
       // 4. API Integration: Lấy danh sách dịch vụ phổ biến thực tế từ CSDL backend
@@ -296,11 +296,11 @@ export function useHomeData(): UseHomeDataReturn {
             name: svc.name,
             slug: (svc as any).slug || svc.id,
             categoryName: svc.category?.name || 'Dịch vụ gia đình',
-            basePrice: Number(svc.basePrice) || 150000,
+            basePrice: Number(svc.basePrice),
             unit: svc.unit || 'lần',
             durationMin: (svc as any).durationMin || 60,
-            rating: 4.9,
-            reviewsCount: 120 + idx * 15,
+            rating: 0,
+            reviewsCount: 0,
             imageUrl:
               (svc as any).imageUrl ||
               MOCK_POPULAR_SERVICES[idx % MOCK_POPULAR_SERVICES.length]?.imageUrl ||
@@ -309,11 +309,11 @@ export function useHomeData(): UseHomeDataReturn {
           }));
           setPopularServices(mappedServices);
         } else {
-          setPopularServices(MOCK_POPULAR_SERVICES);
+          setPopularServices([]);
         }
       } catch (svcErr) {
         console.warn('⚠️ [useHomeData] Không lấy được dịch vụ từ API, dùng fallback:', svcErr);
-        setPopularServices(MOCK_POPULAR_SERVICES);
+        setPopularServices([]);
       }
 
       // 5. Khuyến mãi & Vouchers

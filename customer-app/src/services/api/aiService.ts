@@ -26,6 +26,9 @@ export async function diagnoseIssueImage(
   description = '',
   answers: Record<string, string> = {},
 ): Promise<AiDiagnosisResponse> {
+  if (typeof imageUri !== 'string' || !/^(https?:\/\/[^\s]+|file:\/\/[^\s]+|content:\/\/[^\s]+|blob:[^\s]+)$/.test(imageUri)) {
+    throw Object.assign(new Error('Ảnh không hợp lệ. Vui lòng chọn hoặc chụp lại ảnh.'), { code: 'IMAGE_URI_INVALID' });
+  }
   let response: any;
   const isLocal = /^(file:|content:|ph:|blob:)/.test(imageUri);
   if (isLocal) {
@@ -34,7 +37,8 @@ export async function diagnoseIssueImage(
       const blob = await (await fetch(imageUri)).blob();
       form.append('image', blob, 'incident.jpg');
     } else {
-      const name = imageUri.split('/').pop() || 'incident.jpg';
+      const candidate = imageUri.split(/[?#]/)[0].split('/').pop() || '';
+      const name = /\.(jpe?g|png|webp)$/i.test(candidate) ? candidate : 'incident.jpg';
       const ext = name.split('.').pop()?.toLowerCase();
       form.append('image', { uri: imageUri, name,
         type: ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg' } as any);

@@ -161,22 +161,21 @@ export default function RegisterCustomerScreen() {
 
   // ─── Step 2: Xử lý và Xác thực Phone OTP ────────────────────────────────────
   const handleOtpChange = (val, idx) => {
-    const digit = val.replace(/[^0-9]/g, '');
-    const newOtp = [...otp];
-    newOtp[idx] = digit;
+    if (isLoading) return;
+    const digits = val.replace(/[^0-9]/g, '').slice(0, 6);
+    const newOtp = digits.length > 1 ? Array(6).fill('') : [...otp];
+    if (digits.length > 1) digits.split('').forEach((digit, i) => { newOtp[i] = digit; });
+    else newOtp[idx] = digits;
     setOtp(newOtp);
-    if (errorMessage) {
-      setErrorMessage('');
-      setHasError(false);
-    }
-
-    if (digit && idx < 5) {
-      otpInputs.current[idx + 1]?.focus();
-    }
+    setErrorMessage('');
+    setHasError(false);
+    const next = digits.length > 1 ? Math.min(digits.length, 5) : Math.min(idx + 1, 5);
+    if (digits) otpInputs.current[next]?.focus();
   };
 
   const handleOtpKeyPress = (e, idx) => {
-    if (e.nativeEvent.key === 'Backspace' && !otp[idx] && idx > 0) {
+    if (!isLoading && e.nativeEvent.key === 'Backspace' && !otp[idx] && idx > 0) {
+      setOtp(previous => previous.map((digit, i) => i === idx - 1 ? '' : digit));
       otpInputs.current[idx - 1]?.focus();
     }
   };
@@ -498,7 +497,11 @@ export default function RegisterCustomerScreen() {
                       onFocus={() => setFocusedOtpIndex(idx)}
                       onBlur={() => setFocusedOtpIndex(null)}
                       keyboardType="number-pad"
-                      maxLength={1}
+                      maxLength={6}
+                      editable={!isLoading}
+                      selectTextOnFocus
+                      textContentType="oneTimeCode"
+                      autoComplete="sms-otp"
                       textAlign="center"
                       autoFocus={idx === 0}
                     />

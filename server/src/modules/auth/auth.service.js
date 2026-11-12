@@ -99,7 +99,7 @@ export class AuthService {
     // Explicit validation keeps the existing DTO rules effective on this path.
     const errors = await validate(Object.assign(new RegisterDto(), data));
     if (errors.length) {
-      throw new BadRequestException('Thông tin đăng ký không hợp lệ');
+      throw new BadRequestException({ code: 'REGISTRATION_VALIDATION_FAILED', message: errors.flatMap(error => Object.values(error.constraints || {})), fields: errors.map(error => error.property) });
     }
     const { email, password, fullName, firstName, lastName, avatarUrl } = data;
     const phone = this.registrationProofService.normalizePhone(data.phone);

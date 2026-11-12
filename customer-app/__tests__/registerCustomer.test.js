@@ -127,6 +127,21 @@ describe('═══════════════════════�
         fireEvent.press(screen.getByText('Tiếp tục'));
       };
 
+      it('pastes a complete OTP from any box and permits editing', async () => {
+        const screen = renderRegisterScreen();
+        advanceToOtpStep(screen);
+        await waitFor(() => expect(screen.getByText('Nhập mã gồm 6 chữ số được gửi đến')).toBeTruthy());
+        let inputs = screen.UNSAFE_getAllByType('TextInput');
+        fireEvent.changeText(inputs[3], '123456');
+        inputs = screen.UNSAFE_getAllByType('TextInput');
+        expect(inputs.map(input => input.props.value)).toEqual(['1', '2', '3', '4', '5', '6']);
+        fireEvent.changeText(inputs[5], '');
+        fireEvent(inputs[5], 'keyPress', { nativeEvent: { key: 'Backspace' } });
+        inputs = screen.UNSAFE_getAllByType('TextInput');
+        expect(inputs[4].props.value).toBe('');
+        expect(inputs[5].props.value).toBe('');
+      });
+
       it('2.1: Hiển thị bộ đếm thời gian hoặc nút Gửi lại mã', async () => {
         const screen = renderRegisterScreen();
         advanceToOtpStep(screen);

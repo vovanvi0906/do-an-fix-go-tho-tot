@@ -8,12 +8,13 @@ import * as Location from 'expo-location';
 import { orderStorage } from '../../../services/storage/orderStorage';
 import * as ImagePicker from 'expo-image-picker';
 import { socketService } from '../../../services/socket/socketService';
+import { apiClient } from '../../../services/api/apiClient';
 import { bookingService } from '../services/bookingService';
 
 const MATCHING_TIMEOUT_SECONDS = 120;
 
 
-export function useBooking(initialService = null) {
+export function useBooking(initialService = null, context = {}) {
   // ─── Services list ─────────────────────────────────────────────────
   const [services, setServices] = useState([]);
   const [selectedService, setSelectedService] = useState(
@@ -50,17 +51,27 @@ export function useBooking(initialService = null) {
   const matchingStatusRef = useRef(matchingStatus);
   matchingStatusRef.current = matchingStatus;
 
-  // ─── Load services on mount ────────────────────────────────────────
+  // Resolve the selected ID first; never fabricate price/unit from route defaults.
+  const { serviceId, categoryId, targetId } = context;
   useEffect(() => {
-    const loadServices = async () => {
-      const fetched = await bookingService.getAvailableServices();
-      if (Array.isArray(fetched) && fetched.length > 0) {
+    let active = true;
+    (async () => {
+      try {
+        let selected = initialService;
+        if (serviceId) selected = await apiClient.get(`/services/${encodeURIComponent(serviceId)}`);
+        const category = selected?.categoryId || categoryId;
+        const target = selected?.targetId || targetId;
+        const fetched = category || target
+          ? await bookingService.getAvailableServices(category, target) : [];
+        if (!active) return;
         setServices(fetched);
-
+        if (selected) setSelectedService(selected);
+      } catch (error) {
+        if (active) { setSelectedService(null); setServices([]); setErrorMessage(error.message); }
       }
-    };
-    loadServices();
-  }, []);
+    })();
+    return () => { active = false; };
+  }, [serviceId, categoryId, targetId]);
 
   useEffect(() => {
     let active = true;

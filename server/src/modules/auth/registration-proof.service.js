@@ -1,4 +1,4 @@
-import { Injectable, Dependencies, BadRequestException } from '@nestjs/common';
+import { Injectable, Dependencies, BadRequestException, ConflictException } from '@nestjs/common';
 import { createHash, randomBytes } from 'crypto';
 import { PrismaService } from '../../infrastructure/database/prisma.service';
 import { EsmsService } from './esms.service';
@@ -69,9 +69,12 @@ export class RegistrationProofService {
       });
     } catch (error) {
       if (error.code === 'P2002') {
-        throw new BadRequestException(
-          'Thông tin đăng ký không hợp lệ hoặc đã được sử dụng',
-        );
+        const targets = Array.isArray(error.meta?.target) ? error.meta.target : [];
+        const field = targets.includes('phone') ? 'phone' : targets.includes('email') ? 'email' : null;
+        throw new ConflictException({
+          code: field === 'phone' ? 'REGISTRATION_PHONE_CONFLICT' : field === 'email' ? 'REGISTRATION_EMAIL_CONFLICT' : 'REGISTRATION_CONFLICT',
+          message: field === 'phone' ? 'Không thể dùng số điện thoại này để đăng ký. Vui lòng đăng nhập hoặc khôi phục mật khẩu.' : field === 'email' ? 'Không thể dùng email này để đăng ký. Vui lòng dùng email khác hoặc khôi phục mật khẩu.' : 'Không thể dùng thông tin này để đăng ký.',
+        });
       }
       throw error;
     }

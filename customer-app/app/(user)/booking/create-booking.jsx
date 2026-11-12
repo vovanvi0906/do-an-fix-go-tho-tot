@@ -37,6 +37,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../../../src/features/auth';
+import { catalogService } from '../../../src/services/api/catalogService';
 import { useBooking } from '../../../src/features/booking/hooks/useBooking';
 import { orderStorage } from '../../../src/services/storage/orderStorage';
 import MatchingRadarView from '../../../src/features/booking/components/MatchingRadarView';
@@ -90,6 +91,10 @@ export default function BookingFlowScreen() {
     params.note || ''
   );
   const [requestPreviousWorker, setRequestPreviousWorker] = useState(false);
+  const [catalogContext, setCatalogContext] = useState(null);
+  const [targetChoices, setTargetChoices] = useState([]);
+  const [choosingTarget, setChoosingTarget] = useState(false);
+  const [changingService, setChangingService] = useState(false);
   const [photoActionVisible, setPhotoActionVisible] = useState(false);
 
   // ─── Chọn Ngày & Giờ (Lịch hẹn) ─────────────────────────────────────────
@@ -160,20 +165,7 @@ export default function BookingFlowScreen() {
     submitOrder,
     cancelMatching,
     resetMatching,
-  } = useBooking();
-
-  useEffect(() => {
-    if (params.serviceId) {
-      setSelectedService({
-        id: params.serviceId,
-        name: params.serviceName || params.title || 'Dịch vụ sửa chữa',
-        basePrice: Number(params.basePrice || params.price || 150000),
-        categoryId: params.categoryId,
-        targetId: params.targetId,
-        unit: 'lần',
-      });
-    }
-  }, [params.serviceId, params.serviceName, params.basePrice, params.price, params.categoryId, params.targetId, setSelectedService]);
+  } = useBooking(null, catalogContext || params);
 
   useEffect(() => {
     if (matchingStatus === 'FOUND' && orderId && assignedWorker) {
@@ -464,11 +456,36 @@ export default function BookingFlowScreen() {
             </View>
           )}
 
-          {!isCustom && !params.serviceId && (
+          {!isCustom && (
+            <TouchableOpacity onPress={async () => {
+              try {
+                setTargetChoices(await catalogService.getTargets());
+                setChoosingTarget(value => !value);
+              } catch (error) { setErrorMessage(error.message); }
+            }}>
+              <Text>Chọn danh mục / đối tượng khác</Text>
+            </TouchableOpacity>
+          )}
+          {choosingTarget && targetChoices.map(target => (
+            <TouchableOpacity key={target.id} style={styles.inputCard} onPress={() => {
+              setSelectedService(null);
+              setCatalogContext({ categoryId: target.categoryId, targetId: target.id });
+              setChoosingTarget(false);
+              setChangingService(true);
+            }}>
+              <Text>{target.category?.name} › {target.name}</Text>
+            </TouchableOpacity>
+          ))}
+          {!isCustom && selectedService && (
+            <TouchableOpacity onPress={() => setChangingService(value => !value)}>
+              <Text>Thay đổi dịch vụ ({selectedService.name})</Text>
+            </TouchableOpacity>
+          )}
+          {!isCustom && (!selectedService || changingService) && (
             <View style={styles.fieldGroup}>
               <Text style={styles.fieldLabel}>Chọn dịch vụ</Text>
-              {services.filter((service) => !params.categoryId || service.categoryId === params.categoryId).map((service) => (
-                <TouchableOpacity key={service.id} style={styles.inputCard} onPress={() => { setSelectedService(service); setJobTitle(service.name); }}>
+              {services.map((service) => (
+                <TouchableOpacity key={service.id} style={styles.inputCard} onPress={() => { setSelectedService(service); setJobTitle(service.name); setChangingService(false); }}>
                   <Text>{selectedService?.id === service.id ? '✓ ' : ''}{service.name}</Text>
                 </TouchableOpacity>
               ))}
@@ -476,11 +493,11 @@ export default function BookingFlowScreen() {
             </View>
           )}
           {/* ── Breadcrumb Danh mục > Đối tượng ── */}
-          {(params.categoryName || params.targetName) && (
+          {(selectedService?.category?.name || params.categoryName || params.targetName) && (
             <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#EFF6FF', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, marginBottom: 14, gap: 6 }}>
               <Ionicons name="layers-outline" size={16} color="#0084FF" />
               <Text style={{ fontSize: 13, fontWeight: '700', color: '#0084FF' }}>
-                {params.categoryName || ''} {params.targetName ? `› ${params.targetName}` : ''}
+                {selectedService?.category?.name || params.categoryName || ''} › {selectedService?.target?.name || params.targetName || ''}
               </Text>
             </View>
           )}
