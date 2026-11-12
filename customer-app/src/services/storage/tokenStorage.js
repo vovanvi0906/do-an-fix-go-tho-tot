@@ -3,8 +3,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const TOKEN_KEY = 'AUTH_ACCESS_TOKEN';
 const REFRESH_TOKEN_KEY = 'AUTH_REFRESH_TOKEN';
 const USER_KEY = 'AUTH_USER_INFO';
+const clearHandlers = new Set();
 
 export const tokenStorage = {
+  onClear(handler) {
+    if (typeof handler === 'function') {
+      clearHandlers.add(handler);
+      return () => clearHandlers.delete(handler);
+    }
+  },
   async saveToken(token) {
     try {
       if (token) await AsyncStorage.setItem(TOKEN_KEY, token);
@@ -83,6 +90,14 @@ export const tokenStorage = {
 
   async clearAll() {
     try {
+      const user = await this.getUser().catch(() => null);
+      for (const handler of Array.from(clearHandlers)) {
+        try {
+          await handler(user);
+        } catch (hErr) {
+          console.warn('tokenStorage clearHandler error:', hErr);
+        }
+      }
       await AsyncStorage.multiRemove([TOKEN_KEY, REFRESH_TOKEN_KEY, USER_KEY]);
     } catch (e) {
       console.error('Failed to clear storage', e);
