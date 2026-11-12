@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -81,7 +81,9 @@ export default function WorkerLoginScreen() {
   }, [isCheckingSession, isAuthenticated, user]);
 
   // ─── Validation & Login Handler ─────────────────────────────────────────────
+  const loginLock = useRef(false);
   const handleLogin = async () => {
+    if (loginLock.current) return;
     console.log('⚡ [FixGo Worker Login] Bấm nút ĐĂNG NHẬP THỢ:', { identifier });
 
     setErrorMessage('');
@@ -112,6 +114,7 @@ export default function WorkerLoginScreen() {
       return;
     }
 
+    loginLock.current = true;
     try {
       setIsLoading(true);
 
@@ -145,6 +148,7 @@ export default function WorkerLoginScreen() {
 
       setErrorMessage(msg);
     } finally {
+      loginLock.current = false;
       setIsLoading(false);
     }
   };

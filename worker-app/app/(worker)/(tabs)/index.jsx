@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { WorkerApprovalForm } from '../../../src/features/auth/components/WorkerApprovalForm';
+import { hasShiftVerification, profileRestriction } from '../../../src/features/auth/services/workerEligibility';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -26,6 +28,13 @@ export default function WorkerDashboardScreen() {
 
   // State
   const [isOnline, setIsOnline] = useState(false);
+  const statusLock = useRef(false);
+  const loadProfile = useCallback(async () => {
+    const response = await apiClient.get('/workers/me');
+    return response.data || response;
+  }, []);
+  const { data: profile, error: profileError, loading: profileLoading, reload: reloadProfile } = useOrderRecovery(loadProfile, user?.id);
+  useEffect(() => { setIsOnline(profile?.isOnline === true); }, [profile]);
   const [incomingOrder, setIncomingOrder] = useState(null);
   const [countdown, setCountdown] = useState(30);
   const [isAccepting, setIsAccepting] = useState(false);
@@ -42,14 +51,18 @@ export default function WorkerDashboardScreen() {
   const [isChangingStatus, setIsChangingStatus] = useState(false);
   const [showDailyCheckIn, setShowDailyCheckIn] = useState(false);
 
-  const changeAvailability = async (online, verified = false) => {
-    if (isChangingStatus) return;
+  const changeAvailability = async (online) => {
+    if (statusLock.current) return;
+    statusLock.current = true;
     setIsChangingStatus(true);
     try {
-      if (online && !verified) {
+      if (online) {
+        if (activeLoading || activeError || activeOrder) throw new Error('Cần hoàn tất hoặc kiểm tra công việc hiện tại trước khi nhận đơn mới');
         const response = await apiClient.get('/workers/me');
         const profile = response.data || response;
-        if (!profile.faceVerifiedAt || Date.now() - new Date(profile.faceVerifiedAt).getTime() >= 86400000) {
+        const restriction = profileRestriction(profile);
+        if (restriction) throw new Error(restriction);
+        if (!hasShiftVerification(profile)) {
           setShowDailyCheckIn(true);
           return;
         }
@@ -62,20 +75,25 @@ export default function WorkerDashboardScreen() {
         coords = { lat: position.coords.latitude, lng: position.coords.longitude };
         socketService.connect();
       }
-      await apiClient.patch('/workers/status', { isOnline: online, ...coords });
-      setIsOnline(online);
+      const response = await apiClient.patch('/workers/status', { isOnline: online, ...coords });
+      const ack = response.data || response;
+      if (ack.isOnline !== online) throw new Error('Máy chủ chưa xác nhận trạng thái nhận đơn');
+      setIsOnline(ack.isOnline);
+      await reloadProfile();
       if (!online) setIncomingOrder(null);
     } catch (error) {
       Alert.alert('Chưa cập nhật trạng thái', error.message);
     } finally {
+      statusLock.current = false;
       setIsChangingStatus(false);
     }
   };
 
   const dailyCheckIn = async () => {
-    if (isChangingStatus) return;
+    if (statusLock.current) return;
+    statusLock.current = true;
     setIsChangingStatus(true);
-    let verified = false;
+
     try {
       const permission = await ImagePicker.requestCameraPermissionsAsync();
       if (permission.status !== 'granted') throw new Error('Cần quyền camera để chụp selfie');
@@ -89,14 +107,17 @@ export default function WorkerDashboardScreen() {
         form.append('image', { uri: asset.uri, name: 'selfie.jpg', type: 'image/jpeg' });
       }
       await apiClient.post('/workers/verify-face-daily', form, { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 60000 });
-      verified = true;
+      const current = await loadProfile();
+      if (!hasShiftVerification(current)) throw new Error('Máy chủ chưa xác nhận check-in. Vui lòng thử lại');
+      await reloadProfile();
       setShowDailyCheckIn(false);
     } catch (error) {
       Alert.alert('Check-in chưa thành công', error.message);
     } finally {
+      statusLock.current = false;
       setIsChangingStatus(false);
     }
-    if (verified) await changeAvailability(true, true);
+
   };
 
   useEffect(() => {
@@ -106,7 +127,7 @@ export default function WorkerDashboardScreen() {
     // 2. Lắng nghe đơn hàng mới được broadcast tới thợ (order.new)
     const handleNewOrder = (orderData) => {
       console.log('🔔 [Worker Socket] Có đơn hàng mới phát sóng:', orderData);
-      if (isOnline) {
+      if (isOnline && !activeLoading && !activeError && !activeOrder) {
         setIncomingOrder(orderData);
         setCountdown(orderData.countdownSeconds || 30);
         setConflictMessage('');
@@ -132,7 +153,7 @@ export default function WorkerDashboardScreen() {
       socketService.off('order.new', handleNewOrder);
       socketService.off('order.taken', handleOrderTaken);
     };
-  }, [isOnline, incomingOrder]);
+  }, [isOnline, incomingOrder, activeLoading, activeError, activeOrder]);
 
   // Bộ đếm ngược 30 giây cho đơn hàng đến
   useEffect(() => {
@@ -153,7 +174,7 @@ export default function WorkerDashboardScreen() {
 
   // Xử lý sự kiện Thợ bấm Nhận đơn
   const handleAcceptOrder = async () => {
-    if (!incomingOrder) return;
+    if (!incomingOrder || isAccepting || activeOrder || activeLoading || activeError) return;
     setIsAccepting(true);
     setConflictMessage('');
 
@@ -211,7 +232,7 @@ export default function WorkerDashboardScreen() {
           <Switch
             value={isOnline}
             onValueChange={changeAvailability}
-            disabled={isChangingStatus}
+            disabled={isChangingStatus || profileLoading || (!isOnline && (!!profileRestriction(profile) || !!activeOrder || activeLoading || !!activeError))}
             trackColor={{ false: '#CBD5E1', true: '#86EFAC' }}
             thumbColor={isOnline ? '#16A34A' : '#94A3B8'}
           />
@@ -223,6 +244,10 @@ export default function WorkerDashboardScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {profileError ? <TouchableOpacity onPress={reloadProfile}><Text>{profileError} — Thử lại</Text></TouchableOpacity> : null}
+        {profileRestriction(profile) ? <Text accessibilityRole="alert">{profileRestriction(profile)}</Text> : null}
+        {['DRAFT', 'REJECTED'].includes(profile?.approvalStatus) ? <WorkerApprovalForm key={`${user?.id}:${profile.approvalStatus}`} profile={profile} onSaved={reloadProfile} /> : null}
+        {!showDailyCheckIn && hasShiftVerification(profile) ? <Text>Check-in đầu ca còn hiệu lực. Bật công tắc để nhận đơn.</Text> : null}
         {/* Banner Trạng thái */}
         <View nativeID="worker-online-status-banner" style={isOnline ? styles.bannerOnline : styles.bannerOffline}>
           <Ionicons

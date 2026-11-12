@@ -1,4 +1,4 @@
-jest.mock('../src/services/api/apiClient', () => ({ apiClient: { post: jest.fn() } }));
+jest.mock('../src/services/api/apiClient', () => ({ apiClient: { post: jest.fn(), get: jest.fn() } }));
 jest.mock('../src/services/storage/tokenStorage', () => ({ tokenStorage: {
   saveToken: jest.fn(), saveRefreshToken: jest.fn(), saveUser: jest.fn(),
   getToken: jest.fn(), getUser: jest.fn(), clearAll: jest.fn(),
@@ -35,7 +35,8 @@ it('clears the entire session on logout', async () => {
   expect(tokenStorage.clearAll).toHaveBeenCalledTimes(1);
 });
 it('restores the saved user and access token', async () => {
-  tokenStorage.getToken.mockResolvedValueOnce('saved-token');
+  tokenStorage.getToken.mockResolvedValue('saved-token');
+  apiClient.get.mockResolvedValueOnce({ id: '1', role: 'WORKER' });
   tokenStorage.getUser.mockResolvedValueOnce({ id: '1', role: 'WORKER' });
   await expect(authService.getCurrentSession()).resolves.toEqual({ token: 'saved-token', user: { id: '1', role: 'WORKER' } });
 });

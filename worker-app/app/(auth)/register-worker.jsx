@@ -354,7 +354,9 @@ export default function RegisterWorkerScreen() {
   };
 
   // ─── Step 6: Handle CCCD & Final Submission (Screen 43-46) ───────────────────
+  const registrationLock = useRef(false);
   const handleCccdSubmit = async () => {
+    if (registrationLock.current || isLoading) return;
     setErrorMessage('');
     setHasError(false);
 
@@ -375,6 +377,7 @@ export default function RegisterWorkerScreen() {
 
     const fullName = `${firstName.trim()} ${lastName.trim()}`;
     const userEmail = email.trim();
+    registrationLock.current = true;
 
     try {
       setIsLoading(true);
@@ -401,6 +404,7 @@ export default function RegisterWorkerScreen() {
       console.log('🎉 [FixGo Register Worker] Đăng ký thành công -> Điều hướng');
       router.replace('/(worker)/(tabs)');
     } catch (error) {
+      registrationLock.current = false;
       console.error('❌ [FixGo Register Worker Error]:', error);
       setIsLoading(false);
       const errMsg = error.message || 'Đăng ký thất bại';

@@ -24,8 +24,8 @@ export default function WorkerJobDetailScreen() {
   const { data, loading, error: loadError, reload } = useOrderRecovery(load, `${user?.id}:${id}`);
   const order = data?.order;
   const jobStatus = order?.status;
-  const faceAge = Date.now() - new Date(data?.profile?.faceVerifiedAt).getTime();
-  const isFaceChecked = faceAge >= 0 && faceAge < 86400000;
+  // No order-scoped verification proof is exposed by the current backend.
+  const isFaceChecked = false;
   useFocusEffect(useCallback(() => {
     if (typeof id !== 'string' || !id) return;
     socketService.joinOrderRoom(id);
@@ -91,7 +91,7 @@ export default function WorkerJobDetailScreen() {
           <Ionicons name="scan-circle" size={18} color={isFaceChecked ? '#16A34A' : '#F59E0B'} />
           <Text style={styles.label}>Face ID:</Text>
           <Text style={[styles.val, { color: isFaceChecked ? '#16A34A' : '#D97706' }]}>
-            {isFaceChecked ? 'Phiên check-in còn hiệu lực' : 'Chưa check-in khuôn mặt'}
+            {'Xác thực theo đơn: backend chưa cung cấp trạng thái riêng'}
           </Text>
         </View>
         <View style={styles.row}>
@@ -140,8 +140,8 @@ export default function WorkerJobDetailScreen() {
         )}
 
         {jobStatus === 'ARRIVED' && (
-          <TouchableOpacity style={styles.btnPrimary} disabled={pending} onPress={() => changeStage('IN_PROGRESS')}>
-            <Text style={styles.btnText}>BẮT ĐẦU CÔNG VIỆC</Text>
+          <TouchableOpacity style={styles.btnPrimary} disabled={true} onPress={() => Alert.alert('Chưa thể bắt đầu', 'Đang chờ contract xác thực theo đơn từ backend')}>
+            <Text style={styles.btnText}>CHỜ XÁC THỰC THEO ĐƠN</Text>
           </TouchableOpacity>
         )}
         {jobStatus === 'IN_PROGRESS' && (
