@@ -5,6 +5,7 @@ import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Image } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useOrderRecovery } from '../../../src/features/orders/hooks/useOrderRecovery';
 import { useAuth } from '../../../src/features/auth';
 import { useWorkerLocationTracker } from '../../../src/hooks/useWorkerLocationTracker';
 
@@ -13,40 +14,30 @@ export default function WorkerJobDetailScreen() {
   const router = useRouter();
   const { user } = useAuth();
 
-  const [jobStatus, setJobStatus] = useState(null);
-  const [order, setOrder] = useState(null);
   const [pending, setPending] = useState(false);
-  const [loadError, setLoadError] = useState('');
-  const [isFaceChecked, setIsFaceChecked] = useState(false);
   const { isTracking, startTracking, stopTracking } = useWorkerLocationTracker(id, user?.id);
-
-  const reload = useCallback(async () => {
-    try {
-      const [snapshot, profile] = await Promise.all([orderService.getOrderById(id), apiClient.get('/workers/me')]);
-      setOrder(snapshot);
-      setJobStatus(snapshot.status);
-      setIsFaceChecked(!!profile.faceVerifiedAt && Date.now() - new Date(profile.faceVerifiedAt).getTime() < 86400000);
-      setLoadError('');
-    } catch (error) { setLoadError(error.message); setJobStatus(null); }
+  const load = useCallback(async () => {
+    if (typeof id !== 'string' || !id) throw new Error('Thiếu mã đơn hàng');
+    const [order, profile] = await Promise.all([orderService.getOrderById(id), apiClient.get('/workers/me')]);
+    return { order, profile };
   }, [id]);
+  const { data, loading, error: loadError, reload } = useOrderRecovery(load, `${user?.id}:${id}`);
+  const order = data?.order;
+  const jobStatus = order?.status;
+  const faceAge = Date.now() - new Date(data?.profile?.faceVerifiedAt).getTime();
+  const isFaceChecked = faceAge >= 0 && faceAge < 86400000;
   useFocusEffect(useCallback(() => {
-    reload();
+    if (typeof id !== 'string' || !id) return;
     socketService.joinOrderRoom(id);
-    const onStatus = (event) => { if (event.orderId === id) reload(); };
-    socketService.on('order:status_changed', onStatus);
-    return () => {
-      socketService.off('order:status_changed', onStatus);
-      socketService.leaveOrderRoom(id);
-    };
-  }, [id, reload]));
+    return () => socketService.leaveOrderRoom(id);
+  }, [id]));
 
   const changeStage = async (status) => {
     if (pending) return false;
     setPending(true);
     try {
-      const response = await apiClient.patch(`/orders/${id}/status`, { status });
-      setOrder(response.order);
-      setJobStatus(response.order.status);
+      await apiClient.patch(`/orders/${id}/status`, { status });
+      await reload();
       return true;
     } catch (error) { Alert.alert('Chưa cập nhật trạng thái', error.message); await reload(); return false; }
     finally { setPending(false); }
@@ -60,9 +51,12 @@ export default function WorkerJobDetailScreen() {
     if (await changeStage('ARRIVED')) stopTracking();
   };
 
+  if (loading) return <View nativeID="worker-job-loading"><Text>Đang tải đơn hàng…</Text></View>;
+  if (loadError) return <TouchableOpacity nativeID="worker-job-retry" onPress={reload}><Text>{loadError} — Thử lại</Text></TouchableOpacity>;
+  if (!order) return <TouchableOpacity nativeID="worker-job-empty-retry" onPress={reload}><Text>Không tìm thấy đơn hàng — Thử lại</Text></TouchableOpacity>;
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {loadError ? <TouchableOpacity onPress={reload}><Text>{loadError} — Thử lại</Text></TouchableOpacity> : null}
+    <ScrollView nativeID="worker-job-container" style={styles.container} contentContainerStyle={styles.content}>
       {pending ? <Text>Đang cập nhật…</Text> : null}
       <View style={styles.headerBox}>
         <Text style={styles.orderBadge}>MÃ ĐƠN #{String(id || '').slice(0, 8).toUpperCase()}</Text>
@@ -97,7 +91,7 @@ export default function WorkerJobDetailScreen() {
           <Ionicons name="scan-circle" size={18} color={isFaceChecked ? '#16A34A' : '#F59E0B'} />
           <Text style={styles.label}>Face ID:</Text>
           <Text style={[styles.val, { color: isFaceChecked ? '#16A34A' : '#D97706' }]}>
-            {isFaceChecked ? 'Đã xác thực AI đạt chuẩn' : 'Chưa check-in khuôn mặt'}
+            {isFaceChecked ? 'Phiên check-in còn hiệu lực' : 'Chưa check-in khuôn mặt'}
           </Text>
         </View>
         <View style={styles.row}>
@@ -109,8 +103,18 @@ export default function WorkerJobDetailScreen() {
         </View>
       </View>
 
+      <View nativeID="worker-job-timeline" style={styles.card}>
+        <Text>Trạng thái: {jobStatus}</Text>
+        <Text nativeID="worker-job-timeline-title">Tiến trình đơn hàng</Text>
+        {order.statusHistory?.length ? order.statusHistory.map(item => (
+          <Text nativeID={`worker-job-history-${item.id}`} key={item.id}>{item.status} · {new Date(item.createdAt).toLocaleString('vi-VN')}</Text>
+        )) : <Text>Chưa có lịch sử trạng thái.</Text>}
+        {['AWAITING_ACCEPTANCE', 'AWAITING_CONFIRMATION'].includes(jobStatus) ? <Text>Đang chờ khách nghiệm thu.</Text> : null}
+        {jobStatus === 'AWAITING_PAYMENT' ? <Text>Đang chờ thanh toán.</Text> : null}
+        {jobStatus === 'DISPUTED' ? <Text>Đơn đang được xử lý tranh chấp.</Text> : null}
+      </View>
       <View style={styles.actionContainer}>
-        {!isFaceChecked && (
+        {!isFaceChecked && ['MATCHED', 'ASSIGNED', 'WORKER_EN_ROUTE', 'WORKER_ARRIVING', 'ARRIVED', 'IN_PROGRESS'].includes(jobStatus) && (
           <TouchableOpacity
             style={styles.btnFace}
             onPress={() => router.push({ pathname: '/(worker)/verification/face', params: { orderId: id } })}
