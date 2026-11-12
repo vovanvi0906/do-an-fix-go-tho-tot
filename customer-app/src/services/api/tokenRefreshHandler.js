@@ -14,6 +14,7 @@ const processQueue = (error, token = null) => {
 };
 
 export const handleTokenRefresh = async (axiosInstance, originalRequest, onUnauthorized) => {
+  originalRequest._retry = true;
   if (isRefreshing) {
     return new Promise((resolve, reject) => {
       failedQueue.push({ resolve, reject });
@@ -24,7 +25,6 @@ export const handleTokenRefresh = async (axiosInstance, originalRequest, onUnaut
       });
   }
 
-  originalRequest._retry = true;
   isRefreshing = true;
 
   try {
@@ -55,10 +55,17 @@ export const handleTokenRefresh = async (axiosInstance, originalRequest, onUnaut
     originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
     return axiosInstance(originalRequest);
   } catch (refreshErr) {
-    processQueue(refreshErr, null);
+    const failure = new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!');
+    failure.status = 401;
+    failure.code = 'AUTH_REFRESH_FAILED';
+    failure.cause = refreshErr;
+    failure.url = originalRequest.url;
+    failure.requestId = originalRequest.metadata?.requestId;
+    failure.response = refreshErr.response;
+    processQueue(failure, null);
     await tokenStorage.clearAll().catch(() => {});
     if (onUnauthorized) onUnauthorized();
-    return Promise.reject(new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!'));
+    return Promise.reject(failure);
   } finally {
     isRefreshing = false;
   }

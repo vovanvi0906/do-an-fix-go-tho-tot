@@ -1,3 +1,7 @@
+import { OrdersGateway } from './orders.gateway';
+import { RedisService } from '../../infrastructure/redis/redis.service';
+import { FastApiAiClient } from '../../infrastructure/external/ai/fastapi-ai.client';
+import { OrderQueueService } from './order-queue.service';
 import { Test } from '@nestjs/testing';
 import { OrdersService } from './orders.service';
 import { OrdersRepository } from './orders.repository';
@@ -12,6 +16,7 @@ describe('OrdersService', () => {
     const module = await Test.createTestingModule({
       providers: [
         OrdersService,
+        ...[OrdersGateway, RedisService, FastApiAiClient, OrderQueueService].map((provide) => ({ provide, useValue: {} })),
         {
           provide: OrdersRepository,
           useValue: {

@@ -101,6 +101,9 @@ export const orderStorage = {
       if (serverOrders.length > 0) {
         // Map server orders to local format if needed
         const mappedServer = serverOrders.map((so) => ({
+          ...localList.find((order) => order.id === so.id),
+          worker: so.worker || localList.find((order) => order.id === so.id)?.worker,
+          assignedWorker: so.worker || localList.find((order) => order.id === so.id)?.assignedWorker,
           id: so.id,
           orderCode: `#${so.id.slice(0, 8).toUpperCase()}`,
           title: so.category?.name || so.service?.name || so.note || 'Dịch vụ sửa chữa',

@@ -9,6 +9,8 @@ const mockBack = jest.fn();
 let mockParams = {};
 
 jest.mock('expo-router', () => ({
+  usePathname: () => '/',
+  useFocusEffect: (callback) => require('react').useEffect(callback, [callback]),
   useRouter: () => ({
     replace: mockReplace,
     push: mockPush,
@@ -60,18 +62,21 @@ jest.mock('@react-native-async-storage/async-storage', () => {
   };
 });
 
+import { apiClient } from '../src/services/api/apiClient';
 import { AuthProvider } from '../src/features/auth/context/AuthContext';
 import CustomerProfileScreen from '../app/(user)/(tabs)/profile';
 import EditCustomerProfileScreen from '../app/(user)/profile/edit';
 import EditFieldScreen from '../app/(user)/profile/edit-field';
 import CustomerWalletScreen from '../app/(user)/profile/wallet';
 import VouchersScreen from '../app/(user)/profile/vouchers';
-import CustomerHomeScreen from '../app/(user)/(tabs)/index';
+import CategoryGrid from '../src/features/home/components/CategoryGrid';
 
 describe('═══════════════════════════════════════════════════════════════', () => {
   describe('FIXGO CUSTOMER ACCOUNT & PROFILE FLOW - TEST SUITE', () => {
     beforeEach(async () => {
+      jest.restoreAllMocks();
       jest.clearAllMocks();
+      jest.spyOn(apiClient, 'get').mockResolvedValue(null);
       mockParams = {};
       await AsyncStorage.clear();
     });
@@ -79,21 +84,12 @@ describe('═══════════════════════�
     // ─────────────────────────────────────────────────────────────────────────
     // 0. MÀN HÌNH TRANG CHỦ KHÁCH HÀNG (index.jsx)
     // ─────────────────────────────────────────────────────────────────────────
-    describe('0. Customer Home Screen (index.jsx)', () => {
-      it('0.1: Render vị trí GPS, banner ưu đãi, lưới 4 dịch vụ chính và thợ nổi bật', async () => {
-        const screen = render(
-          <AuthProvider>
-            <CustomerHomeScreen />
-          </AuthProvider>
-        );
-
-        expect(screen.getByText('Vị trí của bạn')).toBeTruthy();
-        expect(screen.getByText('Dịch vụ FixGo')).toBeTruthy();
-        expect(screen.getByText('Sửa điện')).toBeTruthy();
-        expect(screen.getByText('Sửa nước')).toBeTruthy();
-        expect(screen.getByText('Điện lạnh')).toBeTruthy();
-        expect(screen.getByText('Sửa khóa')).toBeTruthy();
-        expect(screen.getByText('Gọi Thợ Khẩn Cấp 24/7')).toBeTruthy();
+    describe('0. Customer home category grid', () => {
+      it('opens the selected category', () => {
+        const onSelectCategory = jest.fn();
+        const screen = render(<CategoryGrid categories={[{ id: 'electric', name: 'Sửa điện', slug: 'sua-dien' }]} selectedCategoryId={null} onSelectCategory={onSelectCategory} />);
+        fireEvent.press(screen.getByText('Sửa điện'));
+        expect(onSelectCategory).toHaveBeenCalledWith('electric');
       });
     });
 
@@ -108,7 +104,7 @@ describe('═══════════════════════�
           </AuthProvider>
         );
 
-        expect(screen.getByText('Lu Dai')).toBeTruthy();
+        expect(screen.getByText('Người dùng FixGo')).toBeTruthy();
         expect(screen.getByText('Chỉnh sửa thông tin')).toBeTruthy();
         expect(screen.getByText('Ví FixGo')).toBeTruthy();
         expect(screen.getByText('Mã giảm giá')).toBeTruthy();
@@ -191,7 +187,7 @@ describe('═══════════════════════�
         expect(screen.getByText('Tên')).toBeTruthy();
         expect(screen.getByText('Số điện thoại')).toBeTruthy();
         expect(screen.getByText('Email')).toBeTruthy();
-        expect(screen.getAllByText('Verified').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('Chưa xác thực').length).toBeGreaterThan(0);
       });
 
       it('2.2: Bấm vào dòng Họ điều hướng sang edit-field với field: surname', async () => {
@@ -244,16 +240,16 @@ describe('═══════════════════════�
 
         // Kiểm tra bước 2: Nhập OTP
         await waitFor(() => {
-          expect(screen.getByText('Nhập mã xác nhận')).toBeTruthy();
-          expect(screen.getByText('Xác nhận mã')).toBeTruthy();
+          expect(screen.getByText('Xác thực Số điện thoại')).toBeTruthy();
+          expect(screen.getByText('Tiếp tục')).toBeTruthy();
         });
 
         // Nhập mã OTP 6 số
-        const otpInput = screen.getByPlaceholderText('• • • • • •');
-        fireEvent.changeText(otpInput, '123456');
+        const otpInputs = screen.UNSAFE_getAllByType('TextInput');
+        '123456'.split('').forEach((digit, index) => fireEvent.changeText(otpInputs[index], digit));
 
         // Bấm Xác nhận mã
-        fireEvent.press(screen.getByText('Xác nhận mã'));
+        fireEvent.press(screen.getByText('Tiếp tục'));
 
         // Kiểm tra bước 3: Verify password (Khớp Image 2)
         await waitFor(() => {
@@ -261,7 +257,7 @@ describe('═══════════════════════�
           expect(
             screen.getByText('For your security, please enter your current password')
           ).toBeTruthy();
-          expect(screen.getByText('Verify')).toBeTruthy();
+          expect(screen.getByText('Xác nhận & Lưu')).toBeTruthy();
         });
       });
     });

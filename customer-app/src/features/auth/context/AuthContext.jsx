@@ -83,6 +83,17 @@ export function AuthProvider({ children }) {
     return res;
   };
 
+  const registerWorker = async (workerData) => {
+    const res = await authService.registerWorker(workerData);
+    const accessToken = res?.accessToken || res?.data?.accessToken;
+    const registeredUser = res?.user || res?.data?.user;
+    if (accessToken && registeredUser) {
+      setToken(accessToken);
+      setUser(registeredUser);
+    }
+    return res;
+  };
+
   const googleLogin = async (idToken) => {
     console.log('🌐 [AuthContext] Thực hiện đăng nhập Google...');
     const res = await authService.googleLogin(idToken);
@@ -158,6 +169,7 @@ export function AuthProvider({ children }) {
       logout,
       updateUser,
       registerCustomer,
+      registerWorker,
       googleLogin,
       firebaseGoogleLogin,
       uploadAvatar,

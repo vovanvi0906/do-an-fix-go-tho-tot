@@ -3,6 +3,7 @@ import { Platform } from 'react-native';
 import { tokenStorage } from '../storage/tokenStorage';
 import { API_BASE_URL } from './apiConfig';
 import { handleTokenRefresh } from './tokenRefreshHandler';
+import { sendErrorToLog } from '../../utils/remoteLogger';
 
 export { API_BASE_URL };
 console.log(`🌐 [API Client] Đã khởi tạo kết nối Base URL: ${API_BASE_URL} (Platform: ${Platform.OS})`);
@@ -24,6 +25,8 @@ export const apiClient = axios.create({
 
 apiClient.interceptors.request.use(
   async (config) => {
+    config.metadata = { startedAt: Date.now(), requestId: `mobile-${Date.now()}-${Math.random().toString(36).slice(2, 10)}` };
+    config.headers['X-Request-ID'] = config.metadata.requestId;
     try {
       config.headers['ngrok-skip-browser-warning'] = 'true';
       const token = await tokenStorage.getToken();
@@ -32,7 +35,7 @@ apiClient.interceptors.request.use(
       }
       console.log(`📡 [API Request] ${config.method?.toUpperCase()} ${config.baseURL || ''}${config.url}`, {
         hasToken: !!token,
-        data: config.data,
+        requestId: config.metadata.requestId,
       });
     } catch (err) {
       console.warn('⚠️ [API Request Interceptor Warning]:', err);
@@ -47,7 +50,10 @@ apiClient.interceptors.request.use(
 
 apiClient.interceptors.response.use(
   (response) => {
-    console.log(`✅ [API Response] ${response.status} ${response.config.url}:`, response.data);
+    console.log(`✅ [API Response] ${response.status} ${response.config.url}`, {
+      requestId: response.config.metadata?.requestId,
+      durationMs: Date.now() - (response.config.metadata?.startedAt || Date.now()),
+    });
     return response.data;
   },
   async (error) => {
@@ -87,9 +93,19 @@ apiClient.interceptors.response.use(
 
     console.error(`❌ [API Error] Status: ${status || 'Network Error'} | Message: ${message}`, {
       url: error.config?.url,
-      serverData: errorResponse,
+      requestId: error.config?.metadata?.requestId,
+      code: error.code,
     });
 
-    return Promise.reject(new Error(message));
+    const failure = new Error(message);
+    failure.name = 'ApiError';
+    failure.status = status;
+    failure.code = error.code;
+    failure.url = error.config?.url;
+    failure.requestId = error.response?.headers?.['x-request-id'] || error.config?.metadata?.requestId;
+    failure.cause = error;
+    failure.response = error.response;
+    void sendErrorToLog(new Error(`${error.config?.method?.toUpperCase()} ${failure.url}: ${status || error.code || 'NETWORK'} ${message}`), 'API_ERROR', 'error', { requestId: failure.requestId });
+    return Promise.reject(failure);
   }
 );

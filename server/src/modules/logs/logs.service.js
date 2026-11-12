@@ -39,10 +39,14 @@ export class LogsService {
 
       const platformTag = (dto.platform || 'UNKNOWN').toUpperCase();
       const levelTag = (dto.level || 'ERROR').toUpperCase();
+      const metadata = JSON.stringify(Object.fromEntries(
+        ['app', 'version', 'build', 'requestId', 'orderId', 'timestamp'].filter((key) => dto[key] != null)
+          .map((key) => [key, String(dto[key]).slice(0, 200)])
+      ));
       const routeInfo = dto.route ? ` [Route: ${dto.route}]` : '';
       const contextInfo = dto.context ? ` [Context: ${dto.context}]` : '';
 
-      const logEntry = `[${formattedTime}] [MOBILE-${platformTag}] [${levelTag}]${contextInfo}${routeInfo}: ${dto.message || 'No message'}\nStack: ${dto.stack || 'No stack trace'}\n-----------------------------------\n`;
+      const logEntry = `[${formattedTime}] [MOBILE-${platformTag}] [${levelTag}] [Metadata: ${metadata}]${contextInfo}${routeInfo}: ${dto.message || 'No message'}\nStack: ${dto.stack || 'No stack trace'}\n-----------------------------------\n`;
 
       // Đảm bảo thư mục cha tồn tại
       const dir = path.dirname(this.logFilePath);

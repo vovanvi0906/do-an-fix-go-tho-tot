@@ -163,10 +163,10 @@ export default function BookingFlowScreen() {
   } = useBooking();
 
   useEffect(() => {
-    if (params.serviceId && params.serviceName) {
+    if (params.serviceId) {
       setSelectedService({
         id: params.serviceId,
-        name: params.serviceName,
+        name: params.serviceName || params.title || 'Dịch vụ sửa chữa',
         basePrice: Number(params.basePrice || params.price || 150000),
         categoryId: params.categoryId,
         targetId: params.targetId,
@@ -174,6 +174,12 @@ export default function BookingFlowScreen() {
       });
     }
   }, [params.serviceId, params.serviceName, params.basePrice, params.price, params.categoryId, params.targetId, setSelectedService]);
+
+  useEffect(() => {
+    if (matchingStatus === 'FOUND' && orderId && assignedWorker) {
+      router.replace(`/(user)/order/${orderId}`);
+    }
+  }, [matchingStatus, orderId, assignedWorker, router]);
 
   // ─── Xử lý gửi đơn đặt lịch ─────────────────────────────────────────────
   const handleBookingSubmit = async () => {
@@ -314,15 +320,19 @@ export default function BookingFlowScreen() {
     const result = await submitOrder({
       scheduleType: isUrgent ? 'INSTANT' : 'SCHEDULED', scheduledAt,
       addressText: customerAddress, note: noteText,
+      lat: params.lat != null ? Number(params.lat) : undefined,
+      lng: params.lng != null ? Number(params.lng) : undefined,
       imageUrl: params.imageUrl || undefined,
       aiConfidence: params.confidence ? Number(params.confidence) : undefined,
       aiSuggestedCategoryId: params.confidence ? params.categoryId : undefined,
     });
     if (!result) return;
     // Chỉ cache đơn đã được backend xác nhận, dùng ID và trạng thái thật.
+    const cachedOrder = (await orderStorage.getLocalOrders()).find((order) => order.id === result.orderId);
     await orderStorage.saveOrder({
       ...orderData, ...result, id: result.orderId,
       status: result.status, price: Number(result.estimatedPrice ?? orderData.price),
+      ...(cachedOrder?.assignedWorker ? cachedOrder : {}),
     });
   };
 
@@ -454,6 +464,17 @@ export default function BookingFlowScreen() {
             </View>
           )}
 
+          {!isCustom && !params.serviceId && (
+            <View style={styles.fieldGroup}>
+              <Text style={styles.fieldLabel}>Chọn dịch vụ</Text>
+              {services.filter((service) => !params.categoryId || service.categoryId === params.categoryId).map((service) => (
+                <TouchableOpacity key={service.id} style={styles.inputCard} onPress={() => { setSelectedService(service); setJobTitle(service.name); }}>
+                  <Text>{selectedService?.id === service.id ? '✓ ' : ''}{service.name}</Text>
+                </TouchableOpacity>
+              ))}
+              {services.length === 0 && <Text>Chưa tải được dịch vụ. Vui lòng thử lại.</Text>}
+            </View>
+          )}
           {/* ── Breadcrumb Danh mục > Đối tượng ── */}
           {(params.categoryName || params.targetName) && (
             <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#EFF6FF', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, marginBottom: 14, gap: 6 }}>

@@ -101,7 +101,7 @@ export default function WorkerMapSection({
       // 2. Gọi API Backend thật: GET /api/workers/nearby
       if (isMounted) setLoadingWorkers(true);
       try {
-        const realWorkers = await getNearbyWorkersApi(userLat, userLng, 15.0);
+        const realWorkers = await getNearbyWorkersApi(userLat, userLng, 10);
         if (isMounted) {
           setWorkers(realWorkers);
           if (realWorkers.length > 0) {

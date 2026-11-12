@@ -8,7 +8,11 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "sync-ip": "node ../scripts/update-ip.js",
-    "test": "jest"
+    "test": "jest",
+    "test:ci": "jest --runInBand --watch=false",
+    "start:debug": "expo start --dev-client --port 8081",
+    "check:build": "node ../scripts/check-mobile-build.cjs",
+    "eas-build-post-install": "npm run check:build"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
@@ -54,7 +58,7 @@
     "@testing-library/jest-native": "^5.4.3",
     "@testing-library/react-native": "~12.8.1",
     "@types/react": "~18.3.12",
-    "jest": "^30.5.1",
+    "jest": "^29.7.0",
     "jest-expo": "~52.0.0",
     "react-test-renderer": "^18.3.1",
     "typescript": "^5.9.3"
@@ -66,7 +70,8 @@
       "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg)"
     ],
     "setupFilesAfterEnv": [
-      "@testing-library/jest-native/extend-expect"
+      "@testing-library/jest-native/extend-expect",
+      "<rootDir>/jest.setup.js"
     ]
   }
 }

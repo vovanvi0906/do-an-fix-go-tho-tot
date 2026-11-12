@@ -1,0 +1,37 @@
+name: Tests
+on: [push, pull_request]
+jobs:
+  mobile:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: [customer-app, worker-app]
+    defaults:
+      run:
+        working-directory: ${{ matrix.app }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: ${{ matrix.app }}/package-lock.json
+      - run: npm ci --legacy-peer-deps
+      - run: npm run test:ci
+      - run: npx expo export --platform android --output-dir dist-ci --max-workers 2
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+      - run: npm ci --legacy-peer-deps
+      - run: npm run prisma:generate
+      - run: npm test -- --runInBand
+      - run: npm run build

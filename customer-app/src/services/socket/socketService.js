@@ -1,53 +1,18 @@
 import { io } from 'socket.io-client';
-import { Platform } from 'react-native';
-import Constants from 'expo-constants';
 import { tokenStorage } from '../storage/tokenStorage';
-
-const getSocketUrl = () => {
-  if (
-    process.env.EXPO_PUBLIC_SOCKET_URL &&
-    !process.env.EXPO_PUBLIC_SOCKET_URL.includes('localhost') &&
-    !process.env.EXPO_PUBLIC_SOCKET_URL.includes('127.0.0.1')
-  ) {
-    return process.env.EXPO_PUBLIC_SOCKET_URL;
-  }
-  if (
-    process.env.EXPO_PUBLIC_API_URL &&
-    !process.env.EXPO_PUBLIC_API_URL.includes('localhost') &&
-    !process.env.EXPO_PUBLIC_API_URL.includes('127.0.0.1')
-  ) {
-    return process.env.EXPO_PUBLIC_API_URL.replace('/api', '');
-  }
-
-  // Tự động lấy IP máy tính chủ từ Expo server để thiết bị thật kết nối thẳng vào Backend
-  const hostUri =
-    Constants.expoConfig?.hostUri ||
-    Constants.manifest2?.extra?.expoClient?.hostUri ||
-    Constants.manifest?.debuggerHost;
-
-  if (hostUri) {
-    const hostIp = hostUri.split(':')[0];
-    if (hostIp && hostIp !== 'localhost' && hostIp !== '127.0.0.1') {
-      return `http://${hostIp}:3000`;
-    }
-  }
-
-  if (Platform.OS === 'android') {
-    return 'http://10.0.2.2:3000';
-  }
-  return 'http://localhost:3000';
-};
+import { SOCKET_BASE_URL } from '../../config/connection';
 
 class SocketService {
   constructor() {
     this.socket = null;
-    this.url = getSocketUrl();
+    this.url = `${SOCKET_BASE_URL}/orders`;
     this.isConnected = false;
     this.joinedRooms = new Set();
   }
 
   connect() {
-    if (this.socket && this.socket.connected) {
+    if (this.socket) {
+      if (!this.socket.connected) this.socket.connect();
       return this.socket;
     }
 

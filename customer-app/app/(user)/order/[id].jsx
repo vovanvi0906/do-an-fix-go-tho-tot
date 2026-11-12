@@ -369,7 +369,7 @@ export default function UserOrderDetailScreen() {
                 {order?.worker?.fullName || 'Nguyễn Văn Thợ (FixGo Pro)'}
               </Text>
               <Text style={styles.workerPhone}>
-                📞 SĐT: {order?.worker?.user?.phone || '0987.654.321'}
+                📞 SĐT: {order?.worker?.phone || order?.worker?.user?.phone || 'Chưa có số điện thoại'}
               </Text>
               <Text style={styles.workerRating}>⭐ 4.9 (128 đánh giá) • Thợ chuyên nghiệp</Text>
             </View>

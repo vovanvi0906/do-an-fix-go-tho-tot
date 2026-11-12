@@ -98,8 +98,8 @@ export default function FixGoLoginScreen() {
 
     try {
       setIsLoading(true);
-      const res = await login({ identifier: identifier.trim(), password });
-      const userRole = (res?.user?.role || 'CUSTOMER').toUpperCase();
+      const res = await login(identifier.trim(), password);
+      const userRole = (res?.user?.role || res?.data?.user?.role || 'CUSTOMER').toUpperCase();
       if (userRole === 'WORKER') {
         router.replace('/(worker)/(tabs)');
       } else {

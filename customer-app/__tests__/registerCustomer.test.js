@@ -6,6 +6,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const mockReplace = jest.fn();
 const mockPush = jest.fn();
 jest.mock('expo-router', () => ({
+  useLocalSearchParams: () => ({}),
+  usePathname: () => '/',
+  useFocusEffect: (callback) => require('react').useEffect(callback, [callback]),
   useRouter: () => ({
     replace: mockReplace,
     push: mockPush,
@@ -225,7 +228,7 @@ describe('═══════════════════════�
         fireEvent.press(screen.getByText('Tiếp'));
 
         await waitFor(() => {
-          expect(screen.getByText('Nhập họ tên và gmail')).toBeTruthy();
+          expect(screen.getByText('Nhập họ tên và email')).toBeTruthy();
         });
       };
 
@@ -249,10 +252,12 @@ describe('═══════════════════════�
         fireEvent.changeText(screen.getByPlaceholderText('Tên'), 'Khách');
         fireEvent.changeText(screen.getByPlaceholderText('Email (vd: example@gmail.com)'), 'khach@gmail.com');
 
-        fireEvent.press(screen.getByText('Hoàn tất'));
+        fireEvent.press(screen.getByText('Đăng ký'));
 
         await waitFor(() => {
           expect(spyPost).toHaveBeenCalledWith('/auth/register/customer', {
+            firstName: 'Nguyễn Văn',
+            lastName: 'Khách',
             fullName: 'Nguyễn Văn Khách',
             email: 'khach@gmail.com',
             phone: '0988776655',

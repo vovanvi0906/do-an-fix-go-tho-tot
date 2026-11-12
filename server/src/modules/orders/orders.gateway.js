@@ -115,7 +115,6 @@ export class OrderGateway {
    * Client join room theo orderId khi mở màn hình theo dõi đơn
    */
   @SubscribeMessage('order:join')
-  @SubscribeMessage('join_order')
   @Bind(ConnectedSocket(), MessageBody())
   handleJoinOrder(client, data) {
     const orderId = typeof data === 'string' ? data : data?.orderId;
@@ -138,7 +137,6 @@ export class OrderGateway {
    * Client rời room khi rời màn hình để tránh leak listener
    */
   @SubscribeMessage('order:leave')
-  @SubscribeMessage('leave_order')
   @Bind(ConnectedSocket(), MessageBody())
   handleLeaveOrder(client, data) {
     const orderId = typeof data === 'string' ? data : data?.orderId;
@@ -156,6 +154,14 @@ export class OrderGateway {
     this.logger.log(`👋 Client ${client.id} left room: ${roomName}`);
     return { status: 'left', orderId, room: roomName };
   }
+
+  @SubscribeMessage('join_order')
+  @Bind(ConnectedSocket(), MessageBody())
+  handleLegacyJoinOrder(client, data) { return this.handleJoinOrder(client, data); }
+
+  @SubscribeMessage('leave_order')
+  @Bind(ConnectedSocket(), MessageBody())
+  handleLegacyLeaveOrder(client, data) { return this.handleLeaveOrder(client, data); }
 
   /**
    * Admin portal subscribe kênh theo dõi đơn hàng toàn hệ thống
@@ -333,6 +339,7 @@ export class OrderGateway {
 
     if (this.server) {
       this.server.to(roomName).emit('order:matched', payload);
+      this.server.to(roomName).emit('order.accepted', payload);
       // Compatibility alias
       this.server.to(roomName).emit('order.matched', payload);
 

@@ -4,6 +4,8 @@
  * Logging prefix: 🚀 [BookingService], 📡 [SocketService]
  */
 import { useState, useEffect, useRef, useCallback } from 'react';
+import * as Location from 'expo-location';
+import { orderStorage } from '../../../services/storage/orderStorage';
 import * as ImagePicker from 'expo-image-picker';
 import { socketService } from '../../../services/socket/socketService';
 import { bookingService } from '../services/bookingService';
@@ -22,8 +24,8 @@ export function useBooking(initialService = null) {
   const [address, setAddress] = useState(
     '268 Lý Thường Kiệt, Phường 14, Quận 10, TP. Hồ Chí Minh'
   );
-  const [lat, setLat] = useState(10.762622);
-  const [lng, setLng] = useState(106.660172);
+  const [lat, setLat] = useState(null);
+  const [lng, setLng] = useState(null);
   const [note, setNote] = useState('');
   const [evidencePhotos, setEvidencePhotos] = useState([]);
   const [scheduleType, setScheduleType] = useState('INSTANT');
@@ -60,34 +62,48 @@ export function useBooking(initialService = null) {
     loadServices();
   }, []);
 
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        if ((await Location.requestForegroundPermissionsAsync()).status !== 'granted') return;
+        const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
+        if (active) { setLat(position.coords.latitude); setLng(position.coords.longitude); }
+      } catch (error) { console.warn('Không lấy được GPS đặt đơn:', error.message); }
+    })();
+    return () => { active = false; };
+  }, []);
+
+  const orderIdRef = useRef(null);
   // ─── Socket listeners ─────────────────────────────────────────────
   useEffect(() => {
     socketService.connect();
 
-    const handleOrderAccepted = (data) => {
-      console.log('📡 [SocketService] ✅ Thợ đã nhận đơn:', data);
+    const handleOrderAccepted = async (data) => {
+      if (!orderIdRef.current || data.orderId !== orderIdRef.current || matchingStatusRef.current === 'FOUND') return;
+      matchingStatusRef.current = 'FOUND';
       clearInterval(countdownRef.current);
+      const worker = data.worker;
+      const orders = await orderStorage.getLocalOrders();
+      const cached = orders.find((order) => order.id === data.orderId) || { id: data.orderId };
+      await orderStorage.saveOrder({ ...cached, status: 'MATCHED', worker, assignedWorker: worker });
+      setAssignedWorker(worker);
       setMatchingStatus('FOUND');
-      setAssignedWorker(data.worker || {
-        workerId: 'w-mock-001',
-        fullName: data.workerName || 'Thợ chuyên nghiệp FixGo',
-        phone: data.workerPhone || '0987.xxx.xxx',
-        avatarUrl: '',
-        ratingAvg: data.ratingAvg || 4.8,
-        completedOrders: data.completedOrders || 156,
-      });
     };
 
     const handleOrderTimeout = (data) => {
+      if (data.orderId !== orderIdRef.current) return;
       console.log('📡 [SocketService] ⏰ Hết thời gian tìm thợ:', data);
       clearInterval(countdownRef.current);
       setMatchingStatus('TIMEOUT');
     };
 
+    socketService.on('order:matched', handleOrderAccepted);
     socketService.on('order.accepted', handleOrderAccepted);
     socketService.on('order.timeout', handleOrderTimeout);
 
     return () => {
+      socketService.off('order:matched', handleOrderAccepted);
       socketService.off('order.accepted', handleOrderAccepted);
       socketService.off('order.timeout', handleOrderTimeout);
       clearInterval(countdownRef.current);
@@ -157,6 +173,9 @@ export function useBooking(initialService = null) {
 
     try {
       if (!selectedService?.id) throw new Error('Vui lòng chọn dịch vụ hợp lệ');
+      const bookingLat = options.lat ?? lat;
+      const bookingLng = options.lng ?? lng;
+      if (!Number.isFinite(bookingLat) || !Number.isFinite(bookingLng)) throw new Error('Vui lòng bật GPS hoặc chọn vị trí trên bản đồ');
       const requestedSchedule = options.scheduleType ?? scheduleType;
       const payload = {
         serviceId: selectedService.id,
@@ -164,8 +183,8 @@ export function useBooking(initialService = null) {
         imageUrl: options.imageUrl,
         aiConfidence: options.aiConfidence,
         aiSuggestedCategoryId: options.aiSuggestedCategoryId,
-        lat,
-        lng,
+        lat: bookingLat,
+        lng: bookingLng,
         addressText: options.addressText ?? address,
         note: options.note ?? (note || `Yêu cầu dịch vụ: ${selectedService.name}`),
         evidencePhotos,
@@ -180,7 +199,9 @@ export function useBooking(initialService = null) {
       const result = await bookingService.createBooking(payload);
 
       const newOrderId = result.orderId;
+      orderIdRef.current = newOrderId;
       setOrderId(newOrderId);
+      matchingStatusRef.current = 'SEARCHING';
       setMatchingStatus('SEARCHING');
       setRemainingSeconds(MATCHING_TIMEOUT_SECONDS);
 
@@ -218,6 +239,8 @@ export function useBooking(initialService = null) {
   const cancelMatching = useCallback(async () => {
     console.log('🚀 [BookingService] Hủy tìm thợ cho đơn:', orderId);
     clearInterval(countdownRef.current);
+    matchingStatusRef.current = 'CANCELLED';
+    orderIdRef.current = null;
     setMatchingStatus('CANCELLED');
 
     if (orderId) {
@@ -232,6 +255,7 @@ export function useBooking(initialService = null) {
     // Reset after short delay
     setTimeout(() => {
       setMatchingStatus('IDLE');
+      orderIdRef.current = null;
       setOrderId(null);
       setRemainingSeconds(MATCHING_TIMEOUT_SECONDS);
       setAssignedWorker(null);
@@ -241,6 +265,7 @@ export function useBooking(initialService = null) {
   // ─── Reset all ─────────────────────────────────────────────────────
   const resetMatching = useCallback(() => {
     setMatchingStatus('IDLE');
+    orderIdRef.current = null;
     setOrderId(null);
     setRemainingSeconds(MATCHING_TIMEOUT_SECONDS);
     setAssignedWorker(null);

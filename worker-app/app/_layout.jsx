@@ -1,11 +1,11 @@
 import 'react-native-get-random-values';
 import React, { useEffect } from 'react';
-import { Stack } from 'expo-router';
+import { Stack, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as WebBrowser from 'expo-web-browser';
 import { AuthProvider } from '../src/features/auth';
 import { GlobalErrorBoundary } from '../src/components/GlobalErrorBoundary';
-import { initRemoteLogger } from '../src/utils/remoteLogger';
+import { initRemoteLogger, setLogRoute } from '../src/utils/remoteLogger';
 
 // Hoàn tất và dọn dẹp phiên đăng nhập WebBrowser ngay tại file root của app
 WebBrowser.maybeCompleteAuthSession();
@@ -14,6 +14,8 @@ WebBrowser.maybeCompleteAuthSession();
 initRemoteLogger();
 
 export default function RootLayout() {
+  const pathname = usePathname();
+  useEffect(() => { setLogRoute(pathname); }, [pathname]);
   return (
     <GlobalErrorBoundary>
       <AuthProvider>

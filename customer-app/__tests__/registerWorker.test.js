@@ -7,6 +7,9 @@ const mockReplace = jest.fn();
 const mockPush = jest.fn();
 const mockBack = jest.fn();
 jest.mock('expo-router', () => ({
+  useLocalSearchParams: () => ({}),
+  usePathname: () => '/',
+  useFocusEffect: (callback) => require('react').useEffect(callback, [callback]),
   useRouter: () => ({
     replace: mockReplace,
     push: mockPush,

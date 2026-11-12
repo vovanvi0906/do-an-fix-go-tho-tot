@@ -5,13 +5,15 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../../infrastructure/database/prisma.service';
+import { FastApiAiClient } from '../../infrastructure/external/ai/fastapi-ai.client';
 import { AdminGateway } from '../admin/admin.gateway';
 
 @Injectable()
-@Dependencies(PrismaService, AdminGateway)
+@Dependencies(PrismaService, AdminGateway, FastApiAiClient)
 export class WorkersService {
-  constructor(prisma, adminGateway) {
+  constructor(prisma, adminGateway, fastApiAiClient) {
     this.prisma = prisma;
+    this.fastApiAiClient = fastApiAiClient;
     this.adminGateway = adminGateway;
   }
 
@@ -201,7 +203,14 @@ export class WorkersService {
       throw new NotFoundException('Không tìm thấy thông tin thợ');
     }
 
-    const { isOnline } = dto;
+    const { isOnline, lat, lng } = dto;
+    if (typeof isOnline !== 'boolean') throw new BadRequestException('isOnline phải là boolean');
+    if (isOnline && (!Number.isFinite(lat) || Math.abs(lat) > 90 || !Number.isFinite(lng) || Math.abs(lng) > 180)) {
+      throw new BadRequestException('Vui lòng gửi tọa độ GPS hợp lệ');
+    }
+    if (isOnline && (!worker.faceVerifiedAt || Date.now() - new Date(worker.faceVerifiedAt).getTime() >= 86400000)) {
+      throw new BadRequestException('Vui lòng xác thực khuôn mặt hằng ngày trước khi bật nhận đơn');
+    }
 
     if (isOnline === true) {
       // 1. User phai ACTIVE
@@ -230,7 +239,7 @@ export class WorkersService {
 
     const updated = await this.prisma.workerProfile.update({
       where: { id: worker.id },
-      data: { isOnline },
+      data: { isOnline, ...(isOnline ? { currentLat: lat, currentLng: lng } : {}) },
     });
 
     try {
@@ -249,6 +258,23 @@ export class WorkersService {
       message: `Đã ${isOnline ? 'bật' : 'tắt'} trạng thái sẵn sàng nhận việc thành công`,
       isOnline: updated.isOnline,
     };
+  }
+
+  async verifyFaceDaily(userId, photoUrl) {
+    if (!photoUrl) throw new BadRequestException('Vui lòng chụp ảnh selfie');
+    const worker = await this.prisma.workerProfile.findUnique({
+      where: { userId }, include: { faceProfile: true },
+    });
+    if (!worker) throw new NotFoundException('Không tìm thấy hồ sơ thợ');
+    const reference = worker.faceProfile?.facePhotoUrl;
+    if (!reference) throw new BadRequestException('Hồ sơ chưa có ảnh khuôn mặt đã đăng ký');
+    const result = await this.fastApiAiClient.verifyFace(worker.id, photoUrl, reference, { allowFallback: false });
+    if (!result.verified || !Number.isFinite(Number(result.confidence)) || Number(result.confidence) < this.fastApiAiClient.confidenceThreshold) {
+      throw new BadRequestException('Chưa xác thực được khuôn mặt. Vui lòng thử lại khi AI khả dụng');
+    }
+    const faceVerifiedAt = new Date();
+    await this.prisma.workerProfile.update({ where: { id: worker.id }, data: { faceVerifiedAt } });
+    return { faceVerifiedAt };
   }
 
   async findNearby(lat, lng, radius = 15.0) {

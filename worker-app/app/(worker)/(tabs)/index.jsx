@@ -8,7 +8,11 @@ import {
   Switch,
   Modal,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
+import * as Location from 'expo-location';
+import * as ImagePicker from 'expo-image-picker';
+import { apiClient } from '../../../src/services/api/apiClient';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { orderService } from '../../../src/services/api/orderService';
@@ -20,12 +24,72 @@ export default function WorkerDashboardScreen() {
   const { user } = useAuth();
 
   // State
-  const [isOnline, setIsOnline] = useState(true);
+  const [isOnline, setIsOnline] = useState(false);
   const [incomingOrder, setIncomingOrder] = useState(null);
   const [countdown, setCountdown] = useState(30);
   const [isAccepting, setIsAccepting] = useState(false);
   const [conflictMessage, setConflictMessage] = useState('');
   const [activeOrder, setActiveOrder] = useState(null);
+
+  const [isChangingStatus, setIsChangingStatus] = useState(false);
+  const [showDailyCheckIn, setShowDailyCheckIn] = useState(false);
+
+  const changeAvailability = async (online, verified = false) => {
+    if (isChangingStatus) return;
+    setIsChangingStatus(true);
+    try {
+      if (online && !verified) {
+        const response = await apiClient.get('/workers/me');
+        const profile = response.data || response;
+        if (!profile.faceVerifiedAt || Date.now() - new Date(profile.faceVerifiedAt).getTime() >= 86400000) {
+          setShowDailyCheckIn(true);
+          return;
+        }
+      }
+      let coords = {};
+      if (online) {
+        const permission = await Location.requestForegroundPermissionsAsync();
+        if (permission.status !== 'granted') throw new Error('Cần quyền vị trí để bật nhận đơn');
+        const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
+        coords = { lat: position.coords.latitude, lng: position.coords.longitude };
+        socketService.connect();
+      }
+      await apiClient.patch('/workers/status', { isOnline: online, ...coords });
+      setIsOnline(online);
+      if (!online) setIncomingOrder(null);
+    } catch (error) {
+      Alert.alert('Chưa cập nhật trạng thái', error.message);
+    } finally {
+      setIsChangingStatus(false);
+    }
+  };
+
+  const dailyCheckIn = async () => {
+    if (isChangingStatus) return;
+    setIsChangingStatus(true);
+    let verified = false;
+    try {
+      const permission = await ImagePicker.requestCameraPermissionsAsync();
+      if (permission.status !== 'granted') throw new Error('Cần quyền camera để chụp selfie');
+      const result = await ImagePicker.launchCameraAsync({ cameraType: ImagePicker.CameraType.front, quality: 0.7 });
+      if (result.canceled || !result.assets?.[0]) return;
+      const asset = result.assets[0];
+      const form = new FormData();
+      if (asset.uri.startsWith('data:') || asset.uri.startsWith('blob:')) {
+        form.append('image', await (await fetch(asset.uri)).blob(), 'selfie.jpg');
+      } else {
+        form.append('image', { uri: asset.uri, name: 'selfie.jpg', type: 'image/jpeg' });
+      }
+      await apiClient.post('/workers/verify-face-daily', form, { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 60000 });
+      verified = true;
+      setShowDailyCheckIn(false);
+    } catch (error) {
+      Alert.alert('Check-in chưa thành công', error.message);
+    } finally {
+      setIsChangingStatus(false);
+    }
+    if (verified) await changeAvailability(true, true);
+  };
 
   useEffect(() => {
     // 1. Kết nối Socket.IO
@@ -113,6 +177,17 @@ export default function WorkerDashboardScreen() {
 
   return (
     <View nativeID="worker-home-container" style={styles.container}>
+      <Modal visible={showDailyCheckIn} transparent animationType="fade" onRequestClose={() => !isChangingStatus && setShowDailyCheckIn(false)}>
+        <View style={{ flex: 1, justifyContent: 'center', padding: 24, backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <View style={{ padding: 24, backgroundColor: 'white', borderRadius: 16, gap: 16 }}>
+            <Text style={{ fontSize: 18, fontWeight: '700' }}>Check-in khuôn mặt hằng ngày</Text>
+            <Text>Chụp selfie trực diện để bật nhận đơn trong 24 giờ tới.</Text>
+            <TouchableOpacity disabled={isChangingStatus} onPress={dailyCheckIn}><Text>Chụp selfie và xác thực</Text></TouchableOpacity>
+            {isChangingStatus && <ActivityIndicator />}
+            <TouchableOpacity disabled={isChangingStatus} onPress={() => setShowDailyCheckIn(false)}><Text>Để sau</Text></TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
       {/* Header Thợ */}
       <View nativeID="worker-home-header" style={styles.header}>
         <View>
@@ -127,7 +202,8 @@ export default function WorkerDashboardScreen() {
           </Text>
           <Switch
             value={isOnline}
-            onValueChange={setIsOnline}
+            onValueChange={changeAvailability}
+            disabled={isChangingStatus}
             trackColor={{ false: '#CBD5E1', true: '#86EFAC' }}
             thumbColor={isOnline ? '#16A34A' : '#94A3B8'}
           />

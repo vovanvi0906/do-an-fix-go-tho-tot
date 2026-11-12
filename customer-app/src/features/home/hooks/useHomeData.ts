@@ -5,6 +5,8 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import * as Location from 'expo-location';
+import { getNearbyWorkersApi } from '../../../services/api/workerService';
 import { tokenStorage } from '../../../services/storage/tokenStorage';
 import { catalogService } from '../../../services/api/catalogService';
 import type {
@@ -103,48 +105,6 @@ const MOCK_CATEGORIES: CategoryItem[] = [
     gradientColors: ['#64748B', '#334155'],
     serviceCount: 22,
     isPopular: false,
-  },
-];
-
-const MOCK_WORKERS: WorkerItem[] = [
-  {
-    id: 'w-01',
-    fullName: 'Lê Văn Thợ Điện',
-    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-    specialty: 'Sửa điện - nước dân dụng',
-    rating: 5.0,
-    totalReviews: 48,
-    distanceKm: 0.3,
-    isOnline: true,
-    completedJobs: 156,
-    latitude: 10.7780,
-    longitude: 106.6990,
-  },
-  {
-    id: 'w-02',
-    fullName: 'Phạm Văn Thợ Lạnh',
-    avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
-    specialty: 'Bảo dưỡng & Vệ sinh máy lạnh',
-    rating: 4.9,
-    totalReviews: 64,
-    distanceKm: 0.6,
-    isOnline: true,
-    completedJobs: 210,
-    latitude: 10.7795,
-    longitude: 106.7025,
-  },
-  {
-    id: 'w-03',
-    fullName: 'Hoàng Minh Tuấn',
-    avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
-    specialty: 'Thông tắc & Cấp thoát nước',
-    rating: 4.85,
-    totalReviews: 32,
-    distanceKm: 1.1,
-    isOnline: true,
-    completedJobs: 98,
-    latitude: 10.7745,
-    longitude: 106.6975,
   },
 ];
 
@@ -253,7 +213,7 @@ export function useHomeData(): UseHomeDataReturn {
 
   const [user, setUser] = useState<UserProfile>(MOCK_USER);
   const [categories, setCategories] = useState<CategoryItem[]>(MOCK_CATEGORIES);
-  const [nearbyWorkers, setNearbyWorkers] = useState<WorkerItem[]>(MOCK_WORKERS);
+  const [nearbyWorkers, setNearbyWorkers] = useState<WorkerItem[]>([]);
   const [popularServices, setPopularServices] = useState<ServiceItem[]>(MOCK_POPULAR_SERVICES);
   const [vouchers, setVouchers] = useState<VoucherItem[]>(MOCK_VOUCHERS);
 
@@ -297,7 +257,13 @@ export function useHomeData(): UseHomeDataReturn {
       // const workerRes = await apiClient.get(`/api/v1/workers/nearby?lat=10.8031&lng=106.7144`);
       // setNearbyWorkers(workerRes.data);
       // =========================================================================
-      setNearbyWorkers(MOCK_WORKERS);
+      setNearbyWorkers([]);
+      try {
+        if ((await Location.requestForegroundPermissionsAsync()).status === 'granted') {
+          const { coords } = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
+          setNearbyWorkers(await getNearbyWorkersApi(coords.latitude, coords.longitude, 10));
+        }
+      } catch (error) { console.warn('Không tải được thợ gần bạn:', error); }
 
       // 3. API Integration: Lấy danh mục dịch vụ thực tế từ CSDL backend
       try {

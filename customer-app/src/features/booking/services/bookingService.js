@@ -2,6 +2,7 @@
  * BookingService — Feature-level service for booking flow
  * Logging prefix: 🚀 [BookingService]
  */
+import { catalogService } from '../../../services/api/catalogService';
 import { orderService } from '../../../services/api/orderService';
 
 export const bookingService = {
@@ -72,7 +73,7 @@ export const bookingService = {
   async getAvailableServices() {
     console.log('🚀 [BookingService] Tải danh sách dịch vụ...');
     try {
-      const categories = await orderService.getCategories();
+      const categories = await catalogService.getServices();
       console.log('🚀 [BookingService] ✅ Đã tải', categories?.length || 0, 'dịch vụ');
       return categories;
     } catch (error) {

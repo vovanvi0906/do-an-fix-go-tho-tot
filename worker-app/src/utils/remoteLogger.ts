@@ -6,6 +6,8 @@
 
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
+import * as Application from 'expo-application';
+import { LOG_ENDPOINT } from '../config/connection';
 
 export interface ClientLogPayload {
   level?: 'error' | 'warn' | 'info';
@@ -15,32 +17,16 @@ export interface ClientLogPayload {
   context?: string;
   timestamp?: string;
   route?: string;
+  app?: string;
+  version?: string;
+  build?: string;
+  requestId?: string;
+  orderId?: string;
 }
 
-const getLogEndpoint = (): string => {
-  if (process.env.EXPO_PUBLIC_API_URL) {
-    const base = process.env.EXPO_PUBLIC_API_URL.replace(/\/+$/, '');
-    return `${base}/logs/client`;
-  }
-
-  const hostUri =
-    Constants.expoConfig?.hostUri ||
-    (Constants.manifest2 as any)?.extra?.expoClient?.hostUri ||
-    (Constants.manifest as any)?.debuggerHost;
-
-  if (hostUri) {
-    const hostIp = hostUri.split(':')[0];
-    if (hostIp && hostIp !== 'localhost' && hostIp !== '127.0.0.1') {
-      return `http://${hostIp}:3000/api/logs/client`;
-    }
-  }
-
-  if (Platform.OS === 'android') {
-    return 'http://10.0.2.2:3000/api/logs/client';
-  }
-
-  return 'http://localhost:3000/api/logs/client';
-};
+let initialized = false;
+let currentRoute: string | undefined;
+export function setLogRoute(route: string): void { currentRoute = route; }
 
 /**
  * Gửi thông tin lỗi trực tiếp về Backend để ghi vào logs/mobile.log
@@ -48,7 +34,8 @@ const getLogEndpoint = (): string => {
 export async function sendErrorToLog(
   error: any,
   context: string = 'MANUAL_LOG',
-  level: 'error' | 'warn' | 'info' = 'error'
+  level: 'error' | 'warn' | 'info' = 'error',
+  details: { route?: string; requestId?: string; orderId?: string } = {}
 ): Promise<void> {
   try {
     let message = 'Unknown error';
@@ -65,6 +52,12 @@ export async function sendErrorToLog(
     }
 
     const payload: ClientLogPayload = {
+      route: currentRoute,
+      orderId: currentRoute?.match(/\/(?:order|job)\/([^/]+)/)?.[1],
+      ...details,
+      app: 'worker-app',
+      version: Application.nativeApplicationVersion || Constants.expoConfig?.version,
+      build: Application.nativeBuildVersion || undefined,
       level,
       message,
       stack,
@@ -73,16 +66,20 @@ export async function sendErrorToLog(
       timestamp: new Date().toISOString(),
     };
 
-    const endpoint = getLogEndpoint();
+    const endpoint = LOG_ENDPOINT;
 
     // Dùng native fetch để độc lập, không phụ thuộc vào Axios
-    await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 5000);
+    try {
+      const response = await fetch(endpoint, {
+        signal: controller.signal,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) throw new Error(`Log upload failed: ${response.status}`);
+    } finally { clearTimeout(timer); }
   } catch (err) {
     // Không ném lỗi ra ngoài để tránh lặp vô hạn
     console.warn('⚠️ [RemoteLogger] Không thể gửi log tới backend:', err);
@@ -93,6 +90,8 @@ export async function sendErrorToLog(
  * Khởi tạo listener bắt lỗi toàn cầu
  */
 export function initRemoteLogger(): void {
+  if (initialized) return;
+  initialized = true;
   // 1. Bắt lỗi JS Native trên Android/iOS
   // @ts-ignore
   if (typeof ErrorUtils !== 'undefined') {

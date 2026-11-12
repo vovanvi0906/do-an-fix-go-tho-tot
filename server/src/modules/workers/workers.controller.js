@@ -1,3 +1,7 @@
+import { UpdateAvailabilityDto } from './dto/update-availability.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { workerFaceStorage } from '../../config/cloudinary.config';
+import { UseInterceptors, UploadedFile } from '@nestjs/common';
 import {
   Controller,
   Get,
@@ -16,6 +20,8 @@ import {
   ApiOperation,
   ApiBearerAuth,
   ApiQuery,
+  ApiResponse,
+  ApiBody,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
@@ -88,6 +94,29 @@ export class WorkersController {
   @Bind(Req())
   async submitApproval(req) {
     return this.workersService.submitApproval(req.user.userId);
+  }
+
+  @Post('verify-face-daily')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('WORKER')
+  @UseInterceptors(FileInterceptor('image', { storage: workerFaceStorage, limits: { fileSize: 5 * 1024 * 1024 } }))
+  @ApiOperation({ summary: 'Check-in khuôn mặt hằng ngày bằng ảnh selfie' })
+  @ApiResponse({ status: 201, description: 'Xác thực thành công, có hiệu lực 24 giờ' })
+  @ApiResponse({ status: 400, description: 'Ảnh không hợp lệ hoặc AI chưa xác thực được' })
+  @Bind(Req(), UploadedFile())
+  async verifyFaceDaily(req, file) {
+    const data = await this.workersService.verifyFaceDaily(req.user.userId, file?.path || file?.secure_url || file?.url);
+    return { success: true, data };
+  }
+
+  @Patch('status')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('WORKER')
+  @ApiOperation({ summary: 'Bật nhận đơn kèm tọa độ GPS hiện tại' })
+  @ApiBody({ type: UpdateAvailabilityDto })
+  @Bind(Req(), Body())
+  async updateStatus(req, body) {
+    return this.workersService.updateAvailability(req.user.userId, body);
   }
 
   @Patch('me/availability')

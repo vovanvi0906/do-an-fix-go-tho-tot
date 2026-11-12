@@ -69,7 +69,7 @@ export class FastApiAiClient {
     return getFallbackCompare(afterImageUrl);
   }
 
-  async verifyFace(workerId, selfieUrl, idCardImageUrl = '') {
+  async verifyFace(workerId, selfieUrl, idCardImageUrl = '', { allowFallback = true } = {}) {
     try {
       const response = await fetch(`${this.baseUrl}/ai/face-verify`, {
         method: 'POST',
@@ -80,6 +80,7 @@ export class FastApiAiClient {
     } catch (err) {
       console.warn('FastAPI AI Service (/ai/face-verify) không phản hồi:', err.message);
     }
+    if (!allowFallback) return { verified: false, confidence: 0 };
     return getFallbackFaceVerify(workerId, selfieUrl);
   }
 

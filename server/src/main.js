@@ -1,5 +1,6 @@
 // FixGo Backend Service
 import 'dotenv/config';
+import { requestLogging } from './common/middleware/request-logging';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -7,6 +8,8 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.use(requestLogging);
 
   // 1. Cấu hình Global Prefix
   app.setGlobalPrefix('api');
@@ -16,7 +19,8 @@ async function bootstrap() {
     origin: true,
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type,Accept,Authorization,X-Requested-With',
+    allowedHeaders: 'Content-Type,Accept,Authorization,X-Requested-With,X-Request-ID,ngrok-skip-browser-warning',
+    exposedHeaders: ['X-Request-ID'],
   });
 
   // 3. Kích hoạt Global ValidationPipe với whitelist & transformation
