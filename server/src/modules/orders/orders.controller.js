@@ -1,3 +1,4 @@
+import { OrderAccessGuard } from './order-access.guard';
 import {
   Controller,
   Get,
@@ -208,6 +209,7 @@ export class OrdersController {
   /**
    * 6. POST /orders/:id/match: (Internal, gọi từ worker job) Tìm thợ gần nhất theo bán kính
    */
+  @Roles('ADMIN')
   @Post(':id/match')
   @ApiOperation({
     summary:
@@ -290,6 +292,7 @@ export class OrdersController {
   /**
    * 8.1 POST /orders/:id/face-verify-upload: Upload trực tiếp ảnh selfie từ mobile
    */
+  @UseGuards(OrderAccessGuard)
   @Post(':id/face-verify-upload')
   @Roles('WORKER')
   @UseInterceptors(FileInterceptor('image', { storage: workerFaceStorage }))
@@ -342,7 +345,7 @@ export class OrdersController {
   @ApiResponse({ status: 400, description: 'Loại ảnh không hợp lệ' })
   @Bind(Req(), Param('id'), Body())
   async uploadImage(req, id, uploadDto) {
-    return this.ordersService.uploadImage(id, uploadDto);
+    return this.ordersService.uploadImage(id, uploadDto, req.user.userId);
   }
 
   /**
@@ -364,17 +367,17 @@ export class OrdersController {
   })
   @Bind(Req(), Param('id'))
   async verifyCompletion(req, id) {
-    return this.ordersService.verifyCompletion(id);
+    return this.ordersService.verifyCompletion(id, req.user.userId);
   }
 
   /**
-   * 12. POST /orders/:id/accept-completion: Khách xác nhận nghiệm thu -> status COMPLETED
+   * 12. POST /orders/:id/accept-completion: Khách xác nhận nghiệm thu -> status AWAITING_PAYMENT
    */
   @Post(':id/accept-completion')
   @Roles('CUSTOMER')
   @ApiOperation({
     summary:
-      'Khách hàng xác nhận nghiệm thu kết quả công việc -> chuyển status COMPLETED',
+      'Khách hàng xác nhận nghiệm thu kết quả công việc -> chuyển status AWAITING_PAYMENT',
   })
   @ApiParam({ name: 'id', description: 'Order UUID' })
   @ApiResponse({
@@ -418,12 +421,12 @@ export class OrdersController {
   @Roles('CUSTOMER', 'ADMIN')
   @ApiOperation({
     summary:
-      'Thanh toán đơn hàng (Tính % hoa hồng category và cộng tiền ví thợ WorkerWallet trong 1 transaction)',
+      'Xác nhận hoàn tất đơn đã có payment PAID và payout hợp lệ; không tự thu tiền/cộng ví',
   })
   @ApiParam({ name: 'id', description: 'Order UUID' })
   @ApiResponse({
     status: 200,
-    description: 'Thanh toán và giải ngân ví thành công -> status PAID',
+    description: 'Đơn đã quyết toán được xác nhận COMPLETED',
   })
   @ApiResponse({
     status: 400,
@@ -515,7 +518,7 @@ export class OrdersController {
 
   @Patch(':id/arrived')
   @Roles('WORKER')
-  @ApiOperation({ summary: 'Thợ đã có mặt tại địa điểm (IN_PROGRESS)' })
+  @ApiOperation({ summary: 'Thợ đã có mặt tại địa điểm (ARRIVED)' })
   @Bind(Req(), Param('id'))
   async markArrived(req, id) {
     return this.ordersService.markArrived(id, req.user.userId);

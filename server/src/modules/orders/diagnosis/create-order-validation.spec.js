@@ -1,3 +1,4 @@
+import { OrderWorkflowService } from '../order-workflow.service';
 import { OrdersService } from '../orders.service';
 
 describe('Order catalog validation', () => {
@@ -10,10 +11,12 @@ describe('Order catalog validation', () => {
     tx = { order: { create: jest.fn().mockImplementation(async ({ data }) => ({ id: 'order-1', ...data })) },
       orderStatusHistory: { create: jest.fn() }, orderImage: { create: jest.fn() } };
     service.prisma = {
+      user: { findUnique: jest.fn().mockResolvedValue({ id: 'user-1', role: 'CUSTOMER', status: 'ACTIVE' }) },
       service: { findFirst: jest.fn().mockResolvedValue(catalogService) },
       serviceCategory: { findFirst: jest.fn().mockResolvedValue(null) },
       $transaction: jest.fn().mockImplementation(fn => fn(tx)),
     };
+    service.orderWorkflowService = new OrderWorkflowService(service.prisma, {});
     service.orderQueueService = { scheduleRadiusExpansion: jest.fn() };
     service.matchNearbyWorkers = jest.fn().mockResolvedValue([]);
     service.ordersGateway = { broadcastNewOrderToWorkers: jest.fn() };
@@ -26,7 +29,7 @@ describe('Order catalog validation', () => {
   it('saves the incident image using fields supported by Prisma', async () => {
     await service.createOrder('user-1', { ...input, imageUrl: 'https://example.test/photo.jpg' });
     expect(tx.orderImage.create).toHaveBeenCalledWith({ data: {
-      orderId: 'order-1', type: 'BEFORE', url: 'https://example.test/photo.jpg',
+      orderId: 'order-1', type: 'ISSUE', url: 'https://example.test/photo.jpg',
     } });
   });
   it('rejects service/category mismatch before writing', async () => {

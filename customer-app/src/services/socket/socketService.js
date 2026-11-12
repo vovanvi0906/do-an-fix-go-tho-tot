@@ -19,6 +19,7 @@ class SocketService {
     console.log(`📡 [Socket.IO] Khởi tạo kết nối tới Gateway: ${this.url}`);
 
     this.socket = io(this.url, {
+      auth: async (callback) => callback({ token: await tokenStorage.getToken() }),
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionAttempts: 10,

@@ -1,14 +1,16 @@
-import { BadRequestException } from '@nestjs/common';
-import { VALID_STATUS_TRANSITIONS } from '../constants/order-status';
+import { ConflictException } from '@nestjs/common';
+import {
+  VALID_STATUS_TRANSITIONS,
+  normalizeOrderStatus,
+} from '../constants/order-status';
 
 export class OrderTransitionValidator {
   static validateTransition(currentStatus, nextStatus) {
-    const allowedTransitions = VALID_STATUS_TRANSITIONS[currentStatus] || [];
-    if (!allowedTransitions.includes(nextStatus)) {
-      throw new BadRequestException(
-        `Không thể chuyển trạng thái đơn hàng từ "${currentStatus}" sang "${nextStatus}". Các trạng thái hợp lệ tiếp theo: [${allowedTransitions.join(
-          ', ',
-        )}]`,
+    const from = normalizeOrderStatus(currentStatus);
+    const to = normalizeOrderStatus(nextStatus);
+    if (!VALID_STATUS_TRANSITIONS[from]?.includes(to)) {
+      throw new ConflictException(
+        `INVALID_TRANSITION: ${currentStatus} -> ${nextStatus}`,
       );
     }
     return true;

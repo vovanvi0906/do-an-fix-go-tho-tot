@@ -140,23 +140,7 @@ export default function OrdersManagementPage() {
       const targetId = data?.orderId || data?.id;
       if (!targetId) return;
 
-      setOrders((prevOrders) =>
-        prevOrders.map((o) => {
-          if (o.id === targetId) {
-            return {
-              ...o,
-              status: data.status || o.status,
-              ...(data.worker && {
-                worker: {
-                  ...(o.worker || {}),
-                  ...data.worker,
-                },
-              }),
-            };
-          }
-          return o;
-        })
-      );
+      fetchOrders();
     };
 
     // 3. Khi đơn hàng khớp thợ nhận việc (ASSIGNED / MATCHED)
@@ -165,18 +149,7 @@ export default function OrdersManagementPage() {
       const targetId = data?.orderId || data?.id;
       if (!targetId) return;
 
-      setOrders((prevOrders) =>
-        prevOrders.map((o) => {
-          if (o.id === targetId) {
-            return {
-              ...o,
-              status: 'ASSIGNED',
-              worker: data.worker || o.worker,
-            };
-          }
-          return o;
-        })
-      );
+      fetchOrders();
     };
 
     socketService.on('order.new', handleNewOrder);
@@ -208,6 +181,7 @@ export default function OrdersManagementPage() {
   // Status Badge Helper
   const renderStatusBadge = (status) => {
     switch (status) {
+      case 'SEARCHING_WORKER':
       case 'SEARCHING':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-500 dark:text-amber-400 text-[11px] font-semibold animate-pulse">
@@ -215,6 +189,9 @@ export default function OrdersManagementPage() {
             <span>Đang tìm thợ</span>
           </span>
         );
+      case 'MATCHED':
+      case 'WORKER_EN_ROUTE':
+      case 'AWAITING_ACCEPTANCE':
       case 'ASSIGNED':
       case 'WORKER_ARRIVING':
       case 'ARRIVED':
@@ -226,6 +203,11 @@ export default function OrdersManagementPage() {
             <span>Đang thực hiện</span>
           </span>
         );
+      case 'AWAITING_PAYMENT':
+        return <span>Chờ thanh toán</span>;
+      case 'DISPUTED':
+        return <span>Đang tranh chấp</span>;
+      case 'PAID':
       case 'COMPLETED':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-[11px] font-semibold">
@@ -529,7 +511,7 @@ export default function OrdersManagementPage() {
                           <div className="flex items-center gap-1.5 text-slate-800 dark:text-slate-200 text-xs truncate">
                             <User className="w-3 h-3 text-blue-500 shrink-0" />
                             <span className="font-medium truncate">
-                              {order.customer?.fullName || 'Khách vãng lai'}
+                              {order.customer?.name || order.customer?.fullName || 'Khách vãng lai'}
                             </span>
                           </div>
 

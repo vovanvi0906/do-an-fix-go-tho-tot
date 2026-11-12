@@ -57,6 +57,7 @@ export default function OrderDetailModal({
 
   const getStatusBadge = (status) => {
     switch (status) {
+      case 'SEARCHING_WORKER':
       case 'SEARCHING':
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 border border-amber-500/30 text-amber-400">
@@ -64,6 +65,9 @@ export default function OrderDetailModal({
             <span>Đang tìm thợ (Searching)</span>
           </span>
         );
+      case 'MATCHED':
+      case 'WORKER_EN_ROUTE':
+      case 'AWAITING_ACCEPTANCE':
       case 'ASSIGNED':
       case 'WORKER_ARRIVING':
       case 'ARRIVED':
@@ -75,6 +79,11 @@ export default function OrderDetailModal({
             <span>Đang thực hiện (In Progress)</span>
           </span>
         );
+      case 'AWAITING_PAYMENT':
+        return <span>Chờ thanh toán</span>;
+      case 'DISPUTED':
+        return <span>Đang tranh chấp</span>;
+      case 'PAID':
       case 'COMPLETED':
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
@@ -147,15 +156,15 @@ export default function OrderDetailModal({
               </div>
               <div className="space-y-1 pl-1">
                 <div className="font-bold text-slate-900 dark:text-white text-sm">
-                  {order.customer?.fullName || 'Khách vãng lai'}
+                  {order.customer?.name || order.customer?.fullName || 'Khách vãng lai'}
                 </div>
                 <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
                   <Phone className="w-3 h-3 text-slate-400" />
-                  <span className="font-mono">{order.customer?.user?.phone || 'Chưa cập nhật'}</span>
+                  <span className="font-mono">{order.customer?.phone || order.customer?.user?.phone || 'Chưa cập nhật'}</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 truncate">
                   <Mail className="w-3 h-3 text-slate-400 shrink-0" />
-                  <span className="truncate">{order.customer?.user?.email || 'N/A'}</span>
+                  <span className="truncate">{order.customer?.email || order.customer?.user?.email || 'N/A'}</span>
                 </div>
               </div>
             </div>

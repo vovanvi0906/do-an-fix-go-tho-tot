@@ -19,3 +19,5 @@ Bộ nội dung chuẩn nằm tại [worker-implementation/01-codebase-audit.md]
 Phát hiện chính: backend có hai FSM; active order chưa restore; status worker chỉ local; AFTER sai route; face/compare còn fake-success fallback; quote chưa bền vững; nghiệm thu COMPLETED trước trả tiền; pay có thể cộng ví lặp; ownership/socket scope thiếu và schema/migrations không đồng bộ.
 
 Đã chạy 6 backend + 8 worker unit tests, đều pass, dùng mocks. Runtime DB/Redis/AI/provider/mobile E2E NOT_VERIFIED. Đề xuất task đầu tiên ARC-01; chờ giao task triển khai.
+
+Cập nhật sau audit: [ARC-01 — implementation report](worker-implementation/10-arc01-report.md), [tiến độ và kiểm thử](worker-implementation/09-progress-tracker.md).
