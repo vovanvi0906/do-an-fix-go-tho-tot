@@ -1,3 +1,4 @@
+import { createRegistrationFlow, socialSignup, isProofInvalid } from '../../src/features/auth/services/registrationFlow';
 // Sizefile exception: Legacy multi-step customer registration flow kept from baseline to prevent regression.
 import React, { useState, useRef, useEffect } from 'react';
 import {
@@ -55,8 +56,10 @@ export default function RegisterCustomerScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const isSocialOnboarding = params?.isSocialOnboarding === 'true';
-  const role = params?.role;
-  const { registerCustomer, updatePhone, user } = useAuth();
+  const { registerCustomer, updatePhone, googleLogin, firebaseGoogleLogin } = useAuth();
+  const flow = useRef(createRegistrationFlow()).current;
+  const isSocialSignup = params?.isSocialSignup === 'true';
+  useEffect(() => () => { flow.clear(); if (isSocialSignup) socialSignup.clear(); }, [flow, isSocialSignup]);
   const { signInWithGoogle, isGoogleLoading } = useGoogleAuth('CUSTOMER');
 
   // ─── Font loading (Inter) ───────────────────────────────────────────────────
@@ -124,7 +127,7 @@ export default function RegisterCustomerScreen() {
   const isPasswordMatch = confirmPassword.length > 0 && password === confirmPassword;
 
   // ─── Step 1: Gửi OTP Số điện thoại ─────────────────────────────────────────
-  const handlePhoneSubmit = async () => {
+  const handlePhoneSubmit = () => flow.run(async () => {
     setErrorMessage('');
     setHasError(false);
 
@@ -142,19 +145,19 @@ export default function RegisterCustomerScreen() {
 
     try {
       setIsLoading(true);
-      console.log('📱 [RegisterCustomer] Gửi SMS OTP đến số:', cleanPhone);
+      flow.clear();
       await otpService.sendPhoneOtp(cleanPhone);
       setCountdown(60);
       setOtp(['', '', '', '', '', '']);
       setStep(2);
     } catch (err) {
-      console.error('❌ [RegisterCustomer] Gửi Phone OTP lỗi:', err);
+      if (isProofInvalid(err)) { flow.clear(); setStep(1); }
       setHasError(true);
       setErrorMessage(err.message || 'Không thể gửi mã OTP. Vui lòng thử lại!');
     } finally {
       setIsLoading(false);
     }
-  };
+  });
 
   // ─── Step 2: Xử lý và Xác thực Phone OTP ────────────────────────────────────
   const handleOtpChange = (val, idx) => {
@@ -178,7 +181,7 @@ export default function RegisterCustomerScreen() {
     }
   };
 
-  const handleOtpSubmit = async () => {
+  const handleOtpSubmit = () => flow.run(async () => {
     const fullOtp = otp.join('');
     if (fullOtp.length < 6) {
       setHasError(true);
@@ -191,11 +194,21 @@ export default function RegisterCustomerScreen() {
       setErrorMessage('');
       setHasError(false);
       const cleanPhone = phone.trim().replace(/\s/g, '');
-      console.log('📱 [RegisterCustomer] Xác thực Phone OTP:', { phone: cleanPhone, code: fullOtp });
-      await otpService.verifyPhoneOtp(cleanPhone, fullOtp, 'register');
+      const result = await otpService.verifyPhoneOtp(cleanPhone, fullOtp, 'register');
+      flow.verify(cleanPhone, result);
+      setOtp(['', '', '', '', '', '']);
+      if (isSocialSignup) {
+        const pending = socialSignup.get();
+        if (!pending) throw new Error('Phiên Google hết hạn. Vui lòng đăng nhập lại.');
+        const login = pending.provider === 'firebase' ? firebaseGoogleLogin : googleLogin;
+        await login(pending.idToken, flow.payload(cleanPhone));
+        flow.clear();
+        socialSignup.clear();
+        router.replace('/(user)/(tabs)');
+        return;
+      }
 
       if (isSocialOnboarding) {
-        console.log('🔗 [RegisterCustomer] Liên kết số điện thoại cho tài khoản hiện tại:', cleanPhone);
         await updatePhone(cleanPhone);
         if (params?.returnTo) {
           router.replace(params.returnTo);
@@ -207,31 +220,33 @@ export default function RegisterCustomerScreen() {
 
       setStep(3);
     } catch (err) {
-      console.error('❌ [RegisterCustomer] Verify Phone OTP lỗi:', err);
+      if (isProofInvalid(err)) { flow.clear(); setStep(1); }
       setHasError(true);
       setErrorMessage(err.message || 'Mã OTP không chính xác hoặc đã hết hạn');
     } finally {
       setIsLoading(false);
     }
-  };
+  });
 
-  const handleResendPhoneOtp = async () => {
+  const handleResendPhoneOtp = () => flow.run(async () => {
     if (countdown > 0 || isLoading) return;
     try {
       setIsLoading(true);
       setErrorMessage('');
       setHasError(false);
       const cleanPhone = phone.trim().replace(/\s/g, '');
+      flow.clear();
       await otpService.sendPhoneOtp(cleanPhone);
       setOtp(['', '', '', '', '', '']);
       setCountdown(60);
     } catch (err) {
+      if (isProofInvalid(err)) { flow.clear(); setStep(1); }
       setHasError(true);
       setErrorMessage(err.message || 'Gửi lại mã thất bại');
     } finally {
       setIsLoading(false);
     }
-  };
+  });
 
   // ─── Step 3: Tạo Mật Khẩu ──────────────────────────────────────────────────
   const handlePasswordSubmit = () => {
@@ -263,7 +278,7 @@ export default function RegisterCustomerScreen() {
   };
 
   // ─── Step 4: Nhập Họ Tên & Email -> Đăng ký tài khoản trực tiếp ─────────────
-  const handleRegisterSubmit = async () => {
+  const handleRegisterSubmit = () => flow.run(async () => {
     setErrorMessage('');
     setHasError(false);
 
@@ -295,33 +310,26 @@ export default function RegisterCustomerScreen() {
 
     try {
       setIsLoading(true);
-      console.log('🚀 [FixGo Register Customer] Đang gửi yêu cầu đăng ký:', {
-        fullName,
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        email: cleanEmail,
-        phone: cleanPhone,
-      });
 
       await registerCustomer({
         fullName,
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         email: cleanEmail,
-        phone: cleanPhone,
+        ...flow.payload(cleanPhone),
         password,
       });
 
-      console.log('🎉 [FixGo Register Customer] Đăng ký thành công! Điều hướng vào ứng dụng...');
+      flow.clear();
       router.replace('/(user)/(tabs)');
     } catch (err) {
-      console.error('❌ [FixGo Register Customer Error]:', err);
+      if (isProofInvalid(err)) { flow.clear(); setStep(1); }
       setHasError(true);
       setErrorMessage(err.message || 'Đăng ký tài khoản thất bại. Vui lòng thử lại!');
     } finally {
       setIsLoading(false);
     }
-  };
+  });
 
   return (
     <View style={styles.container}>
@@ -375,6 +383,7 @@ export default function RegisterCustomerScreen() {
                       placeholderTextColor={COLORS.textSub}
                       value={phone}
                       onChangeText={(val) => {
+                        flow.clear();
                         setPhone(val);
                         if (hasError) setHasError(false);
                         if (errorMessage) setErrorMessage('');

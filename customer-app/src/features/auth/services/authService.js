@@ -1,5 +1,6 @@
 import { apiClient } from '../../../services/api/apiClient';
 import { tokenStorage } from '../../../services/storage/tokenStorage';
+import { socialSignup } from './registrationFlow';
 import { profileService } from './profileService';
 
 async function saveAuthSession(response) {
@@ -42,6 +43,12 @@ export const authService = {
   },
 
   async registerCustomer(customerData) {
+    if (!customerData?.registrationProof || !customerData?.phone) {
+      const err = new Error('Thiếu bằng chứng xác thực OTP (registrationProof) hoặc số điện thoại.');
+      err.status = 400;
+      err.code = 'REGISTRATION_PROOF_REQUIRED';
+      throw err;
+    }
     const response = await apiClient.post('/auth/register/customer', customerData);
     enforceCustomerRole(response);
     await saveAuthSession(response);
@@ -60,6 +67,7 @@ export const authService = {
   },
 
   async logout() {
+    socialSignup.clear();
     await tokenStorage.clearAll();
   },
 
@@ -78,8 +86,8 @@ export const authService = {
     return apiClient.post('/auth/reset-password', { resetToken, newPassword });
   },
 
-  async googleLogin(idToken) {
-    const response = await apiClient.post('/auth/google-login', { idToken });
+  async googleLogin(idToken, registration = {}) {
+    const response = await apiClient.post('/auth/google-login', { ...registration, idToken });
     try {
       enforceCustomerRole(response);
     } catch (roleErr) {
@@ -90,8 +98,8 @@ export const authService = {
     return response;
   },
 
-  async firebaseGoogleLogin(idToken) {
-    const response = await apiClient.post('/auth/firebase-google-login', { idToken });
+  async firebaseGoogleLogin(idToken, registration = {}) {
+    const response = await apiClient.post('/auth/firebase-google-login', { ...registration, idToken });
     try {
       enforceCustomerRole(response);
     } catch (roleErr) {

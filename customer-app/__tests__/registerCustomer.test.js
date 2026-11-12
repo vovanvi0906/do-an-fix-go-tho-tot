@@ -232,6 +232,37 @@ describe('═══════════════════════�
         });
       };
 
+      const fillInfo = (screen) => {
+        fireEvent.changeText(screen.getByPlaceholderText('Họ'), 'Nguyễn');
+        fireEvent.changeText(screen.getByPlaceholderText('Tên'), 'Khách');
+        fireEvent.changeText(screen.getByPlaceholderText('Email (vd: example@gmail.com)'), 'khach@gmail.com');
+      };
+
+      it('returns to phone verification on backend REGISTRATION_PROOF_INVALID', async () => {
+        const error = Object.assign(new Error('Vui lòng xác thực OTP lại.'), { code: 'REGISTRATION_PROOF_INVALID', status: 400 });
+        jest.spyOn(apiClient, 'post').mockRejectedValueOnce(error);
+        const screen = renderRegisterScreen();
+        await advanceToNameStep(screen);
+        fillInfo(screen);
+        fireEvent.press(screen.getByText('Đăng ký'));
+        await waitFor(() => expect(screen.getByPlaceholderText('Số điện thoại')).toBeTruthy());
+        expect(screen.getByText('Vui lòng xác thực OTP lại.')).toBeTruthy();
+        expect(mockReplace).not.toHaveBeenCalled();
+      });
+
+      it('submits registration only once while the request is pending', async () => {
+        let finish;
+        const post = jest.spyOn(apiClient, 'post').mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+        const screen = renderRegisterScreen();
+        await advanceToNameStep(screen);
+        fillInfo(screen);
+        const button = screen.getByText('Đăng ký');
+        fireEvent.press(button);
+        fireEvent.press(button);
+        expect(post).toHaveBeenCalledTimes(1);
+        await require('@testing-library/react-native').act(async () => finish({ accessToken: 'access', user: { role: 'CUSTOMER', id: 'new' } }));
+      });
+
       it('4.1: Đăng ký thành công gọi API POST /auth/register/customer và điều hướng về /(user)/(tabs)', async () => {
         const mockSuccess = {
           accessToken: 'mock-token-xyz',
@@ -262,6 +293,7 @@ describe('═══════════════════════�
             email: 'khach@gmail.com',
             phone: '0988776655',
             password: 'Password123',
+            registrationProof: 'mock-registration-proof-0123456789abcdef0123456789abcdef0123456789ab',
           });
           expect(mockReplace).toHaveBeenCalledWith('/(user)/(tabs)');
         });
@@ -287,6 +319,7 @@ describe('═══════════════════════�
           email: 'trana@gmail.com',
           phone: '0912345678',
           password: 'Password123',
+            registrationProof: 'mock-registration-proof-0123456789abcdef0123456789abcdef0123456789ab',
         });
 
         expect(res.accessToken).toBe('token-stored-customer');

@@ -79,9 +79,9 @@ export function AuthProvider({ children }) {
     return res;
   };
 
-  const handleSocialLogin = async (loginFn, idToken) => {
+  const handleSocialLogin = async (loginFn, idToken, registration) => {
     const seq = ++authSeqRef.current;
-    const res = await loginFn(idToken);
+    const res = await loginFn(idToken, registration);
     if (seq !== authSeqRef.current) return res;
     const accessToken = res?.data?.accessToken || res?.accessToken;
     const loggedUser = res?.data?.user || res?.user;
@@ -131,8 +131,8 @@ export function AuthProvider({ children }) {
     updateUser,
     registerCustomer,
     registerWorker: () => authService.registerWorker(),
-    googleLogin: (idToken) => handleSocialLogin(authService.googleLogin, idToken),
-    firebaseGoogleLogin: (idToken) => handleSocialLogin(authService.firebaseGoogleLogin, idToken),
+    googleLogin: (idToken, reg) => handleSocialLogin(authService.googleLogin, idToken, reg),
+    firebaseGoogleLogin: (idToken, reg) => handleSocialLogin(authService.firebaseGoogleLogin, idToken, reg),
     uploadAvatar,
     updatePhone,
     refreshProfile,

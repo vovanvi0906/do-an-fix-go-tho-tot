@@ -43,7 +43,7 @@ apiClient.interceptors.request.use(
     return config;
   },
   (error) => {
-    console.error('❌ [API Request Error]:', error);
+    console.error('❌ [API Request Error]', { code: error?.code });
     return Promise.reject(error);
   }
 );
@@ -100,7 +100,7 @@ apiClient.interceptors.response.use(
     const failure = new Error(message);
     failure.name = 'ApiError';
     failure.status = status;
-    failure.code = error.code;
+    failure.code = errorResponse?.code || error.code;
     failure.url = error.config?.url;
     failure.requestId = error.response?.headers?.['x-request-id'] || error.config?.metadata?.requestId;
     failure.cause = error;
