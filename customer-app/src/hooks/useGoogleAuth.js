@@ -17,38 +17,37 @@ const webClientId =
   '579509931869-u2p0e3d5k6l76kmu2ot8rqbgojbq24g0.apps.googleusercontent.com';
 
 if (Platform.OS !== 'web') {
-  GoogleSignin.configure({
-    webClientId,
-    offlineAccess: true,
-    forceCodeForRefreshToken: true,
-  });
+  GoogleSignin.configure({ webClientId, offlineAccess: true, forceCodeForRefreshToken: true });
 }
 
-export function useGoogleAuth(targetRole = 'CUSTOMER') {
+export function useGoogleAuth() {
   const router = useRouter();
   const { firebaseGoogleLogin, googleLogin } = useAuth();
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const handleFinishLogin = async (res) => {
     const loggedUser = res?.data?.user || res?.user;
-    const jwtToken = res?.data?.accessToken || res?.accessToken || res?.data?.token || res?.token;
-    const requirePhone = !!(res?.data?.requirePhoneUpdate ?? res?.requirePhoneUpdate ?? !loggedUser?.phone);
-    const userRole = (loggedUser?.role || targetRole).toUpperCase();
+    const jwtToken = res?.data?.accessToken || res?.accessToken;
+    const userRole = (loggedUser?.role || '').toUpperCase();
+
+    if (userRole && userRole !== 'CUSTOMER') {
+      await tokenStorage.clearAll();
+      Alert.alert('Không thể truy cập', 'Tài khoản Đối tác/Quản trị viên không được phép đăng nhập ứng dụng Khách hàng.');
+      return;
+    }
 
     if (jwtToken) {
-      apiClient.defaults.headers.common['Authorization'] = `Bearer ${jwtToken}`;
+      apiClient.defaults.headers.common.Authorization = `Bearer ${jwtToken}`;
       await tokenStorage.saveToken(jwtToken);
     }
     if (loggedUser) await tokenStorage.saveUser(loggedUser);
 
+    const requirePhone = !!(res?.data?.requirePhoneUpdate ?? res?.requirePhoneUpdate ?? !loggedUser?.phone);
     if (requirePhone) {
-      router.push({
-        pathname: userRole === 'WORKER' ? '/(auth)/register-worker' : '/(auth)/register-customer',
-        params: { isSocialOnboarding: 'true', role: userRole },
-      });
+      router.push({ pathname: '/(auth)/register-customer', params: { isSocialOnboarding: 'true' } });
       return;
     }
-    router.replace(userRole === 'WORKER' ? '/(worker)/(tabs)' : '/(user)/(tabs)');
+    router.replace('/(user)/(tabs)');
   };
 
   const signInWithGoogle = async () => {
@@ -64,17 +63,10 @@ export function useGoogleAuth(targetRole = 'CUSTOMER') {
       }
 
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-      try {
-        await GoogleSignin.signOut(); // Xóa sạch session/token cũ đã hết hạn
-      } catch (signOutErr) {
-        // Bỏ qua nếu chưa từng đăng nhập
-      }
+      try { await GoogleSignin.signOut(); } catch {}
       const signInResponse = await GoogleSignin.signIn();
-      let idToken = signInResponse?.data?.idToken || signInResponse?.idToken;
-      if (!idToken) {
-        const tokens = await GoogleSignin.getTokens();
-        idToken = tokens?.idToken;
-      }
+      const tokens = await GoogleSignin.getTokens().catch(() => null);
+      const idToken = signInResponse?.data?.idToken || signInResponse?.idToken || tokens?.idToken;
 
       if (!idToken) throw new Error('Không nhận được mã idToken từ Google Play.');
 
@@ -88,7 +80,6 @@ export function useGoogleAuth(targetRole = 'CUSTOMER') {
       }
       await handleFinishLogin(res);
     } catch (err) {
-      setIsGoogleLoading(false);
       if (err.code !== statusCodes.SIGN_IN_CANCELLED) {
         Alert.alert('Đăng nhập thất bại', err.message || 'Lỗi Google Sign-In');
       }

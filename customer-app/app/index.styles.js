@@ -1,0 +1,42 @@
+import { StyleSheet } from 'react-native';
+
+export const COLORS = {
+  primary: '#0084FF',
+  white: '#FFFFFF',
+  gray: '#94A3B8',
+  placeholder: '#94A3B8',
+  red: '#EF4444',
+  facebookBlue: '#1877F2',
+  googleRed: '#EA4335',
+};
+
+export const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#0084FF' },
+  safeArea: { flex: 1 },
+  flex1: { flex: 1 },
+  launchScreen: { flex: 1, backgroundColor: '#0084FF', justifyContent: 'center', alignItems: 'center' },
+  launchLogo: { fontSize: 48, fontWeight: 'bold', color: '#FFF' },
+  scrollContent: { flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
+  logo: { fontSize: 42, fontWeight: 'bold', color: '#FFF', marginBottom: 30 },
+  formContainer: { width: '100%', maxWidth: 360, backgroundColor: '#FFF', borderRadius: 20, padding: 24, elevation: 4 },
+  inputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F1F5F9', borderRadius: 12, paddingHorizontal: 12, height: 50, marginBottom: 12 },
+  inputWrapperError: { borderColor: '#EF4444', borderWidth: 1 },
+  inputIcon: { marginRight: 8 },
+  textInput: { flex: 1, fontSize: 15, color: '#0F172A' },
+  eyeIcon: { padding: 4 },
+  errorContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
+  errorText: { color: '#EF4444', fontSize: 13, marginLeft: 6 },
+  forgotPasswordBox: { alignSelf: 'flex-end', marginBottom: 16 },
+  forgotPasswordText: { color: '#0084FF', fontSize: 13 },
+  loginBtn: { backgroundColor: '#0084FF', borderRadius: 12, height: 50, justifyContent: 'center', alignItems: 'center' },
+  btnDisabled: { opacity: 0.6 },
+  loginBtnText: { color: '#FFF', fontSize: 16, fontWeight: 'bold' },
+  dividerRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 20 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: '#E2E8F0' },
+  dividerText: { marginHorizontal: 10, color: '#64748B', fontSize: 12 },
+  socialRow: { flexDirection: 'row', justifyContent: 'center', gap: 20, marginBottom: 20 },
+  socialBtn: { width: 50, height: 50, borderRadius: 25, backgroundColor: '#F8FAFC', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#E2E8F0' },
+  footerRow: { flexDirection: 'row', justifyContent: 'center' },
+  footerText: { color: '#64748B', fontSize: 14 },
+  footerLink: { color: '#0084FF', fontWeight: 'bold', fontSize: 14 },
+});
