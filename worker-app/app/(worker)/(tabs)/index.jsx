@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -13,10 +13,11 @@ import {
 import * as Location from 'expo-location';
 import * as ImagePicker from 'expo-image-picker';
 import { apiClient } from '../../../src/services/api/apiClient';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { orderService } from '../../../src/services/api/orderService';
 import { socketService } from '../../../src/services/socket/socketService';
+import { useOrderRecovery } from '../../../src/features/orders/hooks/useOrderRecovery';
 import { useAuth } from '../../../src/features/auth';
 
 export default function WorkerDashboardScreen() {
@@ -29,7 +30,14 @@ export default function WorkerDashboardScreen() {
   const [countdown, setCountdown] = useState(30);
   const [isAccepting, setIsAccepting] = useState(false);
   const [conflictMessage, setConflictMessage] = useState('');
-  const [activeOrder, setActiveOrder] = useState(null);
+  const loadActive = useCallback(() => orderService.getCurrentWorkerOrder(), []);
+  const { data: activeOrder, loading: activeLoading, error: activeError, reload: reloadActive } = useOrderRecovery(loadActive, user?.id);
+
+  useFocusEffect(useCallback(() => {
+    if (!activeOrder?.id) return;
+    socketService.joinOrderRoom(activeOrder.id);
+    return () => socketService.leaveOrderRoom(activeOrder.id);
+  }, [activeOrder?.id]));
 
   const [isChangingStatus, setIsChangingStatus] = useState(false);
   const [showDailyCheckIn, setShowDailyCheckIn] = useState(false);
@@ -154,7 +162,7 @@ export default function WorkerDashboardScreen() {
       const res = await orderService.acceptOrder(incomingOrder.orderId);
 
       console.log('🎉 [Worker] Nhận đơn thành công 200 OK:', res);
-      setActiveOrder(res.order || incomingOrder);
+      await reloadActive();
       setIncomingOrder(null);
     } catch (error) {
       console.error('❌ [Worker Accept Error]:', error.message);
@@ -235,6 +243,9 @@ export default function WorkerDashboardScreen() {
         </View>
 
         {/* Đơn hàng đang thực hiện (nếu có) */}
+        {activeLoading ? <ActivityIndicator accessibilityLabel="Đang khôi phục công việc" /> : null}
+        {activeError ? <TouchableOpacity nativeID="worker-active-order-retry" onPress={reloadActive}><Text>{activeError} — Thử lại</Text></TouchableOpacity> : null}
+        {!activeLoading && !activeError && !activeOrder ? <Text>Không có công việc đang thực hiện.</Text> : null}
         {activeOrder ? (
           <View nativeID="worker-active-order-card" style={styles.activeOrderCard}>
             <View style={styles.activeOrderHeader}>
@@ -242,19 +253,20 @@ export default function WorkerDashboardScreen() {
                 <Text style={styles.activeBadgeText}>ĐƠN ĐANG THỰC HIỆN</Text>
               </View>
               <Text style={styles.activeOrderPrice}>
-                {Number(activeOrder.totalPrice || 150000).toLocaleString('vi-VN')} đ
+                {Number(activeOrder.finalPrice ?? activeOrder.estimatedPrice).toLocaleString('vi-VN')} đ
               </Text>
             </View>
 
+            <Text>{activeOrder.status}</Text>
             <Text style={styles.activeServiceName}>
-              {activeOrder.service?.name || 'Sửa chữa điện gia dụng'}
+              {activeOrder.service?.name || activeOrder.category?.name || 'Chưa có tên dịch vụ'}
             </Text>
-            <Text style={styles.activeAddress}>📍 {activeOrder.pickupAddress || 'Địa chỉ khách hàng'}</Text>
+            <Text style={styles.activeAddress}>📍 {activeOrder.addressText || 'Chưa có địa chỉ'}</Text>
 
             <TouchableOpacity
               nativeID="btn-worker-view-active-order"
               style={styles.viewOrderDetailBtn}
-              onPress={() => router.push(`/job/${activeOrder.id || activeOrder.orderId}`)}
+              onPress={() => router.push(`/(worker)/job/${activeOrder.id}`)}
             >
               <Text style={styles.viewOrderDetailText}>XEM CHI TIẾT & TIẾP NHẬN CÔNG VIỆC</Text>
             </TouchableOpacity>

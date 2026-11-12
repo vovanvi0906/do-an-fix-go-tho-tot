@@ -48,6 +48,7 @@ it('loads order by ID and waits for REST acknowledgement before showing travel s
   fireEvent.press(ui.getByText('BẮT ĐẦU DI CHUYỂN ĐẾN KHÁCH'));
   expect(apiClient.patch).toHaveBeenCalledWith('/orders/order-1/status', { status: 'WORKER_EN_ROUTE' });
   expect(ui.queryByText('ĐÃ ĐẾN NƠI')).toBeNull();
+  orderService.getOrderById.mockResolvedValue(snapshot('WORKER_EN_ROUTE'));
   await act(async () => resolve({ order: snapshot('WORKER_EN_ROUTE') }));
   expect(ui.getByText('ĐÃ ĐẾN NƠI')).toBeTruthy();
   expect(socketService.emit).not.toHaveBeenCalled();
@@ -76,4 +77,27 @@ it('order event triggers a backend reload rather than trusting event status', as
   await act(async () => handler({ orderId: 'order-1', status: 'COMPLETED' }));
   expect(orderService.getOrderById).toHaveBeenCalledTimes(2);
   expect(apiClient.patch).not.toHaveBeenCalled();
+});
+
+it.each(['MATCHED', 'WORKER_EN_ROUTE', 'ARRIVED', 'IN_PROGRESS', 'AWAITING_ACCEPTANCE', 'AWAITING_PAYMENT', 'COMPLETED'])('renders backend %s and its history on reopening', async status => {
+  orderService.getOrderById.mockResolvedValue({ ...snapshot(status), statusHistory: [{ id: 'h1', status, createdAt: '2026-11-12T00:00:00Z' }] });
+  const ui = render(<WorkerJobDetailScreen />);
+  await waitFor(() => expect(ui.getByText(`Trạng thái: ${status}`)).toBeTruthy());
+  expect(ui.getByText(new RegExp(`^${status} ·`))).toBeTruthy();
+  if (['AWAITING_ACCEPTANCE', 'AWAITING_PAYMENT', 'COMPLETED'].includes(status)) {
+    expect(ui.queryByText('BẮT ĐẦU CÔNG VIỆC')).toBeNull();
+    expect(ui.queryByText('BẮT ĐẦU DI CHUYỂN ĐẾN KHÁCH')).toBeNull();
+  }
+  expect(apiClient.patch).not.toHaveBeenCalled();
+});
+it.each([401, 403, 404, 500])('detail clears customer and actions after HTTP %s, then retries', async status => {
+  const ui = render(<WorkerJobDetailScreen />);
+  await waitFor(() => expect(ui.getByText('Khách từ server')).toBeTruthy());
+  orderService.getOrderById.mockRejectedValueOnce(new Error(`HTTP ${status}`));
+  const reconnect = socketService.on.mock.calls.find(([event]) => event === 'connect')[1];
+  await act(async () => reconnect());
+  expect(ui.queryByText('Khách từ server')).toBeNull();
+  expect(ui.queryByText('BẮT ĐẦU DI CHUYỂN ĐẾN KHÁCH')).toBeNull();
+  fireEvent.press(ui.getByText(`HTTP ${status} — Thử lại`));
+  await waitFor(() => expect(ui.getByText('Khách từ server')).toBeTruthy());
 });

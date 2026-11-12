@@ -1,6 +1,24 @@
 import { apiClient } from './apiClient';
 
+export const ACTIVE_WORKER_STATUSES = [
+  'MATCHED', 'ASSIGNED', 'WORKER_EN_ROUTE', 'WORKER_ARRIVING', 'ARRIVED',
+  'IN_PROGRESS', 'AWAITING_ACCEPTANCE', 'AWAITING_CONFIRMATION', 'AWAITING_PAYMENT', 'DISPUTED',
+];
+
+export function readOrder(snapshot) {
+  if (!snapshot || typeof snapshot.id !== 'string' || typeof snapshot.status !== 'string') {
+    throw new Error('Dữ liệu đơn hàng không hợp lệ');
+  }
+  return snapshot;
+}
+
 export const orderService = {
+  async getCurrentWorkerOrder() {
+    const snapshot = await apiClient.get('/orders/worker/current');
+    if (snapshot === null || snapshot === '') return null;
+    const order = readOrder(snapshot);
+    return ACTIVE_WORKER_STATUSES.includes(order.status) ? order : null;
+  },
   /**
    * 1. Chẩn đoán sự cố qua AI (POST /orders/diagnose)
    * @param {Object} payload - { imageUrl, description }
@@ -30,7 +48,7 @@ export const orderService = {
    * 3. Lấy thông tin chi tiết đơn hàng (GET /orders/:id)
    */
   async getOrderById(orderId) {
-    return apiClient.get(`/orders/${orderId}`);
+    return readOrder(await apiClient.get(`/orders/${encodeURIComponent(orderId)}`));
   },
 
   /**
