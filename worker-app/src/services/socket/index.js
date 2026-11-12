@@ -1,0 +1,2 @@
+// Module: services/socket
+export {};

@@ -1,0 +1,2 @@
+// Module: services/storage
+export {};

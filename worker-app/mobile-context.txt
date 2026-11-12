@@ -1,0 +1,881 @@
+--- TREE STRUCTURE --- 
+G:\project-school\doan-kltn-mobile\src\components
+G:\project-school\doan-kltn-mobile\src\config
+G:\project-school\doan-kltn-mobile\src\constants
+G:\project-school\doan-kltn-mobile\src\features
+G:\project-school\doan-kltn-mobile\src\hooks
+G:\project-school\doan-kltn-mobile\src\services
+G:\project-school\doan-kltn-mobile\src\store
+G:\project-school\doan-kltn-mobile\src\types
+G:\project-school\doan-kltn-mobile\src\utils
+G:\project-school\doan-kltn-mobile\src\components\feedback
+G:\project-school\doan-kltn-mobile\src\components\layout
+G:\project-school\doan-kltn-mobile\src\components\ui
+G:\project-school\doan-kltn-mobile\src\components\feedback\index.js
+G:\project-school\doan-kltn-mobile\src\components\layout\index.js
+G:\project-school\doan-kltn-mobile\src\components\ui\index.js
+G:\project-school\doan-kltn-mobile\src\config\index.js
+G:\project-school\doan-kltn-mobile\src\constants\index.js
+G:\project-school\doan-kltn-mobile\src\features\auth
+G:\project-school\doan-kltn-mobile\src\features\booking
+G:\project-school\doan-kltn-mobile\src\features\chat
+G:\project-school\doan-kltn-mobile\src\features\face-verification
+G:\project-school\doan-kltn-mobile\src\features\image-analysis
+G:\project-school\doan-kltn-mobile\src\features\location
+G:\project-school\doan-kltn-mobile\src\features\orders
+G:\project-school\doan-kltn-mobile\src\features\payment
+G:\project-school\doan-kltn-mobile\src\features\services
+G:\project-school\doan-kltn-mobile\src\features\auth\components
+G:\project-school\doan-kltn-mobile\src\features\auth\context
+G:\project-school\doan-kltn-mobile\src\features\auth\hooks
+G:\project-school\doan-kltn-mobile\src\features\auth\index.js
+G:\project-school\doan-kltn-mobile\src\features\auth\services
+G:\project-school\doan-kltn-mobile\src\features\auth\store
+G:\project-school\doan-kltn-mobile\src\features\auth\components\index.js
+G:\project-school\doan-kltn-mobile\src\features\auth\context\AuthContext.jsx
+G:\project-school\doan-kltn-mobile\src\features\auth\hooks\index.js
+G:\project-school\doan-kltn-mobile\src\features\auth\hooks\useAuth.js
+G:\project-school\doan-kltn-mobile\src\features\auth\services\auth.service.js
+G:\project-school\doan-kltn-mobile\src\features\auth\services\authService.js
+G:\project-school\doan-kltn-mobile\src\features\auth\services\index.js
+G:\project-school\doan-kltn-mobile\src\features\auth\store\index.js
+G:\project-school\doan-kltn-mobile\src\features\booking\components
+G:\project-school\doan-kltn-mobile\src\features\booking\hooks
+G:\project-school\doan-kltn-mobile\src\features\booking\index.js
+G:\project-school\doan-kltn-mobile\src\features\booking\services
+G:\project-school\doan-kltn-mobile\src\features\booking\store
+G:\project-school\doan-kltn-mobile\src\features\booking\components\index.js
+G:\project-school\doan-kltn-mobile\src\features\booking\hooks\index.js
+G:\project-school\doan-kltn-mobile\src\features\booking\services\index.js
+G:\project-school\doan-kltn-mobile\src\features\booking\store\index.js
+G:\project-school\doan-kltn-mobile\src\features\chat\components
+G:\project-school\doan-kltn-mobile\src\features\chat\hooks
+G:\project-school\doan-kltn-mobile\src\features\chat\index.js
+G:\project-school\doan-kltn-mobile\src\features\chat\services
+G:\project-school\doan-kltn-mobile\src\features\chat\store
+G:\project-school\doan-kltn-mobile\src\features\chat\components\index.js
+G:\project-school\doan-kltn-mobile\src\features\chat\hooks\index.js
+G:\project-school\doan-kltn-mobile\src\features\chat\services\index.js
+G:\project-school\doan-kltn-mobile\src\features\chat\store\index.js
+G:\project-school\doan-kltn-mobile\src\features\face-verification\components
+G:\project-school\doan-kltn-mobile\src\features\face-verification\hooks
+G:\project-school\doan-kltn-mobile\src\features\face-verification\index.js
+G:\project-school\doan-kltn-mobile\src\features\face-verification\services
+G:\project-school\doan-kltn-mobile\src\features\face-verification\store
+G:\project-school\doan-kltn-mobile\src\features\face-verification\components\index.js
+G:\project-school\doan-kltn-mobile\src\features\face-verification\hooks\index.js
+G:\project-school\doan-kltn-mobile\src\features\face-verification\services\index.js
+G:\project-school\doan-kltn-mobile\src\features\face-verification\store\index.js
+G:\project-school\doan-kltn-mobile\src\features\image-analysis\components
+G:\project-school\doan-kltn-mobile\src\features\image-analysis\hooks
+G:\project-school\doan-kltn-mobile\src\features\image-analysis\index.js
+G:\project-school\doan-kltn-mobile\src\features\image-analysis\services
+G:\project-school\doan-kltn-mobile\src\features\image-analysis\store
+G:\project-school\doan-kltn-mobile\src\features\image-analysis\components\index.js
+G:\project-school\doan-kltn-mobile\src\features\image-analysis\hooks\index.js
+G:\project-school\doan-kltn-mobile\src\features\image-analysis\services\index.js
+G:\project-school\doan-kltn-mobile\src\features\image-analysis\store\index.js
+G:\project-school\doan-kltn-mobile\src\features\location\components
+G:\project-school\doan-kltn-mobile\src\features\location\hooks
+G:\project-school\doan-kltn-mobile\src\features\location\index.js
+G:\project-school\doan-kltn-mobile\src\features\location\services
+G:\project-school\doan-kltn-mobile\src\features\location\store
+G:\project-school\doan-kltn-mobile\src\features\location\components\index.js
+G:\project-school\doan-kltn-mobile\src\features\location\hooks\index.js
+G:\project-school\doan-kltn-mobile\src\features\location\services\index.js
+G:\project-school\doan-kltn-mobile\src\features\location\store\index.js
+G:\project-school\doan-kltn-mobile\src\features\orders\components
+G:\project-school\doan-kltn-mobile\src\features\orders\hooks
+G:\project-school\doan-kltn-mobile\src\features\orders\index.js
+G:\project-school\doan-kltn-mobile\src\features\orders\services
+G:\project-school\doan-kltn-mobile\src\features\orders\store
+G:\project-school\doan-kltn-mobile\src\features\orders\components\index.js
+G:\project-school\doan-kltn-mobile\src\features\orders\hooks\index.js
+G:\project-school\doan-kltn-mobile\src\features\orders\services\index.js
+G:\project-school\doan-kltn-mobile\src\features\orders\store\index.js
+G:\project-school\doan-kltn-mobile\src\features\payment\components
+G:\project-school\doan-kltn-mobile\src\features\payment\hooks
+G:\project-school\doan-kltn-mobile\src\features\payment\index.js
+G:\project-school\doan-kltn-mobile\src\features\payment\services
+G:\project-school\doan-kltn-mobile\src\features\payment\store
+G:\project-school\doan-kltn-mobile\src\features\payment\components\index.js
+G:\project-school\doan-kltn-mobile\src\features\payment\hooks\index.js
+G:\project-school\doan-kltn-mobile\src\features\payment\services\index.js
+G:\project-school\doan-kltn-mobile\src\features\payment\store\index.js
+G:\project-school\doan-kltn-mobile\src\features\services\components
+G:\project-school\doan-kltn-mobile\src\features\services\hooks
+G:\project-school\doan-kltn-mobile\src\features\services\index.js
+G:\project-school\doan-kltn-mobile\src\features\services\services
+G:\project-school\doan-kltn-mobile\src\features\services\store
+G:\project-school\doan-kltn-mobile\src\features\services\components\index.js
+G:\project-school\doan-kltn-mobile\src\features\services\hooks\index.js
+G:\project-school\doan-kltn-mobile\src\features\services\services\index.js
+G:\project-school\doan-kltn-mobile\src\features\services\store\index.js
+G:\project-school\doan-kltn-mobile\src\hooks\index.js
+G:\project-school\doan-kltn-mobile\src\services\api
+G:\project-school\doan-kltn-mobile\src\services\socket
+G:\project-school\doan-kltn-mobile\src\services\storage
+G:\project-school\doan-kltn-mobile\src\services\api\apiClient.js
+G:\project-school\doan-kltn-mobile\src\services\api\index.js
+G:\project-school\doan-kltn-mobile\src\services\api\orderService.js
+G:\project-school\doan-kltn-mobile\src\services\socket\index.js
+G:\project-school\doan-kltn-mobile\src\services\socket\socketService.js
+G:\project-school\doan-kltn-mobile\src\services\storage\index.js
+G:\project-school\doan-kltn-mobile\src\services\storage\tokenStorage.js
+G:\project-school\doan-kltn-mobile\src\store\index.js
+G:\project-school\doan-kltn-mobile\src\types\index.js
+G:\project-school\doan-kltn-mobile\src\utils\index.js
+G:\project-school\doan-kltn-mobile\app\(auth)
+G:\project-school\doan-kltn-mobile\app\(user)
+G:\project-school\doan-kltn-mobile\app\(worker)
+G:\project-school\doan-kltn-mobile\app\common
+G:\project-school\doan-kltn-mobile\app\index.jsx
+G:\project-school\doan-kltn-mobile\app\_layout.jsx
+G:\project-school\doan-kltn-mobile\app\(auth)\forgot-password.jsx
+G:\project-school\doan-kltn-mobile\app\(auth)\login.jsx
+G:\project-school\doan-kltn-mobile\app\(auth)\register-customer.jsx
+G:\project-school\doan-kltn-mobile\app\(auth)\register-worker.jsx
+G:\project-school\doan-kltn-mobile\app\(auth)\register.jsx
+G:\project-school\doan-kltn-mobile\app\(auth)\_layout.jsx
+G:\project-school\doan-kltn-mobile\app\(user)\(tabs)
+G:\project-school\doan-kltn-mobile\app\(user)\booking
+G:\project-school\doan-kltn-mobile\app\(user)\order
+G:\project-school\doan-kltn-mobile\app\(user)\_layout.jsx
+G:\project-school\doan-kltn-mobile\app\(user)\(tabs)\index.jsx
+G:\project-school\doan-kltn-mobile\app\(user)\(tabs)\notifications.jsx
+G:\project-school\doan-kltn-mobile\app\(user)\(tabs)\orders.jsx
+G:\project-school\doan-kltn-mobile\app\(user)\(tabs)\profile.jsx
+G:\project-school\doan-kltn-mobile\app\(user)\(tabs)\_layout.jsx
+G:\project-school\doan-kltn-mobile\app\(user)\booking\address.jsx
+G:\project-school\doan-kltn-mobile\app\(user)\booking\confirm.jsx
+G:\project-school\doan-kltn-mobile\app\(user)\booking\index.jsx
+G:\project-school\doan-kltn-mobile\app\(user)\booking\select-service.jsx
+G:\project-school\doan-kltn-mobile\app\(user)\order\[id].jsx
+G:\project-school\doan-kltn-mobile\app\(worker)\(tabs)
+G:\project-school\doan-kltn-mobile\app\(worker)\job
+G:\project-school\doan-kltn-mobile\app\(worker)\verification
+G:\project-school\doan-kltn-mobile\app\(worker)\_layout.jsx
+G:\project-school\doan-kltn-mobile\app\(worker)\(tabs)\earnings.jsx
+G:\project-school\doan-kltn-mobile\app\(worker)\(tabs)\index.jsx
+G:\project-school\doan-kltn-mobile\app\(worker)\(tabs)\jobs.jsx
+G:\project-school\doan-kltn-mobile\app\(worker)\(tabs)\notifications.jsx
+G:\project-school\doan-kltn-mobile\app\(worker)\(tabs)\profile.jsx
+G:\project-school\doan-kltn-mobile\app\(worker)\(tabs)\_layout.jsx
+G:\project-school\doan-kltn-mobile\app\(worker)\job\[id].jsx
+G:\project-school\doan-kltn-mobile\app\(worker)\verification\face.jsx
+G:\project-school\doan-kltn-mobile\app\common\help.jsx
+G:\project-school\doan-kltn-mobile\app\common\settings.jsx
+ 
+--- SOURCE CODE --- 
+=== FILE: G:\project-school\doan-kltn-mobile\src\components\feedback\index.js === 
+// Module: components/feedback
+export {};
+
+=== FILE: G:\project-school\doan-kltn-mobile\src\components\layout\index.js === 
+// Module: components/layout
+export {};
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\components\ui\index.js === 
+// Module: components/ui
+export {};
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\config\index.js === 
+// Module: config
+export {};
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\constants\index.js === 
+// Module: constants
+export {};
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\auth\index.js === 
+export * from './services/authService';
+export * from './context/AuthContext';
+export * from './hooks/useAuth';
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\auth\components\index.js === 
+// Export components of auth
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\auth\context\AuthContext.jsx === 
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { authService } from '../services/authService';
+
+const AuthContext = createContext(null);
+
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Tự động kiểm tra phiên đăng nhập đã lưu khi khởi động ứng dụng
+    const checkSession = async () => {
+      try {
+        console.log('🔄 [AuthContext] Đang kiểm tra phiên đăng nhập lưu trong máy...');
+        const session = await authService.getCurrentSession();
+        if (session.token && session.user) {
+          console.log('👤 [AuthContext] Tìm thấy phiên đăng nhập:', {
+            email: session.user.email,
+            role: session.user.role,
+          });
+          setToken(session.token);
+          setUser(session.user);
+        } else {
+          console.log('ℹ️ [AuthContext] Chưa có phiên đăng nhập nào được lưu.');
+        }
+      } catch (err) {
+        console.warn('⚠️ [AuthContext] Không thể tải phiên đăng nhập ban đầu:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    checkSession();
+  }, []);
+
+  const login = async (identifier, password) => {
+    console.log('🚀 [AuthContext] Bắt đầu gọi đăng nhập từ UI:', { identifier });
+    const res = await authService.login(identifier, password);
+    if (res?.accessToken && res?.user) {
+      setToken(res.accessToken);
+      setUser(res.user);
+      console.log('✨ [AuthContext] State đã cập nhật user & token mới');
+    }
+    return res;
+  };
+
+  const logout = async () => {
+    console.log('👋 [AuthContext] Thực hiện đăng xuất...');
+    await authService.logout();
+    setToken(null);
+    setUser(null);
+  };
+
+  const updateUser = (updatedUser) => {
+    console.log('📝 [AuthContext] Cập nhật thông tin User:', updatedUser);
+    setUser(updatedUser);
+  };
+
+  const value = {
+    user,
+    token,
+    role: user?.role || null,
+    isAuthenticated: !!token && !!user,
+    isLoading,
+    login,
+    logout,
+    updateUser,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\auth\hooks\index.js === 
+// Export hooks of auth
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\auth\hooks\useAuth.js === 
+export { useAuth, AuthProvider } from '../context/AuthContext';
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\auth\services\auth.service.js === 
+export { authService } from './authService';
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\auth\services\authService.js === 
+import { apiClient } from '../../../services/api/apiClient';
+import { tokenStorage } from '../../../services/storage/tokenStorage';
+
+export const authService = {
+  /**
+   * Đăng nhập với email, số điện thoại hoặc username + mật khẩu
+   * Khớp với AuthController.login và AuthService.login của NestJS Backend (/api/auth/login)
+   */
+  async login(identifier, password) {
+    console.log('🔑 [AuthService] Đang gửi yêu cầu đăng nhập:', { identifier });
+    const payload = {
+      emailOrPhone: identifier.trim(),
+      email: identifier.trim(),
+      password,
+    };
+
+    const response = await apiClient.post('/auth/login', payload);
+
+    if (response?.accessToken && response?.user) {
+      console.log('💾 [AuthService] Lưu token và thông tin người dùng vào bộ nhớ cục bộ...');
+      await tokenStorage.saveToken(response.accessToken);
+      await tokenStorage.saveUser(response.user);
+      console.log('🎉 [AuthService] Đăng nhập thành công, User Role:', response.user.role);
+    }
+
+    return response;
+  },
+
+  /**
+   * Đăng ký tài khoản Khách hàng (Customer) (/api/auth/register/customer)
+   */
+  async registerCustomer(customerData) {
+    console.log('👤 [AuthService] Đang gửi yêu cầu đăng ký Khách hàng:', customerData.email);
+    const response = await apiClient.post('/auth/register/customer', customerData);
+    if (response?.accessToken && response?.user) {
+      await tokenStorage.saveToken(response.accessToken);
+      await tokenStorage.saveUser(response.user);
+    }
+    return response;
+  },
+
+  /**
+   * Đăng ký tài khoản Thợ (Worker) (/api/auth/register/worker)
+   */
+  async registerWorker(workerData) {
+    console.log('🛠️ [AuthService] Đang gửi yêu cầu đăng ký Thợ:', workerData.email);
+    const response = await apiClient.post('/auth/register/worker', workerData);
+    if (response?.accessToken && response?.user) {
+      await tokenStorage.saveToken(response.accessToken);
+      await tokenStorage.saveUser(response.user);
+    }
+    return response;
+  },
+
+  /**
+   * Đăng ký tài khoản chung (/api/auth/register)
+   */
+  async register(registerData) {
+    console.log('📝 [AuthService] Đang gửi yêu cầu đăng ký:', registerData.email);
+    const response = await apiClient.post('/auth/register', registerData);
+    if (response?.accessToken && response?.user) {
+      await tokenStorage.saveToken(response.accessToken);
+      await tokenStorage.saveUser(response.user);
+    }
+    return response;
+  },
+
+  /**
+   * Đăng xuất và dọn dẹp storage
+   */
+  async logout() {
+    console.log('🚪 [AuthService] Đăng xuất và xóa session...');
+    await tokenStorage.clearAll();
+  },
+
+  /**
+   * Lấy phiên đăng nhập hiện tại từ bộ nhớ cục bộ
+   */
+  async getCurrentSession() {
+    const token = await tokenStorage.getToken();
+    const user = await tokenStorage.getUser();
+    console.log('🔍 [AuthService] Kiểm tra phiên đăng nhập đã lưu:', {
+      hasToken: !!token,
+      userId: user?.id,
+      userRole: user?.role,
+    });
+    return { token, user };
+  },
+};
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\auth\services\index.js === 
+// Export services of auth
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\auth\store\index.js === 
+// Export store/slices of auth
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\booking\index.js === 
+// Feature: booking
+// Export public API cho module booking
+
+export * from './components';
+export * from './hooks';
+export * from './services';
+export * from './store';
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\booking\components\index.js === 
+// Export components of booking
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\booking\hooks\index.js === 
+// Export hooks of booking
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\booking\services\index.js === 
+// Export services of booking
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\booking\store\index.js === 
+// Export store/slices of booking
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\chat\index.js === 
+// Feature: chat
+// Export public API cho module chat
+
+export * from './components';
+export * from './hooks';
+export * from './services';
+export * from './store';
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\chat\components\index.js === 
+// Export components of chat
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\chat\hooks\index.js === 
+// Export hooks of chat
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\chat\services\index.js === 
+// Export services of chat
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\chat\store\index.js === 
+// Export store/slices of chat
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\face-verification\index.js === 
+// Feature: face-verification
+// Export public API cho module face-verification
+
+export * from './components';
+export * from './hooks';
+export * from './services';
+export * from './store';
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\face-verification\components\index.js === 
+// Export components of face-verification
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\face-verification\hooks\index.js === 
+// Export hooks of face-verification
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\face-verification\services\index.js === 
+// Export services of face-verification
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\face-verification\store\index.js === 
+// Export store/slices of face-verification
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\image-analysis\index.js === 
+// Feature: image-analysis
+// Export public API cho module image-analysis
+
+export * from './components';
+export * from './hooks';
+export * from './services';
+export * from './store';
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\image-analysis\components\index.js === 
+// Export components of image-analysis
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\image-analysis\hooks\index.js === 
+// Export hooks of image-analysis
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\image-analysis\services\index.js === 
+// Export services of image-analysis
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\image-analysis\store\index.js === 
+// Export store/slices of image-analysis
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\location\index.js === 
+// Feature: location
+// Export public API cho module location
+
+export * from './components';
+export * from './hooks';
+export * from './services';
+export * from './store';
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\location\components\index.js === 
+// Export components of location
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\location\hooks\index.js === 
+// Export hooks of location
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\location\services\index.js === 
+// Export services of location
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\location\store\index.js === 
+// Export store/slices of location
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\orders\index.js === 
+// Feature: orders
+// Export public API cho module orders
+
+export * from './components';
+export * from './hooks';
+export * from './services';
+export * from './store';
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\orders\components\index.js === 
+// Export components of orders
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\orders\hooks\index.js === 
+// Export hooks of orders
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\orders\services\index.js === 
+// Export services of orders
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\orders\store\index.js === 
+// Export store/slices of orders
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\payment\index.js === 
+// Feature: payment
+// Export public API cho module payment
+
+export * from './components';
+export * from './hooks';
+export * from './services';
+export * from './store';
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\payment\components\index.js === 
+// Export components of payment
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\payment\hooks\index.js === 
+// Export hooks of payment
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\payment\services\index.js === 
+// Export services of payment
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\payment\store\index.js === 
+// Export store/slices of payment
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\services\index.js === 
+// Feature: services
+// Export public API cho module services
+
+export * from './components';
+export * from './hooks';
+export * from './services';
+export * from './store';
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\services\components\index.js === 
+// Export components of services
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\services\hooks\index.js === 
+// Export hooks of services
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\services\services\index.js === 
+// Export services of services
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\features\services\store\index.js === 
+// Export store/slices of services
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\hooks\index.js === 
+// Module: hooks
+export {};
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\services\api\apiClient.js === 
+import axios from 'axios';
+import { Platform } from 'react-native';
+import { tokenStorage } from '../storage/tokenStorage';
+
+// Tự động nhận diện Base URL API tùy theo môi trường chạy (Android Emulator vs Web/iOS)
+const getDefaultBaseUrl = () => {
+  if (process.env.EXPO_PUBLIC_API_URL) {
+    return process.env.EXPO_PUBLIC_API_URL;
+  }
+  // Android Emulator map localhost qua địa chỉ IP 10.0.2.2
+  if (Platform.OS === 'android') {
+    return 'http://10.0.2.2:3000/api';
+  }
+  return 'http://localhost:3000/api';
+};
+
+export const API_BASE_URL = getDefaultBaseUrl();
+console.log(`🌐 [API Client] Đã khởi tạo kết nối Base URL: ${API_BASE_URL} (Platform: ${Platform.OS})`);
+
+export const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 15000,
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  },
+});
+
+// Request interceptor: tự động đính kèm accessToken nếu có & log request
+apiClient.interceptors.request.use(
+  async (config) => {
+    try {
+      const token = await tokenStorage.getToken();
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      console.log(`📡 [API Request] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`, {
+        hasToken: !!token,
+        data: config.data,
+      });
+    } catch (err) {
+      console.warn('⚠️ [API Request Interceptor Warning]:', err);
+    }
+    return config;
+  },
+  (error) => {
+    console.error('❌ [API Request Error]:', error);
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor: chuẩn hóa xử lý lỗi từ NestJS backend & log response
+apiClient.interceptors.response.use(
+  (response) => {
+    console.log(`✅ [API Response] ${response.status} ${response.config.url}:`, response.data);
+    return response.data;
+  },
+  (error) => {
+    const errorResponse = error.response?.data;
+    const status = error.response?.status;
+    let message = 'Đã có lỗi xảy ra. Vui lòng thử lại sau!';
+
+    if (errorResponse) {
+      if (Array.isArray(errorResponse.message)) {
+        message = errorResponse.message.join(', ');
+      } else if (typeof errorResponse.message === 'string') {
+        message = errorResponse.message;
+      } else if (errorResponse.error) {
+        message = errorResponse.error;
+      }
+    } else if (error.message === 'Network Error') {
+      message = `Không thể kết nối đến máy chủ. Vui lòng kiểm tra backend (${API_BASE_URL})!`;
+    } else if (error.code === 'ECONNABORTED') {
+      message = 'Kết nối quá thời gian chờ (Timeout). Vui lòng thử lại!';
+    }
+
+    console.error(`❌ [API Error] Status: ${status || 'Network Error'} | Message: ${message}`, {
+      url: error.config?.url,
+      serverData: errorResponse,
+    });
+
+    return Promise.reject(new Error(message));
+  }
+);
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\services\api\index.js === 
+// Module: services/api
+export {};
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\services\api\orderService.js === 
+import { apiClient } from './apiClient';
+
+export const orderService = {
+  /**
+   * Tạo đơn dịch vụ mới (Khách hàng)
+   * @param {Object} payload - { serviceId, pickupLat, pickupLng, pickupAddress, note, scheduledAt }
+   */
+  async createOrder(payload) {
+    console.log('🚀 [OrderService] Gọi API tạo đơn hàng mới:', payload);
+    return apiClient.post('/orders', payload);
+  },
+
+  /**
+   * Thợ chấp nhận nhận đơn hàng
+   * @param {string} orderId - UUID đơn hàng
+   */
+  async acceptOrder(orderId) {
+    console.log(`⚡ [OrderService] Thợ bấm nhận đơn #${orderId}`);
+    return apiClient.post(`/orders/${orderId}/accept`);
+  },
+
+  /**
+   * Lấy chi tiết đơn hàng theo ID
+   */
+  async getOrderById(orderId) {
+    return apiClient.get(`/orders/${orderId}`);
+  },
+
+  /**
+   * Lấy danh sách đơn hàng của người dùng hiện tại
+   */
+  async getMyOrders() {
+    return apiClient.get('/orders');
+  },
+
+  /**
+   * Lấy danh sách dịch vụ đang hoạt động
+   */
+  async getActiveServices() {
+    return apiClient.get('/services');
+  },
+};
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\services\socket\index.js === 
+// Module: services/socket
+export {};
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\services\socket\socketService.js === 
+import { io } from 'socket.io-client';
+import { Platform } from 'react-native';
+import { tokenStorage } from '../storage/tokenStorage';
+
+const getSocketUrl = () => {
+  if (process.env.EXPO_PUBLIC_API_URL) {
+    return process.env.EXPO_PUBLIC_API_URL.replace('/api', '');
+  }
+  if (Platform.OS === 'android') {
+    return 'http://10.0.2.2:3000';
+  }
+  return 'http://localhost:3000';
+};
+
+class SocketService {
+  constructor() {
+    this.socket = null;
+    this.url = getSocketUrl();
+    this.isConnected = false;
+  }
+
+  connect() {
+    if (this.socket && this.socket.connected) {
+      return this.socket;
+    }
+
+    console.log(`📡 [Socket.IO] Khởi tạo kết nối tới Gateway: ${this.url}`);
+
+    this.socket = io(this.url, {
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 2000,
+    });
+
+    this.socket.on('connect', async () => {
+      this.isConnected = true;
+      console.log(`✅ [Socket.IO] Đã kết nối thành công! Socket ID: ${this.socket.id}`);
+
+      // Tự động gửi join_room khi kết nối
+      const user = await tokenStorage.getUser();
+      if (user) {
+        const role = String(user.role || 'CUSTOMER').toUpperCase();
+        const profileId = user.workerProfile?.id || user.customerProfile?.id || user.id;
+        this.joinRoom(role, profileId, user.id);
+      }
+    });
+
+    this.socket.on('disconnect', (reason) => {
+      this.isConnected = false;
+      console.log(`🔴 [Socket.IO] Đã ngắt kết nối: ${reason}`);
+    });
+
+    this.socket.on('connect_error', (error) => {
+      console.warn(`⚠️ [Socket.IO Error]: ${error.message}`);
+    });
+
+    return this.socket;
+  }
+
+  joinRoom(role, profileId, userId) {
+    if (this.socket && this.socket.connected) {
+      console.log(`🚪 [Socket.IO] Yêu cầu tham gia Room: role=${role}, profileId=${profileId}`);
+      this.socket.emit('join_room', { role, profileId, userId });
+    }
+  }
+
+  on(eventName, callback) {
+    if (!this.socket) {
+      this.connect();
+    }
+    this.socket.on(eventName, callback);
+  }
+
+  off(eventName, callback) {
+    if (this.socket) {
+      this.socket.off(eventName, callback);
+    }
+  }
+
+  emit(eventName, data) {
+    if (this.socket && this.socket.connected) {
+      this.socket.emit(eventName, data);
+    } else {
+      console.warn(`⚠️ [Socket.IO] Chưa kết nối, không thể emit '${eventName}'`);
+    }
+  }
+
+  disconnect() {
+    if (this.socket) {
+      this.socket.disconnect();
+      this.socket = null;
+      this.isConnected = false;
+    }
+  }
+}
+
+export const socketService = new SocketService();
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\services\storage\index.js === 
+// Module: services/storage
+export {};
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\services\storage\tokenStorage.js === 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const TOKEN_KEY = 'AUTH_ACCESS_TOKEN';
+const USER_KEY = 'AUTH_USER_INFO';
+
+export const tokenStorage = {
+  async saveToken(token) {
+    try {
+      if (token) {
+        await AsyncStorage.setItem(TOKEN_KEY, token);
+      }
+    } catch (e) {
+      console.error('Failed to save token to storage', e);
+    }
+  },
+
+  async getToken() {
+    try {
+      return await AsyncStorage.getItem(TOKEN_KEY);
+    } catch (e) {
+      console.error('Failed to get token from storage', e);
+      return null;
+    }
+  },
+
+  async removeToken() {
+    try {
+      await AsyncStorage.removeItem(TOKEN_KEY);
+    } catch (e) {
+      console.error('Failed to remove token from storage', e);
+    }
+  },
+
+  async saveUser(user) {
+    try {
+      if (user) {
+        await AsyncStorage.setItem(USER_KEY, JSON.stringify(user));
+      }
+    } catch (e) {
+      console.error('Failed to save user to storage', e);
+    }
+  },
+
+  async getUser() {
+    try {
+      const data = await AsyncStorage.getItem(USER_KEY);
+      return data ? JSON.parse(data) : null;
+    } catch (e) {
+      console.error('Failed to get user from storage', e);
+      return null;
+    }
+  },
+
+  async removeUser() {
+    try {
+      await AsyncStorage.removeItem(USER_KEY);
+    } catch (e) {
+      console.error('Failed to remove user from storage', e);
+    }
+  },
+
+  async clearAll() {
+    try {
+      await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
+    } catch (e) {
+      console.error('Failed to clear storage', e);
+    }
+  },
+};
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\store\index.js === 
+// Module: store
+export {};
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\types\index.js === 
+// Module: types
+export {};
+.
+=== FILE: G:\project-school\doan-kltn-mobile\src\utils\index.js === 
+// Module: utils
+export {};
+.

@@ -11,51 +11,51 @@ echo.
 
 :: 1. Kiem tra file .env mau va copy neu chua co
 echo [1/6] Khoi tao cac file cau hinh .env...
-if not exist "doan-kltn-backend\.env" (
-    if exist "doan-kltn-backend\.env.example" (
-        copy "doan-kltn-backend\.env.example" "doan-kltn-backend\.env" >nul
-        echo       [OK] Da tao doan-kltn-backend/.env
+if not exist "server\.env" (
+    if exist "server\.env.example" (
+        copy "server\.env.example" "server\.env" >nul
+        echo       [OK] Da tao server/.env
     )
 ) else (
-    echo       [OK] doan-kltn-backend/.env da ton tai.
+    echo       [OK] server/.env da ton tai.
 )
 
-if not exist "doan-kttn-frontend\.env.local" (
-    if exist "doan-kttn-frontend\.env.example" (
-        copy "doan-kttn-frontend\.env.example" "doan-kttn-frontend\.env.local" >nul
-        echo       [OK] Da tao doan-kttn-frontend/.env.local
+if not exist "client\.env.local" (
+    if exist "client\.env.example" (
+        copy "client\.env.example" "client\.env.local" >nul
+        echo       [OK] Da tao client/.env.local
     )
 ) else (
-    echo       [OK] doan-kttn-frontend/.env.local da ton tai.
+    echo       [OK] client/.env.local da ton tai.
 )
 
-if not exist "doan-kltn-mobile\.env" (
-    if exist "doan-kltn-mobile\.env.example" (
-        copy "doan-kltn-mobile\.env.example" "doan-kltn-mobile\.env" >nul
-        echo       [OK] Da tao doan-kltn-mobile/.env
+if not exist "customer-app\.env" (
+    if exist "customer-app\.env.example" (
+        copy "customer-app\.env.example" "customer-app\.env" >nul
+        echo       [OK] Da tao customer-app/.env
     )
 ) else (
-    echo       [OK] doan-kltn-mobile/.env da ton tai.
+    echo       [OK] customer-app/.env da ton tai.
 )
 
 :: 2. Cai dat thu vien Backend
 echo.
 echo [2/6] Dang cai dat dependencies cho Backend (NestJS)...
-cd doan-kltn-backend
+cd server
 call npm install
 cd ..
 
 :: 3. Cai dat thu vien Web Admin
 echo.
 echo [3/6] Dang cai dat dependencies cho Frontend (React/Vite)...
-cd doan-kttn-frontend
+cd client
 call npm install
 cd ..
 
 :: 4. Cai dat thu vien Mobile App
 echo.
 echo [4/6] Dang cai dat dependencies cho Mobile (Expo)...
-cd doan-kltn-mobile
+cd customer-app
 call npm install
 cd ..
 
@@ -87,7 +87,7 @@ if %ERRORLEVEL% equ 0 (
     docker compose up -d postgres redis
     echo       Dang cho Database khoi dong san sang (5 giay)...
     timeout /t 5 /nobreak >nul
-    cd doan-kltn-backend
+    cd server
     call npx prisma generate
     call npx prisma db push --skip-generate
     cd ..

@@ -1,0 +1,22 @@
+import { io } from 'socket.io-client';
+import { socketService } from '../src/services/socket/socketService';
+jest.mock('socket.io-client', () => ({ io: jest.fn() }));
+jest.mock('../src/services/storage/tokenStorage', () => ({ tokenStorage: { getUser: jest.fn(async () => ({ id: 'user-1', role: 'WORKER', workerProfile: { id: 'worker-1' } })) } }));
+beforeEach(() => { socketService.disconnect(); jest.clearAllMocks(); });
+it('connects to orders and rejoins user/order rooms after reconnecting', async () => {
+  const handlers = {};
+  const socket = { connected: false, connect: jest.fn(), disconnect: jest.fn(), emit: jest.fn(), on: jest.fn((event, callback) => { handlers[event] = callback; }) };
+  io.mockReturnValue(socket);
+  socketService.connect();
+  socketService.joinOrderRoom('order-1');
+  expect(io).toHaveBeenCalledTimes(1);
+  expect(io.mock.calls[0][0]).toMatch(/\/orders$/);
+  socket.connected = true;
+  await handlers.connect();
+  expect(socket.emit).toHaveBeenCalledWith('join_room', expect.objectContaining({ role: 'WORKER', profileId: 'worker-1' }));
+  expect(socket.emit).toHaveBeenCalledWith('order:join', { orderId: 'order-1' }, expect.any(Function));
+  socketService.leaveOrderRoom('order-1');
+  socket.emit.mockClear();
+  await handlers.connect();
+  expect(socket.emit.mock.calls.some(([event]) => event === 'order:join')).toBe(false);
+});

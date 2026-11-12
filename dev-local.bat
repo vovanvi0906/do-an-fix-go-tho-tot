@@ -15,17 +15,17 @@ echo.
 if not exist "logs" mkdir "logs"
 
 :: 2. Tu dong sao chep cac file .env mau neu chua ton tai (Self-healing)
-if not exist "doan-kltn-backend\.env" (
-    if exist "doan-kltn-backend\.env.example" (
-        copy "doan-kltn-backend\.env.example" "doan-kltn-backend\.env" >nul
-        echo [INFO] Da tu dong tao doan-kltn-backend/.env tu .env.example
+if not exist "server\.env" (
+    if exist "server\.env.example" (
+        copy "server\.env.example" "server\.env" >nul
+        echo [INFO] Da tu dong tao server/.env tu .env.example
     )
 )
 
-if not exist "doan-kttn-frontend\.env.local" (
-    if exist "doan-kttn-frontend\.env.example" (
-        copy "doan-kttn-frontend\.env.example" "doan-kttn-frontend\.env.local" >nul
-        echo [INFO] Da tu dong tao doan-kttn-frontend/.env.local tu .env.example
+if not exist "client\.env.local" (
+    if exist "client\.env.example" (
+        copy "client\.env.example" "client\.env.local" >nul
+        echo [INFO] Da tu dong tao client/.env.local tu .env.example
     )
 )
 
@@ -58,28 +58,29 @@ if not exist "ai-service\weights\yolov8n.pt" (
 
 :: 5. Dong bo Prisma Database
 echo [3/4] Dong bo Prisma Database...
-cd doan-kltn-backend
+cd server
 call npx prisma generate >nul 2>&1
 call npx prisma db push --skip-generate >nul 2>&1
 cd ..
 
-:: 6. Tu dong dong bo dia chi IP Wi-Fi cho Mobile Expo
+:: 6. Tu dong dong bo dia chi IP Wi-Fi may tinh vao Mobile App...
 echo [4/4] Dong bo dia chi IP Wi-Fi may tinh vao Mobile App...
 node scripts\update-ip.js
 echo.
 
 echo ================================================================
 echo  DICH VU HE THONG DANG CHAY:
-echo   - Backend API:  http://localhost:3000/api
-echo   - AI Service:   http://localhost:8000/docs
-echo   - Web Admin:    http://localhost:5173
+echo   - Backend Server:   http://localhost:3000/api
+echo   - AI Service:       http://localhost:8000/docs
+echo   - Client Admin Web: http://localhost:5173
 echo.
-echo  * De chay Mobile App khi can: mo terminal khac, vao doan-kltn-mobile va chay npx expo start -c
+echo  * De chay Customer App: mo terminal khac, vao customer-app va chay npx expo start -c
+echo  * De chay Worker App:   mo terminal khac, vao worker-app va chay npx expo start -c
 echo ================================================================
 echo.
 
 :: Cua so chinh quan ly va hien thi truc tiep log cac dich vu Backend, AI va Web Admin
-npx --yes concurrently -k -n "BACKEND,AI,WEB" -c "blue,magenta,cyan" ^
-  "cd doan-kltn-backend && npm run dev" ^
+npx --yes concurrently -k -n "SERVER,AI,CLIENT" -c "blue,magenta,cyan" ^
+  "cd server && npm run dev" ^
   "cd ai-service && .venv\Scripts\activate && uvicorn main:app --host 0.0.0.0 --port 8000 --reload --reload-exclude .venv" ^
-  "cd doan-kttn-frontend && npm run dev"
+  "cd client && npm run dev"

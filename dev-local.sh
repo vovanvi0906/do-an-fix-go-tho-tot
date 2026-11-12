@@ -11,11 +11,11 @@ export NVM_DIR="$HOME/.nvm"
 mkdir -p logs
 
 # Tu dong copy .env neu chua co
-if [ ! -f "doan-kltn-backend/.env" ] && [ -f "doan-kltn-backend/.env.example" ]; then
-    cp doan-kltn-backend/.env.example doan-kltn-backend/.env
+if [ ! -f "server/.env" ] && [ -f "server/.env.example" ]; then
+    cp server/.env.example server/.env
 fi
-if [ ! -f "doan-kttn-frontend/.env.local" ] && [ -f "doan-kttn-frontend/.env.example" ]; then
-    cp doan-kttn-frontend/.env.example doan-kttn-frontend/.env.local
+if [ ! -f "client/.env.local" ] && [ -f "client/.env.example" ]; then
+    cp client/.env.example client/.env.local
 fi
 
 # Khoi dong docker
@@ -34,7 +34,7 @@ if [ ! -f "ai-service/weights/yolov8n.pt" ] && [ -f "ai-service/scripts/download
 fi
 
 # Dong bo Prisma DB
-cd doan-kltn-backend
+cd server
 npx prisma generate > /dev/null 2>&1
 npx prisma db push --skip-generate > /dev/null 2>&1
 cd ..
@@ -46,16 +46,17 @@ fi
 
 echo "================================================================"
 echo " DICH VU HE THONG DANG CHAY:"
-echo "  - Backend API:  http://localhost:3000/api"
-echo "  - AI Service:   http://localhost:8000/docs"
-echo "  - Web Admin:    http://localhost:5173"
+echo "  - Backend Server:   http://localhost:3000/api"
+echo "  - AI Service:       http://localhost:8000/docs"
+echo "  - Client Admin Web: http://localhost:5173"
 echo ""
-echo " * De chay Mobile App khi can: mo terminal khac, vao doan-kltn-mobile va chay npx expo start -c"
+echo " * De chay Customer App: mo terminal, vao customer-app va chay npx expo start -c"
+echo " * De chay Worker App:   mo terminal, vao worker-app va chay npx expo start -c"
 echo "================================================================"
 echo ""
 
-npx --yes concurrently -k -n "BACKEND,AI,WEB" -c "blue,magenta,cyan" \
-  "cd doan-kltn-backend && npm run dev" \
+npx --yes concurrently -k -n "SERVER,AI,CLIENT" -c "blue,magenta,cyan" \
+  "cd server && npm run dev" \
   "cd ai-service && . .venv/bin/activate && uvicorn main:app --host 0.0.0.0 --port 8000 --reload --reload-exclude .venv" \
-  "cd doan-kttn-frontend && npm run dev"
+  "cd client && npm run dev"
 
