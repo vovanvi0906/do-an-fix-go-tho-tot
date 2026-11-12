@@ -1,8 +1,10 @@
-import { useState, useCallback } from 'react';
+import { apiClient } from '../../../services/api/apiClient';
+import { hasShiftVerification } from '../../auth/services/workerEligibility';
+import { useState, useCallback, useRef } from 'react';
 import * as ImagePicker from 'expo-image-picker';
-import { faceService } from '../../../services/api/faceService';
 
 export const useFaceVerification = (orderId, onSuccess) => {
+  const lock = useRef(false);
   const [imageUri, setImageUri] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState(null);
@@ -38,10 +40,22 @@ export const useFaceVerification = (orderId, onSuccess) => {
   }, []);
 
   const verify = useCallback(async () => {
-    if (!imageUri) return;
+    if (!imageUri || lock.current) return;
+    lock.current = true;
     try {
       setIsAnalyzing(true);
-      const res = await faceService.verifyWorkerFace(orderId, imageUri);
+      if (orderId) throw new Error('Backend chưa cung cấp bằng chứng xác thực riêng cho đơn hàng. Vui lòng liên hệ hỗ trợ.');
+      const form = new FormData();
+      if (imageUri.startsWith('blob:') || imageUri.startsWith('data:')) {
+        form.append('image', await (await fetch(imageUri)).blob(), 'selfie.jpg');
+      } else {
+        form.append('image', { uri: imageUri, name: 'selfie.jpg', type: 'image/jpeg' });
+      }
+      await apiClient.post('/workers/verify-face-daily', form, { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 60000 });
+      const response = await apiClient.get('/workers/me');
+      const profile = response.data || response;
+      if (!hasShiftVerification(profile)) throw new Error('Máy chủ chưa xác nhận check-in');
+      const res = { verified: true, message: 'Check-in đầu ca đã được máy chủ xác nhận' };
       setResult(res.data || res);
       setShowModal(true);
       if ((res.data?.verified || res.verified) && onSuccess) {
@@ -55,6 +69,7 @@ export const useFaceVerification = (orderId, onSuccess) => {
       });
       setShowModal(true);
     } finally {
+      lock.current = false;
       setIsAnalyzing(false);
     }
   }, [imageUri, orderId, onSuccess]);

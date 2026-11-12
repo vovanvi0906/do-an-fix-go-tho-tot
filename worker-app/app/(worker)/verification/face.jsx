@@ -27,7 +27,7 @@ export default function FaceVerificationScreen() {
   const handleFinish = () => {
     reset();
     if (orderId) {
-      router.replace(`/job/${orderId}`);
+      router.replace(`/(worker)/job/${orderId}`);
     } else {
       router.back();
     }
@@ -43,7 +43,7 @@ export default function FaceVerificationScreen() {
         <View style={{ width: 40 }} />
       </View>
       <Text style={styles.subtitle}>
-        Vui lòng chụp ảnh selfie trực diện để đối chiếu sinh trắc học với ảnh thẻ/avatar.
+        {orderId ? 'Xác thực theo đơn đang chờ backend bổ sung contract riêng; chưa thể thực hiện.' : 'Check-in đầu ca bằng ảnh khuôn mặt đã đăng ký. Không thay thế xác thực theo đơn.'}
       </Text>
       <View style={styles.frameContainer}>
         <BiometricOvalFrame imageUri={imageUri} isAnalyzing={isAnalyzing} />
@@ -62,7 +62,7 @@ export default function FaceVerificationScreen() {
         <TouchableOpacity
           style={[styles.btnPrimary, (!imageUri || isAnalyzing) && styles.btnDisabled]}
           onPress={verify}
-          disabled={!imageUri || isAnalyzing}
+          disabled={!!orderId || !imageUri || isAnalyzing}
         >
           {isAnalyzing ? (
             <ActivityIndicator color="#FFFFFF" />

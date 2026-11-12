@@ -1,3 +1,4 @@
+import { sessionEpoch } from '../../features/auth/services/sessionEpoch';
 import axios from 'axios';
 import { Platform } from 'react-native';
 import { tokenStorage } from '../storage/tokenStorage';
@@ -25,6 +26,8 @@ export const apiClient = axios.create({
 
 apiClient.interceptors.request.use(
   async (config) => {
+    config.sessionEpoch ??= sessionEpoch.current();
+    sessionEpoch.assert(config.sessionEpoch);
     config.metadata = { startedAt: Date.now(), requestId: `mobile-${Date.now()}-${Math.random().toString(36).slice(2, 10)}` };
     config.headers['X-Request-ID'] = config.metadata.requestId;
     try {
@@ -32,6 +35,8 @@ apiClient.interceptors.request.use(
       const token = await tokenStorage.getToken();
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+      } else {
+        delete config.headers.Authorization;
       }
       console.log(`📡 [API Request] ${config.method?.toUpperCase()} ${config.baseURL || ''}${config.url}`, {
         hasToken: !!token,
@@ -54,10 +59,12 @@ apiClient.interceptors.response.use(
       requestId: response.config.metadata?.requestId,
       durationMs: Date.now() - (response.config.metadata?.startedAt || Date.now()),
     });
+    sessionEpoch.assert(response.config.sessionEpoch);
     return response.data;
   },
   async (error) => {
     const originalRequest = error.config;
+    if (originalRequest?.sessionEpoch !== undefined) sessionEpoch.assert(originalRequest.sessionEpoch);
     const status = error.response?.status;
     const errorResponse = error.response?.data;
 
@@ -66,7 +73,7 @@ apiClient.interceptors.response.use(
       status === 401 &&
       originalRequest &&
       !originalRequest._retry &&
-      !originalRequest.url?.includes('/auth/login') &&
+      !originalRequest.url?.startsWith('/auth/') &&
       !originalRequest.url?.includes('/auth/refresh')
     ) {
       return handleTokenRefresh(apiClient, originalRequest, onUnauthorizedCallback);
@@ -75,8 +82,12 @@ apiClient.interceptors.response.use(
     let message = 'Đã có lỗi xảy ra. Vui lòng thử lại sau!';
     if (status === 401) {
       message = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!';
-      tokenStorage.clearAll().catch((e) => console.warn('Lỗi khi xóa token storage:', e));
-      if (onUnauthorizedCallback) onUnauthorizedCallback();
+      if (!originalRequest?.url?.startsWith('/auth/')) {
+        const epoch = sessionEpoch.begin();
+        await sessionEpoch.write(epoch, () => tokenStorage.clearAll());
+        sessionEpoch.assert(epoch);
+        if (onUnauthorizedCallback) onUnauthorizedCallback();
+      }
     } else if (errorResponse) {
       if (Array.isArray(errorResponse.message)) {
         message = errorResponse.message.join(', ');

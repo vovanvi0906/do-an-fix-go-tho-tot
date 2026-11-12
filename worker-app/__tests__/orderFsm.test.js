@@ -56,7 +56,9 @@ it('loads order by ID and waits for REST acknowledgement before showing travel s
 it('restores ARRIVED without silently starting work', async () => {
   orderService.getOrderById.mockResolvedValue(snapshot('ARRIVED'));
   const ui = render(<WorkerJobDetailScreen />);
-  await waitFor(() => expect(ui.getByText('BẮT ĐẦU CÔNG VIỆC')).toBeTruthy());
+  await waitFor(() => expect(ui.getByText('CHỜ XÁC THỰC THEO ĐƠN')).toBeTruthy());
+  fireEvent.press(ui.getByText('CHỜ XÁC THỰC THEO ĐƠN'));
+  expect(apiClient.patch).not.toHaveBeenCalled();
   expect(apiClient.patch).not.toHaveBeenCalled();
   expect(ui.queryByText('BẮT ĐẦU DI CHUYỂN ĐẾN KHÁCH')).toBeNull();
 });

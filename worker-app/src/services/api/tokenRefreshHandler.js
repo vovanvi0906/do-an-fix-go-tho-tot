@@ -1,3 +1,4 @@
+import { sessionEpoch } from '../../features/auth/services/sessionEpoch';
 import axios from 'axios';
 import { tokenStorage } from '../storage/tokenStorage';
 import { API_BASE_URL } from './apiConfig';
@@ -14,12 +15,15 @@ const processQueue = (error, token = null) => {
 };
 
 export const handleTokenRefresh = async (axiosInstance, originalRequest, onUnauthorized) => {
+  const epoch = originalRequest.sessionEpoch ?? sessionEpoch.current();
+  sessionEpoch.assert(epoch);
   originalRequest._retry = true;
   if (isRefreshing) {
     return new Promise((resolve, reject) => {
       failedQueue.push({ resolve, reject });
     })
       .then((token) => {
+        sessionEpoch.assert(epoch);
         originalRequest.headers.Authorization = `Bearer ${token}`;
         return axiosInstance(originalRequest);
       });
@@ -46,10 +50,10 @@ export const handleTokenRefresh = async (axiosInstance, originalRequest, onUnaut
       throw new Error('Dữ liệu trả về không có access token');
     }
 
-    await tokenStorage.saveToken(newAccessToken);
-    if (newRefreshToken) {
-      await tokenStorage.saveRefreshToken(newRefreshToken);
-    }
+    await sessionEpoch.write(epoch, async () => {
+      await tokenStorage.saveToken(newAccessToken);
+      if (newRefreshToken) await tokenStorage.saveRefreshToken(newRefreshToken);
+    });
 
     processQueue(null, newAccessToken);
     originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
@@ -63,8 +67,15 @@ export const handleTokenRefresh = async (axiosInstance, originalRequest, onUnaut
     failure.requestId = originalRequest.metadata?.requestId;
     failure.response = refreshErr.response;
     processQueue(failure, null);
-    await tokenStorage.clearAll().catch(() => {});
-    if (onUnauthorized) onUnauthorized();
+    if (epoch === sessionEpoch.current()) {
+      // Network failures are retryable; only rejected credentials end the session.
+      if (!await tokenStorage.getRefreshToken() || [401, 403].includes(refreshErr.response?.status)) {
+        const invalidated = sessionEpoch.begin();
+        await sessionEpoch.write(invalidated, () => tokenStorage.clearAll());
+        sessionEpoch.assert(invalidated);
+        if (onUnauthorized) onUnauthorized();
+      }
+    }
     return Promise.reject(failure);
   } finally {
     isRefreshing = false;

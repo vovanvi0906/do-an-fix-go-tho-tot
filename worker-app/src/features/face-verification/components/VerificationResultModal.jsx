@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 export const VerificationResultModal = ({ visible, result, onClose, onRetry }) => {
   if (!result) return null;
   const isSuccess = result.verified;
-  const confidencePercent = (Number(result.confidence || 0) * 100).toFixed(1);
+  const confidencePercent = Number.isFinite(result.confidence) ? (result.confidence * 100).toFixed(1) : null;
 
   return (
     <Modal visible={visible} transparent animationType="fade">
@@ -19,18 +19,18 @@ export const VerificationResultModal = ({ visible, result, onClose, onRetry }) =
             />
           </View>
           <Text style={styles.title}>
-            {isSuccess ? 'Xác thực thành công' : 'Chưa khớp khuôn mặt'}
+            {isSuccess ? 'Xác thực thành công' : 'Chưa xác thực được'}
           </Text>
-          <Text style={styles.scoreText}>
+          {confidencePercent !== null ? <Text style={styles.scoreText}>
             Độ khớp sinh trắc học: <Text style={styles.boldScore}>{confidencePercent}%</Text>
-          </Text>
+          </Text> : null}
           <Text style={styles.message}>
             {result.message || (isSuccess ? 'Đạt chuẩn nhận diện an toàn' : 'Vui lòng chụp lại rõ nét hơn')}
           </Text>
           <View style={styles.btnRow}>
             {isSuccess ? (
               <TouchableOpacity style={styles.btnPrimary} onPress={onClose}>
-                <Text style={styles.btnPrimaryText}>Bắt đầu làm việc</Text>
+                <Text style={styles.btnPrimaryText}>Quay lại</Text>
               </TouchableOpacity>
             ) : (
               <TouchableOpacity style={styles.btnRetry} onPress={onRetry}>

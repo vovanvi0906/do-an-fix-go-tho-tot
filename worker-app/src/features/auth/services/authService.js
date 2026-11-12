@@ -1,7 +1,9 @@
+import { sessionEpoch } from './sessionEpoch';
 import { apiClient } from '../../../services/api/apiClient';
 import { tokenStorage } from '../../../services/storage/tokenStorage';
 
-async function saveAuthSession(response) {
+async function saveAuthSession(response, epoch) {
+  sessionEpoch.assert(epoch);
   const accessToken = response?.accessToken || response?.data?.accessToken;
   const refreshToken = response?.refreshToken || response?.data?.refreshToken;
   const user = response?.user || response?.data?.user;
@@ -10,9 +12,13 @@ async function saveAuthSession(response) {
     throw new Error('Ứng dụng này chỉ dành cho thợ. Vui lòng đăng nhập bằng tài khoản thợ.');
   }
 
-  if (accessToken) await tokenStorage.saveToken(accessToken);
-  if (refreshToken) await tokenStorage.saveRefreshToken(refreshToken);
-  if (user) await tokenStorage.saveUser(user);
+  if (!accessToken || !user?.id) throw new Error('Phản hồi đăng nhập không hợp lệ');
+  await sessionEpoch.write(epoch, async () => {
+    await tokenStorage.clearAll();
+    await tokenStorage.saveToken(accessToken);
+    if (refreshToken) await tokenStorage.saveRefreshToken(refreshToken);
+    await tokenStorage.saveUser(user);
+  });
 }
 
 export const authService = {
@@ -21,6 +27,7 @@ export const authService = {
    * Khớp với AuthController.login và AuthService.login của NestJS Backend (/api/auth/login)
    */
   async login(identifier, password) {
+    const epoch = sessionEpoch.begin();
     console.log('🔑 [AuthService] Đang gửi yêu cầu đăng nhập:', { identifier });
     const payload = {
       emailOrPhone: identifier.trim(),
@@ -29,7 +36,7 @@ export const authService = {
     };
 
     const response = await apiClient.post('/auth/login', payload);
-    await saveAuthSession(response);
+    await saveAuthSession(response, epoch);
     return response;
   },
 
@@ -37,9 +44,10 @@ export const authService = {
    * Đăng ký tài khoản Thợ (Worker) (/api/auth/register/worker)
    */
   async registerWorker(workerData) {
+    const epoch = sessionEpoch.begin();
     console.log('🛠️ [AuthService] Đang gửi yêu cầu đăng ký Thợ:', workerData.email);
     const response = await apiClient.post('/auth/register/worker', workerData);
-    await saveAuthSession(response);
+    await saveAuthSession(response, epoch);
     return response;
   },
 
@@ -47,9 +55,10 @@ export const authService = {
    * Đăng ký tài khoản chung (/api/auth/register)
    */
   async register(registerData) {
+    const epoch = sessionEpoch.begin();
     console.log('📝 [AuthService] Đang gửi yêu cầu đăng ký:', registerData.email);
     const response = await apiClient.post('/auth/register', registerData);
-    await saveAuthSession(response);
+    await saveAuthSession(response, epoch);
     return response;
   },
 
@@ -58,21 +67,21 @@ export const authService = {
    */
   async logout() {
     console.log('🚪 [AuthService] Đăng xuất và xóa session...');
-    await tokenStorage.clearAll();
+    const epoch = sessionEpoch.begin();
+    await sessionEpoch.write(epoch, () => tokenStorage.clearAll());
   },
 
   /**
    * Lấy phiên đăng nhập hiện tại từ bộ nhớ cục bộ
    */
   async getCurrentSession() {
+    const epoch = sessionEpoch.current();
     const token = await tokenStorage.getToken();
-    const user = await tokenStorage.getUser();
-    console.log('🔍 [AuthService] Kiểm tra phiên đăng nhập đã lưu:', {
-      hasToken: !!token,
-      userId: user?.id,
-      userRole: user?.role,
-    });
-    return { token, user };
+    if (!token) return { token: null, user: null };
+    const user = await this.getProfile();
+    sessionEpoch.assert(epoch);
+    if (user?.role !== 'WORKER') throw new Error('Tài khoản không phải thợ');
+    return { token: await tokenStorage.getToken(), user };
   },
 
   /**
@@ -95,9 +104,10 @@ export const authService = {
    * @param {string} idToken - Google JWT ID Token từ Google OAuth
    */
   async googleLogin(idToken) {
+    const epoch = sessionEpoch.begin();
     console.log('🌐 [AuthService] Gửi yêu cầu đăng nhập bằng Google...');
     const response = await apiClient.post('/auth/google-login', { idToken });
-    await saveAuthSession(response);
+    await saveAuthSession(response, epoch);
     return response;
   },
 
@@ -106,9 +116,10 @@ export const authService = {
    * @param {string} idToken - Firebase JWT ID Token
    */
   async firebaseGoogleLogin(idToken) {
+    const epoch = sessionEpoch.begin();
     console.log('🔥 [AuthService] Gửi yêu cầu đăng nhập bằng Firebase Google...');
     const response = await apiClient.post('/auth/firebase-google-login', { idToken });
-    await saveAuthSession(response);
+    await saveAuthSession(response, epoch);
     return response;
   },
 
@@ -136,21 +147,11 @@ export const authService = {
     };
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
-      apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     }
 
     const response = await apiClient.post('/users/upload-avatar', formData, {
       headers,
     });
-
-    const newAvatarUrl = response?.avatarUrl || response?.data?.avatarUrl;
-    if (newAvatarUrl) {
-      const currentUser = await tokenStorage.getUser();
-      if (currentUser) {
-        currentUser.avatarUrl = newAvatarUrl;
-        await tokenStorage.saveUser(currentUser);
-      }
-    }
 
     return response;
   },
@@ -162,10 +163,6 @@ export const authService = {
   async updatePhone(phone) {
     console.log('📱 [AuthService] Cập nhật số điện thoại:', phone);
     const response = await apiClient.patch('/users/update-phone', { phone });
-    const updatedUser = response?.user || response?.data?.user;
-    if (updatedUser) {
-      await tokenStorage.saveUser(updatedUser);
-    }
     return response;
   },
 
@@ -174,10 +171,12 @@ export const authService = {
    */
   async getProfile() {
     console.log('🌐 [AuthService] Lấy thông tin user mới nhất từ /users/profile...');
+    const epoch = sessionEpoch.current();
     const response = await apiClient.get('/users/profile');
+    sessionEpoch.assert(epoch);
     const profile = response?.data || response;
     if (profile && profile.id) {
-      await tokenStorage.saveUser(profile);
+      await sessionEpoch.write(epoch, () => tokenStorage.saveUser(profile));
     }
     return profile;
   },

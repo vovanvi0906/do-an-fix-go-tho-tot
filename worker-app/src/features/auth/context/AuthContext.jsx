@@ -1,3 +1,6 @@
+import { AppState } from 'react-native';
+import { sessionEpoch } from '../services/sessionEpoch';
+import { socketService } from '../../../services/socket/socketService';
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { authService } from '../services/authService';
 import { tokenStorage } from '../../../services/storage/tokenStorage';
@@ -14,15 +17,18 @@ export function AuthProvider({ children }) {
     // Đăng ký nhận thông báo khi apiClient gặp 401 Unauthorized
     setOnUnauthorizedCallback(() => {
       console.warn('🔒 [AuthContext] Nhận tín hiệu 401 -> Reset phiên đăng nhập về null');
+      socketService.disconnect();
       setToken(null);
       setUser(null);
     });
 
     // Tự động kiểm tra phiên đăng nhập đã lưu khi khởi động ứng dụng
+    const initialEpoch = sessionEpoch.current();
     const checkSession = async () => {
       try {
         console.log('🔄 [AuthContext] Đang kiểm tra phiên đăng nhập lưu trong máy...');
         const session = await authService.getCurrentSession();
+        sessionEpoch.assert(initialEpoch);
         if (session.token && session.user?.role?.toUpperCase() === 'WORKER') {
           console.log('👤 [AuthContext] Tìm thấy phiên đăng nhập:', {
             email: session.user.email,
@@ -31,7 +37,7 @@ export function AuthProvider({ children }) {
           setToken(session.token);
           setUser(session.user);
         } else {
-          await tokenStorage.clearAll();
+          await sessionEpoch.write(initialEpoch, () => tokenStorage.clearAll());
         }
       } catch (err) {
         console.warn('⚠️ [AuthContext] Không thể tải phiên đăng nhập ban đầu:', err);
@@ -40,11 +46,15 @@ export function AuthProvider({ children }) {
       }
     };
     checkSession();
+    return () => setOnUnauthorizedCallback(null);
   }, []);
 
   const login = async (identifier, password) => {
     console.log('🚀 [AuthContext] Bắt đầu gọi đăng nhập từ UI:', { identifier });
-    const res = await authService.login(identifier, password);
+    const pending = authService.login(identifier, password);
+    const epoch = sessionEpoch.current();
+    const res = await pending;
+    sessionEpoch.assert(epoch);
     const accessToken = res?.accessToken || res?.data?.accessToken;
     const user = res?.user || res?.data?.user;
     if (accessToken && user) {
@@ -57,23 +67,20 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     console.log('👋 [AuthContext] Thực hiện đăng xuất...');
-    await authService.logout();
     setToken(null);
     setUser(null);
+    socketService.disconnect();
+    await authService.logout();
   };
 
-  const updateUser = async (updatedUser) => {
-    console.log('📝 [AuthContext] Cập nhật thông tin User:', updatedUser);
-    setUser(updatedUser);
-    try {
-      await tokenStorage.saveUser(updatedUser);
-    } catch (e) {
-      console.warn('⚠️ [AuthContext] Không thể lưu user vào storage:', e);
-    }
-  };
+  // Client-supplied profile edits must never grant a role or approval.
+  const updateUser = async () => refreshProfile();
 
   const registerWorker = async (workerData) => {
-    const res = await authService.registerWorker(workerData);
+    const pending = authService.registerWorker(workerData);
+    const epoch = sessionEpoch.current();
+    const res = await pending;
+    sessionEpoch.assert(epoch);
     const accessToken = res?.accessToken || res?.data?.accessToken;
     const registeredUser = res?.user || res?.data?.user;
     if (accessToken && registeredUser) {
@@ -85,7 +92,10 @@ export function AuthProvider({ children }) {
 
   const googleLogin = async (idToken) => {
     console.log('🌐 [AuthContext] Thực hiện đăng nhập Google...');
-    const res = await authService.googleLogin(idToken);
+    const pending = authService.googleLogin(idToken);
+    const epoch = sessionEpoch.current();
+    const res = await pending;
+    sessionEpoch.assert(epoch);
     const accessToken = res?.data?.accessToken || res?.accessToken;
     const user = res?.data?.user || res?.user;
     if (accessToken && user) {
@@ -98,7 +108,10 @@ export function AuthProvider({ children }) {
 
   const firebaseGoogleLogin = async (idToken) => {
     console.log('🔥 [AuthContext] Thực hiện đăng nhập Firebase Google...');
-    const res = await authService.firebaseGoogleLogin(idToken);
+    const pending = authService.firebaseGoogleLogin(idToken);
+    const epoch = sessionEpoch.current();
+    const res = await pending;
+    sessionEpoch.assert(epoch);
     const accessToken = res?.data?.accessToken || res?.accessToken;
     const user = res?.data?.user || res?.user;
     if (accessToken && user) {
@@ -110,35 +123,31 @@ export function AuthProvider({ children }) {
   };
 
   const uploadAvatar = async (imageUri) => {
-    console.log('📸 [AuthContext] Gọi upload avatar...');
+    const epoch = sessionEpoch.current();
     const res = await authService.uploadAvatar(imageUri);
-    const updatedUrl = res?.avatarUrl || res?.data?.avatarUrl;
-    if (updatedUrl && user) {
-      const newUser = { ...user, avatarUrl: updatedUrl };
-      setUser(newUser);
-      await tokenStorage.saveUser(newUser);
-    }
+    sessionEpoch.assert(epoch);
+    await refreshProfile();
     return res;
   };
 
   const updatePhone = async (phone) => {
-    console.log('📱 [AuthContext] Gọi cập nhật số điện thoại...');
+    const epoch = sessionEpoch.current();
     const res = await authService.updatePhone(phone);
-    const updatedUser = res?.user || res?.data?.user;
-    if (updatedUser) {
-      setUser(updatedUser);
-      await tokenStorage.saveUser(updatedUser);
-    }
+    sessionEpoch.assert(epoch);
+    await refreshProfile();
     return res;
   };
 
   const refreshProfile = useCallback(async () => {
     try {
       console.log('🔄 [AuthContext] Đang làm mới dữ liệu người dùng từ Database...');
+      const epoch = sessionEpoch.current();
       const profile = await authService.getProfile();
+      sessionEpoch.assert(epoch);
+      if (profile?.role !== 'WORKER') { await authService.logout(); setToken(null); setUser(null); return null; }
       if (profile && profile.id) {
         setUser(profile);
-        await tokenStorage.saveUser(profile);
+
         return profile;
       }
     } catch (err) {
@@ -146,6 +155,14 @@ export function AuthProvider({ children }) {
     }
     return null;
   }, []);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const subscription = AppState.addEventListener('change', state => {
+      if (state === 'active') void refreshProfile();
+    });
+    return () => subscription.remove();
+  }, [user?.id, refreshProfile]);
 
   const value = useMemo(
     () => ({

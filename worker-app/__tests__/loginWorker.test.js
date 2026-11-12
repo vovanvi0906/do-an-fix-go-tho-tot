@@ -275,7 +275,8 @@ describe('═══════════════════════�
       });
 
       it('D2: Tự động điều hướng vào /(worker)/(tabs) nếu phiên đăng nhập WORKER đã lưu trong máy', async () => {
-        // Giả lập phiên đăng nhập thợ đã lưu sẵn trong AsyncStorage
+        jest.spyOn(apiClient, 'get').mockResolvedValueOnce({ id: 'worker-saved-01', email: 'saved_worker@fixgo.vn', role: 'WORKER' });
+        // Stored session is accepted only after server profile confirmation
         await AsyncStorage.setItem('AUTH_ACCESS_TOKEN', 'saved-worker-token');
         await AsyncStorage.setItem(
           'AUTH_USER_INFO',
