@@ -7,16 +7,32 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { validate } from 'class-validator';
+import { RegisterDto } from './dto/register.dto';
 import { OAuth2Client } from 'google-auth-library';
-import { getFirebaseAdmin, getFirebaseAuth } from '../../config/firebase.config';
+import { getFirebaseAuth } from '../../config/firebase.config';
 import { UsersService } from '../users/users.service';
+import { RegistrationProofService } from './registration-proof.service';
 import { OtpService } from './otp.service';
 import { AdminGateway } from '../admin/admin.gateway';
 
 @Injectable()
-@Dependencies(UsersService, JwtService, OtpService, AdminGateway)
+@Dependencies(
+  UsersService,
+  JwtService,
+  OtpService,
+  AdminGateway,
+  RegistrationProofService,
+)
 export class AuthService {
-  constructor(usersService, jwtService, otpService, adminGateway) {
+  constructor(
+    usersService,
+    jwtService,
+    otpService,
+    adminGateway,
+    registrationProofService,
+  ) {
+    this.registrationProofService = registrationProofService;
     this.usersService = usersService;
     this.jwtService = jwtService;
     this.otpService = otpService;
@@ -45,11 +61,15 @@ export class AuthService {
         secret: process.env.JWT_SECRET || 'super-secret',
       });
       if (payload.type !== 'refresh') {
-        throw new UnauthorizedException('Token không phải là Refresh Token hợp lệ');
+        throw new UnauthorizedException(
+          'Token không phải là Refresh Token hợp lệ',
+        );
       }
       const user = await this.usersService.findById(payload.sub);
       if (!user || user.status === 'BLOCKED') {
-        throw new UnauthorizedException('Tài khoản không tồn tại hoặc đã bị khóa');
+        throw new UnauthorizedException(
+          'Tài khoản không tồn tại hoặc đã bị khóa',
+        );
       }
       const tokens = this.generateTokens(user);
       const { passwordHash: _, ...sanitizedUser } = user;
@@ -60,7 +80,9 @@ export class AuthService {
         user: sanitizedUser,
       };
     } catch (err) {
-      throw new UnauthorizedException('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+      throw new UnauthorizedException(
+        'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.',
+      );
     }
   }
 
@@ -73,21 +95,14 @@ export class AuthService {
   }
 
   async registerCustomer(data) {
-    const { email, password, phone, fullName, firstName, lastName, avatarUrl } = data;
-
-    const existingEmail = await this.usersService.findByEmail(email);
-    if (existingEmail) {
-      throw new BadRequestException('Email đã tồn tại trong hệ thống');
+    // JavaScript @Bind(Body()) does not emit a DTO metatype for ValidationPipe.
+    // Explicit validation keeps the existing DTO rules effective on this path.
+    const errors = await validate(Object.assign(new RegisterDto(), data));
+    if (errors.length) {
+      throw new BadRequestException('Thông tin đăng ký không hợp lệ');
     }
-
-    if (phone) {
-      const existingPhone = await this.usersService.findByPhone(phone);
-      if (existingPhone) {
-        throw new BadRequestException(
-          'Số điện thoại đã tồn tại trong hệ thống',
-        );
-      }
-    }
+    const { email, password, fullName, firstName, lastName, avatarUrl } = data;
+    const phone = this.registrationProofService.normalizePhone(data.phone);
 
     const passwordHash = await bcrypt.hash(password, 10);
     const resolvedFullName =
@@ -95,21 +110,24 @@ export class AuthService {
       [lastName, firstName].filter(Boolean).join(' ').trim() ||
       null;
 
-    const user = await this.usersService.create({
-      email,
-      passwordHash,
-      phone: phone || null,
-      name: resolvedFullName,
-      role: 'CUSTOMER',
-      status: 'ACTIVE',
-      isEmailVerified: false,
-      customerProfile: {
-        create: {
-          fullName: resolvedFullName,
-          avatarUrl: avatarUrl || null,
+    const user = await this.registrationProofService.createCustomer(
+      {
+        email,
+        passwordHash,
+        phone: phone || null,
+        name: resolvedFullName,
+        role: 'CUSTOMER',
+        status: 'ACTIVE',
+        isEmailVerified: false,
+        customerProfile: {
+          create: {
+            fullName: resolvedFullName,
+            avatarUrl: avatarUrl || null,
+          },
         },
       },
-    });
+      data.registrationProof,
+    );
 
     const { passwordHash: _, ...sanitizedUser } = user;
     const tokens = this.generateTokens(user);
@@ -285,7 +303,7 @@ export class AuthService {
    * Đăng nhập / Đăng ký tự động bằng tài khoản Google (Google Sign-In)
    * @param {string} idToken - Google JWT idToken gửi từ client
    */
-  async googleLogin(idToken) {
+  async googleLogin(idToken, registration = {}) {
     if (!idToken) {
       throw new BadRequestException('Vui lòng cung cấp idToken của Google');
     }
@@ -308,12 +326,20 @@ export class AuthService {
       });
       payload = ticket.getPayload();
     } catch (err) {
-      console.error('❌ [Backend AuthService] Xác thực Google idToken thất bại:', err.message);
-      throw new UnauthorizedException('Mã xác thực Google (idToken) không hợp lệ hoặc đã hết hạn: ' + err.message);
+      console.error(
+        '❌ [Backend AuthService] Xác thực Google idToken thất bại:',
+        err.message,
+      );
+      throw new UnauthorizedException(
+        'Mã xác thực Google (idToken) không hợp lệ hoặc đã hết hạn: ' +
+          err.message,
+      );
     }
 
     if (!payload || !payload.email) {
-      throw new BadRequestException('Không thể trích xuất địa chỉ email từ tài khoản Google này');
+      throw new BadRequestException(
+        'Không thể trích xuất địa chỉ email từ tài khoản Google này',
+      );
     }
 
     const { email, sub: googleId, name, picture } = payload;
@@ -335,40 +361,55 @@ export class AuthService {
           avatarUrl: user.avatarUrl || picture || null,
           name: user.name || name || null,
         });
-        console.log('🔗 [Backend AuthService] Đã liên kết tài khoản Google với email hiện có:', email);
+        console.log(
+          '🔗 [Backend AuthService] Đã liên kết tài khoản Google với email hiện có:',
+          email,
+        );
       }
     }
 
     // 3. Nếu chưa từng tồn tại tài khoản -> Tự động tạo mới User với vai trò CUSTOMER
     if (!user) {
-      console.log('🆕 [Backend AuthService] Tự động tạo tài khoản Customer mới từ Google:', email);
-      const displayName = name || 'Khách hàng FixGo';
-      user = await this.usersService.create({
+      console.log(
+        '🆕 [Backend AuthService] Tự động tạo tài khoản Customer mới từ Google:',
         email,
-        name: displayName,
-        avatarUrl: picture || null,
-        role: 'CUSTOMER',
-        status: 'ACTIVE',
-        isEmailVerified: true,
-        googleId,
-        customerProfile: {
-          create: {
-            fullName: displayName,
-            avatarUrl: picture || null,
+      );
+      const displayName = name || 'Khách hàng FixGo';
+      user = await this.registrationProofService.createCustomer(
+        {
+          phone: registration.phone,
+          email,
+          name: displayName,
+          avatarUrl: picture || null,
+          role: 'CUSTOMER',
+          status: 'ACTIVE',
+          isEmailVerified: true,
+          googleId,
+          customerProfile: {
+            create: {
+              fullName: displayName,
+              avatarUrl: picture || null,
+            },
           },
         },
-      });
+        registration.registrationProof,
+      );
     }
 
     if (user.status === 'BLOCKED') {
-      throw new ForbiddenException('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin');
+      throw new ForbiddenException(
+        'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin',
+      );
     }
 
     // 4. Sinh Access Token và Refresh Token chuẩn JWT
     const tokens = this.generateTokens(user);
     const { passwordHash: _, ...sanitizedUser } = user;
 
-    console.log('🎉 [Backend AuthService] Đăng nhập Google thành công cho user:', user.email);
+    console.log(
+      '🎉 [Backend AuthService] Đăng nhập Google thành công cho user:',
+      user.email,
+    );
 
     return {
       success: true,
@@ -387,20 +428,26 @@ export class AuthService {
    * Đăng nhập / Đăng ký tự động bằng tài khoản Google thông qua Firebase Authentication
    * @param {string} idToken - Firebase ID Token từ Mobile Client
    */
-  async firebaseGoogleLogin(idToken) {
+  async firebaseGoogleLogin(idToken, registration = {}) {
     if (!idToken) {
       throw new BadRequestException('Vui lòng cung cấp idToken của Firebase');
     }
 
-    console.log('🔥 [Backend AuthService] Bắt đầu xác thực Firebase idToken...');
+    console.log(
+      '🔥 [Backend AuthService] Bắt đầu xác thực Firebase idToken...',
+    );
     const auth = getFirebaseAuth();
     let decodedToken;
     try {
       decodedToken = await auth.verifyIdToken(idToken);
     } catch (err) {
-      console.error('❌ [Backend AuthService] Xác thực Firebase idToken thất bại:', err.message);
+      console.error(
+        '❌ [Backend AuthService] Xác thực Firebase idToken thất bại:',
+        err.message,
+      );
       throw new UnauthorizedException(
-        'Mã xác thực Firebase (idToken) không hợp lệ hoặc đã hết hạn: ' + err.message,
+        'Mã xác thực Firebase (idToken) không hợp lệ hoặc đã hết hạn: ' +
+          err.message,
       );
     }
 
@@ -428,40 +475,55 @@ export class AuthService {
           avatarUrl: user.avatarUrl || picture || null,
           name: user.name || name || null,
         });
-        console.log('🔗 [Backend AuthService] Đã liên kết tài khoản Firebase với email hiện có:', email);
+        console.log(
+          '🔗 [Backend AuthService] Đã liên kết tài khoản Firebase với email hiện có:',
+          email,
+        );
       }
     }
 
     // 3. Nếu chưa từng tồn tại tài khoản -> Tự động tạo mới User với vai trò CUSTOMER
     if (!user) {
-      console.log('🆕 [Backend AuthService] Tự động tạo tài khoản Customer mới từ Firebase Google:', email);
-      const displayName = name || 'Khách hàng FixGo';
-      user = await this.usersService.create({
+      console.log(
+        '🆕 [Backend AuthService] Tự động tạo tài khoản Customer mới từ Firebase Google:',
         email,
-        name: displayName,
-        avatarUrl: picture || null,
-        role: 'CUSTOMER',
-        status: 'ACTIVE',
-        isEmailVerified: true,
-        googleId: uid,
-        customerProfile: {
-          create: {
-            fullName: displayName,
-            avatarUrl: picture || null,
+      );
+      const displayName = name || 'Khách hàng FixGo';
+      user = await this.registrationProofService.createCustomer(
+        {
+          phone: registration.phone,
+          email,
+          name: displayName,
+          avatarUrl: picture || null,
+          role: 'CUSTOMER',
+          status: 'ACTIVE',
+          isEmailVerified: true,
+          googleId: uid,
+          customerProfile: {
+            create: {
+              fullName: displayName,
+              avatarUrl: picture || null,
+            },
           },
         },
-      });
+        registration.registrationProof,
+      );
     }
 
     if (user.status === 'BLOCKED') {
-      throw new ForbiddenException('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin');
+      throw new ForbiddenException(
+        'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin',
+      );
     }
 
     // 4. Sinh Access Token và Refresh Token chuẩn JWT
     const tokens = this.generateTokens(user);
     const { passwordHash: _, ...sanitizedUser } = user;
 
-    console.log('🎉 [Backend AuthService] Đăng nhập Firebase Google thành công cho user:', user.email);
+    console.log(
+      '🎉 [Backend AuthService] Đăng nhập Firebase Google thành công cho user:',
+      user.email,
+    );
 
     return {
       success: true,

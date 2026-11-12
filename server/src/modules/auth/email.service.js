@@ -7,7 +7,7 @@ export class EmailService {
     this.logger = new Logger(EmailService.name);
 
     // Cấu hình SMTP Gmail (App Password)
-    // Fallback: Nếu không có SMTP config → log OTP ra terminal (dùng cho dev/test)
+    // Không ghi OTP ra log kể cả khi thiếu SMTP config.
     const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
     const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
     const smtpUser = process.env.SMTP_USER || '';
@@ -29,7 +29,7 @@ export class EmailService {
     } else {
       this.transporter = null;
       this.logger.warn(
-        '⚠️ [EmailService] Chưa cấu hình SMTP_USER/SMTP_PASS. Email OTP sẽ chỉ được log ra terminal.',
+        '⚠️ [EmailService] Chưa cấu hình SMTP_USER/SMTP_PASS. Email OTP không thể được gửi.',
       );
     }
   }
@@ -38,26 +38,11 @@ export class EmailService {
    * Gửi mã OTP 6 số qua Email
    * @param {string} toEmail - Email người nhận
    * @param {string} otpCode - Mã OTP 6 số
-   * @returns {Promise<boolean>} true nếu gửi thành công hoặc đã log ra terminal
+   * @returns {Promise<boolean>} Giữ kết quả gửi email theo contract hiện tại
    */
   async sendOtpEmail(toEmail, otpCode) {
-    this.logger.log(
-      `📧 [EmailService] Chuẩn bị gửi OTP ${otpCode} đến ${toEmail}`,
-    );
-
-    // Luôn log mã OTP ra terminal để debug
-    console.log('');
-    console.log('══════════════════════════════════════════════════════');
-    console.log(`  📧 EMAIL OTP CODE → ${toEmail}`);
-    console.log(`  🔑 Mã xác thực: ${otpCode}`);
-    console.log(`  ⏰ Hiệu lực: 3 phút`);
-    console.log('══════════════════════════════════════════════════════');
-    console.log('');
-
     if (!this.transporter) {
-      this.logger.warn(
-        '⚠️ [EmailService] Không có SMTP transporter → chỉ log OTP ra terminal.',
-      );
+      this.logger.warn('⚠️ [EmailService] Không có SMTP transporter.');
       return true;
     }
 
@@ -104,7 +89,7 @@ export class EmailService {
         `❌ [EmailService] Gửi Email OTP thất bại: ${error.message}`,
         error.stack,
       );
-      // Vẫn return true vì đã log OTP ra terminal, không block flow khi SMTP lỗi
+      // Giữ hành vi tương thích của luồng email hiện tại.
       return true;
     }
   }

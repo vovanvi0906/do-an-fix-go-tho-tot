@@ -5,6 +5,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import * as crypto from 'crypto';
+import { RegistrationProofService } from './registration-proof.service';
 import { JwtService } from '@nestjs/jwt';
 import { RedisService } from '../../infrastructure/redis/redis.service';
 import { EmailService } from './email.service';
@@ -30,6 +31,7 @@ const RESET_TOKEN_TTL = 600; // Token reset password có hiệu lực 10 phút
   EsmsService,
   UsersRepository,
   JwtService,
+  RegistrationProofService,
 )
 export class OtpService {
   constructor(
@@ -38,13 +40,28 @@ export class OtpService {
     esmsService,
     usersRepository,
     jwtService,
+    registrationProofService,
   ) {
+    this.registrationProofService = registrationProofService;
     this.redis = redisService.getClient();
     this.emailService = emailService;
     this.esmsService = esmsService;
     this.usersRepository = usersRepository;
     this.jwtService = jwtService;
     this.logger = new Logger(OtpService.name);
+  }
+
+  hashOtp(code) {
+    const secret = process.env.OTP_HASH_SECRET || process.env.JWT_SECRET;
+    if (!secret || secret.length < 32) {
+      throw new Error(
+        'OTP_HASH_SECRET (or JWT_SECRET) must contain at least 32 characters',
+      );
+    }
+    return crypto
+      .createHmac('sha256', secret)
+      .update(String(code))
+      .digest('hex');
   }
 
   /**
@@ -66,11 +83,11 @@ export class OtpService {
   // ═══════════════════════════════════════════════════════════════════════════
 
   /**
-   * Gửi OTP qua SMS (gọi eSMS API và đồng thời log ra terminal)
+   * Gửi OTP qua SMS
    */
   async sendPhoneOtp(phone) {
     // 1. Chuẩn hóa số điện thoại trước khi xử lý
-    const normalizedPhone = this.esmsService.normalizePhone(phone);
+    const normalizedPhone = this.registrationProofService.normalizePhone(phone);
     if (!normalizedPhone || normalizedPhone.length < 10) {
       throw new BadRequestException(
         'Số điện thoại không đúng định dạng (yêu cầu 10 chữ số)',
@@ -83,51 +100,40 @@ export class OtpService {
 
     // 2. Kiểm tra cooldown
     const cooldownKey = COOLDOWN_KEY('phone', normalizedPhone);
-    const cooldownRemain = await this.redis.ttl(cooldownKey);
-    if (cooldownRemain > 0) {
-      throw new BadRequestException(
-        `Vui lòng đợi ${cooldownRemain} giây trước khi gửi lại mã OTP`,
-      );
+    this.hashOtp('configuration-check');
+    const reserved = await this.redis.set(
+      cooldownKey,
+      '1',
+      'EX',
+      COOLDOWN_TTL,
+      'NX',
+    );
+    if (reserved !== 'OK') {
+      throw new BadRequestException('Vui lòng đợi trước khi gửi lại mã OTP');
     }
 
     // 3. Sinh mã OTP
     const otpCode = this.generateOtp();
+    const otpHash = this.hashOtp(otpCode);
 
     // 4. Gửi tin nhắn SMS thật qua cổng eSMS
     // Nếu eSMS trả về lỗi, ném lỗi ra ngoài, KHÔNG báo thành công về mobile!
     try {
       await this.esmsService.sendOtpSms(normalizedPhone, otpCode);
     } catch (smsError) {
-      console.error(
-        `❌ [OtpService] Gửi SMS qua eSMS thất bại cho số ${normalizedPhone}:`,
-        smsError.message,
-      );
-      // Ném lỗi trực tiếp để Controller báo lỗi rõ ràng về Mobile
       throw new BadRequestException(
-        smsError.message ||
-          'Gửi SMS OTP thất bại qua eSMS. Vui lòng kiểm tra lại cấu hình hoặc số dư!',
+        'Gửi SMS OTP thất bại. Vui lòng thử lại sau.',
       );
     }
 
     // 5. Khi eSMS đã gửi thành công -> Lưu OTP vào Redis (TTL 180s)
     const otpKey = OTP_KEY('phone', normalizedPhone);
-    await this.redis.set(otpKey, otpCode, 'EX', OTP_TTL);
-
-    // Đặt cooldown gửi lại (60s)
-    await this.redis.set(cooldownKey, '1', 'EX', COOLDOWN_TTL);
-
-    // Reset số lần thử
     const attemptsKey = ATTEMPTS_KEY('phone', normalizedPhone);
-    await this.redis.del(attemptsKey);
-
-    // Luôn log mã OTP ra terminal để phục vụ dev/test thuận tiện
-    console.log('');
-    console.log('══════════════════════════════════════════════════════');
-    console.log(`  📱 PHONE OTP CODE → ${normalizedPhone}`);
-    console.log(`  🔑 Mã xác thực: ${otpCode}`);
-    console.log(`  ⏰ Hiệu lực: ${OTP_TTL / 60} phút`);
-    console.log('══════════════════════════════════════════════════════');
-    console.log('');
+    await this.redis
+      .multi()
+      .set(otpKey, otpHash, 'EX', OTP_TTL)
+      .del(attemptsKey)
+      .exec();
 
     this.logger.log(
       `✅ [OtpService] Đã xử lý gửi Phone OTP thành công cho: ${normalizedPhone}`,
@@ -145,49 +151,41 @@ export class OtpService {
    * @returns {{ verified: boolean, resetToken?: string }} resetToken dùng cho luồng quên mật khẩu
    */
   async verifyPhoneOtp(phone, code, issueResetToken = false) {
-    const normalizedPhone = this.esmsService.normalizePhone(phone);
-    this.logger.log(
-      `📱 [OtpService] Xác thực Phone OTP cho: ${normalizedPhone}, Code: ${code}`,
+    const normalizedPhone = this.registrationProofService.normalizePhone(phone);
+    if (typeof code !== 'string' || !/^[0-9]{6}$/.test(code)) {
+      throw new BadRequestException('Mã OTP không hợp lệ');
+    }
+    // A Lua script makes attempt counting and one-time verification atomic.
+    const status = await this.redis.eval(
+      `
+      local attempts = tonumber(redis.call('GET', KEYS[2]) or '0')
+      if attempts >= tonumber(ARGV[2]) then
+        redis.call('DEL', KEYS[1])
+        return -2
+      end
+      local stored = redis.call('GET', KEYS[1])
+      if not stored then return -1 end
+      if stored ~= ARGV[1] then
+        local count = redis.call('INCR', KEYS[2])
+        redis.call('EXPIRE', KEYS[2], ARGV[3])
+        if count >= tonumber(ARGV[2]) then redis.call('DEL', KEYS[1]) end
+        return 0
+      end
+      redis.call('DEL', KEYS[1], KEYS[2])
+      return 1
+    `,
+      2,
+      OTP_KEY('phone', normalizedPhone),
+      ATTEMPTS_KEY('phone', normalizedPhone),
+      this.hashOtp(code),
+      MAX_ATTEMPTS,
+      OTP_TTL,
     );
-
-    const otpKey = OTP_KEY('phone', normalizedPhone);
-    const attemptsKey = ATTEMPTS_KEY('phone', normalizedPhone);
-
-    // Kiểm tra số lần thử
-    const attempts = parseInt((await this.redis.get(attemptsKey)) || '0', 10);
-    if (attempts >= MAX_ATTEMPTS) {
-      // Xóa OTP để buộc gửi lại
-      await this.redis.del(otpKey);
+    if (status !== 1) {
       throw new BadRequestException(
-        'Bạn đã nhập sai quá nhiều lần. Vui lòng yêu cầu gửi lại mã OTP mới.',
+        'Mã OTP không hợp lệ, hết hạn hoặc vượt quá số lần thử.',
       );
     }
-
-    // Lấy mã OTP đã lưu
-    const storedOtp = await this.redis.get(otpKey);
-    if (!storedOtp) {
-      throw new BadRequestException(
-        'Mã OTP đã hết hạn hoặc chưa được gửi. Vui lòng yêu cầu gửi lại.',
-      );
-    }
-
-    // So sánh mã
-    if (storedOtp !== code) {
-      await this.redis.incr(attemptsKey);
-      await this.redis.expire(attemptsKey, OTP_TTL);
-      const remaining = MAX_ATTEMPTS - attempts - 1;
-      throw new BadRequestException(
-        `Mã OTP không chính xác. Bạn còn ${remaining} lần thử.`,
-      );
-    }
-
-    // OTP đúng → xóa key
-    await this.redis.del(otpKey);
-    await this.redis.del(attemptsKey);
-
-    this.logger.log(
-      `✅ [OtpService] Phone OTP verified thành công cho: ${normalizedPhone}`,
-    );
 
     const result = {
       verified: true,
@@ -200,8 +198,10 @@ export class OtpService {
       const tokenKey = RESET_TOKEN_KEY(resetToken);
       await this.redis.set(tokenKey, normalizedPhone, 'EX', RESET_TOKEN_TTL);
       result.resetToken = resetToken;
-      this.logger.log(
-        `🔑 [OtpService] Đã tạo resetToken cho ${normalizedPhone}: ${resetToken.substring(0, 16)}...`,
+    } else {
+      Object.assign(
+        result,
+        await this.registrationProofService.issue(normalizedPhone),
       );
     }
 
@@ -241,7 +241,7 @@ export class OtpService {
     const attemptsKey = ATTEMPTS_KEY('email', email);
     await this.redis.del(attemptsKey);
 
-    // Gửi email qua EmailService (cũng tự log ra terminal)
+    // Gửi email qua EmailService
     await this.emailService.sendOtpEmail(email, otpCode);
 
     this.logger.log(
@@ -262,9 +262,7 @@ export class OtpService {
    * @param {object} [req] - Request object (nếu người dùng đang đăng nhập có kèm Bearer token)
    */
   async verifyEmailOtp(email, code, req = null) {
-    this.logger.log(
-      `📧 [OtpService] Xác thực Email OTP cho: ${email}, Code: ${code}`,
-    );
+    this.logger.log(`📧 [OtpService] Xác thực Email OTP`);
 
     const otpKey = OTP_KEY('email', email);
     const attemptsKey = ATTEMPTS_KEY('email', email);
@@ -313,14 +311,18 @@ export class OtpService {
         const userId = decoded?.sub || decoded?.userId || decoded?.id;
         if (userId) {
           if (email) {
-            const existingWithEmail = await this.usersRepository.findByEmail(email);
+            const existingWithEmail =
+              await this.usersRepository.findByEmail(email);
             if (existingWithEmail && existingWithEmail.id !== userId) {
               throw new BadRequestException(
                 'Email này đã được liên kết với một tài khoản khác trong hệ thống.',
               );
             }
           }
-          updatedUser = await this.usersRepository.markEmailVerified(userId, email);
+          updatedUser = await this.usersRepository.markEmailVerified(
+            userId,
+            email,
+          );
           this.logger.log(
             `✅ [OtpService] Đã cập nhật is_email_verified = true cho User ID: ${userId} (Email: ${email})`,
           );

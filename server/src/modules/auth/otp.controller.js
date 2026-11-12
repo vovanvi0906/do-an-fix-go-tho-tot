@@ -6,6 +6,7 @@ import {
   Dependencies,
   Query,
   Req,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -64,6 +65,9 @@ export class OtpController {
   })
   @Bind(Body(), Query('purpose'))
   async verifyPhoneOtp(body, purpose) {
+    if (purpose && !['register', 'reset-password'].includes(purpose)) {
+      throw new BadRequestException('Mục đích xác thực không hợp lệ');
+    }
     const issueResetToken = purpose === 'reset-password';
     return this.otpService.verifyPhoneOtp(
       body.phone,

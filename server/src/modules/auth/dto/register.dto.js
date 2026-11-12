@@ -101,4 +101,12 @@ export class RegisterDto {
   })
   @IsOptional()
   skills;
+  @ApiPropertyOptional({
+    type: String,
+    description:
+      'Proof từ verify-phone-otp, bắt buộc khi tạo Customer mới; hiệu lực 300 giây, dùng một lần',
+  })
+  @IsOptional()
+  @IsString()
+  registrationProof;
 }
