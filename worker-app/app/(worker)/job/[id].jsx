@@ -1,57 +1,73 @@
-import React, { useState } from 'react';
+import { socketService } from '../../../src/services/socket/socketService';
+import { orderService } from '../../../src/services/api/orderService';
+import { apiClient } from '../../../src/services/api/apiClient';
+import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Image } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../../src/features/auth';
 import { useWorkerLocationTracker } from '../../../src/hooks/useWorkerLocationTracker';
-import { socketService } from '../../../src/services/socket/socketService';
 
 export default function WorkerJobDetailScreen() {
-  const { id, title, customerName, addressText, price, imageUrl, confidence, faceVerified } = useLocalSearchParams();
+  const { id } = useLocalSearchParams();
   const router = useRouter();
   const { user } = useAuth();
 
-  const [jobStatus, setJobStatus] = useState('ASSIGNED');
-  const [isFaceChecked, setIsFaceChecked] = useState(faceVerified === 'true');
+  const [jobStatus, setJobStatus] = useState(null);
+  const [order, setOrder] = useState(null);
+  const [pending, setPending] = useState(false);
+  const [loadError, setLoadError] = useState('');
+  const [isFaceChecked, setIsFaceChecked] = useState(false);
   const { isTracking, startTracking, stopTracking } = useWorkerLocationTracker(id, user?.id);
 
-  const handleStartMoving = async () => {
-    if (!isFaceChecked) {
-      Alert.alert(
-        'Xác thực danh tính',
-        'Vui lòng chụp selfie xác thực khuôn mặt thợ với hệ thống AI trước khi khởi hành.',
-        [
-          { text: 'Hủy', style: 'cancel' },
-          {
-            text: 'Xác thực ngay',
-            onPress: () => router.push({ pathname: '/(worker)/verification/face', params: { orderId: id } }),
-          },
-        ]
-      );
-      return;
-    }
+  const reload = useCallback(async () => {
+    try {
+      const [snapshot, profile] = await Promise.all([orderService.getOrderById(id), apiClient.get('/workers/me')]);
+      setOrder(snapshot);
+      setJobStatus(snapshot.status);
+      setIsFaceChecked(!!profile.faceVerifiedAt && Date.now() - new Date(profile.faceVerifiedAt).getTime() < 86400000);
+      setLoadError('');
+    } catch (error) { setLoadError(error.message); setJobStatus(null); }
+  }, [id]);
+  useFocusEffect(useCallback(() => {
+    reload();
+    socketService.joinOrderRoom(id);
+    const onStatus = (event) => { if (event.orderId === id) reload(); };
+    socketService.on('order:status_changed', onStatus);
+    return () => {
+      socketService.off('order:status_changed', onStatus);
+      socketService.leaveOrderRoom(id);
+    };
+  }, [id, reload]));
 
-    const ok = await startTracking();
-    if (ok) {
-      setJobStatus('WORKER_ARRIVING');
-      socketService.emit('worker:status_update', { orderId: id, status: 'WORKER_ARRIVING' });
-      Alert.alert('Thành công', 'Đã bật định vị GPS truyền trực tiếp lộ trình cho khách hàng!');
-    }
+  const changeStage = async (status) => {
+    if (pending) return false;
+    setPending(true);
+    try {
+      const response = await apiClient.patch(`/orders/${id}/status`, { status });
+      setOrder(response.order);
+      setJobStatus(response.order.status);
+      return true;
+    } catch (error) { Alert.alert('Chưa cập nhật trạng thái', error.message); await reload(); return false; }
+    finally { setPending(false); }
   };
-
-  const handleArrived = () => {
-    stopTracking();
-    setJobStatus('IN_PROGRESS');
-    socketService.emit('worker:status_update', { orderId: id, status: 'IN_PROGRESS' });
-    Alert.alert('Đến nơi', 'Đã đến nhà khách. GPS đã tự động ngắt để tiết kiệm pin!');
+  const imageUrl = order?.images?.find(image => image.type === 'ISSUE')?.url;
+  const confidence = order?.aiConfidence;
+  const handleStartMoving = async () => {
+    if (await changeStage('WORKER_EN_ROUTE')) await startTracking();
+  };
+  const handleArrived = async () => {
+    if (await changeStage('ARRIVED')) stopTracking();
   };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      {loadError ? <TouchableOpacity onPress={reload}><Text>{loadError} — Thử lại</Text></TouchableOpacity> : null}
+      {pending ? <Text>Đang cập nhật…</Text> : null}
       <View style={styles.headerBox}>
         <Text style={styles.orderBadge}>MÃ ĐƠN #{String(id || '').slice(0, 8).toUpperCase()}</Text>
-        <Text style={styles.title}>{title || 'Sửa chữa thiết bị theo yêu cầu'}</Text>
-        <Text style={styles.price}>{price ? `${Number(price).toLocaleString('vi-VN')} đ` : '150.000 đ'}</Text>
+        <Text style={styles.title}>{order?.service?.name || order?.category?.name || 'Đang tải đơn hàng…'}</Text>
+        <Text style={styles.price}>{order ? `${Number(order.finalPrice ?? order.estimatedPrice).toLocaleString('vi-VN')} đ` : '—'}</Text>
       </View>
 
       {imageUrl ? (
@@ -70,12 +86,12 @@ export default function WorkerJobDetailScreen() {
         <View style={styles.row}>
           <Ionicons name="location" size={18} color="#0284C7" />
           <Text style={styles.label}>Địa chỉ:</Text>
-          <Text style={styles.val}>{addressText || '606/20 Hiệp Bình, TP. Thủ Đức'}</Text>
+          <Text style={styles.val}>{order?.addressText || '—'}</Text>
         </View>
         <View style={styles.row}>
           <Ionicons name="person" size={18} color="#0284C7" />
           <Text style={styles.label}>Khách hàng:</Text>
-          <Text style={styles.val}>{customerName || 'Nguyễn Văn A (0988.123.456)'}</Text>
+          <Text style={styles.val}>{order?.customer?.name || '—'}</Text>
         </View>
         <View style={styles.row}>
           <Ionicons name="scan-circle" size={18} color={isFaceChecked ? '#16A34A' : '#F59E0B'} />
@@ -105,29 +121,27 @@ export default function WorkerJobDetailScreen() {
           </TouchableOpacity>
         )}
 
-        {jobStatus === 'ASSIGNED' && (
-          <TouchableOpacity style={styles.btnPrimary} onPress={handleStartMoving} activeOpacity={0.8}>
+        {['ASSIGNED', 'MATCHED'].includes(jobStatus) && (
+          <TouchableOpacity style={styles.btnPrimary} disabled={pending} onPress={handleStartMoving} activeOpacity={0.8}>
             <Ionicons name="navigate" size={18} color="#FFF" style={{ marginRight: 6 }} />
             <Text style={styles.btnText}>BẮT ĐẦU DI CHUYỂN ĐẾN KHÁCH</Text>
           </TouchableOpacity>
         )}
 
-        {jobStatus === 'WORKER_ARRIVING' && (
-          <TouchableOpacity style={styles.btnSuccess} onPress={handleArrived} activeOpacity={0.8}>
+        {['WORKER_ARRIVING', 'WORKER_EN_ROUTE'].includes(jobStatus) && (
+          <TouchableOpacity style={styles.btnSuccess} disabled={pending} onPress={handleArrived} activeOpacity={0.8}>
             <Ionicons name="checkmark-circle" size={18} color="#FFF" style={{ marginRight: 6 }} />
-            <Text style={styles.btnText}>ĐÃ ĐẾN NƠI - BẮT ĐẦU SỬA</Text>
+            <Text style={styles.btnText}>ĐÃ ĐẾN NƠI</Text>
           </TouchableOpacity>
         )}
 
-        {jobStatus === 'IN_PROGRESS' && (
-          <TouchableOpacity
-            style={styles.btnCamera}
-            onPress={() => router.push({ pathname: '/(worker)/verification/face', params: { orderId: id } })}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="camera" size={18} color="#FFF" style={{ marginRight: 6 }} />
-            <Text style={styles.btnText}>CHỤP ẢNH NGHIỆM THU (AFTER)</Text>
+        {jobStatus === 'ARRIVED' && (
+          <TouchableOpacity style={styles.btnPrimary} disabled={pending} onPress={() => changeStage('IN_PROGRESS')}>
+            <Text style={styles.btnText}>BẮT ĐẦU CÔNG VIỆC</Text>
           </TouchableOpacity>
+        )}
+        {jobStatus === 'IN_PROGRESS' && (
+          <Text>Đang thực hiện công việc.</Text>
         )}
       </View>
     </ScrollView>

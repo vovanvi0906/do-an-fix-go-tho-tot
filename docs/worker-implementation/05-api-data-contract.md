@@ -1,5 +1,8 @@
 # API / data / realtime contract
 
+> Cập nhật 12/11/2026: ARC-01 đã triển khai policy/guards/transaction và contract mới; xem [báo cáo ARC-01](10-arc01-report.md). Phần audit/kế hoạch dưới đây được giữ làm baseline lịch sử, không phải tất cả đều là contract hiện hành.
+
+
 Nguồn: OrdersController, WorkersController, OrdersService, OrderGateway, schema.prisma, worker orderService/apiClient và customer orderService. REST prefix thực `/api` ở server/src/main.js; socket namespace `/orders` không có prefix REST. Đây là contract đọc từ source, runtime NOT_VERIFIED.
 
 ## Route hiện có: tái sử dụng trước khi tạo mới

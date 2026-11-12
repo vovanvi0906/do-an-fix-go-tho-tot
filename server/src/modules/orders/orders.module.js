@@ -1,3 +1,4 @@
+import { OrderAccessGuard } from './order-access.guard';
 import { Module } from '@nestjs/common';
 import { OrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
@@ -14,6 +15,7 @@ import { RedisModule } from '../../infrastructure/redis/redis.module';
   imports: [PrismaModule, UsersModule, RedisModule, AiModule],
   controllers: [OrdersController],
   providers: [
+    OrderAccessGuard,
     OrdersService,
     OrdersRepository,
     OrderWorkflowService,

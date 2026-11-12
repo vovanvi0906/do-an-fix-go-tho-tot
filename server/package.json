@@ -21,7 +21,8 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "db:clear-services": "node prisma/clear_services.js",
-    "db:import-services": "node prisma/import_services.js"
+    "db:import-services": "node prisma/import_services.js",
+    "test:arc01": "jest --config ./test/jest-arc01.config.cjs --runInBand"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

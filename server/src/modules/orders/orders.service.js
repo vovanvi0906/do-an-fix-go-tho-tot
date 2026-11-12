@@ -1,3 +1,4 @@
+import { ORDER_STATUS } from './constants/order-status';
 import { resolveDiagnosis } from './diagnosis/diagnosis-resolver';
 import {
   Injectable,
@@ -80,6 +81,8 @@ export class OrdersService {
    * 2. POST /orders: Khởi tạo đơn hàng dịch vụ mới (Trạng thái ban đầu: SEARCHING_WORKER)
    */
   async createOrder(userId, createOrderDto) {
+    const actor = await this.orderWorkflowService.actor(this.prisma, userId);
+    if (actor.role !== 'CUSTOMER') throw new ForbiddenException('CUSTOMER_REQUIRED');
     const {
       categoryId,
       serviceId,
@@ -93,7 +96,6 @@ export class OrdersService {
       description,
       aiSuggestedCategoryId,
       aiConfidence,
-      estimatedPrice,
       scheduledAt,
       imageUrl,
     } = createOrderDto;
@@ -165,12 +167,12 @@ export class OrdersService {
         },
       });
 
-      // Tu dong luu anh su co ban dau vao bang OrderImage voi type = BEFORE
+      // Lưu ảnh khách là ISSUE; không dùng thay BEFORE của thợ
       if (imageUrl) {
         await tx.orderImage.create({
           data: {
             orderId: newOrder.id,
-            type: 'BEFORE',
+            type: 'ISSUE',
             url: imageUrl,
           },
         });
@@ -211,6 +213,8 @@ export class OrdersService {
    * 3. GET /orders/:id: Chi tiết đơn hàng (Chỉ khách tạo đơn, thợ được gán, hoặc admin mới xem được)
    */
   async getOrderById(orderId, userId, userRole) {
+    const { actor } = await this.orderWorkflowService.access(orderId, userId);
+    userRole = actor.role;
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
       include: {
@@ -252,11 +256,9 @@ export class OrdersService {
       const workerProfile = await this.prisma.workerProfile.findUnique({
         where: { userId },
       });
-      // Thợ được gán đơn hoặc thợ đang xem đơn mới ở trạng thái tìm kiếm
+      // Chỉ thợ được gán mới đọc đầy đủ chi tiết đơn
       if (
-        (workerProfile && order.workerId === workerProfile.id) ||
-        order.status === 'SEARCHING_WORKER' ||
-        order.status === 'SEARCHING'
+        workerProfile && order.workerId === workerProfile.id
       ) {
         return order;
       }
@@ -271,6 +273,8 @@ export class OrdersService {
    * 4. GET /orders: Danh sách đơn hàng của người dùng hiện tại (phân trang + lọc status)
    */
   async getMyOrders(userId, userRole, query = {}) {
+    const actor = await this.orderWorkflowService.actor(this.prisma, userId);
+    userRole = actor.role;
     const page = Math.max(1, parseInt(query.page) || 1);
     const limit = Math.min(50, Math.max(1, parseInt(query.limit) || 10));
     const skip = (page - 1) * limit;
@@ -278,6 +282,7 @@ export class OrdersService {
     const where = {};
 
     if (query.status) {
+      if (!Object.hasOwn(ORDER_STATUS, query.status)) throw new BadRequestException('INVALID_STATUS');
       where.status = query.status;
     }
 
@@ -337,92 +342,10 @@ export class OrdersService {
   /**
    * 5. PATCH /orders/:id/cancel: Khách huỷ đơn kèm tính phí phạt nếu huỷ sau khi đã MATCHED
    */
-  async cancelOrder(orderId, userId, userRole, reason = 'Khách hủy đơn') {
-    const order = await this.prisma.order.findUnique({
-      where: { id: orderId },
-    });
-
-    if (!order) {
-      throw new NotFoundException('Không tìm thấy đơn hàng');
-    }
-
-    // Kiểm tra quyền hủy đơn
-    if (userRole !== 'ADMIN' && order.customerId !== userId) {
-      const workerProfile = await this.prisma.workerProfile.findUnique({
-        where: { userId },
-      });
-      if (!workerProfile || order.workerId !== workerProfile.id) {
-        throw new ForbiddenException('Bạn không có quyền hủy đơn hàng này');
-      }
-    }
-
-    if (
-      order.status === 'COMPLETED' ||
-      order.status === 'PAID' ||
-      order.status === 'CANCELLED'
-    ) {
-      throw new BadRequestException(
-        `Không thể hủy đơn hàng đang ở trạng thái ${order.status}`,
-      );
-    }
-
-    // Business Rule: Hủy trước MATCHED -> Miễn phí (0đ). Hủy từ MATCHED trở đi -> Áp phí hủy 20%
-    const freeCancelStatuses = [
-      'PENDING_AI',
-      'AWAITING_CONFIRM',
-      'SEARCHING_WORKER',
-      'SEARCHING',
-      'CREATED',
-    ];
-    let cancellationFee = 0;
-
-    if (!freeCancelStatuses.includes(order.status)) {
-      const penaltyRate = 0.2; // 20% phí hủy
-      cancellationFee = Math.round(
-        Number(order.estimatedPrice || 150000) * penaltyRate,
-      );
-    }
-
-    // Cập nhật trạng thái CANCELLED trong 1 Transaction
-    const updatedOrder = await this.prisma.$transaction(async (tx) => {
-      const updated = await tx.order.update({
-        where: { id: orderId },
-        data: {
-          status: 'CANCELLED',
-          cancellationReason: `${reason} (Phí hủy: ${cancellationFee.toLocaleString('vi-VN')} đ)`,
-          cancelledBy: userId,
-        },
-      });
-
-      await tx.orderStatusHistory.create({
-        data: {
-          orderId,
-          status: 'CANCELLED',
-          note: `Đơn bị hủy bởi ${userRole}. Lý do: ${reason}. Phí hủy áp dụng: ${cancellationFee} đ`,
-          changedBy: userId,
-        },
-      });
-
-      return updated;
-    });
-
-    try {
-      this.ordersGateway.emitStatusChanged(orderId, 'CANCELLED');
-    } catch (e) {
-      console.warn('Lỗi emit socket cancel:', e.message);
-    }
-
-    return {
-      success: true,
-      message: 'Hủy đơn hàng thành công',
-      cancellationFee,
-      order: updatedOrder,
-    };
+  async cancelOrder(orderId, userId, userRole, reason = 'Hủy theo yêu cầu') {
+    return this.orderWorkflowService.transition(orderId, userId, 'CANCELLED', { reason, chargeCancellationFee: true });
   }
 
-  /**
-   * 6. POST /orders/:id/match: (Internal) Tìm thợ gần nhất theo bán kính (Dùng PostGIS/Haversine)
-   */
   async matchNearbyWorkers(orderId, radiusKm = 5) {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
@@ -500,104 +423,20 @@ export class OrdersService {
    * - Business Rule 2: Chống Race Condition tranh chấp nhận đơn bằng transaction SELECT ... FOR UPDATE
    */
   async acceptOrder(orderId, workerUserId) {
-    // 1. Kiểm tra hồ sơ thợ & trạng thái xác thực khuôn mặt 24h
-    const worker = await this.prisma.workerProfile.findUnique({
-      where: { userId: workerUserId },
-    });
-
-    if (!worker) {
-      throw new BadRequestException('Không tìm thấy hồ sơ kỹ thuật viên');
-    }
-
-    if (!worker.faceVerifiedAt) {
-      throw new BadRequestException(
-        'Yêu cầu xác thực khuôn mặt trước khi nhận đơn hàng',
-      );
-    }
-
-    const hoursSinceFaceVerify =
-      (Date.now() - new Date(worker.faceVerifiedAt).getTime()) /
-      (1000 * 60 * 60);
-    if (hoursSinceFaceVerify > 24) {
-      throw new BadRequestException(
-        'Xác thực khuôn mặt đã hết hạn (> 24 giờ). Vui lòng xác thực lại khuôn mặt',
-      );
-    }
-
-    // 2. Chống Race condition bằng Transaction với SELECT ... FOR UPDATE
-    const acceptedOrder = await this.prisma.$transaction(async (tx) => {
-      // Khóa bản ghi đơn hàng để kiểm tra đồng thời
-      const lockedOrders = await tx.$queryRawUnsafe(
-        `SELECT id, status, "workerId" FROM "orders" WHERE id = $1 FOR UPDATE`,
-        orderId,
-      );
-
-      if (!lockedOrders || lockedOrders.length === 0) {
-        throw new NotFoundException('Không tìm thấy đơn hàng');
+    const result = await this.orderWorkflowService.transition(orderId, workerUserId, 'MATCHED');
+    if (result.changed) {
+      try {
+        const worker = await this.prisma.workerProfile.findUnique({ where: { userId: workerUserId } });
+        this.ordersGateway.emitOrderMatched(orderId, worker);
       }
-
-      const currentOrder = lockedOrders[0];
-
-      if (
-        currentOrder.status !== 'SEARCHING_WORKER' &&
-        currentOrder.status !== 'SEARCHING'
-      ) {
-        throw new ConflictException(
-          'Đơn hàng không còn ở trạng thái mở hoặc đã được xử lý',
-        );
-      }
-
-      if (currentOrder.workerId) {
-        throw new ConflictException(
-          'Đơn hàng đã được kỹ thuật viên khác nhận trước',
-        );
-      }
-
-      // Cập nhật gán thợ và chuyển trạng thái sang MATCHED
-      const updated = await tx.order.update({
-        where: { id: orderId },
-        data: {
-          workerId: worker.id,
-          status: 'MATCHED',
-        },
-        include: {
-          customer: { select: { id: true, name: true, phone: true } },
-          category: true,
-        },
-      });
-
-      await tx.orderStatusHistory.create({
-        data: {
-          orderId,
-          status: 'MATCHED',
-          note: `Kỹ thuật viên ${worker.fullName || 'đối tác'} nhận đơn thành công`,
-          changedBy: workerUserId,
-        },
-      });
-
-      return updated;
-    });
-
-    // Bắn tín hiệu WebSocket thông báo khớp đơn
-    try {
-      this.ordersGateway.emitOrderMatched(orderId, worker);
-      this.ordersGateway.emitStatusChanged(orderId, 'MATCHED');
-    } catch (e) {
-      console.warn('Lỗi emit socket matched:', e.message);
+      catch (error) { console.warn('Order matched broadcast failed:', error.message); }
     }
-
-    return {
-      success: true,
-      message: 'Nhận đơn hàng thành công!',
-      order: acceptedOrder,
-    };
+    return result;
   }
 
-  /**
-   * 8. POST /orders/:id/face-verify: Xác thực khuôn mặt thợ trước khi accept (gọi AI service)
-   * Business Rule Fallback: Nếu confidence < ngưỡng cấu hình (0.6) thì chuyển sang hàng đợi xác minh thủ công bởi Admin, không chặn cứng luồng!
-   */
   async verifyFace(orderId, workerUserId, faceVerifyDto) {
+    const access = await this.orderWorkflowService.access(orderId, workerUserId, ['WORKER']);
+    if (!['MATCHED', 'ASSIGNED', 'WORKER_EN_ROUTE', 'WORKER_ARRIVING', 'ARRIVED', 'IN_PROGRESS'].includes(access.order.status)) throw new ConflictException('FACE_STAGE_NOT_ALLOWED');
     const { photoUrl } = faceVerifyDto;
     const threshold = this.fastApiAiClient.confidenceThreshold || 0.6;
 
@@ -639,7 +478,6 @@ export class OrdersService {
       await this.prisma.workerProfile.update({
         where: { userId: workerUserId },
         data: {
-          faceVerifiedAt: verifiedAt,
           kycStatus: 'PENDING',
         },
       });
@@ -650,7 +488,7 @@ export class OrdersService {
         needsManualReview: true,
         confidence,
         verifiedAt,
-        message: `Độ khớp khuôn mặt (${(confidence * 100).toFixed(0)}%) dưới ngưỡng ${threshold * 100}%. Hồ sơ đã được chuyển vào hàng đợi xác minh thủ công bởi Quản trị viên, bạn vẫn có thể tiếp tục nhận đơn.`,
+        message: `Độ khớp khuôn mặt (${(confidence * 100).toFixed(0)}%) dưới ngưỡng ${threshold * 100}%. Hồ sơ đã được chuyển vào hàng đợi xác minh thủ công bởi Quản trị viên, vui lòng chờ xác minh thành công trước khi nhận đơn.`,
       };
     }
 
@@ -677,107 +515,36 @@ export class OrdersService {
   /**
    * 9. PATCH /orders/:id/status: Cập nhật trạng thái tiến độ (EN_ROUTE, IN_PROGRESS, AWAITING_ACCEPTANCE)
    */
-  async updateStatus(orderId, workerUserId, updateStatusDto) {
-    const { status, note } = updateStatusDto;
-
-    const worker = await this.prisma.workerProfile.findUnique({
-      where: { userId: workerUserId },
-    });
-
-    if (!worker) {
-      throw new BadRequestException('Không tìm thấy hồ sơ kỹ thuật viên');
-    }
-
-    const order = await this.prisma.order.findUnique({
-      where: { id: orderId },
-    });
-
-    if (!order || order.workerId !== worker.id) {
-      throw new ForbiddenException(
-        'Bạn không phải là kỹ thuật viên phụ trách đơn hàng này',
-      );
-    }
-
-    // Mapping tương thích trạng thái
-    let normalizedStatus = status;
-    if (status === 'WORKER_ARRIVING') normalizedStatus = 'WORKER_EN_ROUTE';
-    if (status === 'AWAITING_CONFIRMATION')
-      normalizedStatus = 'AWAITING_ACCEPTANCE';
-
-    const updatedOrder = await this.prisma.$transaction(async (tx) => {
-      const updated = await tx.order.update({
-        where: { id: orderId },
-        data: {
-          status: normalizedStatus,
-          ...(normalizedStatus === 'IN_PROGRESS' && !order.startedAt
-            ? { startedAt: new Date() }
-            : {}),
-        },
-      });
-
-      await tx.orderStatusHistory.create({
-        data: {
-          orderId,
-          status: normalizedStatus,
-          note:
-            note || `Kỹ thuật viên cập nhật tiến độ sang ${normalizedStatus}`,
-          changedBy: workerUserId,
-        },
-      });
-
-      return updated;
-    });
-
-    // Bắn tín hiệu WebSocket
-    try {
-      this.ordersGateway.emitStatusChanged(orderId, normalizedStatus);
-    } catch (e) {
-      console.warn('Lỗi emit status socket:', e.message);
-    }
-
-    return {
-      success: true,
-      message: `Cập nhật trạng thái sang ${normalizedStatus} thành công`,
-      order: updatedOrder,
-    };
+  async updateStatus(orderId, workerUserId, dto) {
+    return this.orderWorkflowService.transition(orderId, workerUserId, dto.status, { note: dto.note });
   }
 
-  /**
-   * 10. POST /orders/:id/images: Upload ảnh BEFORE / AFTER lên lưu trữ S3, lưu vào bảng OrderImage
-   */
-  async uploadImage(orderId, uploadDto) {
-    const { type, url } = uploadDto;
-
-    const order = await this.prisma.order.findUnique({
-      where: { id: orderId },
+  async uploadImage(orderId, uploadDto, userId) {
+    const image = await this.prisma.$transaction(async tx => {
+      await tx.$queryRaw`SELECT id FROM orders WHERE id = ${orderId} FOR UPDATE`;
+      const actor = await this.orderWorkflowService.actor(tx, userId);
+      const order = await tx.order.findUnique({ where: { id: orderId } });
+      if (!order) throw new NotFoundException('ORDER_NOT_FOUND');
+      this.orderWorkflowService.authorize(order, actor);
+      const permitted = actor.role === 'WORKER'
+        ? (uploadDto.type === 'BEFORE' && order.status === 'ARRIVED') || (uploadDto.type === 'AFTER' && order.status === 'IN_PROGRESS')
+        : actor.role === 'CUSTOMER' && uploadDto.type === 'ISSUE' && ['CREATED', 'SEARCHING', 'SEARCHING_WORKER'].includes(order.status);
+      if (!permitted) throw new ForbiddenException('PHOTO_ACTION_NOT_ALLOWED');
+      if (!/^https?:\/\//i.test(uploadDto.url)) throw new BadRequestException('INVALID_PHOTO_URL');
+      const existing = await tx.orderImage.findFirst({ where: { orderId, type: uploadDto.type, url: uploadDto.url } });
+      if (existing) return existing;
+      return tx.orderImage.create({ data: { orderId, type: uploadDto.type, url: uploadDto.url,
+        imageUrl: uploadDto.url, imageType: uploadDto.type, uploadedAt: new Date() } });
     });
-
-    if (!order) {
-      throw new NotFoundException('Không tìm thấy đơn hàng');
-    }
-
-    const orderImage = await this.prisma.orderImage.create({
-      data: {
-        orderId,
-        type,
-        url,
-        imageUrl: url,
-        imageType: type,
-        uploadedAt: new Date(),
-      },
-    });
-
-    return {
-      success: true,
-      message: `Lưu ảnh ${type} thành công`,
-      image: orderImage,
-    };
+    return { success: true, image };
   }
 
   /**
    * 11. POST /orders/:id/verify-completion: Gọi AI so sánh ảnh before/after, trả matchScore
    */
-  async verifyCompletion(orderId) {
+  async verifyCompletion(orderId, userId) {
+    const access = await this.orderWorkflowService.access(orderId, userId);
+    if (!['AWAITING_ACCEPTANCE', 'AWAITING_CONFIRMATION', 'AWAITING_PAYMENT', 'COMPLETED', 'PAID', 'DISPUTED'].includes(access.order.status)) throw new ConflictException('ACCEPTANCE_STAGE_REQUIRED');
     const images = await this.prisma.orderImage.findMany({
       where: { orderId },
       orderBy: { uploadedAt: 'desc' },
@@ -829,240 +596,22 @@ export class OrdersService {
   }
 
   /**
-   * 12. POST /orders/:id/accept-completion: Khách xác nhận nghiệm thu -> status COMPLETED
+   * 12. Khách xác nhận nghiệm thu -> AWAITING_PAYMENT (chưa hoàn tất đơn)
    */
-  async acceptCompletion(orderId, customerUserId) {
-    const order = await this.prisma.order.findUnique({
-      where: { id: orderId },
-    });
-
-    if (!order) {
-      throw new NotFoundException('Không tìm thấy đơn hàng');
-    }
-
-    if (order.customerId !== customerUserId) {
-      throw new ForbiddenException(
-        'Chỉ khách hàng tạo đơn mới có quyền xác nhận nghiệm thu',
-      );
-    }
-
-    const updatedOrder = await this.prisma.$transaction(async (tx) => {
-      const updated = await tx.order.update({
-        where: { id: orderId },
-        data: {
-          status: 'COMPLETED',
-          completedAt: new Date(),
-        },
-      });
-
-      await tx.orderStatusHistory.create({
-        data: {
-          orderId,
-          status: 'COMPLETED',
-          note: 'Khách hàng đã trực tiếp kiểm tra và xác nhận nghiệm thu công việc hoàn tất',
-          changedBy: customerUserId,
-        },
-      });
-
-      return updated;
-    });
-
-    try {
-      this.ordersGateway.emitStatusChanged(orderId, 'COMPLETED');
-    } catch (e) {
-      console.warn('Lỗi emit completion socket:', e.message);
-    }
-
-    return {
-      success: true,
-      message:
-        'Xác nhận nghiệm thu dịch vụ thành công! Vui lòng tiến hành thanh toán cho kỹ thuật viên.',
-      order: updatedOrder,
-    };
+  async acceptCompletion(orderId, userId) {
+    return this.orderWorkflowService.transition(orderId, userId, 'AWAITING_PAYMENT');
   }
 
-  /**
-   * 13. POST /orders/:id/dispute: Khách khiếu nại -> status DISPUTED, tạo ticket cho admin
-   */
-  async disputeOrder(orderId, customerUserId, disputeDto) {
-    const { reason, evidenceImages = [] } = disputeDto;
-
-    const order = await this.prisma.order.findUnique({
-      where: { id: orderId },
-    });
-
-    if (!order || order.customerId !== customerUserId) {
-      throw new ForbiddenException('Bạn không có quyền khiếu nại đơn hàng này');
-    }
-
-    const updatedOrder = await this.prisma.$transaction(async (tx) => {
-      const updated = await tx.order.update({
-        where: { id: orderId },
-        data: {
-          status: 'DISPUTED',
-        },
-      });
-
-      await tx.orderStatusHistory.create({
-        data: {
-          orderId,
-          status: 'DISPUTED',
-          note: `Khách khiếu nại: ${reason}`,
-          changedBy: customerUserId,
-        },
-      });
-
-      // Lưu các ảnh bằng chứng nếu có
-      for (const imgUrl of evidenceImages) {
-        await tx.orderImage.create({
-          data: {
-            orderId,
-            type: 'ISSUE',
-            url: imgUrl,
-            description: `Bằng chứng khiếu nại: ${reason}`,
-          },
-        });
-      }
-
-      return updated;
-    });
-
-    console.log(
-      `🚨 [DISPUTE TICKET CREATED] Đơn ${orderId} có khiếu nại từ khách hàng: ${reason}`,
-    );
-
-    try {
-      this.ordersGateway.emitStatusChanged(orderId, 'DISPUTED');
-    } catch (e) {
-      console.warn('Lỗi emit dispute socket:', e.message);
-    }
-
-    return {
-      success: true,
-      message:
-        'Khiếu nại đã được ghi nhận. Đội ngũ Chăm sóc khách hàng FixGo sẽ liên hệ hỗ trợ trong 30 phút.',
-      order: updatedOrder,
-    };
+  async disputeOrder(orderId, userId, dto) {
+    if (typeof dto.reason !== 'string' || !dto.reason.trim()) throw new BadRequestException('DISPUTE_REASON_REQUIRED');
+    return this.orderWorkflowService.transition(orderId, userId, 'DISPUTED', { reason: dto.reason, evidenceImages: dto.evidenceImages || [] });
   }
 
-  /**
-   * 14. POST /orders/:id/pay: Xử lý thanh toán, tính commissionPercent, cộng vào WorkerWallet trong 1 Transaction
-   */
   async processPayment(orderId, userId) {
-    const order = await this.prisma.order.findUnique({
-      where: { id: orderId },
-      include: { category: true, worker: true },
-    });
-
-    if (!order) {
-      throw new NotFoundException('Không tìm thấy đơn hàng');
-    }
-
-    if (!order.workerId) {
-      throw new BadRequestException(
-        'Đơn hàng chưa có kỹ thuật viên phụ trách, không thể thanh toán',
-      );
-    }
-
-    // Tính toán số tiền theo cấu hình hoa hồng category (không hardcode)
-    const grossAmount = Number(
-      order.finalPrice || order.estimatedPrice || 150000,
-    );
-    const commissionPercent = Number(
-      order.commissionPercent || order.category?.commissionPercent || 15.0,
-    );
-    const commissionAmount = Math.round(
-      (grossAmount * commissionPercent) / 100,
-    );
-    const workerPayoutAmount = grossAmount - commissionAmount;
-
-    // Thực thi trong 1 Prisma Transaction duy nhất bảo đảm tính toàn vẹn tài chính
-    const result = await this.prisma.$transaction(async (tx) => {
-      // 1. Tạo hoặc cập nhật bản ghi Payment
-      const payment = await tx.payment.upsert({
-        where: { orderId },
-        create: {
-          orderId,
-          amount: grossAmount,
-          commissionAmount,
-          workerPayoutAmount,
-          method: 'VNPAY',
-          status: 'PAID',
-          paidAt: new Date(),
-        },
-        update: {
-          amount: grossAmount,
-          commissionAmount,
-          workerPayoutAmount,
-          status: 'PAID',
-          paidAt: new Date(),
-        },
-      });
-
-      // 2. Cộng tiền thợ vào WorkerWallet
-      const workerWallet = await tx.workerWallet.upsert({
-        where: { workerId: order.workerId },
-        create: {
-          workerId: order.workerId,
-          balance: workerPayoutAmount,
-        },
-        update: {
-          balance: { increment: workerPayoutAmount },
-        },
-      });
-
-      // 3. Ghi vết giao dịch ví WalletTransaction
-      const transaction = await tx.walletTransaction.create({
-        data: {
-          walletId: workerWallet.id,
-          orderId,
-          amount: workerPayoutAmount,
-          type: 'PAYOUT',
-          description: `Thanh toán doanh thu đơn #${order.id.slice(0, 8).toUpperCase()} (Khấu trừ hoa hồng ${commissionPercent}%)`,
-        },
-      });
-
-      // 4. Chuyển trạng thái đơn sang PAID
-      const updatedOrder = await tx.order.update({
-        where: { id: orderId },
-        data: {
-          status: 'PAID',
-        },
-      });
-
-      // 5. Ghi vết lịch sử trạng thái
-      await tx.orderStatusHistory.create({
-        data: {
-          orderId,
-          status: 'PAID',
-          note: `Khách thanh toán thành công ${grossAmount.toLocaleString('vi-VN')} đ. Đã chuyển ${workerPayoutAmount.toLocaleString('vi-VN')} đ vào ví kỹ thuật viên.`,
-          changedBy: userId,
-        },
-      });
-
-      return { payment, workerWallet, transaction, updatedOrder };
-    });
-
-    try {
-      this.ordersGateway.emitStatusChanged(orderId, 'PAID');
-    } catch (e) {
-      console.warn('Lỗi emit payment socket:', e.message);
-    }
-
-    return {
-      success: true,
-      message: 'Thanh toán và giải ngân vào ví thợ thành công!',
-      payment: result.payment,
-      grossAmount,
-      commissionAmount,
-      workerPayoutAmount,
-      order: result.updatedOrder,
-    };
+    // ARC-01 only finalizes an already recorded settlement. Creating/crediting money belongs to PAY/WAL.
+    return this.orderWorkflowService.transition(orderId, userId, 'COMPLETED');
   }
 
-  /**
-   * 15. POST /orders/:id/review: Khách đánh giá chất lượng thợ sau khi đơn hoàn thành/đã thanh toán
-   */
   async reviewOrder(orderId, customerUserId, reviewDto) {
     const { rating, comment } = reviewDto;
 
@@ -1142,7 +691,11 @@ export class OrdersService {
    * - Khách gọi (ACCEPT/REJECT): phê duyệt hoặc từ chối -> cập nhật finalPrice hoặc giữ nguyên -> Bắn socket kết quả cho thợ
    */
   async adjustPrice(orderId, userId, userRole, adjustPriceDto) {
-    const order = await this.prisma.order.findUnique({
+    const access = await this.orderWorkflowService.access(orderId, userId);
+    if (access.actor.role !== userRole) throw new ForbiddenException('ROLE_NOT_ALLOWED');
+    const result = await this.prisma.$transaction(async (lockedTx) => {
+    await lockedTx.$queryRaw`SELECT id FROM orders WHERE id = ${orderId} FOR UPDATE`;
+    const order = await lockedTx.order.findUnique({
       where: { id: orderId },
       include: { worker: true, customer: true },
     });
@@ -1151,11 +704,21 @@ export class OrdersService {
       throw new NotFoundException('Không tìm thấy đơn hàng');
     }
 
+    this.orderWorkflowService.authorize(order, access.actor);
+    if (order.status !== 'ARRIVED') throw new ConflictException('QUOTE_STAGE_REQUIRED');
     const action =
       adjustPriceDto.action || (userRole === 'CUSTOMER' ? 'ACCEPT' : 'PROPOSE');
 
+    if (!['PROPOSE', 'ACCEPT', 'REJECT'].includes(action)) throw new BadRequestException('INVALID_QUOTE_ACTION');
     // 1. Trường hợp Khách hàng phê duyệt (ACCEPT) hoặc từ chối (REJECT)
     if (action === 'ACCEPT' || action === 'REJECT') {
+      const pending = await lockedTx.orderStatusHistory.findFirst({ where: { orderId, OR: [
+        { note: { startsWith: '[YÊU CẦU ĐIỀU CHỈNH GIÁ]' } },
+        { note: { startsWith: '[ĐÃ DUYỆT ĐIỀU CHỈNH GIÁ]' } },
+        { note: { startsWith: '[TỪ CHỐI ĐIỀU CHỈNH GIÁ]' } },
+      ] }, orderBy: { createdAt: 'desc' } });
+      if (!pending?.note.startsWith('[YÊU CẦU')) throw new ConflictException('NO_PENDING_QUOTE');
+
       if (userRole !== 'ADMIN' && order.customerId !== userId) {
         throw new ForbiddenException(
           'Chỉ khách hàng tạo đơn mới có quyền phê duyệt/từ chối điều chỉnh giá',
@@ -1163,13 +726,15 @@ export class OrdersService {
       }
 
       if (action === 'ACCEPT') {
-        const additionalPrice = Number(adjustPriceDto.additionalPrice || 0);
+        const recordedAmount = pending.note.match(/phát sinh thêm ([\d.]+) đ/);
+        const additionalPrice = Number(recordedAmount?.[1]?.replace(/\./g, ''));
+        if (!Number.isFinite(additionalPrice) || additionalPrice <= 0 || (adjustPriceDto.additionalPrice != null && Number(adjustPriceDto.additionalPrice) !== additionalPrice)) throw new BadRequestException('QUOTE_AMOUNT_MISMATCH');
         const currentPrice = Number(
           order.finalPrice || order.estimatedPrice || 150000,
         );
         const newFinalPrice = currentPrice + additionalPrice;
 
-        const updatedOrder = await this.prisma.$transaction(async (tx) => {
+        const updatedOrder = await (async (tx) => {
           const updated = await tx.order.update({
             where: { id: orderId },
             data: {
@@ -1187,19 +752,7 @@ export class OrdersService {
           });
 
           return updated;
-        });
-
-        // Bắn Socket thông báo cho thợ
-        try {
-          this.ordersGateway.emitPriceAdjusted(orderId, {
-            status: 'ACCEPTED',
-            additionalPrice,
-            finalPrice: newFinalPrice,
-            note: adjustPriceDto.note,
-          });
-        } catch (e) {
-          console.warn('Lỗi emit socket price adjusted:', e.message);
-        }
+        })(lockedTx);
 
         return {
           success: true,
@@ -1214,7 +767,7 @@ export class OrdersService {
         const currentPrice = Number(
           order.finalPrice || order.estimatedPrice || 150000,
         );
-        await this.prisma.orderStatusHistory.create({
+        await lockedTx.orderStatusHistory.create({
           data: {
             orderId,
             status: order.status,
@@ -1222,16 +775,6 @@ export class OrdersService {
             changedBy: userId,
           },
         });
-
-        try {
-          this.ordersGateway.emitPriceAdjusted(orderId, {
-            status: 'REJECTED',
-            finalPrice: currentPrice,
-            note: adjustPriceDto.note,
-          });
-        } catch (e) {
-          console.warn('Lỗi emit socket price rejected:', e.message);
-        }
 
         return {
           success: true,
@@ -1244,7 +787,7 @@ export class OrdersService {
     }
 
     // 2. Trường hợp Thợ đề xuất chi phí phát sinh (PROPOSE)
-    const workerProfile = await this.prisma.workerProfile.findUnique({
+    const workerProfile = await lockedTx.workerProfile.findUnique({
       where: { userId },
     });
     if (!workerProfile || order.workerId !== workerProfile.id) {
@@ -1256,7 +799,7 @@ export class OrdersService {
     }
 
     const additionalPrice = Number(adjustPriceDto.additionalPrice || 0);
-    if (additionalPrice <= 0) {
+    if (!Number.isFinite(additionalPrice) || additionalPrice <= 0) {
       throw new BadRequestException('Số tiền phát sinh thêm phải lớn hơn 0');
     }
 
@@ -1271,7 +814,7 @@ export class OrdersService {
     );
     const proposedTotal = currentPrice + additionalPrice;
 
-    await this.prisma.orderStatusHistory.create({
+    await lockedTx.orderStatusHistory.create({
       data: {
         orderId,
         status: order.status,
@@ -1279,20 +822,6 @@ export class OrdersService {
         changedBy: userId,
       },
     });
-
-    // Bắn realtime socket tới phòng khách hàng
-    try {
-      this.ordersGateway.emitPriceAdjusted(orderId, {
-        status: 'PENDING_APPROVAL',
-        additionalPrice,
-        currentPrice,
-        proposedTotal,
-        reason: adjustPriceDto.reason,
-        imageUrl: adjustPriceDto.imageUrl,
-      });
-    } catch (e) {
-      console.warn('Lỗi emit socket price propose:', e.message);
-    }
 
     return {
       success: true,
@@ -1303,48 +832,23 @@ export class OrdersService {
       message:
         'Đã gửi yêu cầu điều chỉnh giá tới khách hàng thành công. Vui lòng chờ khách hàng phê duyệt trước khi tiếp tục thực hiện.',
     };
+    });
+    try { this.ordersGateway.emitPriceAdjusted(orderId, result); } catch (error) { console.warn(error.message); }
+    return result;
   }
 
   /**
    * 17. PATCH /orders/:id/schedule: Đặt lịch hẹn sau khi không tìm được thợ ngay
    */
   async scheduleOrder(orderId, userId, scheduledAt) {
-    const order = await this.prisma.order.findUnique({
-      where: { id: orderId },
-    });
-    if (!order) throw new NotFoundException('Không tìm thấy đơn hàng');
-
-    const scheduledDate = new Date(
-      scheduledAt || Date.now() + 24 * 60 * 60 * 1000,
-    );
-
-    const updated = await this.prisma.order.update({
-      where: { id: orderId },
-      data: {
-        scheduledAt: scheduledDate,
-        status: 'SEARCHING_WORKER',
-      },
-    });
-
-    await this.prisma.orderStatusHistory.create({
-      data: {
-        orderId,
-        status: 'SEARCHING_WORKER',
-        note: `Khách hàng đặt lịch hẹn phục vụ vào lúc ${scheduledDate.toLocaleString('vi-VN')}`,
-        changedBy: userId,
-      },
-    });
-
-    return {
-      success: true,
-      scheduledAt: scheduledDate,
-      message: `Đã lên lịch hẹn thành công vào lúc ${scheduledDate.toLocaleString('vi-VN')}`,
-      order: updated,
-    };
+    const date = new Date(scheduledAt);
+    if (!Number.isFinite(date.getTime()) || date.getTime() <= Date.now()) throw new BadRequestException('INVALID_SCHEDULE');
+    return this.orderWorkflowService.transition(orderId, userId, 'SEARCHING_WORKER', { schedule: date });
   }
 
-  // Compatibility aliases
   async getCurrentWorkerOrder(userId) {
+    const actor = await this.orderWorkflowService.actor(this.prisma, userId);
+    if (actor.role !== 'WORKER') throw new ForbiddenException('WORKER_REQUIRED');
     const workerProfile = await this.prisma.workerProfile.findUnique({
       where: { userId },
     });
@@ -1357,7 +861,7 @@ export class OrdersService {
   }
 
   async markArrived(orderId, userId) {
-    return this.updateStatus(orderId, userId, { status: 'IN_PROGRESS' });
+    return this.updateStatus(orderId, userId, { status: 'ARRIVED' });
   }
 
   async startWork(orderId, userId) {

@@ -1,3 +1,4 @@
+import { OrdersModule } from '../orders/orders.module';
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../../infrastructure/database/prisma.module';
 import { AdminController } from './admin.controller';
@@ -8,7 +9,7 @@ import { AdminService } from './admin.service';
 import { AdminGateway } from './admin.gateway';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, OrdersModule],
   controllers: [
     AdminController,
     DashboardV1Controller,

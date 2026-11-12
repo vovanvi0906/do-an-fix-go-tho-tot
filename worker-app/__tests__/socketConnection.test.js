@@ -1,7 +1,7 @@
 import { io } from 'socket.io-client';
 import { socketService } from '../src/services/socket/socketService';
 jest.mock('socket.io-client', () => ({ io: jest.fn() }));
-jest.mock('../src/services/storage/tokenStorage', () => ({ tokenStorage: { getUser: jest.fn(async () => ({ id: 'user-1', role: 'WORKER', workerProfile: { id: 'worker-1' } })) } }));
+jest.mock('../src/services/storage/tokenStorage', () => ({ tokenStorage: { getToken: jest.fn(async () => 'access-token'), getUser: jest.fn(async () => ({ id: 'user-1', role: 'WORKER', workerProfile: { id: 'worker-1' } })) } }));
 beforeEach(() => { socketService.disconnect(); jest.clearAllMocks(); });
 it('connects to orders and rejoins user/order rooms after reconnecting', async () => {
   const handlers = {};
@@ -10,6 +10,9 @@ it('connects to orders and rejoins user/order rooms after reconnecting', async (
   socketService.connect();
   socketService.joinOrderRoom('order-1');
   expect(io).toHaveBeenCalledTimes(1);
+  const authenticated = jest.fn();
+  await io.mock.calls[0][1].auth(authenticated);
+  expect(authenticated).toHaveBeenCalledWith({ token: 'access-token' });
   expect(io.mock.calls[0][0]).toMatch(/\/orders$/);
   socket.connected = true;
   await handlers.connect();

@@ -1,5 +1,8 @@
 # Order state machine: thực tế và phương án tương thích
 
+> Cập nhật 12/11/2026: ARC-01 đã triển khai policy/guards/transaction và contract mới; xem [báo cáo ARC-01](10-arc01-report.md). Phần audit/kế hoạch dưới đây được giữ làm baseline lịch sử, không phải tất cả đều là contract hiện hành.
+
+
 Nguồn: schema.prisma/OrderStatus; OrdersService.updateStatus/acceptOrder/acceptCompletion/processPayment; OrderWorkflowService; VALID_STATUS_TRANSITIONS. Đây là audit, không đổi enum.
 
 ## Enum hiện có

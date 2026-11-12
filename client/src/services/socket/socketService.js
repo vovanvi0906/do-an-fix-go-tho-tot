@@ -5,6 +5,7 @@ const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:3000';
 
 class SocketService {
   constructor() {
+    this.orderSocket = null;
     this.socket = null;
     this.isConnected = false;
     this.currentRoom = null;
@@ -33,6 +34,11 @@ class SocketService {
         timeout: 10000,
       });
 
+      this.orderSocket = io(`${WS_URL.replace(/\/orders\/?$/, '')}/orders`, {
+        auth: (callback) => callback({ token: tokenStorage.getAccessToken() }),
+        transports: ['websocket', 'polling'],
+      });
+      this.orderSocket.on('connect', () => this.orderSocket.emit('admin:join'));
       this.socket.on('connect', () => {
         this.isConnected = true;
         console.log('⚡ [SocketService] Kết nối WebSocket thành công. ID:', this.socket.id);
@@ -91,6 +97,7 @@ class SocketService {
     }
     if (this.socket) {
       this.socket.on(event, callback);
+      this.orderSocket?.on(event, callback);
     }
   }
 
@@ -101,8 +108,10 @@ class SocketService {
     if (this.socket) {
       if (callback) {
         this.socket.off(event, callback);
+        this.orderSocket?.off(event, callback);
       } else {
         this.socket.off(event);
+        this.orderSocket?.off(event);
       }
     }
   }
@@ -111,6 +120,8 @@ class SocketService {
    * Ngắt kết nối socket
    */
   disconnect() {
+    this.orderSocket?.disconnect();
+    this.orderSocket = null;
     if (this.socket) {
       this.socket.disconnect();
       this.socket = null;

@@ -1,5 +1,8 @@
 # Kế hoạch triển khai theo phụ thuộc — chờ giao task
 
+> Cập nhật 12/11/2026: ARC-01 đã triển khai policy/guards/transaction và contract mới; xem [báo cáo ARC-01](10-arc01-report.md). Phần audit/kế hoạch dưới đây được giữ làm baseline lịch sử, không phải tất cả đều là contract hiện hành.
+
+
 Chưa task code nào được phê duyệt/thực hiện. AUD-01 là audit và bộ tài liệu này; runtime verification vẫn mở. Mỗi đường dẫn viết tắt `orders.*`, `workers.*`, `admin.*` bên dưới thuộc `server/src/modules/<module>/`; worker/customer/client và Prisma dùng các đường dẫn trong evidence index 01. Không cần rewrite kiến trúc.
 
 ## Thứ tự P0 đề xuất

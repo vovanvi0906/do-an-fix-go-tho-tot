@@ -55,7 +55,7 @@ export default function PaymentReviewScreen({ navigation, onComplete }) {
     onSuccess: (data) => {
       console.log('💳 [PaymentReviewScreen] Thanh toán thành công:', data);
       setPaymentSuccess(true);
-      setOrderStatus('PAID');
+      setOrderStatus(data.order.status);
     },
     onError: (err) => {
       Alert.alert(

@@ -139,9 +139,7 @@ export default function TrackingScreen({ navigation, onNext, onCancel }) {
     const handleStatusChanged = (data) => {
       console.log('🔄 [TrackingScreen] Nhận order:status_changed:', data);
       setIsSocketAlive(true);
-      if (data.status) {
-        setOrderStatus(data.status);
-      }
+      if (data.orderId === orderId) void refetchOrderDetail();
     };
 
     // Lắng nghe sự kiện thợ đề xuất phát sinh chi phí ngoài báo giá
@@ -250,12 +248,17 @@ export default function TrackingScreen({ navigation, onNext, onCancel }) {
   const currentStepIndex = useMemo(() => {
     const status = orderStatus || currentOrder?.status || 'MATCHED';
     switch (status) {
+      case 'ASSIGNED':
       case 'MATCHED':
         return 0;
+      case 'WORKER_ARRIVING':
+      case 'ARRIVED':
       case 'WORKER_EN_ROUTE':
         return 1;
       case 'IN_PROGRESS':
         return 2;
+      case 'AWAITING_PAYMENT':
+      case 'AWAITING_CONFIRMATION':
       case 'AWAITING_ACCEPTANCE':
       case 'COMPLETED':
       case 'PAID':

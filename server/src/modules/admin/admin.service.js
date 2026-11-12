@@ -1,3 +1,4 @@
+import { OrderWorkflowService } from '../orders/order-workflow.service';
 import {
   Injectable,
   Dependencies,
@@ -10,9 +11,10 @@ import { PrismaService } from '../../infrastructure/database/prisma.service';
 import { AdminGateway } from './admin.gateway';
 
 @Injectable()
-@Dependencies(PrismaService, AdminGateway)
+@Dependencies(PrismaService, AdminGateway, OrderWorkflowService)
 export class AdminService {
-  constructor(prisma, adminGateway) {
+  constructor(prisma, adminGateway, orderWorkflowService) {
+    this.orderWorkflowService = orderWorkflowService;
     this.prisma = prisma;
     this.adminGateway = adminGateway;
   }
@@ -746,7 +748,7 @@ export class AdminService {
         { id: { contains: search, mode: 'insensitive' } },
         { pickupAddress: { contains: search, mode: 'insensitive' } },
         { note: { contains: search, mode: 'insensitive' } },
-        { customer: { fullName: { contains: search, mode: 'insensitive' } } },
+        { customer: { name: { contains: search, mode: 'insensitive' } } },
         { worker: { fullName: { contains: search, mode: 'insensitive' } } },
         { service: { name: { contains: search, mode: 'insensitive' } } },
       ];
@@ -759,17 +761,7 @@ export class AdminService {
         skip,
         take: limit,
         include: {
-          customer: {
-            include: {
-              user: {
-                select: {
-                  id: true,
-                  email: true,
-                  phone: true,
-                },
-              },
-            },
-          },
+          customer: { select: { id: true, name: true, phone: true, email: true } },
           worker: {
             include: {
               user: {
@@ -811,17 +803,7 @@ export class AdminService {
     const order = await this.prisma.order.findUnique({
       where: { id },
       include: {
-        customer: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                email: true,
-                phone: true,
-              },
-            },
-          },
-        },
+        customer: { select: { id: true, name: true, phone: true, email: true } },
         worker: {
           include: {
             user: {
@@ -856,113 +838,18 @@ export class AdminService {
   }
 
   async updateOrderStatus(id, status, note, adminId) {
-    const existing = await this.prisma.order.findUnique({ where: { id } });
-    if (!existing) {
-      throw new NotFoundException('Không tìm thấy đơn hàng để cập nhật');
-    }
-
-    const [updatedOrder] = await this.prisma.$transaction([
-      this.prisma.order.update({
-        where: { id },
-        data: {
-          status,
-          ...(status === 'COMPLETED' ? { completedAt: new Date() } : {}),
-        },
-        include: {
-          customer: true,
-          worker: true,
-          service: true,
-        },
-      }),
-      this.prisma.orderStatusHistory.create({
-        data: {
-          orderId: id,
-          status,
-          note: note || `Admin cập nhật trạng thái sang ${status}`,
-          changedBy: adminId || 'ADMIN',
-        },
-      }),
-    ]);
-
-    return {
-      success: true,
-      message: `Đã cập nhật trạng thái đơn hàng sang ${status}`,
-      order: updatedOrder,
-    };
+    return this.orderWorkflowService.transition(id, adminId, status, { note,
+      ...(status === 'CANCELLED' ? { reason: note || 'Hủy bởi Quản trị viên' } : {}) });
   }
 
   async cancelOrder(id, reason, adminId) {
-    const existing = await this.prisma.order.findUnique({ where: { id } });
-    if (!existing) {
-      throw new NotFoundException('Không tìm thấy đơn hàng để hủy');
-    }
-
-    const [updatedOrder] = await this.prisma.$transaction([
-      this.prisma.order.update({
-        where: { id },
-        data: {
-          status: 'CANCELLED',
-          cancellationReason: reason || 'Hủy bởi Quản trị viên',
-          cancelledBy: adminId || 'ADMIN',
-        },
-        include: {
-          customer: true,
-          worker: true,
-          service: true,
-        },
-      }),
-      this.prisma.orderStatusHistory.create({
-        data: {
-          orderId: id,
-          status: 'CANCELLED',
-          note: reason || 'Hủy bởi Quản trị viên',
-          changedBy: adminId || 'ADMIN',
-        },
-      }),
-    ]);
-
-    return {
-      success: true,
-      message: 'Đã hủy đơn hàng thành công',
-      order: updatedOrder,
-    };
+    return this.orderWorkflowService.transition(id, adminId, 'CANCELLED', { reason: reason || 'Hủy bởi Quản trị viên' });
   }
 
-  async deleteOrder(id) {
-    const existing = await this.prisma.order.findUnique({ where: { id } });
-    if (!existing) {
-      throw new NotFoundException('Không tìm thấy đơn hàng để xóa');
-    }
-
-    await this.prisma.$transaction([
-      this.prisma.payment.deleteMany({ where: { orderId: id } }),
-      this.prisma.aIAnalysis.deleteMany({ where: { orderId: id } }),
-      this.prisma.orderImage.deleteMany({ where: { orderId: id } }),
-      this.prisma.orderStatusHistory.deleteMany({ where: { orderId: id } }),
-      this.prisma.faceVerification.deleteMany({ where: { orderId: id } }),
-      this.prisma.walletTransaction.deleteMany({ where: { orderId: id } }),
-      this.prisma.review.deleteMany({ where: { orderId: id } }),
-      this.prisma.commissionRecord.deleteMany({ where: { orderId: id } }),
-      this.prisma.order.delete({ where: { id } }),
-    ]);
-
-    return {
-      success: true,
-      message: 'Đã xóa hoàn toàn đơn hàng khỏi hệ thống',
-      id,
-    };
+  async deleteOrder() {
+    throw new BadRequestException('ORDER_DELETE_DISABLED: lịch sử đơn hàng phải được giữ lại');
   }
 
-  // ==========================================
-  // SERVICES MANAGEMENT (CRUD)
-  // ==========================================
-
-  /**
-   * Lấy danh sách danh mục ngành nghề kèm thống kê số lượng dịch vụ
-   * Hỗ trợ tìm kiếm theo từ khóa (search) và lọc theo trạng thái (status: all | active | inactive)
-   * @param {{ search?: string, status?: string }} [query]
-   * @returns {Promise<Array<Object>>}
-   */
   async getServiceCategories(query = {}) {
     const { search, status } = query || {};
     const where = {};

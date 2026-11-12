@@ -1,3 +1,5 @@
+import { JwtService } from '@nestjs/jwt';
+import { WsException } from '@nestjs/websockets';
 import {
   WebSocketGateway,
   WebSocketServer,
@@ -46,6 +48,10 @@ export class OrderGateway {
   }
 
   afterInit(server) {
+    server.use(async (client, next) => {
+      try { await this.authenticate(client); next(); }
+      catch { next(new Error('UNAUTHORIZED')); }
+    });
     this.logger.log(
       '📡 [WebSocket Gateway] OrderGateway initialized on namespace /orders',
     );
@@ -87,12 +93,48 @@ export class OrderGateway {
     }
   }
 
+  async authenticate(client) {
+    const token = String(client.handshake?.auth?.token || '').replace(/^Bearer /i, '');
+    const payload = new JwtService({ secret: process.env.JWT_SECRET || 'super-secret' }).verify(token);
+    if (payload.type === 'refresh' || !payload.sub) throw new WsException('ACCESS_TOKEN_REQUIRED');
+    const actor = await this.prisma.user.findUnique({ where: { id: payload.sub }, include: { workerProfile: true } });
+    if (!actor || actor.status !== 'ACTIVE' || !['CUSTOMER', 'WORKER', 'ADMIN'].includes(actor.role)) throw new WsException('ACTIVE_ACCOUNT_REQUIRED');
+    client.data = { ...client.data, actor, tokenExpiresAt: payload.exp * 1000 };
+    return actor;
+  }
+
+  async orderAccess(client, orderId) {
+    const actor = await this.authenticate(client);
+    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    if (!order || !(actor.role === 'ADMIN' ||
+      (actor.role === 'CUSTOMER' && order.customerId === actor.id) ||
+      (actor.role === 'WORKER' && actor.workerProfile && order.workerId === actor.workerProfile.id))) {
+      throw new WsException('ORDER_ACCESS_DENIED');
+    }
+    return { actor, order };
+  }
+
+  @SubscribeMessage('join_room')
+  @Bind(ConnectedSocket())
+  async handleIdentityRoom(client) {
+    const actor = await this.authenticate(client);
+    // Ignore role/profile/user IDs in the incoming payload.
+    client.join(`user:${actor.id}`);
+    if (actor.role === 'WORKER' && actor.workerProfile) client.join(`worker:${actor.workerProfile.id}`);
+    return { status: 'joined' };
+  }
+
   handleConnection(client) {
     this.logger.log(`🟢 [Socket Connected] Client ID: ${client.id} on /orders`);
+    if (!client.data?.actor) { client.disconnect(true); return; }
+    client.join(`user:${client.data.actor.id}`);
+    if (client.data.actor.role === 'WORKER' && client.data.actor.workerProfile) client.join(`worker:${client.data.actor.workerProfile.id}`);
+    client.authExpiryTimer = setTimeout(() => client.disconnect(true), Math.max(0, client.data.tokenExpiresAt - Date.now()));
     client.orderRooms = new Set();
   }
 
   handleDisconnect(client) {
+    clearTimeout(client.authExpiryTimer);
     this.logger.log(`🔴 [Socket Disconnected] Client ID: ${client.id}`);
 
     // Dọn dẹp bộ nhớ throttle liên quan đến client này để tránh Memory Leak
@@ -116,12 +158,13 @@ export class OrderGateway {
    */
   @SubscribeMessage('order:join')
   @Bind(ConnectedSocket(), MessageBody())
-  handleJoinOrder(client, data) {
+  async handleJoinOrder(client, data) {
     const orderId = typeof data === 'string' ? data : data?.orderId;
     if (!orderId) {
       return { status: 'error', message: 'Thiếu orderId để join room' };
     }
 
+    await this.orderAccess(client, orderId);
     const roomName = `order:${orderId}`;
     client.join(roomName);
 
@@ -167,13 +210,18 @@ export class OrderGateway {
    * Admin portal subscribe kênh theo dõi đơn hàng toàn hệ thống
    */
   @SubscribeMessage('admin:orders:join')
-  @SubscribeMessage('admin:join')
   @Bind(ConnectedSocket())
-  handleAdminJoinOrders(client) {
+  async handleAdminJoinOrders(client) {
+    const actor = await this.authenticate(client);
+    if (actor.role !== 'ADMIN') throw new WsException('ADMIN_REQUIRED');
     client.join('admin_orders_room');
     this.logger.log(`🛡️ Admin Client ${client.id} joined admin_orders_room`);
     return { status: 'joined', room: 'admin_orders_room' };
   }
+
+  @SubscribeMessage('admin:join')
+  @Bind(ConnectedSocket())
+  async handleLegacyAdminJoin(client) { return this.handleAdminJoinOrders(client); }
 
   // ==========================================
   // CLIENT -> SERVER: WORKER GPS LOCATION
@@ -185,7 +233,10 @@ export class OrderGateway {
   @SubscribeMessage('worker:update_location')
   @Bind(ConnectedSocket(), MessageBody())
   async handleWorkerUpdateLocation(client, data) {
-    const { orderId, lat, lng, workerId } = data || {};
+    const { orderId, lat, lng } = data || {};
+    const { actor, order } = await this.orderAccess(client, orderId);
+    if (actor.role !== 'WORKER' || !['WORKER_EN_ROUTE', 'WORKER_ARRIVING'].includes(order.status)) throw new WsException('GPS_STAGE_NOT_ALLOWED');
+    const workerId = actor.workerProfile.id;
 
     if (!orderId || lat === undefined || lng === undefined) {
       return {
@@ -197,7 +248,7 @@ export class OrderGateway {
     const parsedLat = parseFloat(lat);
     const parsedLng = parseFloat(lng);
 
-    if (isNaN(parsedLat) || isNaN(parsedLng)) {
+    if (!Number.isFinite(parsedLat) || Math.abs(parsedLat) > 90 || !Number.isFinite(parsedLng) || Math.abs(parsedLng) > 180) {
       return { status: 'error', message: 'Tọa độ GPS lat, lng không hợp lệ' };
     }
 
@@ -218,25 +269,8 @@ export class OrderGateway {
     // Cập nhật timestamp gần nhất
     this.throttleMap.set(throttleKey, now);
 
-    // Phát sự kiện worker:location_update tới toàn bộ client trong room đơn hàng
+    await this.prisma.workerProfile.update({ where: { id: workerId }, data: { currentLat: parsedLat, currentLng: parsedLng } });
     this.emitWorkerLocationUpdate(orderId, parsedLat, parsedLng);
-
-    // Cập nhật tọa độ thợ vào database nền tảng (nếu có thông tin thợ)
-    try {
-      if (workerId) {
-        await this.prisma.workerProfile
-          .update({
-            where: { id: workerId },
-            data: {
-              currentLat: parsedLat,
-              currentLng: parsedLng,
-            },
-          })
-          .catch(() => {});
-      }
-    } catch (e) {
-      // Bỏ qua lỗi DB phụ để không làm chậm luồng realtime
-    }
 
     return {
       status: 'ok',
@@ -254,12 +288,13 @@ export class OrderGateway {
   /**
    * 1. Server -> Client: order:status_changed { orderId, status, timestamp }
    */
-  emitStatusChanged(orderId, status) {
+  emitStatusChanged(orderId, status, updatedAt) {
     if (!orderId || !status) return;
 
     const payload = {
       orderId,
       status,
+      ...(updatedAt ? { updatedAt } : {}),
       timestamp: new Date().toISOString(),
     };
 
@@ -276,8 +311,7 @@ export class OrderGateway {
       // Broadcast to Admin order portal
       this.server.to('admin_orders_room').emit('order:status_changed', payload);
       this.server.to('admin_orders_room').emit('order.status', payload);
-      this.server.emit('order:status_changed', payload);
-      this.server.emit('order.status', payload);
+
 
       // Nếu đơn hàng đã kết thúc (COMPLETED, PAID, CANCELLED), tự động giải phóng room để tránh leak listener
       if (['COMPLETED', 'PAID', 'CANCELLED'].includes(status)) {
@@ -346,8 +380,7 @@ export class OrderGateway {
       // Broadcast to Admin order portal
       this.server.to('admin_orders_room').emit('order:matched', payload);
       this.server.to('admin_orders_room').emit('order.matched', payload);
-      this.server.emit('order:matched', payload);
-      this.server.emit('order.matched', payload);
+
     }
   }
 
@@ -406,12 +439,13 @@ export class OrderGateway {
         addressText: orderData?.addressText,
         status: orderData?.status || 'SEARCHING',
         createdAt: orderData?.createdAt || new Date().toISOString(),
-        order: orderData,
+
       };
 
-      this.server.emit('order.new', payload);
-      this.server.emit('order.created', payload);
-      this.server.emit('order:created', payload);
+      workers.forEach(worker => {
+        const workerId = worker.workerId || worker.id;
+        if (workerId) this.server.to(`worker:${workerId}`).emit('order.new', payload);
+      });
       this.server.to('admin_orders_room').emit('order.created', payload);
       this.server.to('admin_orders_room').emit('order:created', payload);
       this.server.to('admin_orders_room').emit('order.new', payload);

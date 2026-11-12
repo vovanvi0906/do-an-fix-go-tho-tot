@@ -1,11 +1,13 @@
+import { OrderWorkflowService } from './order-workflow.service';
+import { ACTIVE_STATUSES } from './constants/order-status';
 import { Injectable, Dependencies } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../infrastructure/database/prisma.service';
 
 @Injectable()
-@Dependencies(PrismaService)
+@Dependencies(PrismaService, OrderWorkflowService)
 export class OrdersRepository {
-  constructor(prisma) {
+  constructor(prisma, workflow) {
+    this.workflow = workflow;
     this.prisma = prisma;
   }
 
@@ -13,19 +15,7 @@ export class OrdersRepository {
     return this.prisma.order.findUnique({
       where: { id },
       include: {
-        customer: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                email: true,
-                phone: true,
-                role: true,
-                status: true,
-              },
-            },
-          },
-        },
+        customer: { select: { id: true, name: true, phone: true, email: true } },
         worker: {
           include: {
             user: {
@@ -81,17 +71,7 @@ export class OrdersRepository {
     return this.prisma.order.findMany({
       where: { workerId },
       include: {
-        customer: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                email: true,
-                phone: true,
-              },
-            },
-          },
-        },
+        customer: { select: { id: true, name: true, phone: true, email: true } },
         service: true,
         address: true,
       },
@@ -102,17 +82,7 @@ export class OrdersRepository {
   async findAll() {
     return this.prisma.order.findMany({
       include: {
-        customer: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                email: true,
-                phone: true,
-              },
-            },
-          },
-        },
+        customer: { select: { id: true, name: true, phone: true, email: true } },
         worker: {
           include: {
             user: {
@@ -136,28 +106,11 @@ export class OrdersRepository {
       where: {
         workerId,
         status: {
-          in: [
-            'ASSIGNED',
-            'WORKER_ARRIVING',
-            'ARRIVED',
-            'IN_PROGRESS',
-            'AWAITING_CONFIRMATION',
-            'AWAITING_PAYMENT',
-          ],
+          in: ACTIVE_STATUSES,
         },
       },
       include: {
-        customer: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                email: true,
-                phone: true,
-              },
-            },
-          },
-        },
+        customer: { select: { id: true, name: true, phone: true, email: true } },
         service: {
           include: {
             category: true,
@@ -266,59 +219,7 @@ export class OrdersRepository {
     });
   }
 
-  async updateStatusWithHistory(
-    orderId,
-    newStatus,
-    { updateData = {}, note = null, changedByUserId = null } = {},
-  ) {
-    return this.prisma.$transaction(async (tx) => {
-      const order = await tx.order.update({
-        where: { id: orderId },
-        data: {
-          status: newStatus,
-          ...updateData,
-        },
-        include: {
-          customer: {
-            include: {
-              user: {
-                select: {
-                  id: true,
-                  email: true,
-                  phone: true,
-                },
-              },
-            },
-          },
-          worker: {
-            include: {
-              user: {
-                select: {
-                  id: true,
-                  email: true,
-                  phone: true,
-                },
-              },
-            },
-          },
-          service: true,
-          address: true,
-          statusHistory: {
-            orderBy: { createdAt: 'asc' },
-          },
-        },
-      });
-
-      await tx.orderStatusHistory.create({
-        data: {
-          orderId,
-          status: newStatus,
-          note: note || `Chuyển trạng thái sang ${newStatus}`,
-          changedBy: changedByUserId,
-        },
-      });
-
-      return order;
-    });
+  async updateStatusWithHistory(orderId, status, { changedByUserId, note } = {}) {
+    return (await this.workflow.transition(orderId, changedByUserId, status, { note })).order;
   }
 }

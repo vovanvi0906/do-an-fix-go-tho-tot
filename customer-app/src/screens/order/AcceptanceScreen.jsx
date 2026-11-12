@@ -87,7 +87,7 @@ export default function AcceptanceScreen({ navigation, onNext, onDispute }) {
     mutationFn: () => orderService.acceptCompletion(orderId),
     onSuccess: (data) => {
       console.log('✅ [AcceptanceScreen] Nghiệm thu thành công:', data);
-      setOrderStatus('COMPLETED');
+      setOrderStatus(data.order.status);
       Alert.alert(
         'Nghiệm thu thành công!',
         'Cảm ơn bạn đã xác nhận. Mời bạn tiến hành thanh toán và đánh giá chất lượng dịch vụ.',
