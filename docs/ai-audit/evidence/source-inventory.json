@@ -1,0 +1,434 @@
+[
+  {
+    "path": "ai-service/.dockerignore",
+    "lines": 11,
+    "sha256": "7257dbd318d117dc4e8e1c7fd94200bceeeaa4d9f51895f334e9d733108019a5"
+  },
+  {
+    "path": "ai-service/.gitignore",
+    "lines": 15,
+    "sha256": "89505578c9a173026d0836fefe11afc3aae62a243fe8a4a8ef13e6c28099358f"
+  },
+  {
+    "path": "ai-service/Dockerfile",
+    "lines": 41,
+    "sha256": "41b1e9d8a28ed3cdfb99ed0dd7e6cd5e0f8e51dad2c02b6ac243a057892bdecb"
+  },
+  {
+    "path": "ai-service/category_helper.py",
+    "lines": 84,
+    "sha256": "b6c40e2fe1e2be2de6c64d993dc0f33f26d8011143a99be987066ebd882b495a",
+    "symbols": [
+      {
+        "name": "strip_accents",
+        "line": 29,
+        "end": 35
+      },
+      {
+        "name": "normalize_category_key",
+        "line": 38,
+        "end": 41
+      },
+      {
+        "name": "extract_category_from_path",
+        "line": 49,
+        "end": 72
+      },
+      {
+        "name": "match_category_by_keywords",
+        "line": 75,
+        "end": 84
+      }
+    ]
+  },
+  {
+    "path": "ai-service/clip_classifier.py",
+    "lines": 254,
+    "sha256": "dc1cc31f52e4dcb7f0501d79d37a031233396b9e690e70685e9da365825fff77",
+    "symbols": [
+      {
+        "name": "_to_tensor",
+        "line": 23,
+        "end": 28
+      },
+      {
+        "name": "_embed_prompts",
+        "line": 31,
+        "end": 36
+      },
+      {
+        "name": "fetch_targets_from_backend",
+        "line": 39,
+        "end": 70
+      },
+      {
+        "name": "reload_targets",
+        "line": 73,
+        "end": 84
+      },
+      {
+        "name": "load_clip",
+        "line": 87,
+        "end": 116
+      },
+      {
+        "name": "is_ready",
+        "line": 119,
+        "end": 120
+      },
+      {
+        "name": "_encode_image",
+        "line": 123,
+        "end": 135
+      },
+      {
+        "name": "predict_target_from_feat",
+        "line": 138,
+        "end": 171
+      },
+      {
+        "name": "predict_sub_service_from_feat",
+        "line": 174,
+        "end": 208
+      },
+      {
+        "name": "predict_clip_full",
+        "line": 211,
+        "end": 248
+      },
+      {
+        "name": "predict_clip",
+        "line": 251,
+        "end": 254
+      }
+    ]
+  },
+  {
+    "path": "ai-service/eval/audit_dataset.py",
+    "lines": 24,
+    "sha256": "b7df85a9590552f52c4bccaa363369f36d5c42aa20afe05e5e0db36ad4abb38d",
+    "symbols": [
+      {
+        "name": "audit_dataset",
+        "line": 7,
+        "end": 18
+      }
+    ]
+  },
+  {
+    "path": "ai-service/eval/benchmark.py",
+    "lines": 355,
+    "sha256": "a8133e03ba58bc7819c03fe4696d584cd6f34b8f6dbd9fcc4139f2ae4894b555",
+    "symbols": [
+      {
+        "name": "create_sample_images",
+        "line": 38,
+        "end": 97
+      },
+      {
+        "name": "run_benchmark",
+        "line": 100,
+        "end": 350
+      },
+      {
+        "name": "run_tests_with_client",
+        "line": 121,
+        "end": 332
+      },
+      {
+        "name": "do_get",
+        "line": 122,
+        "end": 125
+      },
+      {
+        "name": "do_post",
+        "line": 127,
+        "end": 130
+      }
+    ]
+  },
+  {
+    "path": "ai-service/eval/classify_dataset.py",
+    "lines": 152,
+    "sha256": "72539cf1ed14ec06953f409fe451867d1a80e5aac37d4df597aeb680dda4072c",
+    "symbols": [
+      {
+        "name": "evaluate_single_image",
+        "line": 34,
+        "end": 83
+      },
+      {
+        "name": "print_summary_table",
+        "line": 86,
+        "end": 98
+      },
+      {
+        "name": "run_batch_classification",
+        "line": 101,
+        "end": 147
+      }
+    ]
+  },
+  {
+    "path": "ai-service/eval/eval_cls.py",
+    "lines": 157,
+    "sha256": "3c552994ebef0de468444feea6cc2e3d0eac13de15cb52f0c859d35e5d2d71b5",
+    "symbols": [
+      {
+        "name": "evaluate_test_set",
+        "line": 33,
+        "end": 153
+      }
+    ]
+  },
+  {
+    "path": "ai-service/eval/test_diagnose_contract.py",
+    "lines": 84,
+    "sha256": "53c75939d1238dcae9e0f577de008c58cc490eeb258b7729f3ec3278776600b7",
+    "symbols": [
+      {
+        "name": "endpoint_namespace",
+        "line": 8,
+        "end": 32
+      },
+      {
+        "name": "DiagnosisContractTests",
+        "line": 35,
+        "end": 80
+      },
+      {
+        "name": "call",
+        "line": 36,
+        "end": 41
+      },
+      {
+        "name": "test_unreadable_image_has_no_confidence_or_fake_diagnosis",
+        "line": 43,
+        "end": 49
+      },
+      {
+        "name": "test_filename_and_description_do_not_replace_missing_models",
+        "line": 51,
+        "end": 54
+      },
+      {
+        "name": "test_clip_classifies_group_without_claiming_specific_damage",
+        "line": 56,
+        "end": 62
+      },
+      {
+        "name": "test_ambiguous_and_out_of_scope_images_abstain",
+        "line": 64,
+        "end": 69
+      },
+      {
+        "name": "test_ensemble_scores_determine_category",
+        "line": 71,
+        "end": 80
+      },
+      {
+        "name": "body",
+        "line": 37,
+        "end": 38
+      }
+    ]
+  },
+  {
+    "path": "ai-service/main.py",
+    "lines": 1005,
+    "sha256": "0ce6c6ff814690cd61d016bed5578876d693d6060eb248090c3da7d162146335",
+    "symbols": [
+      {
+        "name": "decode_image_to_cv2",
+        "line": 88,
+        "end": 129
+      },
+      {
+        "name": "compute_ssim_opencv",
+        "line": 132,
+        "end": 163
+      },
+      {
+        "name": "compute_hist_correlation",
+        "line": 166,
+        "end": 182
+      },
+      {
+        "name": "lifespan",
+        "line": 189,
+        "end": 285
+      },
+      {
+        "name": "CompareBeforeAfterRequest",
+        "line": 310,
+        "end": 312
+      },
+      {
+        "name": "BoundingBox",
+        "line": 315,
+        "end": 318
+      },
+      {
+        "name": "PriceRange",
+        "line": 321,
+        "end": 325
+      },
+      {
+        "name": "DiagnoseResponse",
+        "line": 328,
+        "end": 350
+      },
+      {
+        "name": "CompareBeforeAfterResponse",
+        "line": 353,
+        "end": 364
+      },
+      {
+        "name": "FaceVerifyResponse",
+        "line": 367,
+        "end": 372
+      },
+      {
+        "name": "diagnose",
+        "line": 404,
+        "end": 595
+      },
+      {
+        "name": "analyze_before_after_opencv",
+        "line": 598,
+        "end": 762
+      },
+      {
+        "name": "compare_before_after",
+        "line": 770,
+        "end": 836
+      },
+      {
+        "name": "face_verify",
+        "line": 844,
+        "end": 944
+      },
+      {
+        "name": "sync_targets",
+        "line": 952,
+        "end": 965
+      },
+      {
+        "name": "health_check",
+        "line": 973,
+        "end": 999
+      }
+    ]
+  },
+  {
+    "path": "ai-service/requirements.txt",
+    "lines": 10,
+    "sha256": "8b577ed830f21c572059d815dddda4b995e53186eb05b7dc5f5d9eb21d11e4d1"
+  },
+  {
+    "path": "ai-service/runs/classify/fixgo_cls_v1/args.yaml",
+    "lines": 114,
+    "sha256": "eff9f3e2f3cfa16ed97dd9b220a290669ee4705dcfafebaf41555660e1cf3cd6"
+  },
+  {
+    "path": "ai-service/runs/classify/fixgo_cls_v1/results.csv",
+    "lines": 6,
+    "sha256": "c8eb4c2873e21b189fbaaa2ae7f4f2d252992b745fa6eb0e6bcd247fbc0dd725"
+  },
+  {
+    "path": "ai-service/scripts/download_models.py",
+    "lines": 110,
+    "sha256": "7fdb6a5c3e9cf4ee1959c1712e4b7cb88d3fa1ef89d0a080b94734da97d1f9fb",
+    "symbols": [
+      {
+        "name": "download_file",
+        "line": 44,
+        "end": 87
+      },
+      {
+        "name": "main",
+        "line": 90,
+        "end": 106
+      }
+    ]
+  },
+  {
+    "path": "ai-service/scripts/test_ui.html",
+    "lines": 653,
+    "sha256": "47fc6903810ba0dd61d8c97487bacbc6265060356421482fb481e6ab1770f1bc"
+  },
+  {
+    "path": "ai-service/scripts/test_ui.test.cjs",
+    "lines": 108,
+    "sha256": "7885b81b3b8bbdf577cce9b6b180b4d96fa80d0b4c7367088eed4045d8769633"
+  },
+  {
+    "path": "ai-service/service_catalog.py",
+    "lines": 448,
+    "sha256": "988230261b70eda69d175767fe2ee64683da822ba67c7b1186a9f35c7c4a8dca",
+    "symbols": [
+      {
+        "name": "format_vnd",
+        "line": 439,
+        "end": 441
+      },
+      {
+        "name": "get_services_by_category",
+        "line": 444,
+        "end": 447
+      }
+    ]
+  },
+  {
+    "path": "ai-service/target_catalog.py",
+    "lines": 384,
+    "sha256": "1e62a9788a98a3832ee8fe95247430a8b5177d991b7c659241cd456cc4b101e2",
+    "symbols": []
+  },
+  {
+    "path": "ai-service/target_helper.py",
+    "lines": 46,
+    "sha256": "fd7412bb62cdc652d18a3f13dcc10fb13a61da30b5604540f137a139df3fa08b",
+    "symbols": [
+      {
+        "name": "match_target_by_keywords",
+        "line": 37,
+        "end": 46
+      }
+    ]
+  },
+  {
+    "path": "ai-service/training/prepare_dataset.py",
+    "lines": 191,
+    "sha256": "0cd2c96ba622898e6667ff02af77c7554168194063b080cbae5d94f36cb2888b",
+    "symbols": [
+      {
+        "name": "generate_class_images",
+        "line": 70,
+        "end": 143
+      },
+      {
+        "name": "build_dataset",
+        "line": 146,
+        "end": 187
+      }
+    ]
+  },
+  {
+    "path": "ai-service/training/train.py",
+    "lines": 80,
+    "sha256": "3a3587cf299e6c114d559f1030478c118e18ecf38e0a866c99f332e03dd147dc",
+    "symbols": [
+      {
+        "name": "train_model",
+        "line": 27,
+        "end": 75
+      }
+    ]
+  },
+  {
+    "path": "ai-service/training/train_colab.ipynb",
+    "lines": 163,
+    "sha256": "2859774c21668786b3bbf0d583036ad8036adb4d25ef8ef553373029ac727230"
+  }
+]
