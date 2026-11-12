@@ -5,6 +5,7 @@ import { UsersModule } from '../users/users.module';
 import { AuthController } from './auth.controller';
 import { OtpController } from './otp.controller';
 import { AuthService } from './auth.service';
+import { RegistrationProofService } from './registration-proof.service';
 import { OtpService } from './otp.service';
 import { EmailService } from './email.service';
 import { EsmsService } from './esms.service';
@@ -26,6 +27,7 @@ import { AdminModule } from '../admin/admin.module';
   ],
   controllers: [AuthController, OtpController],
   providers: [
+    RegistrationProofService,
     AuthService,
     OtpService,
     EmailService,

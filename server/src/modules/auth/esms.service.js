@@ -86,7 +86,7 @@ export class EsmsService {
     };
 
     this.logger.log(
-      `📨 [eSMS] Đang gửi SMS OTP đến số: ${recipientPhone} (Brandname: "${payload.Brandname}", Content: "${content}")`,
+      `📨 [eSMS] Đang gửi SMS OTP đến số: ${recipientPhone} (Brandname: "${payload.Brandname}")`,
     );
 
     let response;
@@ -116,7 +116,6 @@ export class EsmsService {
     }
 
     const data = await response.json();
-    this.logger.log(`📬 [eSMS Response]: ${JSON.stringify(data)}`);
 
     // 3. Xử lý phản hồi từ eSMS (Error Handling):
     // Chỉ coi là thành công khi CodeResult === "100" hoặc CodeResult === 100
@@ -148,14 +147,11 @@ export class EsmsService {
     };
 
     const errorDesc =
-      data?.ErrorMessage ||
-      errorMap[data?.CodeResult] ||
-      `Lỗi eSMS mã: ${data?.CodeResult}`;
+      errorMap[data?.CodeResult] || `Lỗi eSMS mã: ${data?.CodeResult}`;
     const detailedMessage = `Gửi SMS thất bại qua eSMS: [Mã ${data?.CodeResult}] ${errorDesc}`;
 
     console.error('❌ [eSMS API Error Details]:', {
       codeResult: data?.CodeResult,
-      errorMessage: data?.ErrorMessage,
       errorDesc,
       phone: recipientPhone,
       brandname: payload.Brandname,

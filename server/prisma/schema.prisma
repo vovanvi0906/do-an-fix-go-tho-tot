@@ -504,3 +504,16 @@ enum WalletTransactionType {
   PAYOUT
   WITHDRAW
 }
+
+// Opaque registration credentials: only SHA-256 digests are persisted.
+model RegistrationProof {
+  tokenHash  String    @id @db.Char(64)
+  phone      String
+  purpose    String
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([expiresAt])
+  @@map("registration_proofs")
+}
