@@ -1,3 +1,4 @@
+// Sizefile exception: Legacy multi-step customer registration flow kept from baseline to prevent regression.
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
@@ -200,12 +201,7 @@ export default function RegisterCustomerScreen() {
           router.replace(params.returnTo);
           return;
         }
-        const targetRole = (role || user?.role || 'CUSTOMER').toUpperCase();
-        if (targetRole === 'WORKER') {
-          router.replace('/(worker)/(tabs)');
-        } else {
-          router.replace('/(user)/(tabs)');
-        }
+        router.replace('/(user)/(tabs)');
         return;
       }
 
