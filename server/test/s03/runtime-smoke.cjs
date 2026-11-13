@@ -1,6 +1,6 @@
 // Real S03 entrypoints and Metro listeners, owned disposable PostgreSQL + Redis only.
 const {spawn, spawnSync} = require('node:child_process');
-const {readFileSync, writeFileSync, openSync, closeSync, readlinkSync, mkdirSync} = require('node:fs');
+const {readFileSync, writeFileSync, openSync, closeSync, readlinkSync, mkdirSync, existsSync} = require('node:fs');
 const {resolve, join} = require('node:path');
 const {randomUUID} = require('node:crypto');
 const assert = require('node:assert/strict');
@@ -47,12 +47,14 @@ async function waitHttp(item, address) {
       PYTHONDONTWRITEBYTECODE:'1', ULTRALYTICS_AUTOINSTALL:'false', HF_HUB_OFFLINE:'1',
       EXPO_PUBLIC_API_URL:'http://127.0.0.1:3000/api', EXPO_PUBLIC_SOCKET_URL:'http://127.0.0.1:3000', CI:'1'};
     if (useUsbScript) {
-      // Exclusive files: never overwrite the user's local runtime configuration.
+      // Existing local config is preserved. Runner env overrides DB/Redis/Face
+      // settings; create missing files exclusively and remove only files we own.
       for (const [relative, content] of [
         ['server/.env','# Disposable S03 smoke only; connection comes from runner environment.\n'],
         ...['customer-app','worker-app'].map(app=>[`${app}/.env.local`, 'EXPO_PUBLIC_API_URL=http://127.0.0.1:3000/api\nEXPO_PUBLIC_SOCKET_URL=http://127.0.0.1:3000\n']),
       ]) {
         const path = join(root,relative);
+        if (existsSync(path)) continue;
         writeFileSync(path,content,{flag:'wx',mode:0o600});temporaryEnvFiles.push(path);
       }
       const usb = start('usb-script','', 'bash', ['dev-local-usb.sh'], env);
@@ -97,7 +99,7 @@ async function waitHttp(item, address) {
     writeFileSync(join(reportDir,'runtime-smoke.json'),JSON.stringify({sourceRoot:root,disposableDatabase:true,disposableRedis:true,
       fullUsbScriptExecuted:useUsbScript,physicalDeviceTest:false,listeners,diagnose,face,unauthenticatedFaceStatus:unauthenticated.status,
       facePaths,researchMounted:false,productionFaceCoreEnabled:false},null,2)+'\n');
-    console.log('PASS: actual S03 Backend, production FastAPI/V2/Face, Customer/Worker Metro, Admin; kernel listener provenance confirmed');
+    console.log('PASS: worktree Backend, production FastAPI/V2/Face, Customer/Worker Metro, Admin; kernel listener provenance confirmed');
   } finally {
     for (const {child} of processes.reverse()) { try { process.kill(-child.pid,'SIGTERM'); } catch (_) {} }
     await delay(1000);

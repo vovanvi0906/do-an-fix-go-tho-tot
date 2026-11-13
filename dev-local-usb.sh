@@ -85,11 +85,12 @@ echo "Checking Prisma..."
   cd server
   npx prisma validate
   npx prisma generate
+  node scripts/usb-runtime-preflight.cjs
 )
 
 # ADB Reverse
 echo "Configuring Android USB..."
-bash scripts/dev-usb-connect.sh
+bash scripts/dev-usb-connect.sh "$@"
 
 echo ""
 echo "=========================================="
@@ -110,7 +111,7 @@ npx --yes concurrently -k \
   -n "SERVER,AI,CLIENT,CUSTOMER,WORKER" \
   -c "blue,magenta,cyan,green,yellow" \
   "cd server && npm run dev" \
-  "cd ai-service && .venv/bin/python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload --reload-exclude .venv" \
+  "node scripts/start-usb-ai.cjs" \
   "cd client && npm run dev -- --strictPort" \
   "cd customer-app && CI=1 npm run start:debug -- --localhost" \
   "cd worker-app && FACE_RESEARCH_APP=false CI=1 npm run start:debug -- --localhost"
