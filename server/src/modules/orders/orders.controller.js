@@ -1,3 +1,4 @@
+import { FaceCaptureBlockedGuard } from '../workers/face/face-capture-blocked.guard';
 import { OrderAccessGuard } from './order-access.guard';
 import {
   Controller,
@@ -268,17 +269,18 @@ export class OrdersController {
   /**
    * 8. POST /orders/:id/face-verify: Xác thực khuôn mặt thợ trước khi accept (gọi AI service)
    */
+  @UseGuards(OrderAccessGuard, FaceCaptureBlockedGuard)
   @Post(':id/face-verify')
   @Roles('WORKER')
   @ApiOperation({
     summary:
-      'Xác thực sinh trắc học khuôn mặt thợ qua AI Service trước khi nhận đơn (Hiệu lực 24h)',
+      'Xác thực theo đơn: đang khóa intake đến khi có enrollment, PAD và proof',
   })
   @ApiParam({ name: 'id', description: 'Order UUID' })
   @ApiBody({ type: FaceVerifyDto })
   @ApiResponse({
     status: 200,
-    description: 'Xác thực thành công, cập nhật faceVerifiedAt',
+    description: 'Chưa cấp proof theo đơn',
   })
   @ApiResponse({
     status: 400,
@@ -292,10 +294,10 @@ export class OrdersController {
   /**
    * 8.1 POST /orders/:id/face-verify-upload: Upload trực tiếp ảnh selfie từ mobile
    */
-  @UseGuards(OrderAccessGuard)
+  @UseGuards(OrderAccessGuard, FaceCaptureBlockedGuard)
   @Post(':id/face-verify-upload')
   @Roles('WORKER')
-  @UseInterceptors(FileInterceptor('image', { storage: workerFaceStorage }))
+  @UseInterceptors(FileInterceptor('image', { storage: workerFaceStorage, limits: { fileSize: 5 * 1024 * 1024 } }))
   @ApiOperation({
     summary: 'Upload trực tiếp ảnh selfie của thợ từ mobile, lưu Cloudinary và đối chiếu AI',
   })

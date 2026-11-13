@@ -1,3 +1,4 @@
+import { FaceCaptureBlockedGuard } from '../workers/face/face-capture-blocked.guard';
 import { OrderAccessGuard } from './order-access.guard';
 import { Module } from '@nestjs/common';
 import { OrdersController } from './orders.controller';
@@ -16,6 +17,7 @@ import { RedisModule } from '../../infrastructure/redis/redis.module';
   controllers: [OrdersController],
   providers: [
     OrderAccessGuard,
+    FaceCaptureBlockedGuard,
     OrdersService,
     OrdersRepository,
     OrderWorkflowService,

@@ -1,3 +1,4 @@
+import { FaceCaptureBlockedGuard } from './face/face-capture-blocked.guard';
 import { UpdateAvailabilityDto } from './dto/update-availability.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { workerFaceStorage } from '../../config/cloudinary.config';
@@ -97,11 +98,11 @@ export class WorkersController {
   }
 
   @Post('verify-face-daily')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, FaceCaptureBlockedGuard)
   @Roles('WORKER')
   @UseInterceptors(FileInterceptor('image', { storage: workerFaceStorage, limits: { fileSize: 5 * 1024 * 1024 } }))
   @ApiOperation({ summary: 'Check-in khuôn mặt hằng ngày bằng ảnh selfie' })
-  @ApiResponse({ status: 201, description: 'Xác thực thành công, có hiệu lực 24 giờ' })
+  @ApiResponse({ status: 201, description: 'Chưa cấp proof: enrollment/PAD/storage đang bị khóa' })
   @ApiResponse({ status: 400, description: 'Ảnh không hợp lệ hoặc AI chưa xác thực được' })
   @Bind(Req(), UploadedFile())
   async verifyFaceDaily(req, file) {

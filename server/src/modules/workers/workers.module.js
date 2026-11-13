@@ -1,3 +1,4 @@
+import { FaceCaptureBlockedGuard } from './face/face-capture-blocked.guard';
 import { FaceIdentityService } from './face/face-identity.service';
 import { FaceIdentityController } from './face/face-identity.controller';
 import { AiModule } from '../ai/ai.module';
@@ -10,7 +11,7 @@ import { WorkersService } from './workers.service';
 @Module({
   imports: [PrismaModule, AdminModule, AiModule],
   controllers: [WorkersController, FaceIdentityController],
-  providers: [WorkersService, FaceIdentityService],
+  providers: [WorkersService, FaceIdentityService, FaceCaptureBlockedGuard],
   exports: [WorkersService],
 })
 export class WorkersModule {}
