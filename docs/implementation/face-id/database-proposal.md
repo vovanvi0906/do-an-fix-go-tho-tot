@@ -1,3 +1,5 @@
+> Historical v1 proposal. Additive v2 schema is implemented/tested on disposable PostgreSQL; see [schema-diff-v2.md](schema-diff-v2.md). No project migration is authorized.
+
 # Database and proof rollout proposal — APPROVAL REQUIRED
 
 No Prisma schema, migration SQL or database has been changed/executed.

@@ -1,21 +1,23 @@
-# Face ID implementation handoff
+# Face Core v2 handoff
 
-This branch provides a tested fail-closed foundation, not an operational biometric
-identity system. No enrollment, daily or order proof can be issued until the explicit
-approval blockers are resolved. Legacy timestamps do not authorize online/start work.
+Durable backend enrollment and daily/order proof now run end-to-end on disposable
+PostgreSQL/Nest HTTP with synthetic evidence. Runtime capture remains blocked until
+PAD and real-data policies are approved. No fake success flag/provider is shipped.
 
-- [Status matrix and approvals](limitations-and-blockers.md)
-- [Architecture and hotfix reconciliation](architecture.md)
-- [API contracts and environment setup](api-contracts.md)
-- [Enrollment and encrypted template design](enrollment-design.md)
-- [1:1 verification algorithm](verification-design.md)
-- [Daily/order proof design](proof-design.md)
-- [Database proposal and rollout/rollback](database-proposal.md)
-- [PAD sources, license/dependency review and evaluation plan](pad-evaluation.md)
-- [Threat model](security-threat-model.md)
-- [Executed tests and remaining validation](test-report.md)
-- [Worker usage and Android QA checklist](android-qa-checklist.md)
-- [Audit synchronization SHA-256 manifest](audit-sync-sha256.json)
+- [Current status, remaining blockers and approvals](limitations-and-blockers.md)
+- [v2 executed tests and isolation boundaries](test-report-v2.md)
+- [Additive schema diff, compatibility and rollback](schema-diff-v2.md)
+- [Current API contracts](api-contracts.md)
+- [Enrollment/consent/encryption/deletion](enrollment-design.md)
+- [Durable daily/order sessions and atomic proof consumption](proof-design.md)
+- [Experimental configuration](experimental-env.example)
+- [PAD exact artifact/download experiment proposal](pad-download-proposal.md)
+- [PAD evaluation protocol](pad-evaluation.md)
+- [Android checklist](android-qa-checklist.md)
 
-No database changes, model downloads, real biometric collection or automatic branch
-integration were performed. Customer AI Recommendation code remains outside this work.
+Run isolated backend integration: `node server/test/face/run-isolated.cjs`.
+It provisions and removes its own PostgreSQL/PostGIS container and never uses the project DB.
+
+Historical v1 references: architecture.md, database-proposal.md, test-report.md and
+security-threat-model.md document the f6737fd fail-closed baseline; current behavior is
+in the v2 documents above. The original 34-file audit SHA-256 manifest remains intact.

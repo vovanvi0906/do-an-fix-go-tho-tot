@@ -1,3 +1,5 @@
+> Historical v1 boundary table. Durable v2 controls and remaining threats are detailed in proof-design.md, enrollment-design.md and limitations-and-blockers.md; database atomicity is now tested on disposable PostgreSQL.
+
 # Security threat model and residual risk
 
 Assets: identity linkage, templates, consent, fresh sessions, scoped authorization,

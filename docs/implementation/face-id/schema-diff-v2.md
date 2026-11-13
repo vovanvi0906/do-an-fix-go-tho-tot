@@ -19,7 +19,7 @@ ciphertext erasure are allowed. Retired version metadata remains for revocation/
 Backward compatibility: FACE_CORE_ENABLED defaults false. Disabled code never queries
 the new tables; existing legacy endpoints remain fail-closed. Enabling requires this
 migration and key configuration. No legacy photo/boolean/timestamp is backfilled into
-trusted data. Old application code can run with additive tables present. Once new flows
+trusted data. Old application code can run with additive tables present before feature use. Once review rows exist, the reviewer foreign key intentionally restricts hard-deleting that Admin; account lifecycle/retention must be reviewed before rollout. Once new flows
 are used, roll back by disabling issuance/enforcement safely, not restoring fail-open code.
 
 Historical migration chain does not reproduce current schema: init has older OrderStatus
