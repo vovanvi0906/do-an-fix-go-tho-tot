@@ -1,0 +1,24 @@
+9db1016 feat(android-qa): build isolated research dev-client and document device handoff
+1c70ae3 test(face-research): verify HTTP lab and document isolated Android pilot
+25f6101 feat(android): isolate Face Research app and nonce-bound camera flows
+93dd336 feat(face-research): add isolated inference APIs and durable measurement sessions
+f926fa3 feat(pad): add pinned experimental MN3 provider and synthetic CPU evidence
+7ae16c7 feat(eval): prepare consented PAD protocol and measured-trial aggregation
+7c3780a docs(pad): propose pinned MN3 research experiment with license and CPU evidence
+87bb98e docs(db): audit verified project schema with read-only catalog tooling
+c38d752 docs(face): report migration audit tests and isolated model integration limits
+58dab32 feat(face-ai): wire pinned local models with independent identity and PAD outcomes
+f8feed9 fix(face-db): bind biometric lineage and reject stale proof replay
+fb670ab docs(face): report PostgreSQL results compatibility and remaining rollout approvals
+2d1a82d docs(face-pad): pin checkpoint metadata and propose isolated CPU evaluation
+308eb1c feat(worker): integrate scoped face sessions consent and persisted proof readback
+68fb022 feat(face): implement durable enrollment and scoped proofs with PostgreSQL integration
+fd7f6d2 feat(face-db): add durable biometric schema and isolated-only rollback
+f6737fd test(face): validate API boundaries and document approval blockers
+c275a15 feat(worker): show face enrollment blockers and remove legacy biometric success
+faaed86 feat(face): add unevaluated PAD boundary and licensed-candidate evaluation plan
+12dbd5d feat(face): define scoped proof policy and block capture before persistence
+813640a feat(face): isolate versioned SFace matching with quality and internal auth
+2cc5938 feat(face): add enrollment capability preflight and encrypted template primitive
+1cb5f8d fix(face): reuse integration fail-closed hotfix without recommendation changes
+a3cbc21 docs(face): synchronize forensic audit with verified SHA-256 manifest

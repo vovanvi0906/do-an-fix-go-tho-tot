@@ -1,3 +1,7 @@
+import { FaceCoreModule } from './face/face-core.module';
+import { FaceCaptureBlockedGuard } from './face/face-capture-blocked.guard';
+import { FaceIdentityService } from './face/face-identity.service';
+import { FaceIdentityController } from './face/face-identity.controller';
 import { AiModule } from '../ai/ai.module';
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../../infrastructure/database/prisma.module';
@@ -6,9 +10,9 @@ import { WorkersController } from './workers.controller';
 import { WorkersService } from './workers.service';
 
 @Module({
-  imports: [PrismaModule, AdminModule, AiModule],
-  controllers: [WorkersController],
-  providers: [WorkersService],
+  imports: [PrismaModule, AdminModule, AiModule, FaceCoreModule],
+  controllers: [WorkersController, FaceIdentityController],
+  providers: [WorkersService, FaceIdentityService, FaceCaptureBlockedGuard],
   exports: [WorkersService],
 })
 export class WorkersModule {}

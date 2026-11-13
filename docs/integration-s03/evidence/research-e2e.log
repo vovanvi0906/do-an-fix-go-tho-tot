@@ -1,0 +1,25 @@
+PASS actual Android research client reaches Nest and FastAPI
+PASS authentication required
+PASS actual models ready, camera and proof locked
+PASS concurrent create idempotent in PostgreSQL
+PASS purpose mismatch idempotency rejected
+PASS wrong worker rejected
+PASS wrong nonce rejected
+PASS camera blocked before multipart parsing
+PASS concurrent submit serialized without duplicate inference
+PASS duplicate concurrent capture consumes one inference attempt
+PASS lost response retry returns persisted identical measurement
+PASS real YuNet blank produces NO_FACE, never fabricated score or success
+PASS no production template or proof created
+PASS synthetic endpoint rejects supplied media
+PASS Android client POST session and nonce through real inference
+PASS ORDER session through real FastAPI
+PASS wrong order ownership rejected
+PASS expired session rejected
+PASS real HTTP timeout fails closed
+PASS retry after timeout succeeds only as measurement
+PASS network disconnect fails closed
+PASS same nonce retry after network restored
+PASS research measurement deletion
+PASS all error and retry paths leave authority tables empty
+TOTAL 24 checks PASS; no real biometric data or proof

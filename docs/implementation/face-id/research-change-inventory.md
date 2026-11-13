@@ -1,0 +1,49 @@
+# FACE-RESEARCH-E2E change inventory
+
+Base: `7ae16c7`, branch `agent/codex-worker`. 45 files; includes the approved PAD experiment carried over uncommitted from the previous phase. No weights/binary media, project migrations, production Face Core/FSM or Recommendation source changes.
+
+- `ai-service/eval/benchmark_pad_mn3.py`
+- `ai-service/eval/smoke_research_components.py`
+- `ai-service/eval/test_face_research.py`
+- `ai-service/eval/test_pad_mn3.py`
+- `ai-service/face_research.py`
+- `ai-service/face_research_app.py`
+- `ai-service/pad_mn3.py`
+- `docs/implementation/face-id/README.md`
+- `docs/implementation/face-id/consent-and-android-pilot-draft.md`
+- `docs/implementation/face-id/limitations-and-blockers.md`
+- `docs/implementation/face-id/pad-mn3-artifacts-sha256.json`
+- `docs/implementation/face-id/pad-mn3-benchmark.json`
+- `docs/implementation/face-id/pad-mn3-license-manifest.json`
+- `docs/implementation/face-id/pad-mn3-manifest.json`
+- `docs/implementation/face-id/pad-mn3-requirements.lock`
+- `docs/implementation/face-id/pad-technical-experiment.md`
+- `docs/implementation/face-id/participant-test-protocol.md`
+- `docs/implementation/face-id/research-android-checklist.md`
+- `docs/implementation/face-id/research-android-export.json`
+- `docs/implementation/face-id/research-architecture.md`
+- `docs/implementation/face-id/research-change-inventory.md`
+- `docs/implementation/face-id/research-e2e-report.md`
+- `docs/implementation/face-id/research-e2e-results.json`
+- `docs/implementation/face-id/research-e2e-runbook.md`
+- `docs/implementation/face-id/research-runtime-requirements.lock`
+- `server/scripts/face-research/prepare.cjs`
+- `server/scripts/face-research/schema.sql`
+- `server/scripts/face-research/start.cjs`
+- `server/scripts/face-research/test-e2e.cjs`
+- `server/src/face-research/research.controller.js`
+- `server/src/face-research/research.dto.js`
+- `server/src/face-research/research.service.js`
+- `server/src/face-research/research.spec.js`
+- `worker-app/__tests__/faceResearchConfig.test.js`
+- `worker-app/__tests__/faceResearchFlow.test.js`
+- `worker-app/app.config.js`
+- `worker-app/package-lock.json`
+- `worker-app/package.json`
+- `worker-app/research-app/_layout.jsx`
+- `worker-app/research-app/face-research.jsx`
+- `worker-app/research-app/index.jsx`
+- `worker-app/scripts/verify-research-export.cjs`
+- `worker-app/src/features/face-research/ResearchScreen.jsx`
+- `worker-app/src/features/face-research/client.js`
+- `worker-app/src/features/face-research/useFaceResearch.js`

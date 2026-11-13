@@ -1,0 +1,18 @@
+{
+  "package": "openvino",
+  "version": "2026.4.1",
+  "requires_python": ">=3.10",
+  "requires_dist": [
+    "numpy<2.6.0,>=1.16.6",
+    "openvino-telemetry>=2023.2.1"
+  ],
+  "installed": false,
+  "source": "https://pypi.org/pypi/openvino/json",
+  "linux_x86_64_cp311_wheels": [
+    {
+      "filename": "openvino-2026.4.1-22982-cp311-cp311-manylinux_2_28_x86_64.whl",
+      "sha256": "2d22b1da03f7caf74df30e9f6417d0ab2f637e4a38e08e1dcd294d2c37407aaf",
+      "bytes": 59130756
+    }
+  ]
+}

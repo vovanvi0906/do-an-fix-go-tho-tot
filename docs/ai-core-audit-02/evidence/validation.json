@@ -1,0 +1,20 @@
+{
+  "baseline": "be082dc91bc05ff3c05177acd72fe786fc478f6a",
+  "requiredDocuments": 14,
+  "markdownFileLinks": "PASS",
+  "evidenceReferences": "PASS",
+  "jsonArtifacts": "PASS",
+  "sourceHashUnchanged": true,
+  "sourceFileCount": 409,
+  "checks": {
+    "pythonBranchChecks": 11,
+    "javascriptBranchChecks": 8,
+    "catalogResolverCase": 1,
+    "existingPythonContractTests": 5
+  },
+  "modelAccuracyMeasured": false,
+  "liveBiometricDataUsed": false,
+  "databaseWrites": 0,
+  "androidE2E": "PENDING_NO_DEVICE",
+  "mermaidValidation": "STATIC_REVIEW_ONLY_NOT_RENDERED"
+}

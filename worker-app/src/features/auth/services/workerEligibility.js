@@ -1,7 +1,6 @@
-export function hasShiftVerification(profile, now = Date.now()) {
-  const age = now - new Date(profile?.faceVerifiedAt).getTime();
-  return !!profile?.faceVerifiedAt && Number.isFinite(age) && age >= 0 && age < 86400000;
-}
+import { isCurrentFaceProof } from '../../face-verification/services/proof';
+// Status must be freshly read from the authenticated backend; legacy timestamps never count.
+export function hasShiftVerification(profile, now = Date.now()) { return isCurrentFaceProof(profile?.dailyProof, 'DAILY', null, now); }
 export function profileRestriction(profile) {
   if (!profile) return 'Chưa tải được hồ sơ. Vui lòng thử lại.';
   if (profile.user?.role !== 'WORKER') return 'Tài khoản không có quyền thợ.';

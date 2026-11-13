@@ -1,0 +1,8 @@
+2026-11-14 02:19:04,740 [INFO] [httpx2] HTTP Request: POST http://testserver/ai/v2/diagnose "HTTP/1.1 200 OK"
+2026-11-14 02:19:04,744 [INFO] [httpx2] HTTP Request: POST http://testserver/ai/face-verify "HTTP/1.1 503 Service Unavailable"
+2026-11-14 02:19:04,747 [INFO] [httpx2] HTTP Request: POST http://testserver/ai/face-verify "HTTP/1.1 200 OK"
+.
+----------------------------------------------------------------------
+Ran 1 test in 0.059s
+
+OK

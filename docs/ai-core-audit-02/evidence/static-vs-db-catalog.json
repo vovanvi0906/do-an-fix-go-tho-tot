@@ -1,0 +1,257 @@
+{
+  "staticServices": 25,
+  "dbActiveTreeServices": 693,
+  "rows": [
+    {
+      "slug": "don-dep-nha-theo-gio",
+      "staticCategory": "giup-viec",
+      "dbMatches": 1,
+      "dbCategoryMatches": true,
+      "staticTargetSlug": "nha-o-can-ho",
+      "dbTargetSlugs": [
+        "nha-o-can-ho"
+      ]
+    },
+    {
+      "slug": "tong-ve-sinh-nha-o",
+      "staticCategory": "giup-viec",
+      "dbMatches": 1,
+      "dbCategoryMatches": true,
+      "staticTargetSlug": "nha-o-can-ho",
+      "dbTargetSlugs": [
+        "nha-o-can-ho"
+      ]
+    },
+    {
+      "slug": "giat-sofa-vai",
+      "staticCategory": "giup-viec",
+      "dbMatches": 1,
+      "dbCategoryMatches": true,
+      "staticTargetSlug": "sofa-nem-tham-rem",
+      "dbTargetSlugs": [
+        "sofa-nem-tham-rem"
+      ]
+    },
+    {
+      "slug": "ve-sinh-cua-kinh",
+      "staticCategory": "giup-viec",
+      "dbMatches": 1,
+      "dbCategoryMatches": true,
+      "staticTargetSlug": "cua-kinh-cua-so-ban-cong",
+      "dbTargetSlugs": [
+        "cua-kinh-cua-so-ban-cong"
+      ]
+    },
+    {
+      "slug": "ve-sinh-van-phong-theo-gio",
+      "staticCategory": "giup-viec",
+      "dbMatches": 1,
+      "dbCategoryMatches": true,
+      "staticTargetSlug": "van-phong-cua-hang",
+      "dbTargetSlugs": [
+        "van-phong-cua-hang"
+      ]
+    },
+    {
+      "slug": "cat-co-dinh-ky",
+      "staticCategory": "lam-vuon",
+      "dbMatches": 1,
+      "dbCategoryMatches": true,
+      "staticTargetSlug": "tham-co-bai-co",
+      "dbTargetSlugs": [
+        "tham-co-bai-co"
+      ]
+    },
+    {
+      "slug": "cat-tia-cay-canh",
+      "staticCategory": "lam-vuon",
+      "dbMatches": 1,
+      "dbCategoryMatches": true,
+      "staticTargetSlug": "cay-canh-chau-cay",
+      "dbTargetSlugs": [
+        "cay-canh-chau-cay"
+      ]
+    },
+    {
+      "slug": "nho-don-co-dai",
+      "staticCategory": "lam-vuon",
+      "dbMatches": 1,
+      "dbCategoryMatches": true,
+      "staticTargetSlug": "tham-co-bai-co",
+      "dbTargetSlugs": [
+        "tham-co-bai-co"
+      ]
+    },
+    {
+      "slug": "cat-tia-hang-rao-cay",
+      "staticCategory": "lam-vuon",
+      "dbMatches": 1,
+      "dbCategoryMatches": true,
+      "staticTargetSlug": "hang-rao-cay-bon-hoa-vuon-rau",
+      "dbTargetSlugs": [
+        "hang-rao-cay-bon-hoa-vuon-rau"
+      ]
+    },
+    {
+      "slug": "lap-he-thong-tuoi-tu-dong",
+      "staticCategory": "lam-vuon",
+      "dbMatches": 1,
+      "dbCategoryMatches": true,
+      "staticTargetSlug": "he-thong-tuoi-san-vuon-tong-the",
+      "dbTargetSlugs": [
+        "he-thong-tuoi-san-vuon-tong-the"
+      ]
+    },
+    {
+      "slug": "lap-dat-voi-moi",
+      "staticCategory": "sua-nuoc",
+      "dbMatches": 1,
+      "dbCategoryMatches": true,
+      "staticTargetSlug": "voi-nuoc-voi-sen",
+      "dbTargetSlugs": [
+        "voi-nuoc-voi-sen"
+      ]
+    },
+    {
+      "slug": "sua-bon-cau-xa-yeu",
+      "staticCategory": "sua-nuoc",
+      "dbMatches": 1,
+      "dbCategoryMatches": true,
+      "staticTargetSlug": "bon-cau-ket-nuoc",
+      "dbTargetSlugs": [
+        "bon-cau-ket-nuoc"
+      ]
+    },
+    {
+      "slug": "xu-ly-mui-hoi-quanh-bon-cau",
+      "staticCategory": "sua-nuoc",
+      "dbMatches": 1,
+      "dbCategoryMatches": true,
+      "staticTargetSlug": "bon-cau-ket-nuoc",
+      "dbTargetSlugs": [
+        "bon-cau-ket-nuoc"
+      ]
+    },
+    {
+      "slug": "sua-bom-khong-chay",
+      "staticCategory": "sua-nuoc",
+      "dbMatches": 1,
+      "dbCategoryMatches": true,
+      "staticTargetSlug": "bon-nuoc-may-bom-phao-nuoc",
+      "dbTargetSlugs": [
+        "bon-nuoc-may-bom-phao-nuoc"
+      ]
+    },
+    {
+      "slug": "sua-cong-tac-khong-hoat-dong",
+      "staticCategory": "sua-dien",
+      "dbMatches": 1,
+      "dbCategoryMatches": true,
+      "staticTargetSlug": "cong-tac-dien",
+      "dbTargetSlugs": [
+        "cong-tac-dien"
+      ]
+    },
+    {
+      "slug": "lap-tu-dien-dan-dung",
+      "staticCategory": "sua-dien",
+      "dbMatches": 1,
+      "dbCategoryMatches": true,
+      "staticTargetSlug": "tu-dien-bang-dien",
+      "dbTargetSlugs": [
+        "tu-dien-bang-dien"
+      ]
+    },
+    {
+      "slug": "thay-day-cu-xuong-cap",
+      "staticCategory": "sua-dien",
+      "dbMatches": 1,
+      "dbCategoryMatches": true,
+      "staticTargetSlug": "day-dien-cap-dien",
+      "dbTargetSlugs": [
+        "day-dien-cap-dien"
+      ]
+    },
+    {
+      "slug": "kiem-tra-may-lanh-khong-lanh-hoac-lanh-yeu",
+      "staticCategory": "dien-lanh",
+      "dbMatches": 1,
+      "dbCategoryMatches": true,
+      "staticTargetSlug": "may-lanh-dieu-hoa",
+      "dbTargetSlugs": [
+        "may-lanh-dieu-hoa"
+      ]
+    },
+    {
+      "slug": "sua-may-lanh-chay-nuoc",
+      "staticCategory": "dien-lanh",
+      "dbMatches": 1,
+      "dbCategoryMatches": true,
+      "staticTargetSlug": "may-lanh-dieu-hoa",
+      "dbTargetSlugs": [
+        "may-lanh-dieu-hoa"
+      ]
+    },
+    {
+      "slug": "sua-tu-lanh-khong-lanh",
+      "staticCategory": "dien-lanh",
+      "dbMatches": 1,
+      "dbCategoryMatches": true,
+      "staticTargetSlug": "tu-lanh-tu-lanh-side-by-side",
+      "dbTargetSlugs": [
+        "tu-lanh-tu-lanh-side-by-side"
+      ]
+    },
+    {
+      "slug": "sua-may-giat-khong-vat",
+      "staticCategory": "dien-lanh",
+      "dbMatches": 1,
+      "dbCategoryMatches": true,
+      "staticTargetSlug": "may-giat-may-giat-say",
+      "dbTargetSlugs": [
+        "may-giat-may-giat-say"
+      ]
+    },
+    {
+      "slug": "sua-bep-khong-len-nguon",
+      "staticCategory": "thiet-bi",
+      "dbMatches": 1,
+      "dbCategoryMatches": true,
+      "staticTargetSlug": "bep-tu-bep-hong-ngoai",
+      "dbTargetSlugs": [
+        "bep-tu-bep-hong-ngoai"
+      ]
+    },
+    {
+      "slug": "sua-bep-khong-nong-nong-yeu",
+      "staticCategory": "thiet-bi",
+      "dbMatches": 1,
+      "dbCategoryMatches": true,
+      "staticTargetSlug": "bep-tu-bep-hong-ngoai",
+      "dbTargetSlugs": [
+        "bep-tu-bep-hong-ngoai"
+      ]
+    },
+    {
+      "slug": "thay-loi-loc-dinh-ky",
+      "staticCategory": "thiet-bi",
+      "dbMatches": 1,
+      "dbCategoryMatches": true,
+      "staticTargetSlug": "may-loc-nuoc-ro-nano",
+      "dbTargetSlugs": [
+        "may-loc-nuoc-ro-nano"
+      ]
+    },
+    {
+      "slug": "sua-binh-khong-nong",
+      "staticCategory": "thiet-bi",
+      "dbMatches": 1,
+      "dbCategoryMatches": true,
+      "staticTargetSlug": "binh-nong-lanh-dien",
+      "dbTargetSlugs": [
+        "binh-nong-lanh-dien"
+      ]
+    }
+  ],
+  "note": "Current active snapshot only, not guarantee after admin updates"
+}
