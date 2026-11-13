@@ -17,6 +17,11 @@
    - Các sự cố hỏng hóc bên trong (ví dụ: đứt ngầm dây điện, cháy cuộn dây motor máy bơm, rò rỉ gas máy lạnh) không thể phát hiện chỉ qua hình ảnh chụp bên ngoài thiết bị.
    - Hệ thống không thể và không được phép tự bịa ra nguyên nhân hư hỏng ẩn. Việc kiểm tra và báo giá chính thức bắt buộc phải do thợ thực địa tiến hành trực tiếp.
 
+5. **Cấu hình Trọng số và Ngưỡng là Baseline Chưa Hiệu chuẩn (Uncalibrated Baseline)**:
+   - Các tham số ensemble ($w_{\text{clip}}=0.6, w_{\text{yolo}}=0.4$, hệ số prior từ khóa $1.8$, ngưỡng tin cậy $0.48$, margin cách biệt $0.10$, ngưỡng tương đồng cosine tối thiểu $0.20$) hiện được cố định như một cấu hình cơ sở (baseline).
+   - Các trọng số này được thiết kế để bảo đảm tính ổn định cấu trúc và khả năng từ chối ảnh lạ (OOD), chưa qua quá trình hiệu chuẩn thống kê (Platt scaling / Isotonic regression) trên tập dữ liệu thực địa độc lập.
+   - Không được tiếp tục tinh chỉnh ad-hoc dựa trên một vài ảnh mẫu đơn lẻ khi chưa có test set thực nghiệm chuẩn hóa.
+
 ## 2. Định hướng Phát triển (Roadmap)
 
 1. **Thu thập Dữ liệu Thực tế**:

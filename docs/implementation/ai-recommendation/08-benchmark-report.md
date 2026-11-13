@@ -33,8 +33,8 @@ Kiểm thử tự động tại `ai-service/eval/test_live_inference.py` sử d�
 | **Category Accuracy (Real Dataset)** | **NOT MEASURED** | Cần thu thập ảnh thực tế hộ gia đình trước khi benchmark |
 | **Target Top-1 / Top-3 (Real Dataset)** | **NOT MEASURED** | Chưa có tập ảnh thực địa gắn nhãn 70 đối tượng |
 | **Service Recall@k (Real Dataset)** | **NOT MEASURED** | Cần tập dữ liệu ground truth đánh giá độ liên quan dịch vụ |
-| **Pipeline Latency p50 (CPU Inference)** | **19.5 ms** | Đo trực tiếp qua `benchmark_recommendation.py` |
-| **Pipeline Latency p95 (CPU Inference)** | **25.0 ms** | Đo trực tiếp qua `benchmark_recommendation.py` |
+| **End-to-End Latency (Mobile → Cloudinary → AI → DB)** | **NOT MEASURED** | Chưa có logcat/APM từ thiết bị Android thực tế qua USB/mạng thật |
+| **FastAPI Request Latency p50/p95 (Live Traffic)** | **NOT MEASURED** | Chưa có tải thực tế; chỉ mới chạy đơn lẻ trong test suite |
 | **Ràng buộc Quan hệ 3 Tầng** | **100% Verified** | Kiểm thử qua 28 unit tests NestJS (`diagnosis-resolver.spec.js`) |
 | **Kiểm tra Trạng thái Hoạt động Active** | **100% Verified** | Loại trừ toàn bộ Category, Target, Service bị tắt (`isActive: false`) |
 
