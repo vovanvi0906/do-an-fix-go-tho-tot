@@ -1,8 +1,10 @@
-# Face Core v2 handoff
+# Face Core — migration hardening and real-model handoff
 
-Durable backend enrollment and daily/order proof now run end-to-end on disposable
+See the latest [migration audit](migration-review-v3.md), [real-model integration](real-model-integration.md), [v3 tests](test-report-v3.md) and [read-only schema reconciliation plan](schema-reconciliation-plan.md).
+
+Durable backend enrollment and daily/order proof run end-to-end on disposable
 PostgreSQL/Nest HTTP with synthetic evidence. Runtime capture remains blocked until
-PAD and real-data policies are approved. No fake success flag/provider is shipped.
+PAD and real-data policies are approved. No fake success flag/provider is shipped. Existing official YuNet/SFace artifacts now have a pinned loader and real HTTP negative smoke; this does not establish real-face/PAD accuracy.
 
 - [Current status, remaining blockers and approvals](limitations-and-blockers.md)
 - [v2 executed tests and isolation boundaries](test-report-v2.md)

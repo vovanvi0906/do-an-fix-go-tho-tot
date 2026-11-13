@@ -44,3 +44,20 @@ hard-coded unavailable until a licensed/evaluated provider is implemented; there
 no environment option to return test PASS. Synthetic gateway exists only under tests.
 Therefore enrollment extraction and successful proof issuance remain blocked in runtime.
 AI/Nest token/private TLS/network and licensed provider remain deployment prerequisites.
+
+
+## Internal model integration update
+
+GET /ai/face-capabilities (same service token) returns identityModelReady/modelVersion
+separately from padEvaluated/padModelVersion. Nest accepts identity readiness metadata
+but never treats an AI self-reported PAD boolean as approval. POST /ai/face-enroll uses
+backend-selected worker/session/model/planned version and inline photo; quality/SFace
+acquisition can run independently, but no embedding is returned while PAD is unevaluated.
+Identity matching outputs now include identityMatched, padModelVersion and padErrorCode;
+AI compatibility verified stays false even for identity MATCH. Only Nest persists and
+authorizes proof after all approved checks. Old face-verify endpoints remain blocked.
+
+Idempotent completed submit is successful only while proof/template and current order
+ownership/stage remain valid. Expired/consumed/revoked/missing proof or changed assignee
+rejects; historical success cannot refresh the proof TTL. v3 makes context immutable and
+binds FK tuples; Order hard-delete with biometric history is explicitly RESTRICTED.

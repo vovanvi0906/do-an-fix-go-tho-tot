@@ -1,3 +1,5 @@
+> Latest audit: [v2/v3 migration review](migration-review-v3.md), [real model integration](real-model-integration.md), [executed v3 tests](test-report-v3.md), and [read-only schema reconciliation proposal](schema-reconciliation-plan.md). The original v2 migration is unchanged; forward hardening is tested only on disposable PostgreSQL. YuNet/SFace load from existing SHA-verified local artifacts, but PAD and real-data approvals still block successful enrollment/proof runtime.
+
 # Face Core v2 — current status and decisions required
 
 This supersedes the f6737fd utilities-only milestone. Persistence, enrollment/proof
@@ -8,7 +10,7 @@ fixtures. It is still NOT a deployable/evaluated biometric identity system.
 |---|---|---|
 | 0 Fail-closed security | DONE | Legacy URLs/timestamps never grant; new runtime provider not ready => capture blocked. |
 | 1 Enrollment backend | DONE for isolated synthetic protocol; PARTIAL overall | Admin review record + consent + session + immutable encrypted version + withdrawal/reset transaction. Real identity review procedure, KMS/data/participant policy and evaluated PAD still required. |
-| 2 1:1 Verification | PARTIAL | Backend selects/decrypts current template; model/version/quality/score/PAD provenance checked. Existing real matcher retained; successful backend tests inject synthetic gateway, not actual faces. |
+| 2 1:1 Verification | PARTIAL | Pinned local YuNet/SFace loader and actual Nest→FastAPI→OpenCV negative smoke tested; identity MATCH separated from PAD and AI verified=false. Successful backend protocol tests still inject synthetic evidence; real-face accuracy remains unmeasured. |
 | 3 Durable daily/order proof | DONE on isolated PostgreSQL | Purpose/order/worker/epoch/version/nonce/TTL, persisted attempts/idempotency, atomic start-work consumption and rollback/race tests. Production migration/enforcement still unapproved. |
 | 4 PAD | BLOCKED | Exact upstream checkpoint pair/commit metadata and download experiment proposal. No binaries downloaded, no evaluated provider, no fake-pass flag. |
 | 5 Worker UI | PARTIAL / ANDROID PENDING | Consent, camera-only scoped sessions, upload/readback, withdrawal, fresh daily/order proof display/start gate. No physical Android/camera/injection validation. |
@@ -18,7 +20,7 @@ fixtures. It is still NOT a deployable/evaluated biometric identity system.
 
 | Item | Status | Evidence / limitation |
 |---|---|---|
-| Additive schema/migration/rollback | DONE on disposable DB | Six new tables, constraints/indexes/template trigger; legacy columns unchanged. Project DB not inspected or changed. |
+| Additive schema/migration/rollback | DONE on disposable DB | v2 unchanged; v3 adds compound lineage FKs, explicit Order DELETE RESTRICT, immutable session/proof guards and active epoch lookup. v3 rollback/reapply preserves records; project DB not inspected or changed. |
 | Reviewed identity authority | DONE backend / PARTIAL policy | ACTIVE Admin, professional approval, evidence record ID+digest/reason/type/expiry; not approvalStatus alone. External evidence custody and review procedure not implemented. |
 | Durable consent | DONE experimental | Versioned record/audit; no automatic enrollment. Actual consent language/policy needs approval. |
 | Template encryption/version/no overwrite | DONE backend | AES-GCM AAD binding, stored key ID, monotonic version, DB trigger and race tests. Production KMS pending. |
