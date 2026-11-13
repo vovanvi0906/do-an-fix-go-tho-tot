@@ -232,35 +232,17 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logger.warning(f"⚠️ [Lifespan] Không thể nạp YOLOv8n detect: {e}")
 
-    # 3. Nạp OpenCV YuNet Face Detector
-    yunet_path = WEIGHTS_DIR / "face_detection_yunet_2023mar.onnx"
-    if HAS_OPENCV and yunet_path.exists():
-        try:
-            logger.info(f"📦 [Lifespan] Nạp OpenCV YuNet Face Detector: {yunet_path}")
-            # Khởi tạo FaceDetectorYN với input size mặc định (320, 320)
-            app.state.face_detector = cv2.FaceDetectorYN.create(
-                str(yunet_path),
-                "",
-                (320, 320),
-                score_threshold=0.6,
-                nms_threshold=0.3,
-                top_k=5000,
-            )
-            app.state.models_status["face_detector"] = True
-            logger.info("✅ [Lifespan] OpenCV YuNet Face Detector đã sẵn sàng")
-        except Exception as e:
-            logger.warning(f"⚠️ [Lifespan] Không thể nạp YuNet Face Detector: {e}")
-
-    # 4. Nạp OpenCV SFace Face Recognizer
-    sface_path = WEIGHTS_DIR / "face_recognition_sface_2021dec.onnx"
-    if HAS_OPENCV and sface_path.exists():
-        try:
-            logger.info(f"📦 [Lifespan] Nạp OpenCV SFace Face Recognizer: {sface_path}")
-            app.state.face_recognizer = cv2.FaceRecognizerSF.create(str(sface_path), "")
-            app.state.models_status["face_recognizer"] = True
-            logger.info("✅ [Lifespan] OpenCV SFace Face Recognizer đã sẵn sàng")
-        except Exception as e:
-            logger.warning(f"⚠️ [Lifespan] Không thể nạp SFace Face Recognizer: {e}")
+    # Face-only loader: pinned local artifacts; no model download or Customer changes.
+    from face_models import load_face_models
+    face_models = load_face_models(os.environ.get("FACE_MODEL_DIR", str(WEIGHTS_DIR)))
+    app.state.face_detector = face_models.detector
+    app.state.face_recognizer = face_models.recognizer
+    app.state.face_model_version = face_models.model_version
+    app.state.face_model_error = face_models.error_code
+    app.state.models_status["face_detector"] = face_models.detector is not None
+    app.state.models_status["face_recognizer"] = face_models.recognizer is not None
+    if face_models.error_code:
+        logger.warning("Face models unavailable: %s", face_models.error_code)
 
     # 5. Nạp CLIP Zero-Shot Incident Classifier
     app.state.models_status["clip"] = False
@@ -275,17 +257,6 @@ async def lifespan(app: FastAPI):
 
     loaded_count = sum(1 for v in app.state.models_status.values() if v)
     logger.info(f"🎉 [Lifespan] Hoàn tất nạp mô hình. Trạng thái: {app.state.models_status} ({loaded_count}/6 engine sẵn sàng)")
-
-    # Face-only provenance: bind templates to the actual loaded weight artifacts.
-    app.state.face_model_version = None
-    if app.state.face_detector is not None and app.state.face_recognizer is not None:
-        try:
-            import hashlib
-            digests = [hashlib.sha256(path.read_bytes()).hexdigest() for path in (yunet_path, sface_path)]
-            app.state.face_model_version = "yunet-sface:" + ":".join(digests)
-        except OSError:
-            # Isolate face provenance failure from Customer diagnosis startup.
-            logger.warning("Face model provenance unavailable")
 
     yield
 

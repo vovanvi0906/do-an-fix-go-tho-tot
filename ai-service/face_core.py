@@ -34,7 +34,9 @@ def outcome(decision, code, score=None, quality='NOT_EVALUATED', model=None, ver
                 modelVersion=model, templateVersion=version, qualityDecision=quality,
                 padDecision=UnavailablePad().assess(None).decision, errorCode=code,
                 # Compatibility fields describe identity only; never an authorization proof.
-                status=decision, reason=code, confidence=score, verified=compared and decision == 'MATCH',
+                status=decision, reason=code, confidence=score, verified=False,
+                identityMatched=compared and decision == 'MATCH', padModelVersion=None,
+                padErrorCode='PAD_PROVIDER_NOT_APPROVED',
                 method='sface_cosine' if compared else 'none', engine='model' if compared else 'unavailable')
 
 
@@ -123,4 +125,24 @@ def compare_capture(capture, template, version, expected_model, detector, recogn
                        'PASS', model_version, version)
     except Exception:
         # Do not emit exception text: it may contain paths, images or embeddings.
+        return outcome('TECHNICAL_ERROR', 'FACE_PROCESSING_FAILED', model=model_version, version=version)
+
+
+def enroll_capture(capture, version, expected_model, detector, recognizer, model_version, policy):
+    """Prepare enrollment evidence; do not release an embedding without evaluated PAD."""
+    if cv2 is None or np is None or detector is None or recognizer is None or not model_version:
+        return outcome('TECHNICAL_ERROR', 'MODEL_NOT_READY')
+    if type(version) is not int or version < 1 or expected_model != model_version:
+        return outcome('INCONCLUSIVE', 'MODEL_OR_TEMPLATE_VERSION_INVALID', model=model_version)
+    try:
+        image = decode_capture(capture)
+        feature, problem = extract_embedding(image, detector, recognizer, policy)
+        if problem:
+            return outcome('INCONCLUSIVE', problem, quality='FAIL', model=model_version, version=version)
+        # Feature exists only transiently. With no evaluated provider, never expose a
+        # template for enrollment or label detection/quality as presentation-attack PASS.
+        result = outcome('INCONCLUSIVE', 'PAD_NOT_EVALUATED', quality='PASS', model=model_version, version=version)
+        result['verificationMethod'] = 'yunet_sface_embedding'
+        return result
+    except Exception:
         return outcome('TECHNICAL_ERROR', 'FACE_PROCESSING_FAILED', model=model_version, version=version)
