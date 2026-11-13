@@ -1,6 +1,6 @@
 # Read-only schema snapshot and migration-history reconciliation proposal
 
-Status: PLAN ONLY. No connection to the FixGo project DB; no migration history write.
+Current update: the user authorized verified read-only catalog/migration metadata comparison, now executed in project-schema-readonly-report.md. No migration history write occurred. The broader schema-only export/baseline reconciliation plan below remains unexecuted.
 Do not run migrate resolve/deploy/dev, db push/reset or seed on that DB without a new
 explicit approval. The existing disposable harness never falls back to DATABASE_URL.
 
