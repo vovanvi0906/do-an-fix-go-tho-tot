@@ -227,6 +227,7 @@ export default function HomeScreen() {
       params: {
         categoryId: diagnosis.suggestedCategoryId,
         categoryName: diagnosis.categoryName,
+        targetId: diagnosis.suggestedTargetId || '',
         serviceId: diagnosis.suggestedServiceId || '',
         serviceName: diagnosis.suggestedServiceName || diagnosis.categoryName,
         price: String(diagnosis.estimatedPrice.min),
