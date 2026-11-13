@@ -123,3 +123,32 @@ unaffected by this offline declaration; the file does not itself authorize colle
 5. Review held-out results and limitations. If video replay or cross-device performance
    fails target, block release; do not lower thresholds to make the demo pass.
 6. Only after a separate project migration/rollout approval consider real FixGo integration.
+
+## FACE-RESEARCH-E2E measurement mapping (not approved collection)
+
+The standalone research API is now implemented; see [lab runbook](research-e2e-runbook.md).
+No trial data was collected. Raw synthetic/mocked scores and NO_FACE smoke results
+must never enter held-out accuracy input files.
+
+After separate consent approval, an operator records a private trial manifest with
+trial ID, pseudonymous reference/probe participant IDs, both consent references where
+they differ, split, device/session/day and known attack instrument. Model cannot infer
+ground truth; do not label identity/PAD based on its own output. Do not capture a second
+person simply because the logged-in worker consented. Any impostor-pair protocol needs
+consent from both people and explicit operator authorization beyond the current fixture lab.
+
+For each approved measured attempt, preserve full outcome in the manifest; export only
+whitelisted score/outcome/timing fields to `face_metrics.py`. Identity uses cosine;
+PAD uses real score. A no-face/quality reject/timeout/inconclusive trial exports null
+score and its actual outcome, even when intermediate diagnostic scores exist. Export
+identity and PAD as distinct task rows with distinct trial IDs, correlated by a separate
+private manifest. Quality/crop/model version and separate probe/reference PAD outputs
+remain available for diagnosis, not proof. Print matte/glossy, screen static and video
+replay get separate breakdowns in the report; existing aggregator groups print variants,
+so do not claim it alone supplies all instrument/device/cluster-confidence analyses.
+
+Freeze thresholds only on calibration subjects, then run held-out sessions with retries
+counted as attempts and denominator rules specified in advance. FMR/FNMR/TAR and APCER/
+BPCER remain **NOT MEASURED** until consenting labeled data exists. Participant-cluster
+confidence intervals and cross-device reporting still need the approved study analysis;
+this phase does not generate substitute synthetic accuracy metrics.

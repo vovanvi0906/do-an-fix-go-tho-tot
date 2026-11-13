@@ -1,3 +1,7 @@
+> FACE-RESEARCH-E2E: standalone measurement pipeline/API/camera-flow code implemented; 24 real HTTP/PG synthetic checks PASS. See [current report](research-e2e-report.md). Camera policy and physical-device/real-face tests remain blocked; production gates unchanged.
+
+> 2026-11-13 update: approved isolated MN3 synthetic CPU experiment completed. See [results](pad-technical-experiment.md). Weights now downloaded outside Git; historical no-download statements below describe the previous phase. No real-data evaluation or proof enablement approved.
+
 > Latest: read-only project catalog comparison is complete (project-schema-readonly-report.md). Primary proposed PAD research baseline is anti-spoof-mn3; see pad-selection-report.md and participant-test-protocol.md. Download, real-data evaluation and project DDL are still unapproved.
 
 > Latest audit: [v2/v3 migration review](migration-review-v3.md), [real model integration](real-model-integration.md), [executed v3 tests](test-report-v3.md), and [read-only schema reconciliation proposal](schema-reconciliation-plan.md). The original v2 migration is unchanged; forward hardening is tested only on disposable PostgreSQL. YuNet/SFace load from existing SHA-verified local artifacts, but PAD and real-data approvals still block successful enrollment/proof runtime.

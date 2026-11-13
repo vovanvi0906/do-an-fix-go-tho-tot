@@ -25,3 +25,9 @@ It provisions and removes its own PostgreSQL/PostGIS container and never uses th
 Historical v1 references: architecture.md, database-proposal.md, test-report.md and
 security-threat-model.md document the f6737fd fail-closed baseline; current behavior is
 in the v2 documents above. The original 34-file audit SHA-256 manifest remains intact.
+
+Latest approved synthetic-only PAD experiment: [technical results](pad-technical-experiment.md), [consent and Android pilot draft](consent-and-android-pilot-draft.md). Model executable is not evidence of PAD effectiveness; enrollment/proof gates remain closed.
+
+FACE-RESEARCH-E2E: [implementation and executed checks](research-e2e-report.md), [isolated Android lab/API runbook](research-e2e-runbook.md). Physical camera and consenting face evaluation remain pending.
+
+Research variant verification: [architecture](research-architecture.md), [Android checklist](research-android-checklist.md), [Hermes isolation evidence](research-android-export.json).
