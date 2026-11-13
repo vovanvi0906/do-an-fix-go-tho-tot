@@ -1,5 +1,6 @@
-// Legacy timestamp has no session, template or PAD provenance. Runtime issuance is blocked.
-export function hasShiftVerification() { return false; }
+import { isCurrentFaceProof } from '../../face-verification/services/proof';
+// Status must be freshly read from the authenticated backend; legacy timestamps never count.
+export function hasShiftVerification(profile, now = Date.now()) { return isCurrentFaceProof(profile?.dailyProof, 'DAILY', null, now); }
 export function profileRestriction(profile) {
   if (!profile) return 'Chưa tải được hồ sơ. Vui lòng thử lại.';
   if (profile.user?.role !== 'WORKER') return 'Tài khoản không có quyền thợ.';

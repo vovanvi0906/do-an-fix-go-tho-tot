@@ -1,36 +1,39 @@
-# Worker guide and Android QA — ANDROID PENDING
+# Worker flow and physical Android QA — PENDING
 
-## Current user flow
+Current flow when schema/feature is enabled: Admin professional approval + identity
+review API → Worker enrollment screen records consent → backend scoped session → front
+camera → memory upload → backend inference/finalization → refetch persisted template.
+Daily screen uses separate DAILY session/proof. Job detail at ARRIVED uses ORDER session
+and reads orderProof by authenticated orderId; start button calls normal status API,
+whose server transaction checks and consumes proof with all existing ARC-01 prerequisites.
+Upload/local navigation flags never enable work. Daily proof does not satisfy an order.
 
-Worker Home → bật nhận đơn → Kiểm tra xác thực khuôn mặt → màn Check-in đầu ca.
-Direct route /(worker)/verification/face?orderId=... displays per-order context.
-Đăng ký lần đầu opens enrollment; Cần cấp lại đăng ký opens reset preflight.
-Status comes from GET /workers/me/face/status; consent checkbox is required for
-preflight. accepted=false is shown as not submitted, never enrollment success.
-Không chọn ảnh thư viện. Không chụp/tải ảnh khi tính năng đang bị khóa.
-Kiểm tra lại trạng thái retries network/status; Quay lại cancels/aborts pending work.
-Foreground restoration refetches status; no image, local verified flag or proof is
-persisted to AsyncStorage. Home never trusts a legacy faceVerifiedAt timestamp.
+Runtime gateway currently reports PAD_NOT_EVALUATED and data capture is not approved,
+so camera stays unavailable. No gallery option. Schema/flags alone cannot fake PAD.
+Consent/review metadata may be tested with synthetic records on isolated DB; physical
+face collection is still forbidden until policies/people are approved.
 
-There is deliberately no enrollment/check-in/start success path in this release.
-Neither worker approval nor a manually added FaceProfile can enable it. Support must
-explain prerequisites rather than advise using an avatar or bypassing the gate.
+Withdrawal requires explicit UI confirmation, calls DELETE template, then refetches
+status. It erases v2 ciphertext and revokes sessions/proofs. Reset is Admin-reviewed;
+no self-service approval queue/Admin screen exists. Enrollment success is shown separately
+from daily/order verification success. Failed network retry keeps the request key/
+nonce/capture for idempotency; expired sessions require a new capture. Back cancels local
+requests; returning/refocusing refetches backend state. No local proof/image persistence.
+Ordinary background clears ephemeral capture; native camera Activity is handled separately
+so OS camera transitions do not discard a legitimate capture. Device behavior needs QA.
 
-## Device checklist (not executed)
+- [ ] Isolated Android debug build/test accounts; no real participants without approval.
+- [ ] TalkBack, large text, checkbox/consent policy, pending/error announcements.
+- [ ] Permission denied/permanent denial, camera cancel, native camera Activity lifecycle.
+- [ ] Correct enrollment/daily/order context and scope; no gallery/substitution.
+- [ ] Timeout/retry retains same idempotency key, successful readback bound to same proof.
+- [ ] Expired session/proof, quota, reset during inference and account switching.
+- [ ] Offline/background/kill/relaunch/refocus fetches current backend proof, no local success.
+- [ ] Withdrawal confirmation, server ACK, ciphertext erasure and disabled online/start state.
+- [ ] ARRIVED proof only; wrong-order proof does not enable start; failed BEFORE/quote check
+      keeps proof unconsumed; successful start shows refreshed server status.
+- [ ] Logs contain no images/vectors/secret headers/private evidence/capture payload.
+- [ ] After PAD/data approval: quality feedback, consented genuine/impostor and authorized
+      print/screen/video tests; report per device/attack. Injection is separate from PAD.
 
-- [ ] Isolated Android debug build, test accounts; no production worker data.
-- [ ] TalkBack announces heading, pending/error and checkbox; large font/scroll supported.
-- [ ] Home/daily/order/enrollment/reset show correct context; order not switched by retry.
-- [ ] Offline/reconnect, cancellation, app background/kill/relaunch do not restore success.
-- [ ] Account switch cannot show previous account image/proof; no biometric data in logs.
-- [ ] Back button/dismiss modal leaves retry available; no stuck spinner.
-- [ ] Camera does not open while capture blocked; no cloud upload occurs.
-- [ ] After separately approved feature enablement: permission denied/permanent denial,
-      camera cancellation, low light/blur/crop/multiple faces/occlusion and retry feedback.
-- [ ] Approved consented genuine/impostor and print/screen/video PAD protocol, separately
-      report device/attack errors and camera injection limitations.
-- [ ] After database implementation: simultaneous start requests, duplicate requests,
-      reset during inference, old nonce, stale proof, other worker/order and proof reuse.
-- [ ] Explicit expiry and support path; manual review never grants live proof automatically.
-
-Jest tests are not Android device validation. No Android or biometric security PASS.
+Jest/Nest/PostgreSQL success is not physical Android or biometric security PASS.

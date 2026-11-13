@@ -30,7 +30,12 @@ export default function WorkerDashboardScreen() {
   const statusLock = useRef(false);
   const loadProfile = useCallback(async () => {
     const response = await apiClient.get('/workers/me');
-    return response.data || response;
+    const profile = response.data || response;
+    try {
+      const statusResponse = await apiClient.get('/workers/me/face/status');
+      const status = statusResponse.data || statusResponse;
+      return { ...profile, dailyProof: status.dailyProof || null };
+    } catch (_) { return { ...profile, dailyProof: null }; }
   }, []);
   const { data: profile, error: profileError, loading: profileLoading, reload: reloadProfile } = useOrderRecovery(loadProfile, user?.id);
   useEffect(() => { setIsOnline(profile?.isOnline === true); }, [profile]);
@@ -57,8 +62,7 @@ export default function WorkerDashboardScreen() {
     try {
       if (online) {
         if (activeLoading || activeError || activeOrder) throw new Error('Cần hoàn tất hoặc kiểm tra công việc hiện tại trước khi nhận đơn mới');
-        const response = await apiClient.get('/workers/me');
-        const profile = response.data || response;
+        const profile = await loadProfile();
         const restriction = profileRestriction(profile);
         if (restriction) throw new Error(restriction);
         if (!hasShiftVerification(profile)) {

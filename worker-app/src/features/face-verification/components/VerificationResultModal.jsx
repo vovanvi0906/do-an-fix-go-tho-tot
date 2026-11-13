@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 export const VerificationResultModal = ({ visible, result, onClose, onRetry }) => {
   if (!result) return null;
-  const isSuccess = result.verified;
+  const isSuccess = result.verified === true || result.enrolled === true;
   const cosine = Number.isFinite(result.identityScore) ? result.identityScore.toFixed(3) : null;
 
   return (
@@ -19,7 +19,7 @@ export const VerificationResultModal = ({ visible, result, onClose, onRetry }) =
             />
           </View>
           <Text nativeID="face-result-title" accessibilityRole="header" style={styles.title}>
-            {isSuccess ? 'Xác thực thành công' : 'Chưa xác thực được'}
+            {result.enrolled ? 'Đăng ký khuôn mặt đã được lưu' : isSuccess ? 'Xác thực thành công' : 'Chưa xác thực được'}
           </Text>
           {cosine !== null ? <Text style={styles.scoreText}>
             Điểm tương đồng cosine: <Text style={styles.boldScore}>{cosine}</Text>
