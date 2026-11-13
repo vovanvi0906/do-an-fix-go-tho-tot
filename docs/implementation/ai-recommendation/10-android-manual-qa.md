@@ -22,10 +22,67 @@
 | **13** | Chuyển sang Booking | Bấm "Xác nhận dịch vụ" | Modal đóng lại, chuyển sang màn hình Tạo đơn Đặt lịch với đầy đủ Category, Target, Service và Giá | [ ] Pending |
 | **14** | Tạo đơn hoàn tất | Bấm "Tìm thợ ngay" trên Booking | Đơn hàng được tạo thành công với trạng thái `SEARCHING_WORKER`, quét thợ 5km | [ ] Pending |
 
-## 2. Ghi chú Khắc phục Lỗi Upload `ERR_NETWORK` Trước đây
+## 2. Kế hoạch Trace `ERR_NETWORK` và Luồng Dữ liệu theo `x-request-id`
 
-Lỗi `ERR_NETWORK` trong các bản build Android cũ xuất phát từ:
-1. URL cấu hình `localhost:3000` thay vì IP LAN máy chủ phát triển (ví dụ: `192.168.1.x`).
-2. Định dạng file `FormData` trên Android yêu cầu thuộc tính `{ uri, name, type }` chính xác.
+> [!IMPORTANT]
+> **Quy tắc môi trường USB Debugging:**
+> Khi thiết bị Android kết nối qua USB và đã chạy `adb reverse tcp:3000 tcp:3000`, Base URL `http://localhost:3000/api` là **hoàn toàn hợp lệ**. Tuyệt đối **không tự ý đổi sang IP LAN** khi `adb reverse` đang kích hoạt.
 
-Đoạn mã trong `customer-app/src/services/api/aiService.ts` đã được chuẩn hóa để luôn tự động trích xuất đúng MIME type (`image/jpeg`, `image/png`, `image/webp`) và tên file, kèm `timeout: 45000` ms để tránh đứt kết nối khi mạng yếu.
+### 2.1. Chuỗi Trace End-to-End qua `x-request-id`
+
+Mỗi lượt chẩn đoán ảnh được gán một `x-request-id` duy nhất xuyên suốt 4 chặng:
+
+```
+[Customer Mobile App] ──(1) FormData + reqId──> [NestJS OrdersController]
+                                                       │
+                                            (2) Upload Buffer + reqId
+                                                       ▼
+                                              [Cloudinary Storage]
+                                                       │
+                                            (3) secure_url + reqId
+                                                       ▼
+                                            [FastAPI /ai/v2/diagnose]
+                                                       │
+[Customer Mobile App] <──(4) V2 Contract + reqId───────┘
+```
+
+1. **Chặng 1 — Mobile Client (`customer-app`):**
+   - Sinh UUIDv4: `const reqId = uuidv4()`.
+   - Gắn header: `headers: { 'x-request-id': reqId, 'Content-Type': 'multipart/form-data' }`.
+   - Định dạng payload Android bắt buộc:
+     ```javascript
+     formData.append('image', {
+       uri: Platform.OS === 'android' ? imageUri : imageUri.replace('file://', ''),
+       name: `diagnosis_${Date.now()}.jpg`,
+       type: mimeType || 'image/jpeg',
+     });
+     ```
+   - Log chẩn đoán: `console.log('[Mobile Request]', { reqId, url: '/orders/diagnose-upload' })`.
+
+2. **Chặng 2 — Backend NestJS Gateway (`OrdersController.diagnoseUpload`):**
+   - Trích xuất `reqId = req.headers['x-request-id'] || uuidv4()`.
+   - Log tiếp nhận: `logger.log(`[NestJS][reqId: ${reqId}] Uploading image buffer to Cloudinary...`);`.
+
+3. **Chặng 3 — Cloudinary Upload:**
+   - Đẩy stream buffer lên Cloudinary với timeout 20s.
+   - Log phản hồi: `logger.log(`[NestJS][reqId: ${reqId}] Cloudinary success: ${secure_url}`);`.
+   - Nếu lỗi: Ghi rõ mã lỗi Cloudinary và hủy request, trả HTTP 502 kèm `reqId`.
+
+4. **Chặng 4 — FastAPI AI Service (`/ai/v2/diagnose`):**
+   - Gửi POST JSON `{ imageUrl: secure_url, description }` kèm header `x-request-id: ${reqId}`.
+   - FastAPI ghi log: `logger.info(f"[FastAPI V2][reqId: {req_id}] Inference start - {image_url}")`.
+   - Trả response V2 kèm model version và decision source.
+
+### 2.2. Lệnh giám sát trực tiếp trên máy chủ và thiết bị
+
+Khi phát hiện `ERR_NETWORK` trên màn hình:
+1. Kiểm tra cầu nối ADB Reverse:
+   ```bash
+   adb reverse --list
+   # Kỳ vọng: tcp:3000 tcp:3000
+   ```
+2. Giám sát logcat thời gian thực của ứng dụng Mobile:
+   ```bash
+   adb logcat -s "ReactNativeJS" "FixGo-API"
+   ```
+3. Đối chiếu `reqId` trên terminal Backend NestJS để xác định chính xác chặng phát sinh sự cố (Mobile, Cloudinary, hay AI Service).

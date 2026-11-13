@@ -10,7 +10,17 @@
 | **Customer AI Recommendation** | **Antigravity** | `customer-app/`, `ai-service/recommendation/`, `server/src/modules/orders/diagnosis/` | Codex không can thiệp. |
 | **Entrypoint `ai-service/main.py`** | **Codex sở hữu** | `ai-service/main.py` | Antigravity **không chỉnh sửa trực tiếp**, cung cấp proposal. |
 
-👉 **Kết quả kiểm toán đối chiếu (`git diff`): ZERO FILE COLLISION.**
+### Chi tiết 2 file giao thoa duy nhất (Non-conflicting Additive Changes):
+1. **`server/prisma/schema.prisma`**:
+   - `gemini-customer`: Thêm model `RegistrationProof` (phục vụ bảo mật đăng ký số điện thoại).
+   - `codex-worker`: Thêm các trường biometric vào `User`, `WorkerProfile`, `Order` và các model `BiometricState`, `BiometricTemplate`, `BiometricReview`.
+   - *Kết luận*: Cả hai đều là thay đổi độc lập bổ sung (additive), không trùng lặp trường hay khóa nào. Khi merge chỉ cần giữ cả hai.
+2. **`server/src/infrastructure/external/ai/fastapi-ai.client.js`**:
+   - `gemini-customer`: Cập nhật phương thức `diagnoseIncident` với vòng lặp thử `/ai/v2/diagnose` trước khi fallback sang `/ai/diagnose`.
+   - `codex-worker`: Bổ sung các phương thức mới cho Face ID (`verifyFace`, `faceCapabilities`, `enrollFaceTemplate`) ở phía dưới.
+   - *Kết luận*: Hoàn toàn độc lập về mặt hàm, ghép nối mượt mà không xung đột logic.
+
+👉 **Kết quả kiểm toán đối chiếu HEAD (`7ae16c7`): ZERO FUNCTIONAL CONFLICT.**
 
 ---
 
