@@ -1,3 +1,5 @@
+> Superseded as primary research candidate by pad-selection-report.md (anti-spoof-mn3). This older MiniFASNet proposal remains an unapproved secondary option; no weights were downloaded.
+
 # PAD download proposal — not yet approved, NO weights downloaded
 
 Candidate pinned to upstream commit b6d5f04ad78778917853b25c778acef6d5626d15 of

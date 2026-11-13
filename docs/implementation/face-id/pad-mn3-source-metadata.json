@@ -1,0 +1,36 @@
+{
+  "weightsDownloaded": false,
+  "sourceCommits": {
+    "openvinotoolkit/open_model_zoo": "2c9b5c563ab3a202d085a42e2bbfc48f77961f4b",
+    "kprokofi/light-weight-face-anti-spoofing": "82a2c26bacff5462c6f9320c34ae0363ccbed497",
+    "ZhangYuanhan-AI/CelebA-Spoof": "566342dd0f1fbb07733df8b7e742b90725fb2c4d"
+  },
+  "modelDescriptorSha256": "463e1ec4a3c287e09052d06557f4681b396bbcc9b7773f586fe60fdc50b28730",
+  "artifact": {
+    "name": "anti-spoof-mn3.onnx",
+    "bytes": 12270179,
+    "upstreamChecksum": "6de4534964b723397b3e8c995cadcf43bc007cc2f9930b95ae25f76adccece5d1d4d058d0b15117b9e4a9f758424f92a",
+    "source": "https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/anti-spoof-mn3/anti-spoof-mn3.onnx",
+    "checksumAlgorithm": "SHA-384"
+  },
+  "modelDescriptorUrl": "https://github.com/openvinotoolkit/open_model_zoo/blob/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/models/public/anti-spoof-mn3/model.yml",
+  "headVerification": {
+    "status": 200,
+    "contentLength": "12270179",
+    "finalUrl": "https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/anti-spoof-mn3/anti-spoof-mn3.onnx",
+    "bodyDownloaded": false
+  },
+  "checksumImplementationSource": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/tools/model_tools/src/omz_tools/download_engine/cache.py",
+  "checksumSourceEvidence": [
+    "checksum = {'$type': 'sha384', 'value': checksum}",
+    "class ChecksumSHA384(Checksum):",
+    "RE_SHA384SUM = re.compile(r'[0-9a-fA-F]{96}')",
+    "self.type = hashlib.sha384",
+    "sha384_str = validation.validate_string('\"sha384\"', checksum['value'])",
+    "if not cls.RE_SHA384SUM.fullmatch(sha384_str):",
+    "'\"sha384\": got invalid hash {!r}'.format(sha384_str))",
+    "sha384 = bytes.fromhex(sha384_str)",
+    "return cls(sha384)",
+    "Checksum.types['sha384'] = ChecksumSHA384"
+  ]
+}
