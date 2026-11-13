@@ -31,3 +31,5 @@ Latest approved synthetic-only PAD experiment: [technical results](pad-technical
 FACE-RESEARCH-E2E: [implementation and executed checks](research-e2e-report.md), [isolated Android lab/API runbook](research-e2e-runbook.md). Physical camera and consenting face evaluation remain pending.
 
 Research variant verification: [architecture](research-architecture.md), [Android checklist](research-android-checklist.md), [Hermes isolation evidence](research-android-export.json).
+
+ANDROID-RESEARCH-QA-01: [verified native APK and Ubuntu physical QA instructions](android-research-qa-01.md). Device execution remains pending.

@@ -1,3 +1,5 @@
+> ANDROID-RESEARCH-QA-01 update: native ARM64 dev-client APK built and verified; physical device still ANDROID PENDING. See [Ubuntu build/install/QA guide](android-research-qa-01.md). Earlier no-APK statements below describe the previous phase.
+
 # FACE-RESEARCH-E2E — isolated lab
 
 This is a measurement lab, not another production Face Core implementation. Neither the standalone Nest app nor standalone FastAPI app is imported into the existing applications. No Recommendation/FSM/project DB changes. Default capture approval is false at both services. No template, enrollment success or daily/order proof can be issued by these research routes, even after camera collection receives separate approval.

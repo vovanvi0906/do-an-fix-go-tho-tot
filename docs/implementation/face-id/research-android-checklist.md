@@ -1,3 +1,5 @@
+> ANDROID-RESEARCH-QA-01 update: native ARM64 dev-client APK built and verified; physical device still ANDROID PENDING. See [Ubuntu build/install/QA guide](android-research-qa-01.md). Earlier no-APK statements below describe the previous phase.
+
 # Android Face Research checklist
 
 ## Đã kiểm bằng code, HTTP và export
