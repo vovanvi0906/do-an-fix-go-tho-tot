@@ -80,8 +80,8 @@ export class ServicesService {
       },
     });
 
-    if (!service) {
-      throw new NotFoundException('Không tìm thấy dịch vụ');
+    if (!service || !service.isActive || (service.category && !service.category.isActive)) {
+      throw new NotFoundException('Dịch vụ không tồn tại hoặc đã ngừng hoạt động');
     }
 
     return service;

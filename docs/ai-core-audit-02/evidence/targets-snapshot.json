@@ -1,0 +1,842 @@
+[
+  {
+    "id": "520cae18-9d24-4109-850f-1752f26f05ee",
+    "slug": "voi-nuoc-voi-sen",
+    "name": "Vòi nước / Vòi sen",
+    "categoryId": "2a367f64-e8b2-4b94-8227-f5058c842af8",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Vòi nước / Vòi sen home appliance device",
+      "a photo of voi nuoc voi sen"
+    ],
+    "categorySlug": "sua-nuoc"
+  },
+  {
+    "id": "79d5736c-c8e1-4514-a9ce-e01899beffa9",
+    "slug": "bep-tu-bep-hong-ngoai",
+    "name": "Bếp từ / Bếp hồng ngoại",
+    "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Bếp từ / Bếp hồng ngoại home appliance device",
+      "a photo of bep tu bep hong ngoai"
+    ],
+    "categorySlug": "thiet-bi"
+  },
+  {
+    "id": "32acffd8-6255-49b1-8035-eb34a5dff180",
+    "slug": "tham-co-bai-co",
+    "name": "Thảm cỏ / Bãi cỏ",
+    "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Thảm cỏ / Bãi cỏ home appliance device",
+      "a photo of tham co bai co"
+    ],
+    "categorySlug": "lam-vuon"
+  },
+  {
+    "id": "ca1e389e-6302-4a19-a086-5c815a836473",
+    "slug": "o-cam-dien",
+    "name": "Ổ cắm điện",
+    "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Ổ cắm điện home appliance device",
+      "a photo of o cam dien"
+    ],
+    "categorySlug": "sua-dien"
+  },
+  {
+    "id": "cf864eb2-ba2a-4dd8-8b8f-d13602981783",
+    "slug": "nha-o-can-ho",
+    "name": "Nhà ở / Căn hộ",
+    "categoryId": "76c09b08-3231-4abd-be79-c2da76e06495",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Nhà ở / Căn hộ home appliance device",
+      "a photo of nha o can ho"
+    ],
+    "categorySlug": "giup-viec"
+  },
+  {
+    "id": "3d946ff9-d116-4d07-9f38-c175669f74ed",
+    "slug": "may-lanh-dieu-hoa",
+    "name": "Máy lạnh / Điều hòa",
+    "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Máy lạnh / Điều hòa home appliance device",
+      "a photo of may lanh dieu hoa"
+    ],
+    "categorySlug": "dien-lanh"
+  },
+  {
+    "id": "2e1b524a-80c8-409d-aa30-e4c8ca71bfbd",
+    "slug": "sofa-nem-tham-rem",
+    "name": "Sofa / Nệm / Thảm / Rèm",
+    "categoryId": "76c09b08-3231-4abd-be79-c2da76e06495",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Sofa / Nệm / Thảm / Rèm home appliance device",
+      "a photo of sofa nem tham rem"
+    ],
+    "categorySlug": "giup-viec"
+  },
+  {
+    "id": "863b2a1d-05f2-4792-beaa-4073e6197141",
+    "slug": "bep-gas-bep-gas-am",
+    "name": "Bếp gas / Bếp gas âm",
+    "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Bếp gas / Bếp gas âm home appliance device",
+      "a photo of bep gas bep gas am"
+    ],
+    "categorySlug": "thiet-bi"
+  },
+  {
+    "id": "fbcd5b31-5530-43ba-b35b-a32d25479477",
+    "slug": "cay-canh-chau-cay",
+    "name": "Cây cảnh / Chậu cây",
+    "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Cây cảnh / Chậu cây home appliance device",
+      "a photo of cay canh chau cay"
+    ],
+    "categorySlug": "lam-vuon"
+  },
+  {
+    "id": "78e95d0e-4ea5-43d1-b0fe-9b3d9be8b3c3",
+    "slug": "bon-cau-ket-nuoc",
+    "name": "Bồn cầu / Két nước",
+    "categoryId": "2a367f64-e8b2-4b94-8227-f5058c842af8",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Bồn cầu / Két nước home appliance device",
+      "a photo of bon cau ket nuoc"
+    ],
+    "categorySlug": "sua-nuoc"
+  },
+  {
+    "id": "521d7ce8-9e72-492e-b0cd-4eb88508f58d",
+    "slug": "tu-lanh-tu-lanh-side-by-side",
+    "name": "Tủ lạnh / Tủ lạnh side-by-side",
+    "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Tủ lạnh / Tủ lạnh side-by-side home appliance device",
+      "a photo of tu lanh tu lanh side by side"
+    ],
+    "categorySlug": "dien-lanh"
+  },
+  {
+    "id": "f2b5a73e-b1e3-45c2-97c1-a09015ad18b6",
+    "slug": "cong-tac-dien",
+    "name": "Công tắc điện",
+    "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Công tắc điện home appliance device",
+      "a photo of cong tac dien"
+    ],
+    "categorySlug": "sua-dien"
+  },
+  {
+    "id": "65f531cd-165d-4feb-b69f-922398fde6db",
+    "slug": "noi-com-dien-noi-ap-suat-dien",
+    "name": "Nồi cơm điện / Nồi áp suất điện",
+    "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Nồi cơm điện / Nồi áp suất điện home appliance device",
+      "a photo of noi com dien noi ap suat dien"
+    ],
+    "categorySlug": "thiet-bi"
+  },
+  {
+    "id": "b45c19d2-93d2-43ac-8330-87d223d941b4",
+    "slug": "bong-den-den-led",
+    "name": "Bóng đèn / Đèn LED",
+    "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Bóng đèn / Đèn LED home appliance device",
+      "a photo of bong den den led"
+    ],
+    "categorySlug": "sua-dien"
+  },
+  {
+    "id": "4f2dd034-f575-49b6-a913-cea3a620b618",
+    "slug": "lavabo-chau-rua-bon-rua",
+    "name": "Lavabo / Chậu rửa / Bồn rửa",
+    "categoryId": "2a367f64-e8b2-4b94-8227-f5058c842af8",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Lavabo / Chậu rửa / Bồn rửa home appliance device",
+      "a photo of lavabo chau rua bon rua"
+    ],
+    "categorySlug": "sua-nuoc"
+  },
+  {
+    "id": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+    "slug": "cay-bong-mat-cay-lon",
+    "name": "Cây bóng mát / Cây lớn",
+    "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Cây bóng mát / Cây lớn home appliance device",
+      "a photo of cay bong mat cay lon"
+    ],
+    "categorySlug": "lam-vuon"
+  },
+  {
+    "id": "eaa18ae1-41b8-4588-bcdb-96192e5a2da8",
+    "slug": "may-giat-may-giat-say",
+    "name": "Máy giặt / Máy giặt sấy",
+    "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Máy giặt / Máy giặt sấy home appliance device",
+      "a photo of may giat may giat say"
+    ],
+    "categorySlug": "dien-lanh"
+  },
+  {
+    "id": "07174301-9fd2-4a3e-b3da-2b43303663e6",
+    "slug": "khu-vuc-bep-thiet-bi-bep-ben-ngoai",
+    "name": "Khu vực bếp / Thiết bị bếp bên ngoài",
+    "categoryId": "76c09b08-3231-4abd-be79-c2da76e06495",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Khu vực bếp / Thiết bị bếp bên ngoài home appliance device",
+      "a photo of khu vuc bep thiet bi bep ben ngoai"
+    ],
+    "categorySlug": "giup-viec"
+  },
+  {
+    "id": "059da690-c6be-46a8-83d5-d96e250cbe4f",
+    "slug": "hang-rao-cay-bon-hoa-vuon-rau",
+    "name": "Hàng rào cây / Bồn hoa / Vườn rau",
+    "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Hàng rào cây / Bồn hoa / Vườn rau home appliance device",
+      "a photo of hang rao cay bon hoa vuon rau"
+    ],
+    "categorySlug": "lam-vuon"
+  },
+  {
+    "id": "667cd41a-d6ab-42fa-808c-08898ba947dc",
+    "slug": "den-trang-tri-den-chum",
+    "name": "Đèn trang trí / Đèn chùm",
+    "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Đèn trang trí / Đèn chùm home appliance device",
+      "a photo of den trang tri den chum"
+    ],
+    "categorySlug": "sua-dien"
+  },
+  {
+    "id": "1746c918-2fb7-41ac-a111-5c3e807616bf",
+    "slug": "may-say-quan-ao",
+    "name": "Máy sấy quần áo",
+    "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Máy sấy quần áo home appliance device",
+      "a photo of may say quan ao"
+    ],
+    "categorySlug": "dien-lanh"
+  },
+  {
+    "id": "c3e13154-aeb8-4c3f-a6d3-6fa4f20566df",
+    "slug": "lo-vi-song",
+    "name": "Lò vi sóng",
+    "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Lò vi sóng home appliance device",
+      "a photo of lo vi song"
+    ],
+    "categorySlug": "thiet-bi"
+  },
+  {
+    "id": "f27226de-570a-4c1e-84b5-dc419fe9c32e",
+    "slug": "duong-ong-cap-thoat-nuoc",
+    "name": "Đường ống cấp / thoát nước",
+    "categoryId": "2a367f64-e8b2-4b94-8227-f5058c842af8",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Đường ống cấp / thoát nước home appliance device",
+      "a photo of duong ong cap thoat nuoc"
+    ],
+    "categorySlug": "sua-nuoc"
+  },
+  {
+    "id": "5ef7b978-d4dc-4287-b119-19926b473bac",
+    "slug": "nha-ve-sinh-phong-tam",
+    "name": "Nhà vệ sinh / Phòng tắm",
+    "categoryId": "76c09b08-3231-4abd-be79-c2da76e06495",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Nhà vệ sinh / Phòng tắm home appliance device",
+      "a photo of nha ve sinh phong tam"
+    ],
+    "categorySlug": "giup-viec"
+  },
+  {
+    "id": "5e8f3e42-a1e4-47e3-8e76-8c774d04d5ea",
+    "slug": "tu-dong-tu-mat",
+    "name": "Tủ đông / Tủ mát",
+    "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Tủ đông / Tủ mát home appliance device",
+      "a photo of tu dong tu mat"
+    ],
+    "categorySlug": "dien-lanh"
+  },
+  {
+    "id": "8ea8b042-3418-4ec9-8cd7-5c71b899a183",
+    "slug": "cua-kinh-cua-so-ban-cong",
+    "name": "Cửa kính / Cửa sổ / Ban công",
+    "categoryId": "76c09b08-3231-4abd-be79-c2da76e06495",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Cửa kính / Cửa sổ / Ban công home appliance device",
+      "a photo of cua kinh cua so ban cong"
+    ],
+    "categorySlug": "giup-viec"
+  },
+  {
+    "id": "47c02e77-5604-49ae-8ca7-a38f619acd0d",
+    "slug": "bon-nuoc-may-bom-phao-nuoc",
+    "name": "Bồn nước / Máy bơm / Phao nước",
+    "categoryId": "2a367f64-e8b2-4b94-8227-f5058c842af8",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Bồn nước / Máy bơm / Phao nước home appliance device",
+      "a photo of bon nuoc may bom phao nuoc"
+    ],
+    "categorySlug": "sua-nuoc"
+  },
+  {
+    "id": "2f246a0e-3617-4083-83da-2713460741cb",
+    "slug": "den-ngoai-troi-san-vuon",
+    "name": "Đèn ngoài trời / Sân vườn",
+    "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Đèn ngoài trời / Sân vườn home appliance device",
+      "a photo of den ngoai troi san vuon"
+    ],
+    "categorySlug": "sua-dien"
+  },
+  {
+    "id": "a289a9b0-6cb9-4d94-b3a3-3ff6dd55e1f7",
+    "slug": "lo-nuong-noi-chien-khong-dau",
+    "name": "Lò nướng / Nồi chiên không dầu",
+    "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Lò nướng / Nồi chiên không dầu home appliance device",
+      "a photo of lo nuong noi chien khong dau"
+    ],
+    "categorySlug": "thiet-bi"
+  },
+  {
+    "id": "cc0ab115-0758-4fd3-a4ad-b10a68cd0cdb",
+    "slug": "he-thong-tuoi-san-vuon-tong-the",
+    "name": "Hệ thống tưới / Sân vườn tổng thể",
+    "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Hệ thống tưới / Sân vườn tổng thể home appliance device",
+      "a photo of he thong tuoi san vuon tong the"
+    ],
+    "categorySlug": "lam-vuon"
+  },
+  {
+    "id": "82430f58-a332-4d4f-aa99-5c27f888a0e7",
+    "slug": "may-loc-nuoc-ro-nano",
+    "name": "Máy lọc nước RO / Nano",
+    "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Máy lọc nước RO / Nano home appliance device",
+      "a photo of may loc nuoc ro nano"
+    ],
+    "categorySlug": "thiet-bi"
+  },
+  {
+    "id": "ee850727-ccde-4173-8b16-41e7be8065ca",
+    "slug": "san-nha-tuong-tran-noi-that",
+    "name": "Sàn nhà / Tường / Trần / Nội thất",
+    "categoryId": "76c09b08-3231-4abd-be79-c2da76e06495",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Sàn nhà / Tường / Trần / Nội thất home appliance device",
+      "a photo of san nha tuong tran noi that"
+    ],
+    "categorySlug": "giup-viec"
+  },
+  {
+    "id": "8e1a07e4-134d-4214-8841-ad2969a584fa",
+    "slug": "may-lam-mat-quat-dieu-hoa",
+    "name": "Máy làm mát / Quạt điều hòa",
+    "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Máy làm mát / Quạt điều hòa home appliance device",
+      "a photo of may lam mat quat dieu hoa"
+    ],
+    "categorySlug": "dien-lanh"
+  },
+  {
+    "id": "3a9061ae-55b0-4130-b48c-7b6f1c281247",
+    "slug": "pheu-thoat-san-khu-vuc-phong-tam",
+    "name": "Phễu thoát sàn / Khu vực phòng tắm",
+    "categoryId": "2a367f64-e8b2-4b94-8227-f5058c842af8",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Phễu thoát sàn / Khu vực phòng tắm home appliance device",
+      "a photo of pheu thoat san khu vuc phong tam"
+    ],
+    "categorySlug": "sua-nuoc"
+  },
+  {
+    "id": "484e7b6f-469e-4b22-acd8-bae2b7ea60a1",
+    "slug": "aptomat-cb-mcb",
+    "name": "Aptomat / CB / MCB",
+    "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Aptomat / CB / MCB home appliance device",
+      "a photo of aptomat cb mcb"
+    ],
+    "categorySlug": "sua-dien"
+  },
+  {
+    "id": "349b1f3b-5664-4ba4-a3c4-567c16c58ca0",
+    "slug": "van-phong-cua-hang",
+    "name": "Văn phòng / Cửa hàng",
+    "categoryId": "76c09b08-3231-4abd-be79-c2da76e06495",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Văn phòng / Cửa hàng home appliance device",
+      "a photo of van phong cua hang"
+    ],
+    "categorySlug": "giup-viec"
+  },
+  {
+    "id": "d9924692-19d1-4185-9e35-b381953c42a3",
+    "slug": "be-tu-hoai-ho-ga-cong-thoat",
+    "name": "Bể tự hoại / Hố ga / Cống thoát",
+    "categoryId": "2a367f64-e8b2-4b94-8227-f5058c842af8",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Bể tự hoại / Hố ga / Cống thoát home appliance device",
+      "a photo of be tu hoai ho ga cong thoat"
+    ],
+    "categorySlug": "sua-nuoc"
+  },
+  {
+    "id": "42c03e7a-0da1-446a-ae1e-db7783716016",
+    "slug": "may-hut-mui",
+    "name": "Máy hút mùi",
+    "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Máy hút mùi home appliance device",
+      "a photo of may hut mui"
+    ],
+    "categorySlug": "thiet-bi"
+  },
+  {
+    "id": "9a3f2d63-e61b-4d6c-8ff0-15e179c15d02",
+    "slug": "thiet-bi-chong-ro-chong-giat",
+    "name": "Thiết bị chống rò / Chống giật",
+    "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Thiết bị chống rò / Chống giật home appliance device",
+      "a photo of thiet bi chong ro chong giat"
+    ],
+    "categorySlug": "sua-dien"
+  },
+  {
+    "id": "043e30bc-6493-4f96-82b6-e6a2f26e4bf2",
+    "slug": "may-nuoc-uong-nong-lanh",
+    "name": "Máy nước uống nóng lạnh",
+    "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Máy nước uống nóng lạnh home appliance device",
+      "a photo of may nuoc uong nong lanh"
+    ],
+    "categorySlug": "dien-lanh"
+  },
+  {
+    "id": "470acb27-41b1-4d36-9ee3-84b9bbc857de",
+    "slug": "tu-dien-bang-dien",
+    "name": "Tủ điện / Bảng điện",
+    "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Tủ điện / Bảng điện home appliance device",
+      "a photo of tu dien bang dien"
+    ],
+    "categorySlug": "sua-dien"
+  },
+  {
+    "id": "ac770808-e06b-4f11-8c0d-ea2c5ca4ab55",
+    "slug": "may-hut-bui-robot-hut-bui",
+    "name": "Máy hút bụi / Robot hút bụi",
+    "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Máy hút bụi / Robot hút bụi home appliance device",
+      "a photo of may hut bui robot hut bui"
+    ],
+    "categorySlug": "thiet-bi"
+  },
+  {
+    "id": "a9f91e3c-16d5-484d-92bf-68c526ac9606",
+    "slug": "quat-dien-quat-dung-quat-ban",
+    "name": "Quạt điện / Quạt đứng / Quạt bàn",
+    "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Quạt điện / Quạt đứng / Quạt bàn home appliance device",
+      "a photo of quat dien quat dung quat ban"
+    ],
+    "categorySlug": "thiet-bi"
+  },
+  {
+    "id": "36d41107-3c4a-4a4e-9aa1-22cba07aed57",
+    "slug": "day-dien-cap-dien",
+    "name": "Dây điện / Cáp điện",
+    "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Dây điện / Cáp điện home appliance device",
+      "a photo of day dien cap dien"
+    ],
+    "categorySlug": "sua-dien"
+  },
+  {
+    "id": "8c5b11b7-adfe-4c5d-a3b6-fd7afbf53636",
+    "slug": "binh-nong-lanh-dien",
+    "name": "Bình nóng lạnh điện",
+    "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Bình nóng lạnh điện home appliance device",
+      "a photo of binh nong lanh dien"
+    ],
+    "categorySlug": "thiet-bi"
+  },
+  {
+    "id": "56d03ad1-b3a0-469a-bf79-ec9e83d23e08",
+    "slug": "hop-noi-dien-hop-ky-thuat",
+    "name": "Hộp nối điện / Hộp kỹ thuật",
+    "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Hộp nối điện / Hộp kỹ thuật home appliance device",
+      "a photo of hop noi dien hop ky thuat"
+    ],
+    "categorySlug": "sua-dien"
+  },
+  {
+    "id": "812864e5-2682-4d13-bbd4-5c22aba656cd",
+    "slug": "may-xay-may-ep-may-danh-trung",
+    "name": "Máy xay / Máy ép / Máy đánh trứng",
+    "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Máy xay / Máy ép / Máy đánh trứng home appliance device",
+      "a photo of may xay may ep may danh trung"
+    ],
+    "categorySlug": "thiet-bi"
+  },
+  {
+    "id": "cc357a32-647e-4598-9c0c-86c6d62f2427",
+    "slug": "he-thong-dien-phong",
+    "name": "Hệ thống điện phòng",
+    "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Hệ thống điện phòng home appliance device",
+      "a photo of he thong dien phong"
+    ],
+    "categorySlug": "sua-dien"
+  },
+  {
+    "id": "481e60aa-a20b-466e-8ae0-c581284e67ee",
+    "slug": "he-thong-dien-toan-nha",
+    "name": "Hệ thống điện toàn nhà",
+    "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Hệ thống điện toàn nhà home appliance device",
+      "a photo of he thong dien toan nha"
+    ],
+    "categorySlug": "sua-dien"
+  },
+  {
+    "id": "f37e014f-c25d-4bcf-a5de-af804d32bd40",
+    "slug": "may-pha-ca-phe-am-sieu-toc",
+    "name": "Máy pha cà phê / Ấm siêu tốc",
+    "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Máy pha cà phê / Ấm siêu tốc home appliance device",
+      "a photo of may pha ca phe am sieu toc"
+    ],
+    "categorySlug": "thiet-bi"
+  },
+  {
+    "id": "492a7d40-96f6-4b1a-8146-34956f8a95f8",
+    "slug": "quat-tran-quat-treo-tuong",
+    "name": "Quạt trần / Quạt treo tường",
+    "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Quạt trần / Quạt treo tường home appliance device",
+      "a photo of quat tran quat treo tuong"
+    ],
+    "categorySlug": "sua-dien"
+  },
+  {
+    "id": "44c6d84b-0c8c-44f0-855b-36aff9d8222a",
+    "slug": "may-rua-chen-may-rua-bat",
+    "name": "Máy rửa chén / Máy rửa bát",
+    "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Máy rửa chén / Máy rửa bát home appliance device",
+      "a photo of may rua chen may rua bat"
+    ],
+    "categorySlug": "thiet-bi"
+  },
+  {
+    "id": "9b5276c6-9692-46be-a8ad-f3e1afdac569",
+    "slug": "quat-thong-gio-quat-hut",
+    "name": "Quạt thông gió / Quạt hút",
+    "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Quạt thông gió / Quạt hút home appliance device",
+      "a photo of quat thong gio quat hut"
+    ],
+    "categorySlug": "sua-dien"
+  },
+  {
+    "id": "a265bdb4-3c9f-4d0a-bcba-1f0722c8b420",
+    "slug": "ban-ui-ban-la-hoi-nuoc",
+    "name": "Bàn ủi / Bàn là hơi nước",
+    "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Bàn ủi / Bàn là hơi nước home appliance device",
+      "a photo of ban ui ban la hoi nuoc"
+    ],
+    "categorySlug": "thiet-bi"
+  },
+  {
+    "id": "31a46f93-b19d-46e0-89ec-de97705944e4",
+    "slug": "may-loc-khong-khi-may-hut-am",
+    "name": "Máy lọc không khí / Máy hút ẩm",
+    "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Máy lọc không khí / Máy hút ẩm home appliance device",
+      "a photo of may loc khong khi may hut am"
+    ],
+    "categorySlug": "thiet-bi"
+  },
+  {
+    "id": "b5e21dc2-ed41-4aaa-9f0f-8f5f5aaf025c",
+    "slug": "chuong-cua-nut-nhan",
+    "name": "Chuông cửa / Nút nhấn",
+    "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Chuông cửa / Nút nhấn home appliance device",
+      "a photo of chuong cua nut nhan"
+    ],
+    "categorySlug": "sua-dien"
+  },
+  {
+    "id": "56725529-2a0c-4bdf-a437-4f18d98b5939",
+    "slug": "cam-bien-thiet-bi-tu-dong",
+    "name": "Cảm biến / Thiết bị tự động",
+    "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Cảm biến / Thiết bị tự động home appliance device",
+      "a photo of cam bien thiet bi tu dong"
+    ],
+    "categorySlug": "sua-dien"
+  },
+  {
+    "id": "1c1b61c3-be55-4d27-8a32-46410e2a2017",
+    "slug": "cong-tac-thong-minh-relay",
+    "name": "Công tắc thông minh / Relay",
+    "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Công tắc thông minh / Relay home appliance device",
+      "a photo of cong tac thong minh relay"
+    ],
+    "categorySlug": "sua-dien"
+  },
+  {
+    "id": "215bc4ef-6d9d-49ec-841f-4a9fb91868f5",
+    "slug": "o-cam-thong-minh-hen-gio",
+    "name": "Ổ cắm thông minh / Hẹn giờ",
+    "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Ổ cắm thông minh / Hẹn giờ home appliance device",
+      "a photo of o cam thong minh hen gio"
+    ],
+    "categorySlug": "sua-dien"
+  },
+  {
+    "id": "199c79fa-7e5d-424f-bb45-f2fd9242024f",
+    "slug": "nguon-dien-adapter-bo-nguon",
+    "name": "Nguồn điện / Adapter / Bộ nguồn",
+    "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Nguồn điện / Adapter / Bộ nguồn home appliance device",
+      "a photo of nguon dien adapter bo nguon"
+    ],
+    "categorySlug": "sua-dien"
+  },
+  {
+    "id": "ec503642-d273-4742-bf35-e8b3d509e7e5",
+    "slug": "on-ap-ups-bo-luu-dien",
+    "name": "Ổn áp / UPS / Bộ lưu điện",
+    "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Ổn áp / UPS / Bộ lưu điện home appliance device",
+      "a photo of on ap ups bo luu dien"
+    ],
+    "categorySlug": "sua-dien"
+  },
+  {
+    "id": "aa15b0ce-a9e6-4faf-9c87-1d5102d339f5",
+    "slug": "tiep-dia-chong-set",
+    "name": "Tiếp địa / Chống sét",
+    "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Tiếp địa / Chống sét home appliance device",
+      "a photo of tiep dia chong set"
+    ],
+    "categorySlug": "sua-dien"
+  },
+  {
+    "id": "8e1b308f-a8cd-4de8-9a30-6db52cfdb32c",
+    "slug": "den-su-co-den-thoat-hiem",
+    "name": "Đèn sự cố / Đèn thoát hiểm",
+    "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Đèn sự cố / Đèn thoát hiểm home appliance device",
+      "a photo of den su co den thoat hiem"
+    ],
+    "categorySlug": "sua-dien"
+  },
+  {
+    "id": "2fe406ed-6aae-4f00-b90f-b262e69645e5",
+    "slug": "dien-cua-cuon-cong-tu-dong",
+    "name": "Điện cửa cuốn / Cổng tự động",
+    "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Điện cửa cuốn / Cổng tự động home appliance device",
+      "a photo of dien cua cuon cong tu dong"
+    ],
+    "categorySlug": "sua-dien"
+  },
+  {
+    "id": "bc70283c-4093-4574-aa3f-f5ef1fcdb353",
+    "slug": "may-bom-nuoc-phan-dien",
+    "name": "Máy bơm nước – Phần điện",
+    "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Máy bơm nước – Phần điện home appliance device",
+      "a photo of may bom nuoc phan dien"
+    ],
+    "categorySlug": "sua-dien"
+  },
+  {
+    "id": "9e70ad4f-39e3-44f9-90d6-cb70c8ce9fbe",
+    "slug": "nguon-cap-cho-thiet-bi-co-dinh",
+    "name": "Nguồn cấp cho thiết bị cố định",
+    "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Nguồn cấp cho thiết bị cố định home appliance device",
+      "a photo of nguon cap cho thiet bi co dinh"
+    ],
+    "categorySlug": "sua-dien"
+  },
+  {
+    "id": "72afafec-8d91-4ed9-b153-238d314ddfdf",
+    "slug": "dien-mat-troi-inverter",
+    "name": "Điện mặt trời / Inverter",
+    "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Điện mặt trời / Inverter home appliance device",
+      "a photo of dien mat troi inverter"
+    ],
+    "categorySlug": "sua-dien"
+  },
+  {
+    "id": "34f7d2f7-e63f-4081-b968-2b8275cab527",
+    "slug": "bo-sac-xe-dien-o-cam-sac",
+    "name": "Bộ sạc xe điện / Ổ cắm sạc",
+    "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Bộ sạc xe điện / Ổ cắm sạc home appliance device",
+      "a photo of bo sac xe dien o cam sac"
+    ],
+    "categorySlug": "sua-dien"
+  },
+  {
+    "id": "53a59ef2-9ffe-4206-940f-bc364951b917",
+    "slug": "kiem-tra-khao-sat-su-co-dien",
+    "name": "Kiểm tra / Khảo sát sự cố điện",
+    "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Kiểm tra / Khảo sát sự cố điện home appliance device",
+      "a photo of kiem tra khao sat su co dien"
+    ],
+    "categorySlug": "sua-dien"
+  },
+  {
+    "id": "93797cd8-e539-456e-a38f-f76316e84107",
+    "slug": "thiet-bi-do-dien-cong-to-dien",
+    "name": "Thiết bị đo điện / Công tơ điện",
+    "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+    "isActive": true,
+    "aiPrompts": [
+      "a photo of a Thiết bị đo điện / Công tơ điện home appliance device",
+      "a photo of thiet bi do dien cong to dien"
+    ],
+    "categorySlug": "sua-dien"
+  }
+]

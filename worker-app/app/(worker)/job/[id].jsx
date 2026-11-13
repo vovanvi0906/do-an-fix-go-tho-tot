@@ -1,7 +1,8 @@
+import { isCurrentFaceProof } from '../../../src/features/face-verification/services/proof';
 import { socketService } from '../../../src/services/socket/socketService';
 import { orderService } from '../../../src/services/api/orderService';
 import { apiClient } from '../../../src/services/api/apiClient';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Image } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,19 +19,21 @@ export default function WorkerJobDetailScreen() {
   const { isTracking, startTracking, stopTracking } = useWorkerLocationTracker(id, user?.id);
   const load = useCallback(async () => {
     if (typeof id !== 'string' || !id) throw new Error('Thiếu mã đơn hàng');
-    const [order, profile] = await Promise.all([orderService.getOrderById(id), apiClient.get('/workers/me')]);
-    return { order, profile };
+    const [order, profile, statusResponse] = await Promise.all([orderService.getOrderById(id), apiClient.get('/workers/me'), apiClient.get('/workers/me/face/status', { params: { orderId: id } }).catch(() => null)]);
+    return { order, profile, face: statusResponse?.data || statusResponse };
   }, [id]);
   const { data, loading, error: loadError, reload } = useOrderRecovery(load, `${user?.id}:${id}`);
   const order = data?.order;
   const jobStatus = order?.status;
-  // No order-scoped verification proof is exposed by the current backend.
-  const isFaceChecked = false;
+  const isFaceChecked = isCurrentFaceProof(data?.face?.orderProof, 'ORDER', id);
+  const lastFocusedId = useRef(null);
   useFocusEffect(useCallback(() => {
     if (typeof id !== 'string' || !id) return;
+    if (lastFocusedId.current === id) void reload();
+    lastFocusedId.current = id;
     socketService.joinOrderRoom(id);
     return () => socketService.leaveOrderRoom(id);
-  }, [id]));
+  }, [id, reload]));
 
   const changeStage = async (status) => {
     if (pending) return false;
@@ -91,7 +94,7 @@ export default function WorkerJobDetailScreen() {
           <Ionicons name="scan-circle" size={18} color={isFaceChecked ? '#16A34A' : '#F59E0B'} />
           <Text style={styles.label}>Face ID:</Text>
           <Text style={[styles.val, { color: isFaceChecked ? '#16A34A' : '#D97706' }]}>
-            {'Xác thực theo đơn: backend chưa cung cấp trạng thái riêng'}
+            {isFaceChecked ? 'Bằng chứng riêng cho đơn còn hiệu lực' : jobStatus === 'IN_PROGRESS' ? 'Bằng chứng được kiểm và tiêu thụ khi bắt đầu' : 'Cần xác thực riêng cho đơn khi đã đến nơi'}
           </Text>
         </View>
         <View style={styles.row}>
@@ -114,7 +117,7 @@ export default function WorkerJobDetailScreen() {
         {jobStatus === 'DISPUTED' ? <Text>Đơn đang được xử lý tranh chấp.</Text> : null}
       </View>
       <View style={styles.actionContainer}>
-        {!isFaceChecked && ['MATCHED', 'ASSIGNED', 'WORKER_EN_ROUTE', 'WORKER_ARRIVING', 'ARRIVED', 'IN_PROGRESS'].includes(jobStatus) && (
+        {!isFaceChecked && jobStatus === 'ARRIVED' && (
           <TouchableOpacity
             style={styles.btnFace}
             onPress={() => router.push({ pathname: '/(worker)/verification/face', params: { orderId: id } })}
@@ -140,8 +143,8 @@ export default function WorkerJobDetailScreen() {
         )}
 
         {jobStatus === 'ARRIVED' && (
-          <TouchableOpacity style={styles.btnPrimary} disabled={true} onPress={() => Alert.alert('Chưa thể bắt đầu', 'Đang chờ contract xác thực theo đơn từ backend')}>
-            <Text style={styles.btnText}>CHỜ XÁC THỰC THEO ĐƠN</Text>
+          <TouchableOpacity nativeID="worker-job-start-button" accessibilityRole="button" style={styles.btnPrimary} disabled={pending || !isFaceChecked} onPress={() => changeStage('IN_PROGRESS')}>
+            <Text style={styles.btnText}>{isFaceChecked ? 'BẮT ĐẦU CÔNG VIỆC' : 'CHỜ XÁC THỰC THEO ĐƠN'}</Text>
           </TouchableOpacity>
         )}
         {jobStatus === 'IN_PROGRESS' && (

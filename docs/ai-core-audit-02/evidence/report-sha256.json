@@ -1,0 +1,16 @@
+{
+  "00-executive-summary.md": "07cd3068c1b497bad54babf2343d5fd427f15a0d562976a40f6bad0ad93e1fe2",
+  "01-ai-current-inventory.md": "c385f93d60b93591aa48e5e2e9e1ef7d579c696e4a867d24f89e9d01f34b554b",
+  "02-image-diagnosis-current-flow.md": "3d2c34bf198a41917f31897b77b96db6d48bb2a82279efc04b3afc9add24e72d",
+  "03-service-recommendation-current-flow.md": "ab4696b92f1f8cc63c27181f1535a8e1626a24f09584afe08c1e9a86d139cb3c",
+  "04-image-ai-gap-analysis.md": "5b1be66ac2f43297c0e6a1b8cfb4a03f6b1d3e0028ca3a3760c26203a3d42c8b",
+  "05-face-enrollment-audit.md": "ee9945e569f62e5181b3da577dd23dda1ea6f68710ad5d58d43d5d7ccc25a2e9",
+  "06-face-recognition-audit.md": "bc23de5dfc0607abb101a8470d6cb26723bbadcf27cf99410e57b7d7ca1e730c",
+  "07-liveness-anti-spoofing-audit.md": "004846dcd950cfec5fa12c53ccc96dc7f34038e3b9bcd50cf73c388c6f07332a",
+  "08-security-trust-boundary.md": "23a94170e6cbb3cefa26d64eaefefc0af7b0c53d51dbe2ab6e034c7c62002a85",
+  "09-proposed-ai-architecture.md": "67245fe27240d62712d947320cd335452fa0b0a2658dcef0be4dd25baf99c417",
+  "10-dataset-training-evaluation.md": "47eab3dad6ea484e085b01a8e9d8cf06db25f433144d656ebfc260ca60fe7679",
+  "11-implementation-roadmap.md": "d8d74e1b8e8869757ac1c205a06c5f2ce12b7a895c045e709c4d2398657104ef",
+  "12-learning-guide.md": "9a0cc3e55902ba41f7a634ba7d316f7b194c42c23729babb280a88ec00075863",
+  "13-evidence-index.md": "2c257c9ea95f30b32f06361a3aeb495c450e49613a29e47f94153d9560426b99"
+}

@@ -1,0 +1,58 @@
+{
+  "baseHead": "1c70ae3",
+  "buildSource": "task working tree with research-only native hardening",
+  "workspace": "/home/vanvi/.cache/fixgo-android-research/build-GVZjt0",
+  "apk": "/home/vanvi/.cache/fixgo-android-research/build-GVZjt0/android/app/build/outputs/apk/debug/app-debug.apk",
+  "buildLog": "/home/vanvi/.cache/fixgo-android-research/build-GVZjt0/gradle-build.log",
+  "finalGradleStatus": "BUILD SUCCESSFUL",
+  "finalGradleDurationSeconds": 66,
+  "gradleVersion": "8.10.2",
+  "javaVersion": "17.0.21.0.3",
+  "compileSdk": 35,
+  "ndkVersion": "26.1.10909125",
+  "expoVersion": "52.0.49",
+  "reactNativeVersion": "0.76.9",
+  "generatedNativePackagesExcluded": [
+    "Google Sign-In",
+    "AsyncStorage",
+    "SecureStore",
+    "Location"
+  ],
+  "metro": {
+    "status": 200,
+    "applicationId": "com.fixgo.faceresearch",
+    "routerRoot": "research-app",
+    "deviceLaunched": false
+  },
+  "hermesExport": {
+    "applicationId": "com.fixgo.faceresearch",
+    "scheme": "fixgoresearch",
+    "entrypoint": "expo-router/entry",
+    "routerRoot": "research-app",
+    "introspectedManifestPackage": "com.fixgo.faceresearch",
+    "androidHermesExport": true,
+    "nativeApkBuilt": false,
+    "physicalDeviceTest": false,
+    "sourceCount": 916,
+    "forbiddenWorkerModules": [],
+    "bundleBytes": 1557104,
+    "bundleSha256": "ca2c172f251917352bc136020acc3b282f08d9f2fe6772b9874ec81302e8548a",
+    "sourceMapSha256": "b062eeae78262c64cf7b269a2212db4d691e7f3e578dd421bc999911c6af767f"
+  },
+  "tests": {
+    "worker": {
+      "pass": 27,
+      "fail": 0,
+      "skip": 0
+    },
+    "http_postgresql": {
+      "pass": 24,
+      "fail": 0,
+      "skip": 0
+    }
+  },
+  "physicalDevice": "ANDROID PENDING",
+  "physicalCasesUnexecuted": 12,
+  "projectDatabaseUsed": false,
+  "realBiometricDataUsed": false
+}

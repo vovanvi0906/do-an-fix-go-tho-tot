@@ -1,0 +1,2757 @@
+{
+  "dataset_name": "fixgo-multimodal-recommendation-dataset",
+  "provenance": {
+    "synthetic_ratio": 1.0,
+    "origin": "synthetic_opencv_templates",
+    "leakage_detected": true
+  },
+  "splits": {
+    "train": {
+      "count": 840,
+      "unique_sha256": 646
+    },
+    "val": {
+      "count": 240,
+      "unique_sha256": 213
+    },
+    "test": {
+      "count": 120,
+      "unique_sha256": 114
+    }
+  },
+  "sha256_duplicates": [
+    {
+      "sha256": "6b696982384bbe7cfb23ad4c86f76bbc742e99d8c4772097a730660495814051",
+      "first": "train/dien_lanh/dien_lanh_0011.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0042.jpg"
+    },
+    {
+      "sha256": "091d152c87e0ed1a22bb81914a07255905a43304c53a6ab5c25ae762b8cc8acc",
+      "first": "train/dien_lanh/dien_lanh_0101.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0061.jpg"
+    },
+    {
+      "sha256": "f6d809e719e6a9e06db7bcbf10036541a4ff91c887b85b40454b5ec6c302e3bf",
+      "first": "train/dien_lanh/dien_lanh_0023.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0073.jpg"
+    },
+    {
+      "sha256": "f0371f14d8f37c8a47c394ca03cf72fb963a98174846ddbd187ac084ed344d6d",
+      "first": "train/dien_lanh/dien_lanh_0037.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0094.jpg"
+    },
+    {
+      "sha256": "dc369cf0f843d832e54acead66b250b4f9c25c198f5221187cdcd287cc9b8b0d",
+      "first": "train/dien_lanh/dien_lanh_0054.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0108.jpg"
+    },
+    {
+      "sha256": "e139250442c5ec7705f64878ff88dbd1dc6cfc11cbdc4b163c3ce4ec4bfb1fd5",
+      "first": "train/dien_lanh/dien_lanh_0103.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0045.jpg"
+    },
+    {
+      "sha256": "40eb5656e979623feabe9a18f5c7d35d991ebc2892b7b5b35129275046d3e03a",
+      "first": "train/dien_lanh/dien_lanh_0137.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0074.jpg"
+    },
+    {
+      "sha256": "33869ba524401e48daa3bbec21926e6728fcdca9bb72e508746d6c975c437d8b",
+      "first": "train/dien_lanh/dien_lanh_0077.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0015.jpg"
+    },
+    {
+      "sha256": "9119b7712f8ab35e0de54cef13b7e2734fe468ee6dc126c1c7c45ad4ae2e7410",
+      "first": "train/dien_lanh/dien_lanh_0059.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0034.jpg"
+    },
+    {
+      "sha256": "33869ba524401e48daa3bbec21926e6728fcdca9bb72e508746d6c975c437d8b",
+      "first": "train/dien_lanh/dien_lanh_0077.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0112.jpg"
+    },
+    {
+      "sha256": "72c71eea18afaa978f03fc0d3a026c9a3eb1f23fe55c89567dad75b346e4ecf8",
+      "first": "train/dien_lanh/dien_lanh_0060.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0031.jpg"
+    },
+    {
+      "sha256": "f6d809e719e6a9e06db7bcbf10036541a4ff91c887b85b40454b5ec6c302e3bf",
+      "first": "train/dien_lanh/dien_lanh_0023.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0092.jpg"
+    },
+    {
+      "sha256": "dc369cf0f843d832e54acead66b250b4f9c25c198f5221187cdcd287cc9b8b0d",
+      "first": "train/dien_lanh/dien_lanh_0054.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0120.jpg"
+    },
+    {
+      "sha256": "091d152c87e0ed1a22bb81914a07255905a43304c53a6ab5c25ae762b8cc8acc",
+      "first": "train/dien_lanh/dien_lanh_0101.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0002.jpg"
+    },
+    {
+      "sha256": "6b696982384bbe7cfb23ad4c86f76bbc742e99d8c4772097a730660495814051",
+      "first": "train/dien_lanh/dien_lanh_0011.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0049.jpg"
+    },
+    {
+      "sha256": "f07e979fc9f3c97a5e474869d967457419c342bd66098c9f8ff0ff4a2bec8644",
+      "first": "train/dien_lanh/dien_lanh_0018.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0046.jpg"
+    },
+    {
+      "sha256": "5b5905764422407b78a3067895c745be6e85f57f885eddb4646c88b3cd333446",
+      "first": "train/dien_lanh/dien_lanh_0050.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0097.jpg"
+    },
+    {
+      "sha256": "4ed9e8bca9506f4b51ce43e26c25f005a1b942b1446bcaa93b014ef7b9b24647",
+      "first": "train/dien_lanh/dien_lanh_0048.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0089.jpg"
+    },
+    {
+      "sha256": "5b178e6d3fd0a9acf22ff96dcbdeb2b918419a8108cf880a04080d515bbb650c",
+      "first": "train/dien_lanh/dien_lanh_0115.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0111.jpg"
+    },
+    {
+      "sha256": "05189a30518c183781573e14f838cd29247d841ff77487539ad9646f944c1714",
+      "first": "train/dien_lanh/dien_lanh_0081.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0024.jpg"
+    },
+    {
+      "sha256": "039e51793fcd40ebe3fe538804824764118fd174f2d173a6b26f74c1dbd4f41c",
+      "first": "train/dien_lanh/dien_lanh_0052.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0082.jpg"
+    },
+    {
+      "sha256": "091d152c87e0ed1a22bb81914a07255905a43304c53a6ab5c25ae762b8cc8acc",
+      "first": "train/dien_lanh/dien_lanh_0101.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0110.jpg"
+    },
+    {
+      "sha256": "81e8b39d588f87255cd778a24a4bb4967cd4c7d14a4efaa00a98a6ce0521b0ce",
+      "first": "train/dien_lanh/dien_lanh_0083.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0095.jpg"
+    },
+    {
+      "sha256": "40eb5656e979623feabe9a18f5c7d35d991ebc2892b7b5b35129275046d3e03a",
+      "first": "train/dien_lanh/dien_lanh_0137.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0009.jpg"
+    },
+    {
+      "sha256": "59456902cec370a24093fef9f26cd90834de8621ba003c791962ded7df121f18",
+      "first": "train/dien_lanh/dien_lanh_0132.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0055.jpg"
+    },
+    {
+      "sha256": "9119b7712f8ab35e0de54cef13b7e2734fe468ee6dc126c1c7c45ad4ae2e7410",
+      "first": "train/dien_lanh/dien_lanh_0059.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0041.jpg"
+    },
+    {
+      "sha256": "dc369cf0f843d832e54acead66b250b4f9c25c198f5221187cdcd287cc9b8b0d",
+      "first": "train/dien_lanh/dien_lanh_0054.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0070.jpg"
+    },
+    {
+      "sha256": "2363520e50085f4951d695376328e43e5fd62c6871ddf20bf980d96878f18925",
+      "first": "train/dien_lanh/dien_lanh_0044.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0079.jpg"
+    },
+    {
+      "sha256": "2bb070e05bc94ae178454d82263a04901f30d86b55a81c969ccc54149e75606c",
+      "first": "train/dien_lanh/dien_lanh_0019.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0040.jpg"
+    },
+    {
+      "sha256": "7dfbd6793cc7a514ad46d0899505968a4f46f456205342f6e7452942c270409e",
+      "first": "train/dien_lanh/dien_lanh_0043.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0133.jpg"
+    },
+    {
+      "sha256": "fc0c8ee3f05c480f308223f3e7f965ef4d316df087903ee152c9bfd7b8e7ab82",
+      "first": "train/dien_lanh/dien_lanh_0098.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0087.jpg"
+    },
+    {
+      "sha256": "b1e60cf374713efb70385fef35439d1f2e115449b3076afb5bb2ba15193fe97d",
+      "first": "train/dien_lanh/dien_lanh_0086.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0038.jpg"
+    },
+    {
+      "sha256": "5b5905764422407b78a3067895c745be6e85f57f885eddb4646c88b3cd333446",
+      "first": "train/dien_lanh/dien_lanh_0050.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0030.jpg"
+    },
+    {
+      "sha256": "2363520e50085f4951d695376328e43e5fd62c6871ddf20bf980d96878f18925",
+      "first": "train/dien_lanh/dien_lanh_0044.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0109.jpg"
+    },
+    {
+      "sha256": "6f2ce58f459122194f70fc1cf280958fc6de161d99b10bac8a3902fa5da2eca4",
+      "first": "train/dien_lanh/dien_lanh_0085.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0100.jpg"
+    },
+    {
+      "sha256": "039e51793fcd40ebe3fe538804824764118fd174f2d173a6b26f74c1dbd4f41c",
+      "first": "train/dien_lanh/dien_lanh_0052.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0035.jpg"
+    },
+    {
+      "sha256": "4ed9e8bca9506f4b51ce43e26c25f005a1b942b1446bcaa93b014ef7b9b24647",
+      "first": "train/dien_lanh/dien_lanh_0048.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0136.jpg"
+    },
+    {
+      "sha256": "94fecfe1e8c75673d3b7d1983278d97c3e56e13a332246e20c23ded5f5a5da64",
+      "first": "train/dien_lanh/dien_lanh_0062.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0068.jpg"
+    },
+    {
+      "sha256": "ea852d2a477208a9236cd8442df74fc39866c5bb098e201366324ecbaff3c225",
+      "first": "train/dien_lanh/dien_lanh_0032.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0006.jpg"
+    },
+    {
+      "sha256": "039e51793fcd40ebe3fe538804824764118fd174f2d173a6b26f74c1dbd4f41c",
+      "first": "train/dien_lanh/dien_lanh_0052.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0088.jpg"
+    },
+    {
+      "sha256": "5b178e6d3fd0a9acf22ff96dcbdeb2b918419a8108cf880a04080d515bbb650c",
+      "first": "train/dien_lanh/dien_lanh_0115.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0028.jpg"
+    },
+    {
+      "sha256": "05189a30518c183781573e14f838cd29247d841ff77487539ad9646f944c1714",
+      "first": "train/dien_lanh/dien_lanh_0081.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0064.jpg"
+    },
+    {
+      "sha256": "2363520e50085f4951d695376328e43e5fd62c6871ddf20bf980d96878f18925",
+      "first": "train/dien_lanh/dien_lanh_0044.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0121.jpg"
+    },
+    {
+      "sha256": "f07e979fc9f3c97a5e474869d967457419c342bd66098c9f8ff0ff4a2bec8644",
+      "first": "train/dien_lanh/dien_lanh_0018.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0022.jpg"
+    },
+    {
+      "sha256": "4ed9e8bca9506f4b51ce43e26c25f005a1b942b1446bcaa93b014ef7b9b24647",
+      "first": "train/dien_lanh/dien_lanh_0048.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0128.jpg"
+    },
+    {
+      "sha256": "33869ba524401e48daa3bbec21926e6728fcdca9bb72e508746d6c975c437d8b",
+      "first": "train/dien_lanh/dien_lanh_0077.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0069.jpg"
+    },
+    {
+      "sha256": "59456902cec370a24093fef9f26cd90834de8621ba003c791962ded7df121f18",
+      "first": "train/dien_lanh/dien_lanh_0132.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0135.jpg"
+    },
+    {
+      "sha256": "40eb5656e979623feabe9a18f5c7d35d991ebc2892b7b5b35129275046d3e03a",
+      "first": "train/dien_lanh/dien_lanh_0137.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0026.jpg"
+    },
+    {
+      "sha256": "0ac009d156cca92194e5a1e1b1f4e57a1a09d5a6c55228ff98e1706eb5544f0c",
+      "first": "train/dien_lanh/dien_lanh_0063.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0076.jpg"
+    },
+    {
+      "sha256": "bd59b432e52d8d7fd982c0284e51f2a6dadfbe285bc6027263589b6b389618fc",
+      "first": "train/dien_lanh/dien_lanh_0047.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0113.jpg"
+    },
+    {
+      "sha256": "f6d809e719e6a9e06db7bcbf10036541a4ff91c887b85b40454b5ec6c302e3bf",
+      "first": "train/dien_lanh/dien_lanh_0023.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0140.jpg"
+    },
+    {
+      "sha256": "40eb5656e979623feabe9a18f5c7d35d991ebc2892b7b5b35129275046d3e03a",
+      "first": "train/dien_lanh/dien_lanh_0137.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0131.jpg"
+    },
+    {
+      "sha256": "33869ba524401e48daa3bbec21926e6728fcdca9bb72e508746d6c975c437d8b",
+      "first": "train/dien_lanh/dien_lanh_0077.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0071.jpg"
+    },
+    {
+      "sha256": "7dfbd6793cc7a514ad46d0899505968a4f46f456205342f6e7452942c270409e",
+      "first": "train/dien_lanh/dien_lanh_0043.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0075.jpg"
+    },
+    {
+      "sha256": "f6d809e719e6a9e06db7bcbf10036541a4ff91c887b85b40454b5ec6c302e3bf",
+      "first": "train/dien_lanh/dien_lanh_0023.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0138.jpg"
+    },
+    {
+      "sha256": "bd59b432e52d8d7fd982c0284e51f2a6dadfbe285bc6027263589b6b389618fc",
+      "first": "train/dien_lanh/dien_lanh_0047.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0129.jpg"
+    },
+    {
+      "sha256": "0ac009d156cca92194e5a1e1b1f4e57a1a09d5a6c55228ff98e1706eb5544f0c",
+      "first": "train/dien_lanh/dien_lanh_0063.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0093.jpg"
+    },
+    {
+      "sha256": "dc369cf0f843d832e54acead66b250b4f9c25c198f5221187cdcd287cc9b8b0d",
+      "first": "train/dien_lanh/dien_lanh_0054.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0114.jpg"
+    },
+    {
+      "sha256": "81e8b39d588f87255cd778a24a4bb4967cd4c7d14a4efaa00a98a6ce0521b0ce",
+      "first": "train/dien_lanh/dien_lanh_0083.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0116.jpg"
+    },
+    {
+      "sha256": "dc369cf0f843d832e54acead66b250b4f9c25c198f5221187cdcd287cc9b8b0d",
+      "first": "train/dien_lanh/dien_lanh_0054.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0029.jpg"
+    },
+    {
+      "sha256": "a9c0d63327596fe0317a7afc978125ef4b035afc10ecc152058d0a05c12fd77a",
+      "first": "train/dien_lanh/dien_lanh_0004.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0124.jpg"
+    },
+    {
+      "sha256": "33869ba524401e48daa3bbec21926e6728fcdca9bb72e508746d6c975c437d8b",
+      "first": "train/dien_lanh/dien_lanh_0077.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0102.jpg"
+    },
+    {
+      "sha256": "81e8b39d588f87255cd778a24a4bb4967cd4c7d14a4efaa00a98a6ce0521b0ce",
+      "first": "train/dien_lanh/dien_lanh_0083.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0003.jpg"
+    },
+    {
+      "sha256": "81e8b39d588f87255cd778a24a4bb4967cd4c7d14a4efaa00a98a6ce0521b0ce",
+      "first": "train/dien_lanh/dien_lanh_0083.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0130.jpg"
+    },
+    {
+      "sha256": "72c71eea18afaa978f03fc0d3a026c9a3eb1f23fe55c89567dad75b346e4ecf8",
+      "first": "train/dien_lanh/dien_lanh_0060.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0020.jpg"
+    },
+    {
+      "sha256": "5b5905764422407b78a3067895c745be6e85f57f885eddb4646c88b3cd333446",
+      "first": "train/dien_lanh/dien_lanh_0050.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0118.jpg"
+    },
+    {
+      "sha256": "ea852d2a477208a9236cd8442df74fc39866c5bb098e201366324ecbaff3c225",
+      "first": "train/dien_lanh/dien_lanh_0032.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0104.jpg"
+    },
+    {
+      "sha256": "091d152c87e0ed1a22bb81914a07255905a43304c53a6ab5c25ae762b8cc8acc",
+      "first": "train/dien_lanh/dien_lanh_0101.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0080.jpg"
+    },
+    {
+      "sha256": "5c961fe793ed7838c71f29be4426f941cd71b6c6aaa55d3e2a1fac17f21ecf67",
+      "first": "train/dien_lanh/dien_lanh_0013.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0091.jpg"
+    },
+    {
+      "sha256": "b1e60cf374713efb70385fef35439d1f2e115449b3076afb5bb2ba15193fe97d",
+      "first": "train/dien_lanh/dien_lanh_0086.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0125.jpg"
+    },
+    {
+      "sha256": "59456902cec370a24093fef9f26cd90834de8621ba003c791962ded7df121f18",
+      "first": "train/dien_lanh/dien_lanh_0132.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0096.jpg"
+    },
+    {
+      "sha256": "dc369cf0f843d832e54acead66b250b4f9c25c198f5221187cdcd287cc9b8b0d",
+      "first": "train/dien_lanh/dien_lanh_0054.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0122.jpg"
+    },
+    {
+      "sha256": "f6d809e719e6a9e06db7bcbf10036541a4ff91c887b85b40454b5ec6c302e3bf",
+      "first": "train/dien_lanh/dien_lanh_0023.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0017.jpg"
+    },
+    {
+      "sha256": "f0371f14d8f37c8a47c394ca03cf72fb963a98174846ddbd187ac084ed344d6d",
+      "first": "train/dien_lanh/dien_lanh_0037.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0021.jpg"
+    },
+    {
+      "sha256": "5b5905764422407b78a3067895c745be6e85f57f885eddb4646c88b3cd333446",
+      "first": "train/dien_lanh/dien_lanh_0050.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0016.jpg"
+    },
+    {
+      "sha256": "8cc30b80ac3998ac67e991a2c578059a6ac07759fad3c32a25d0685d899f20d5",
+      "first": "train/dien_lanh/dien_lanh_0025.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0084.jpg"
+    },
+    {
+      "sha256": "dc369cf0f843d832e54acead66b250b4f9c25c198f5221187cdcd287cc9b8b0d",
+      "first": "train/dien_lanh/dien_lanh_0054.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0036.jpg"
+    },
+    {
+      "sha256": "6b696982384bbe7cfb23ad4c86f76bbc742e99d8c4772097a730660495814051",
+      "first": "train/dien_lanh/dien_lanh_0011.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0127.jpg"
+    },
+    {
+      "sha256": "9119b7712f8ab35e0de54cef13b7e2734fe468ee6dc126c1c7c45ad4ae2e7410",
+      "first": "train/dien_lanh/dien_lanh_0059.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0012.jpg"
+    },
+    {
+      "sha256": "ca3d23d04e635bcd0b6f871f264a4f5821a9e431f060b13f3685403d3c0d54a1",
+      "first": "train/dien_lanh/dien_lanh_0067.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0139.jpg"
+    },
+    {
+      "sha256": "5c961fe793ed7838c71f29be4426f941cd71b6c6aaa55d3e2a1fac17f21ecf67",
+      "first": "train/dien_lanh/dien_lanh_0013.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0105.jpg"
+    },
+    {
+      "sha256": "5b178e6d3fd0a9acf22ff96dcbdeb2b918419a8108cf880a04080d515bbb650c",
+      "first": "train/dien_lanh/dien_lanh_0115.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0123.jpg"
+    },
+    {
+      "sha256": "bd59b432e52d8d7fd982c0284e51f2a6dadfbe285bc6027263589b6b389618fc",
+      "first": "train/dien_lanh/dien_lanh_0047.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0001.jpg"
+    },
+    {
+      "sha256": "8cc30b80ac3998ac67e991a2c578059a6ac07759fad3c32a25d0685d899f20d5",
+      "first": "train/dien_lanh/dien_lanh_0025.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0008.jpg"
+    },
+    {
+      "sha256": "72c71eea18afaa978f03fc0d3a026c9a3eb1f23fe55c89567dad75b346e4ecf8",
+      "first": "train/dien_lanh/dien_lanh_0060.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0078.jpg"
+    },
+    {
+      "sha256": "5c961fe793ed7838c71f29be4426f941cd71b6c6aaa55d3e2a1fac17f21ecf67",
+      "first": "train/dien_lanh/dien_lanh_0013.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0056.jpg"
+    },
+    {
+      "sha256": "2bb070e05bc94ae178454d82263a04901f30d86b55a81c969ccc54149e75606c",
+      "first": "train/dien_lanh/dien_lanh_0019.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0099.jpg"
+    },
+    {
+      "sha256": "2363520e50085f4951d695376328e43e5fd62c6871ddf20bf980d96878f18925",
+      "first": "train/dien_lanh/dien_lanh_0044.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0014.jpg"
+    },
+    {
+      "sha256": "6b696982384bbe7cfb23ad4c86f76bbc742e99d8c4772097a730660495814051",
+      "first": "train/dien_lanh/dien_lanh_0011.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0051.jpg"
+    },
+    {
+      "sha256": "40eb5656e979623feabe9a18f5c7d35d991ebc2892b7b5b35129275046d3e03a",
+      "first": "train/dien_lanh/dien_lanh_0137.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0005.jpg"
+    },
+    {
+      "sha256": "f6d809e719e6a9e06db7bcbf10036541a4ff91c887b85b40454b5ec6c302e3bf",
+      "first": "train/dien_lanh/dien_lanh_0023.jpg",
+      "duplicate": "train/dien_lanh/dien_lanh_0117.jpg"
+    },
+    {
+      "sha256": "0e05082a24201cb410b6f568b3b9db2a789d09b0b81f9bde8cad5b64081b6531",
+      "first": "train/thiet_bi/thiet_bi_0040.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0139.jpg"
+    },
+    {
+      "sha256": "4921ae4ad9d310e2b9c4b4e19718c4c08d2f39d3ee3eb959f2336a215b5306a0",
+      "first": "train/thiet_bi/thiet_bi_0115.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0069.jpg"
+    },
+    {
+      "sha256": "ae4265327e205fa63cf717f7d2f78db8f4b3e2ed8833ba0eb1711e4bb02e8f6d",
+      "first": "train/thiet_bi/thiet_bi_0103.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0086.jpg"
+    },
+    {
+      "sha256": "71f32543a81b0d9a8a1ce16be759df57a28d7967687578434f57d21b24390149",
+      "first": "train/thiet_bi/thiet_bi_0064.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0008.jpg"
+    },
+    {
+      "sha256": "b4408c2f959f7718002949561f96411f2c4e25f997200a4ea566bf69863ed44d",
+      "first": "train/thiet_bi/thiet_bi_0051.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0118.jpg"
+    },
+    {
+      "sha256": "0e05082a24201cb410b6f568b3b9db2a789d09b0b81f9bde8cad5b64081b6531",
+      "first": "train/thiet_bi/thiet_bi_0040.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0037.jpg"
+    },
+    {
+      "sha256": "f9b517e75a15db9c070425c3db6d5c8920a5d495134db8cd6c216e92cc33e1cc",
+      "first": "train/thiet_bi/thiet_bi_0114.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0131.jpg"
+    },
+    {
+      "sha256": "ae4265327e205fa63cf717f7d2f78db8f4b3e2ed8833ba0eb1711e4bb02e8f6d",
+      "first": "train/thiet_bi/thiet_bi_0103.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0126.jpg"
+    },
+    {
+      "sha256": "83b1caad1991b94c5d717d521b7543072cc3f5ced01bd4d26ca1e6077aa76439",
+      "first": "train/thiet_bi/thiet_bi_0135.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0085.jpg"
+    },
+    {
+      "sha256": "2075149fac4e744300564df62fdb8eedd3cff49b71659b8a1c6fc92b81780404",
+      "first": "train/thiet_bi/thiet_bi_0136.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0061.jpg"
+    },
+    {
+      "sha256": "f11ad310e472611b74e7c5b84e7048f4b537e171f6f5e077ab6ddcca078df3c4",
+      "first": "train/thiet_bi/thiet_bi_0035.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0098.jpg"
+    },
+    {
+      "sha256": "3150e408896295be37e5c751b710e7257fcff45ad6f134fb5c6e1813eb33a146",
+      "first": "train/thiet_bi/thiet_bi_0134.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0022.jpg"
+    },
+    {
+      "sha256": "f587c7aa505e4c6c3b3b201f5a6dbbd02a45744e6b5aeca11e769892bf414ce5",
+      "first": "train/thiet_bi/thiet_bi_0034.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0107.jpg"
+    },
+    {
+      "sha256": "00889f649008b17cf9e80c9e950a1e3d6a255088b65656caecbd211538dfa44a",
+      "first": "train/thiet_bi/thiet_bi_0018.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0095.jpg"
+    },
+    {
+      "sha256": "f587c7aa505e4c6c3b3b201f5a6dbbd02a45744e6b5aeca11e769892bf414ce5",
+      "first": "train/thiet_bi/thiet_bi_0034.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0117.jpg"
+    },
+    {
+      "sha256": "efeeb6bd0e878a23881b7a2352bd6a831b4e93b6c9c9965bc9a705ee09db29d3",
+      "first": "train/thiet_bi/thiet_bi_0077.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0106.jpg"
+    },
+    {
+      "sha256": "221a03be0fcadba91dcd463fe1d9208a687245378e8c7fdb97467befa538cd9a",
+      "first": "train/thiet_bi/thiet_bi_0127.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0048.jpg"
+    },
+    {
+      "sha256": "087fd308f74c3314cdadca7bb0ec71ef7572d5fb45853401ab595921303ae503",
+      "first": "train/thiet_bi/thiet_bi_0049.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0079.jpg"
+    },
+    {
+      "sha256": "00889f649008b17cf9e80c9e950a1e3d6a255088b65656caecbd211538dfa44a",
+      "first": "train/thiet_bi/thiet_bi_0018.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0094.jpg"
+    },
+    {
+      "sha256": "58cb935e5af2a180840713b79ccc218f455053ebd09289d1ce10f8d36d8e73cd",
+      "first": "train/thiet_bi/thiet_bi_0041.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0023.jpg"
+    },
+    {
+      "sha256": "71f32543a81b0d9a8a1ce16be759df57a28d7967687578434f57d21b24390149",
+      "first": "train/thiet_bi/thiet_bi_0064.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0002.jpg"
+    },
+    {
+      "sha256": "81b496fedaad9ae537f2b33226e5ae5468ed4f5311289633d68f9d7857514fd5",
+      "first": "train/thiet_bi/thiet_bi_0120.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0074.jpg"
+    },
+    {
+      "sha256": "2075149fac4e744300564df62fdb8eedd3cff49b71659b8a1c6fc92b81780404",
+      "first": "train/thiet_bi/thiet_bi_0136.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0066.jpg"
+    },
+    {
+      "sha256": "f9b517e75a15db9c070425c3db6d5c8920a5d495134db8cd6c216e92cc33e1cc",
+      "first": "train/thiet_bi/thiet_bi_0114.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0105.jpg"
+    },
+    {
+      "sha256": "e2670cdd7e95d6d27e52f9624d64cc8187ced28db0c1899a7f57435d2d5e50df",
+      "first": "train/thiet_bi/thiet_bi_0065.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0005.jpg"
+    },
+    {
+      "sha256": "087fd308f74c3314cdadca7bb0ec71ef7572d5fb45853401ab595921303ae503",
+      "first": "train/thiet_bi/thiet_bi_0049.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0109.jpg"
+    },
+    {
+      "sha256": "b4408c2f959f7718002949561f96411f2c4e25f997200a4ea566bf69863ed44d",
+      "first": "train/thiet_bi/thiet_bi_0051.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0056.jpg"
+    },
+    {
+      "sha256": "f9b517e75a15db9c070425c3db6d5c8920a5d495134db8cd6c216e92cc33e1cc",
+      "first": "train/thiet_bi/thiet_bi_0114.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0012.jpg"
+    },
+    {
+      "sha256": "087fd308f74c3314cdadca7bb0ec71ef7572d5fb45853401ab595921303ae503",
+      "first": "train/thiet_bi/thiet_bi_0049.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0125.jpg"
+    },
+    {
+      "sha256": "69fbf6a8213deabf30afed400dae068055f66611d2705219700531467c4d2d8b",
+      "first": "train/thiet_bi/thiet_bi_0090.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0067.jpg"
+    },
+    {
+      "sha256": "f11ad310e472611b74e7c5b84e7048f4b537e171f6f5e077ab6ddcca078df3c4",
+      "first": "train/thiet_bi/thiet_bi_0035.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0119.jpg"
+    },
+    {
+      "sha256": "f11ad310e472611b74e7c5b84e7048f4b537e171f6f5e077ab6ddcca078df3c4",
+      "first": "train/thiet_bi/thiet_bi_0035.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0084.jpg"
+    },
+    {
+      "sha256": "81b496fedaad9ae537f2b33226e5ae5468ed4f5311289633d68f9d7857514fd5",
+      "first": "train/thiet_bi/thiet_bi_0120.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0014.jpg"
+    },
+    {
+      "sha256": "af4b8923d8f14ce8d94969351dd807d8c1f542cf90d46a19e0718fec54fceed8",
+      "first": "train/thiet_bi/thiet_bi_0055.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0032.jpg"
+    },
+    {
+      "sha256": "00889f649008b17cf9e80c9e950a1e3d6a255088b65656caecbd211538dfa44a",
+      "first": "train/thiet_bi/thiet_bi_0018.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0025.jpg"
+    },
+    {
+      "sha256": "dd4e9fa3f887e940ea36d0fc9c4236426b79413c2b2bbe39983080ffc4864205",
+      "first": "train/thiet_bi/thiet_bi_0122.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0003.jpg"
+    },
+    {
+      "sha256": "b4408c2f959f7718002949561f96411f2c4e25f997200a4ea566bf69863ed44d",
+      "first": "train/thiet_bi/thiet_bi_0051.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0101.jpg"
+    },
+    {
+      "sha256": "087fd308f74c3314cdadca7bb0ec71ef7572d5fb45853401ab595921303ae503",
+      "first": "train/thiet_bi/thiet_bi_0049.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0137.jpg"
+    },
+    {
+      "sha256": "4921ae4ad9d310e2b9c4b4e19718c4c08d2f39d3ee3eb959f2336a215b5306a0",
+      "first": "train/thiet_bi/thiet_bi_0115.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0050.jpg"
+    },
+    {
+      "sha256": "e6d1f4046e1f0abb2bca39c16f9fa65d7da695f624e9e844a6baf5d38eced5b2",
+      "first": "train/thiet_bi/thiet_bi_0019.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0021.jpg"
+    },
+    {
+      "sha256": "802997d9926778d073451627d7dc147a5eaee30f8318188094f974db134f552b",
+      "first": "train/thiet_bi/thiet_bi_0121.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0020.jpg"
+    },
+    {
+      "sha256": "e6d1f4046e1f0abb2bca39c16f9fa65d7da695f624e9e844a6baf5d38eced5b2",
+      "first": "train/thiet_bi/thiet_bi_0019.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0036.jpg"
+    },
+    {
+      "sha256": "a973e26b2f5c9a628512b91dc1085f8602d0e4586a36ef6eedf8f5c51d9a14ca",
+      "first": "train/thiet_bi/thiet_bi_0104.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0030.jpg"
+    },
+    {
+      "sha256": "00889f649008b17cf9e80c9e950a1e3d6a255088b65656caecbd211538dfa44a",
+      "first": "train/thiet_bi/thiet_bi_0018.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0052.jpg"
+    },
+    {
+      "sha256": "d3c345099d1b1164e077cee455ed8f20bffd48ba9f1eaf90e25661085a8baf36",
+      "first": "train/thiet_bi/thiet_bi_0068.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0097.jpg"
+    },
+    {
+      "sha256": "0a8f342648b39044cf95a3a4154a46e422449005cf6a09a4ea25e53035d7102d",
+      "first": "train/thiet_bi/thiet_bi_0058.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0133.jpg"
+    },
+    {
+      "sha256": "dd4e9fa3f887e940ea36d0fc9c4236426b79413c2b2bbe39983080ffc4864205",
+      "first": "train/thiet_bi/thiet_bi_0122.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0138.jpg"
+    },
+    {
+      "sha256": "3150e408896295be37e5c751b710e7257fcff45ad6f134fb5c6e1813eb33a146",
+      "first": "train/thiet_bi/thiet_bi_0134.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0013.jpg"
+    },
+    {
+      "sha256": "f9b517e75a15db9c070425c3db6d5c8920a5d495134db8cd6c216e92cc33e1cc",
+      "first": "train/thiet_bi/thiet_bi_0114.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0006.jpg"
+    },
+    {
+      "sha256": "83b1caad1991b94c5d717d521b7543072cc3f5ced01bd4d26ca1e6077aa76439",
+      "first": "train/thiet_bi/thiet_bi_0135.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0062.jpg"
+    },
+    {
+      "sha256": "9302ccdb06dc3a84681932162ebd5ec2da791391084f66682a52085d297ded0f",
+      "first": "train/thiet_bi/thiet_bi_0132.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0031.jpg"
+    },
+    {
+      "sha256": "a6e292f3a0967dd00687715d69de18be6bcfea97091eeb096cdeebc3b15052d3",
+      "first": "train/thiet_bi/thiet_bi_0116.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0042.jpg"
+    },
+    {
+      "sha256": "0a8f342648b39044cf95a3a4154a46e422449005cf6a09a4ea25e53035d7102d",
+      "first": "train/thiet_bi/thiet_bi_0058.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0124.jpg"
+    },
+    {
+      "sha256": "00d9531ad755d9272993cc026d728e03d21f7212a2baf5c057a45ae197cc23bc",
+      "first": "train/thiet_bi/thiet_bi_0029.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0081.jpg"
+    },
+    {
+      "sha256": "4c649ac1752aab99518d8131887238caa84b112db07546c4d42a1c9cd7de4cc8",
+      "first": "train/thiet_bi/thiet_bi_0044.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0009.jpg"
+    },
+    {
+      "sha256": "16b3497c1b4c4411b1dc57cb7344e8feee940a0f2bb2ff848c8cca75639724ec",
+      "first": "train/thiet_bi/thiet_bi_0033.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0082.jpg"
+    },
+    {
+      "sha256": "6b9e862a8da853a1e6db0ecf1bf1215762938df557171095d3c9124eba1abc2a",
+      "first": "train/thiet_bi/thiet_bi_0007.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0028.jpg"
+    },
+    {
+      "sha256": "b0e62b01058a3e4b66fb07c9c626265d5f8b1d485e08a936b8e2bf3df95ccca1",
+      "first": "train/thiet_bi/thiet_bi_0128.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0072.jpg"
+    },
+    {
+      "sha256": "802997d9926778d073451627d7dc147a5eaee30f8318188094f974db134f552b",
+      "first": "train/thiet_bi/thiet_bi_0121.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0080.jpg"
+    },
+    {
+      "sha256": "e6d1f4046e1f0abb2bca39c16f9fa65d7da695f624e9e844a6baf5d38eced5b2",
+      "first": "train/thiet_bi/thiet_bi_0019.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0071.jpg"
+    },
+    {
+      "sha256": "6b9e862a8da853a1e6db0ecf1bf1215762938df557171095d3c9124eba1abc2a",
+      "first": "train/thiet_bi/thiet_bi_0007.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0011.jpg"
+    },
+    {
+      "sha256": "00d9531ad755d9272993cc026d728e03d21f7212a2baf5c057a45ae197cc23bc",
+      "first": "train/thiet_bi/thiet_bi_0029.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0078.jpg"
+    },
+    {
+      "sha256": "ae4265327e205fa63cf717f7d2f78db8f4b3e2ed8833ba0eb1711e4bb02e8f6d",
+      "first": "train/thiet_bi/thiet_bi_0103.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0043.jpg"
+    },
+    {
+      "sha256": "e2670cdd7e95d6d27e52f9624d64cc8187ced28db0c1899a7f57435d2d5e50df",
+      "first": "train/thiet_bi/thiet_bi_0065.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0113.jpg"
+    },
+    {
+      "sha256": "050d600fef0e5be98e53dd6dbbac1eaa080b9bb063fe3d846a5ac0d70387d1cb",
+      "first": "train/thiet_bi/thiet_bi_0088.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0017.jpg"
+    },
+    {
+      "sha256": "bbc6640f438e3748ca89ab54efba00a41c1f9fd24ee2cfab8d54bc62edc83930",
+      "first": "train/thiet_bi/thiet_bi_0096.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0057.jpg"
+    },
+    {
+      "sha256": "6b9e862a8da853a1e6db0ecf1bf1215762938df557171095d3c9124eba1abc2a",
+      "first": "train/thiet_bi/thiet_bi_0007.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0039.jpg"
+    },
+    {
+      "sha256": "81b496fedaad9ae537f2b33226e5ae5468ed4f5311289633d68f9d7857514fd5",
+      "first": "train/thiet_bi/thiet_bi_0120.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0111.jpg"
+    },
+    {
+      "sha256": "b0e62b01058a3e4b66fb07c9c626265d5f8b1d485e08a936b8e2bf3df95ccca1",
+      "first": "train/thiet_bi/thiet_bi_0128.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0087.jpg"
+    },
+    {
+      "sha256": "d657cf7384408c38e9356af3e78cad944f43e0456e2592ffdfba24f8b1fe74e5",
+      "first": "train/thiet_bi/thiet_bi_0015.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0130.jpg"
+    },
+    {
+      "sha256": "e2670cdd7e95d6d27e52f9624d64cc8187ced28db0c1899a7f57435d2d5e50df",
+      "first": "train/thiet_bi/thiet_bi_0065.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0026.jpg"
+    },
+    {
+      "sha256": "efeeb6bd0e878a23881b7a2352bd6a831b4e93b6c9c9965bc9a705ee09db29d3",
+      "first": "train/thiet_bi/thiet_bi_0077.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0038.jpg"
+    },
+    {
+      "sha256": "69893ed6f1f380c7e6b22c66c14a3afc2359a20514e56e12accc37c23aef072e",
+      "first": "train/thiet_bi/thiet_bi_0059.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0140.jpg"
+    },
+    {
+      "sha256": "e6d1f4046e1f0abb2bca39c16f9fa65d7da695f624e9e844a6baf5d38eced5b2",
+      "first": "train/thiet_bi/thiet_bi_0019.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0001.jpg"
+    },
+    {
+      "sha256": "eea24f65c688413f5fdf3babcdff0d6a303918681631cc3f6679760f0817360b",
+      "first": "train/thiet_bi/thiet_bi_0060.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0063.jpg"
+    },
+    {
+      "sha256": "f11ad310e472611b74e7c5b84e7048f4b537e171f6f5e077ab6ddcca078df3c4",
+      "first": "train/thiet_bi/thiet_bi_0035.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0093.jpg"
+    },
+    {
+      "sha256": "6aa7e7c36ce689b2cc36a35944c3571a6b3e45c23283d10377214f62c6b4ca5e",
+      "first": "train/thiet_bi/thiet_bi_0123.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0004.jpg"
+    },
+    {
+      "sha256": "d657cf7384408c38e9356af3e78cad944f43e0456e2592ffdfba24f8b1fe74e5",
+      "first": "train/thiet_bi/thiet_bi_0015.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0100.jpg"
+    },
+    {
+      "sha256": "c7e9acfcacc5a9439fc1e199265ccdc2b1294e82b1f50b7ae15a885327e2207e",
+      "first": "train/thiet_bi/thiet_bi_0027.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0070.jpg"
+    },
+    {
+      "sha256": "050d600fef0e5be98e53dd6dbbac1eaa080b9bb063fe3d846a5ac0d70387d1cb",
+      "first": "train/thiet_bi/thiet_bi_0088.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0112.jpg"
+    },
+    {
+      "sha256": "22081668ead939221d79e28adfac749132b2e699dc638e68dbdf15195fa21404",
+      "first": "train/thiet_bi/thiet_bi_0091.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0045.jpg"
+    },
+    {
+      "sha256": "6aa7e7c36ce689b2cc36a35944c3571a6b3e45c23283d10377214f62c6b4ca5e",
+      "first": "train/thiet_bi/thiet_bi_0123.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0073.jpg"
+    },
+    {
+      "sha256": "1617eb8bf08d3b11c522dca39137ff6a65b7f0b2578965ec1e64471b18a5884a",
+      "first": "train/thiet_bi/thiet_bi_0129.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0046.jpg"
+    },
+    {
+      "sha256": "1617eb8bf08d3b11c522dca39137ff6a65b7f0b2578965ec1e64471b18a5884a",
+      "first": "train/thiet_bi/thiet_bi_0129.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0089.jpg"
+    },
+    {
+      "sha256": "783bde41f99c81be49e13a3dda7cb3adbc4b72f60c1a073bd90537073dc337a2",
+      "first": "train/thiet_bi/thiet_bi_0083.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0010.jpg"
+    },
+    {
+      "sha256": "a973e26b2f5c9a628512b91dc1085f8602d0e4586a36ef6eedf8f5c51d9a14ca",
+      "first": "train/thiet_bi/thiet_bi_0104.jpg",
+      "duplicate": "train/thiet_bi/thiet_bi_0053.jpg"
+    },
+    {
+      "sha256": "430a9e7bb49132df791c42c545a4a31cd802904a9b6644dacb1065bcd27adece",
+      "first": "train/sua_nuoc/sua_nuoc_0061.jpg",
+      "duplicate": "train/sua_nuoc/sua_nuoc_0120.jpg"
+    },
+    {
+      "sha256": "430a9e7bb49132df791c42c545a4a31cd802904a9b6644dacb1065bcd27adece",
+      "first": "train/sua_nuoc/sua_nuoc_0061.jpg",
+      "duplicate": "train/sua_nuoc/sua_nuoc_0010.jpg"
+    },
+    {
+      "sha256": "364589c7a6c8a77c03c258363b28802b1ff9c742e5c217d1d820ed76f9681b06",
+      "first": "train/sua_nuoc/sua_nuoc_0132.jpg",
+      "duplicate": "train/sua_nuoc/sua_nuoc_0035.jpg"
+    },
+    {
+      "sha256": "898efc87847f3b9830c45492e722bfb0292df60a1510197f562bcfb67cb5a61f",
+      "first": "train/sua_nuoc/sua_nuoc_0114.jpg",
+      "duplicate": "train/sua_nuoc/sua_nuoc_0075.jpg"
+    },
+    {
+      "sha256": "55c3226bebae3f76631e0d7d00bf7bbf858570277d46cb2cd98a7d97a7d26d9a",
+      "first": "train/sua_nuoc/sua_nuoc_0111.jpg",
+      "duplicate": "train/sua_nuoc/sua_nuoc_0125.jpg"
+    },
+    {
+      "sha256": "e31f32e9dca2a635c7c8758752d28a295d5a05dc01d7682de24b723ca49e3d04",
+      "first": "train/sua_nuoc/sua_nuoc_0104.jpg",
+      "duplicate": "train/sua_nuoc/sua_nuoc_0097.jpg"
+    },
+    {
+      "sha256": "2c100be27223cc5de0842a531e4b289d604b424cd9392b4c77a727d0d4626918",
+      "first": "train/sua_nuoc/sua_nuoc_0138.jpg",
+      "duplicate": "train/sua_nuoc/sua_nuoc_0032.jpg"
+    },
+    {
+      "sha256": "3c931416bf0e8d4c74ffaa52cb3f2ace6f746259ff259482c1d4208d8f0b71ad",
+      "first": "train/sua_nuoc/sua_nuoc_0076.jpg",
+      "duplicate": "train/sua_nuoc/sua_nuoc_0130.jpg"
+    },
+    {
+      "sha256": "700afee389702e470deb3eba0ae22a0b17a78397844683c596bca74975e5d6aa",
+      "first": "train/sua_nuoc/sua_nuoc_0034.jpg",
+      "duplicate": "train/sua_nuoc/sua_nuoc_0014.jpg"
+    },
+    {
+      "sha256": "11d05189560234ec363c567ed6f02dcf9b2634600be77b2f21f3ac18813ec9ab",
+      "first": "train/sua_nuoc/sua_nuoc_0094.jpg",
+      "duplicate": "train/sua_nuoc/sua_nuoc_0033.jpg"
+    },
+    {
+      "sha256": "0a8f49ab6bf1f179385b492c26af8a10caa39ad0dd979283f1b6caf5d38478c5",
+      "first": "train/sua_dien/sua_dien_0056.jpg",
+      "duplicate": "train/sua_dien/sua_dien_0064.jpg"
+    },
+    {
+      "sha256": "0a89a20c83f35429bf469eb0eff9fd3335809cf15ba6164499335cd3bf72ddf0",
+      "first": "train/sua_dien/sua_dien_0104.jpg",
+      "duplicate": "train/sua_dien/sua_dien_0001.jpg"
+    },
+    {
+      "sha256": "5a9f63b630a042b822d5c87f2787dc7026b30daea2c6c5183eb2823b27f6905e",
+      "first": "train/sua_dien/sua_dien_0008.jpg",
+      "duplicate": "train/sua_dien/sua_dien_0007.jpg"
+    },
+    {
+      "sha256": "2c710f49a08f4e1f2fe1a4c729647d8b7f6a8c38c09f8218bd8e6e4cf6a0321b",
+      "first": "train/sua_dien/sua_dien_0130.jpg",
+      "duplicate": "train/sua_dien/sua_dien_0122.jpg"
+    },
+    {
+      "sha256": "6a9df1a393d6762bf4cc060ba1ea79c635f2cb88d174d8cbd40df90e063945e3",
+      "first": "train/sua_dien/sua_dien_0046.jpg",
+      "duplicate": "train/sua_dien/sua_dien_0105.jpg"
+    },
+    {
+      "sha256": "f064e80309658b4f31ed8cc3915ea75f58bbf7929c3387b50381b74713fda2cc",
+      "first": "train/sua_dien/sua_dien_0003.jpg",
+      "duplicate": "train/sua_dien/sua_dien_0012.jpg"
+    },
+    {
+      "sha256": "487b1b84fc909faa83194bc0eab236dc1a8d29ab30f2a0f0e43e6982a4b7da7c",
+      "first": "train/sua_dien/sua_dien_0107.jpg",
+      "duplicate": "train/sua_dien/sua_dien_0019.jpg"
+    },
+    {
+      "sha256": "6b696982384bbe7cfb23ad4c86f76bbc742e99d8c4772097a730660495814051",
+      "first": "train/dien_lanh/dien_lanh_0011.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0011.jpg"
+    },
+    {
+      "sha256": "f0371f14d8f37c8a47c394ca03cf72fb963a98174846ddbd187ac084ed344d6d",
+      "first": "train/dien_lanh/dien_lanh_0037.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0037.jpg"
+    },
+    {
+      "sha256": "f6d809e719e6a9e06db7bcbf10036541a4ff91c887b85b40454b5ec6c302e3bf",
+      "first": "train/dien_lanh/dien_lanh_0023.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0023.jpg"
+    },
+    {
+      "sha256": "f07e979fc9f3c97a5e474869d967457419c342bd66098c9f8ff0ff4a2bec8644",
+      "first": "train/dien_lanh/dien_lanh_0018.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0018.jpg"
+    },
+    {
+      "sha256": "039f5d33d05e536f13a1d3e12716c4679c3bad39ce7cb8a641b214576d2b9357",
+      "first": "train/dien_lanh/dien_lanh_0033.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0033.jpg"
+    },
+    {
+      "sha256": "33869ba524401e48daa3bbec21926e6728fcdca9bb72e508746d6c975c437d8b",
+      "first": "train/dien_lanh/dien_lanh_0077.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0015.jpg"
+    },
+    {
+      "sha256": "9119b7712f8ab35e0de54cef13b7e2734fe468ee6dc126c1c7c45ad4ae2e7410",
+      "first": "train/dien_lanh/dien_lanh_0059.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0034.jpg"
+    },
+    {
+      "sha256": "72c71eea18afaa978f03fc0d3a026c9a3eb1f23fe55c89567dad75b346e4ecf8",
+      "first": "train/dien_lanh/dien_lanh_0060.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0031.jpg"
+    },
+    {
+      "sha256": "091d152c87e0ed1a22bb81914a07255905a43304c53a6ab5c25ae762b8cc8acc",
+      "first": "train/dien_lanh/dien_lanh_0101.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0002.jpg"
+    },
+    {
+      "sha256": "4bda4f090e62f40e8d9b49931686df73fcaa839997747f8ba5f5e58a230e15f2",
+      "first": "train/dien_lanh/dien_lanh_0027.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0027.jpg"
+    },
+    {
+      "sha256": "05189a30518c183781573e14f838cd29247d841ff77487539ad9646f944c1714",
+      "first": "train/dien_lanh/dien_lanh_0081.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0024.jpg"
+    },
+    {
+      "sha256": "2bb070e05bc94ae178454d82263a04901f30d86b55a81c969ccc54149e75606c",
+      "first": "train/dien_lanh/dien_lanh_0019.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0019.jpg"
+    },
+    {
+      "sha256": "40eb5656e979623feabe9a18f5c7d35d991ebc2892b7b5b35129275046d3e03a",
+      "first": "train/dien_lanh/dien_lanh_0137.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0009.jpg"
+    },
+    {
+      "sha256": "5c961fe793ed7838c71f29be4426f941cd71b6c6aaa55d3e2a1fac17f21ecf67",
+      "first": "train/dien_lanh/dien_lanh_0013.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0013.jpg"
+    },
+    {
+      "sha256": "2bb070e05bc94ae178454d82263a04901f30d86b55a81c969ccc54149e75606c",
+      "first": "train/dien_lanh/dien_lanh_0019.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0040.jpg"
+    },
+    {
+      "sha256": "750a3723d78ce0c295fa7541f71e987136f965fc699032599fdda484d1af2571",
+      "first": "train/dien_lanh/dien_lanh_0010.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0010.jpg"
+    },
+    {
+      "sha256": "a9c0d63327596fe0317a7afc978125ef4b035afc10ecc152058d0a05c12fd77a",
+      "first": "train/dien_lanh/dien_lanh_0004.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0004.jpg"
+    },
+    {
+      "sha256": "ea852d2a477208a9236cd8442df74fc39866c5bb098e201366324ecbaff3c225",
+      "first": "train/dien_lanh/dien_lanh_0032.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0032.jpg"
+    },
+    {
+      "sha256": "b1e60cf374713efb70385fef35439d1f2e115449b3076afb5bb2ba15193fe97d",
+      "first": "train/dien_lanh/dien_lanh_0086.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0038.jpg"
+    },
+    {
+      "sha256": "5b5905764422407b78a3067895c745be6e85f57f885eddb4646c88b3cd333446",
+      "first": "train/dien_lanh/dien_lanh_0050.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0030.jpg"
+    },
+    {
+      "sha256": "039e51793fcd40ebe3fe538804824764118fd174f2d173a6b26f74c1dbd4f41c",
+      "first": "train/dien_lanh/dien_lanh_0052.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0035.jpg"
+    },
+    {
+      "sha256": "ea852d2a477208a9236cd8442df74fc39866c5bb098e201366324ecbaff3c225",
+      "first": "train/dien_lanh/dien_lanh_0032.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0006.jpg"
+    },
+    {
+      "sha256": "1852efe7a94591012d23504699a94bc4814e0eaa0c3a4f62a7e8251a9b5496bc",
+      "first": "train/dien_lanh/dien_lanh_0007.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0007.jpg"
+    },
+    {
+      "sha256": "5b178e6d3fd0a9acf22ff96dcbdeb2b918419a8108cf880a04080d515bbb650c",
+      "first": "train/dien_lanh/dien_lanh_0115.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0028.jpg"
+    },
+    {
+      "sha256": "f07e979fc9f3c97a5e474869d967457419c342bd66098c9f8ff0ff4a2bec8644",
+      "first": "train/dien_lanh/dien_lanh_0018.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0022.jpg"
+    },
+    {
+      "sha256": "0e84a250fa426ec611628c702e1b631a6fb45c04497989aa4c65ee9092b9fc1e",
+      "first": "train/dien_lanh/dien_lanh_0039.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0039.jpg"
+    },
+    {
+      "sha256": "40eb5656e979623feabe9a18f5c7d35d991ebc2892b7b5b35129275046d3e03a",
+      "first": "train/dien_lanh/dien_lanh_0137.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0026.jpg"
+    },
+    {
+      "sha256": "8cc30b80ac3998ac67e991a2c578059a6ac07759fad3c32a25d0685d899f20d5",
+      "first": "train/dien_lanh/dien_lanh_0025.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0025.jpg"
+    },
+    {
+      "sha256": "dc369cf0f843d832e54acead66b250b4f9c25c198f5221187cdcd287cc9b8b0d",
+      "first": "train/dien_lanh/dien_lanh_0054.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0029.jpg"
+    },
+    {
+      "sha256": "81e8b39d588f87255cd778a24a4bb4967cd4c7d14a4efaa00a98a6ce0521b0ce",
+      "first": "train/dien_lanh/dien_lanh_0083.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0003.jpg"
+    },
+    {
+      "sha256": "72c71eea18afaa978f03fc0d3a026c9a3eb1f23fe55c89567dad75b346e4ecf8",
+      "first": "train/dien_lanh/dien_lanh_0060.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0020.jpg"
+    },
+    {
+      "sha256": "f6d809e719e6a9e06db7bcbf10036541a4ff91c887b85b40454b5ec6c302e3bf",
+      "first": "train/dien_lanh/dien_lanh_0023.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0017.jpg"
+    },
+    {
+      "sha256": "f0371f14d8f37c8a47c394ca03cf72fb963a98174846ddbd187ac084ed344d6d",
+      "first": "train/dien_lanh/dien_lanh_0037.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0021.jpg"
+    },
+    {
+      "sha256": "5b5905764422407b78a3067895c745be6e85f57f885eddb4646c88b3cd333446",
+      "first": "train/dien_lanh/dien_lanh_0050.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0016.jpg"
+    },
+    {
+      "sha256": "dc369cf0f843d832e54acead66b250b4f9c25c198f5221187cdcd287cc9b8b0d",
+      "first": "train/dien_lanh/dien_lanh_0054.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0036.jpg"
+    },
+    {
+      "sha256": "9119b7712f8ab35e0de54cef13b7e2734fe468ee6dc126c1c7c45ad4ae2e7410",
+      "first": "train/dien_lanh/dien_lanh_0059.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0012.jpg"
+    },
+    {
+      "sha256": "ea852d2a477208a9236cd8442df74fc39866c5bb098e201366324ecbaff3c225",
+      "first": "train/dien_lanh/dien_lanh_0032.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0001.jpg"
+    },
+    {
+      "sha256": "8cc30b80ac3998ac67e991a2c578059a6ac07759fad3c32a25d0685d899f20d5",
+      "first": "train/dien_lanh/dien_lanh_0025.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0008.jpg"
+    },
+    {
+      "sha256": "2363520e50085f4951d695376328e43e5fd62c6871ddf20bf980d96878f18925",
+      "first": "train/dien_lanh/dien_lanh_0044.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0014.jpg"
+    },
+    {
+      "sha256": "40eb5656e979623feabe9a18f5c7d35d991ebc2892b7b5b35129275046d3e03a",
+      "first": "train/dien_lanh/dien_lanh_0137.jpg",
+      "duplicate": "val/dien_lanh/dien_lanh_0005.jpg"
+    },
+    {
+      "sha256": "6b9e862a8da853a1e6db0ecf1bf1215762938df557171095d3c9124eba1abc2a",
+      "first": "train/thiet_bi/thiet_bi_0007.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0007.jpg"
+    },
+    {
+      "sha256": "0e05082a24201cb410b6f568b3b9db2a789d09b0b81f9bde8cad5b64081b6531",
+      "first": "train/thiet_bi/thiet_bi_0040.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0040.jpg"
+    },
+    {
+      "sha256": "16b3497c1b4c4411b1dc57cb7344e8feee940a0f2bb2ff848c8cca75639724ec",
+      "first": "train/thiet_bi/thiet_bi_0033.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0033.jpg"
+    },
+    {
+      "sha256": "f587c7aa505e4c6c3b3b201f5a6dbbd02a45744e6b5aeca11e769892bf414ce5",
+      "first": "train/thiet_bi/thiet_bi_0034.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0034.jpg"
+    },
+    {
+      "sha256": "71f32543a81b0d9a8a1ce16be759df57a28d7967687578434f57d21b24390149",
+      "first": "train/thiet_bi/thiet_bi_0064.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0008.jpg"
+    },
+    {
+      "sha256": "0e05082a24201cb410b6f568b3b9db2a789d09b0b81f9bde8cad5b64081b6531",
+      "first": "train/thiet_bi/thiet_bi_0040.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0037.jpg"
+    },
+    {
+      "sha256": "f11ad310e472611b74e7c5b84e7048f4b537e171f6f5e077ab6ddcca078df3c4",
+      "first": "train/thiet_bi/thiet_bi_0035.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0035.jpg"
+    },
+    {
+      "sha256": "00889f649008b17cf9e80c9e950a1e3d6a255088b65656caecbd211538dfa44a",
+      "first": "train/thiet_bi/thiet_bi_0018.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0018.jpg"
+    },
+    {
+      "sha256": "3150e408896295be37e5c751b710e7257fcff45ad6f134fb5c6e1813eb33a146",
+      "first": "train/thiet_bi/thiet_bi_0134.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0022.jpg"
+    },
+    {
+      "sha256": "58cb935e5af2a180840713b79ccc218f455053ebd09289d1ce10f8d36d8e73cd",
+      "first": "train/thiet_bi/thiet_bi_0041.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0023.jpg"
+    },
+    {
+      "sha256": "6b7a3808d011a7072d42e80456895312aee409ff42792fbb52c3d9254357ff73",
+      "first": "train/thiet_bi/thiet_bi_0024.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0024.jpg"
+    },
+    {
+      "sha256": "00d9531ad755d9272993cc026d728e03d21f7212a2baf5c057a45ae197cc23bc",
+      "first": "train/thiet_bi/thiet_bi_0029.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0029.jpg"
+    },
+    {
+      "sha256": "71f32543a81b0d9a8a1ce16be759df57a28d7967687578434f57d21b24390149",
+      "first": "train/thiet_bi/thiet_bi_0064.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0002.jpg"
+    },
+    {
+      "sha256": "e2670cdd7e95d6d27e52f9624d64cc8187ced28db0c1899a7f57435d2d5e50df",
+      "first": "train/thiet_bi/thiet_bi_0065.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0005.jpg"
+    },
+    {
+      "sha256": "e6d1f4046e1f0abb2bca39c16f9fa65d7da695f624e9e844a6baf5d38eced5b2",
+      "first": "train/thiet_bi/thiet_bi_0019.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0019.jpg"
+    },
+    {
+      "sha256": "f9b517e75a15db9c070425c3db6d5c8920a5d495134db8cd6c216e92cc33e1cc",
+      "first": "train/thiet_bi/thiet_bi_0114.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0012.jpg"
+    },
+    {
+      "sha256": "c7e9acfcacc5a9439fc1e199265ccdc2b1294e82b1f50b7ae15a885327e2207e",
+      "first": "train/thiet_bi/thiet_bi_0027.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0027.jpg"
+    },
+    {
+      "sha256": "81b496fedaad9ae537f2b33226e5ae5468ed4f5311289633d68f9d7857514fd5",
+      "first": "train/thiet_bi/thiet_bi_0120.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0014.jpg"
+    },
+    {
+      "sha256": "af4b8923d8f14ce8d94969351dd807d8c1f542cf90d46a19e0718fec54fceed8",
+      "first": "train/thiet_bi/thiet_bi_0055.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0032.jpg"
+    },
+    {
+      "sha256": "00889f649008b17cf9e80c9e950a1e3d6a255088b65656caecbd211538dfa44a",
+      "first": "train/thiet_bi/thiet_bi_0018.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0025.jpg"
+    },
+    {
+      "sha256": "dd4e9fa3f887e940ea36d0fc9c4236426b79413c2b2bbe39983080ffc4864205",
+      "first": "train/thiet_bi/thiet_bi_0122.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0003.jpg"
+    },
+    {
+      "sha256": "e6d1f4046e1f0abb2bca39c16f9fa65d7da695f624e9e844a6baf5d38eced5b2",
+      "first": "train/thiet_bi/thiet_bi_0019.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0021.jpg"
+    },
+    {
+      "sha256": "802997d9926778d073451627d7dc147a5eaee30f8318188094f974db134f552b",
+      "first": "train/thiet_bi/thiet_bi_0121.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0020.jpg"
+    },
+    {
+      "sha256": "e6d1f4046e1f0abb2bca39c16f9fa65d7da695f624e9e844a6baf5d38eced5b2",
+      "first": "train/thiet_bi/thiet_bi_0019.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0036.jpg"
+    },
+    {
+      "sha256": "a973e26b2f5c9a628512b91dc1085f8602d0e4586a36ef6eedf8f5c51d9a14ca",
+      "first": "train/thiet_bi/thiet_bi_0104.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0030.jpg"
+    },
+    {
+      "sha256": "3150e408896295be37e5c751b710e7257fcff45ad6f134fb5c6e1813eb33a146",
+      "first": "train/thiet_bi/thiet_bi_0134.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0013.jpg"
+    },
+    {
+      "sha256": "f9b517e75a15db9c070425c3db6d5c8920a5d495134db8cd6c216e92cc33e1cc",
+      "first": "train/thiet_bi/thiet_bi_0114.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0006.jpg"
+    },
+    {
+      "sha256": "d657cf7384408c38e9356af3e78cad944f43e0456e2592ffdfba24f8b1fe74e5",
+      "first": "train/thiet_bi/thiet_bi_0015.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0015.jpg"
+    },
+    {
+      "sha256": "9302ccdb06dc3a84681932162ebd5ec2da791391084f66682a52085d297ded0f",
+      "first": "train/thiet_bi/thiet_bi_0132.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0031.jpg"
+    },
+    {
+      "sha256": "4c649ac1752aab99518d8131887238caa84b112db07546c4d42a1c9cd7de4cc8",
+      "first": "train/thiet_bi/thiet_bi_0044.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0009.jpg"
+    },
+    {
+      "sha256": "6b9e862a8da853a1e6db0ecf1bf1215762938df557171095d3c9124eba1abc2a",
+      "first": "train/thiet_bi/thiet_bi_0007.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0028.jpg"
+    },
+    {
+      "sha256": "db4e60613a1ac4cf112867c01be2b319e527b115387c2f3a922606abd1ce8437",
+      "first": "train/thiet_bi/thiet_bi_0016.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0016.jpg"
+    },
+    {
+      "sha256": "6b9e862a8da853a1e6db0ecf1bf1215762938df557171095d3c9124eba1abc2a",
+      "first": "train/thiet_bi/thiet_bi_0007.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0011.jpg"
+    },
+    {
+      "sha256": "050d600fef0e5be98e53dd6dbbac1eaa080b9bb063fe3d846a5ac0d70387d1cb",
+      "first": "train/thiet_bi/thiet_bi_0088.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0017.jpg"
+    },
+    {
+      "sha256": "6b9e862a8da853a1e6db0ecf1bf1215762938df557171095d3c9124eba1abc2a",
+      "first": "train/thiet_bi/thiet_bi_0007.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0039.jpg"
+    },
+    {
+      "sha256": "e2670cdd7e95d6d27e52f9624d64cc8187ced28db0c1899a7f57435d2d5e50df",
+      "first": "train/thiet_bi/thiet_bi_0065.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0026.jpg"
+    },
+    {
+      "sha256": "efeeb6bd0e878a23881b7a2352bd6a831b4e93b6c9c9965bc9a705ee09db29d3",
+      "first": "train/thiet_bi/thiet_bi_0077.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0038.jpg"
+    },
+    {
+      "sha256": "b4408c2f959f7718002949561f96411f2c4e25f997200a4ea566bf69863ed44d",
+      "first": "train/thiet_bi/thiet_bi_0051.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0001.jpg"
+    },
+    {
+      "sha256": "6aa7e7c36ce689b2cc36a35944c3571a6b3e45c23283d10377214f62c6b4ca5e",
+      "first": "train/thiet_bi/thiet_bi_0123.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0004.jpg"
+    },
+    {
+      "sha256": "783bde41f99c81be49e13a3dda7cb3adbc4b72f60c1a073bd90537073dc337a2",
+      "first": "train/thiet_bi/thiet_bi_0083.jpg",
+      "duplicate": "val/thiet_bi/thiet_bi_0010.jpg"
+    },
+    {
+      "sha256": "ebbd2606d70ddc2cab10dff3f7063a3c61153275e6f50df8588242f90dcdc115",
+      "first": "train/other_unclear/other_unclear_0039.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0039.jpg"
+    },
+    {
+      "sha256": "032bc61f38f81c764188a7e3d200a0190b2d8cda89ea7aa6b9326b4fba361158",
+      "first": "train/other_unclear/other_unclear_0015.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0015.jpg"
+    },
+    {
+      "sha256": "5c20b7a6657357be1af9ddb326db1b6ac4915e950a5809895ce8a996ad7aab45",
+      "first": "train/other_unclear/other_unclear_0007.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0007.jpg"
+    },
+    {
+      "sha256": "e46b98f549d610c3294de95729ee63ec7c3fd90f8c4670ce6851cc965213e3e2",
+      "first": "train/other_unclear/other_unclear_0027.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0027.jpg"
+    },
+    {
+      "sha256": "526b9b9303fbbff8be1c50fddd8a31077cfa045cf11b0dce22b7d76f720b6b88",
+      "first": "train/other_unclear/other_unclear_0023.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0023.jpg"
+    },
+    {
+      "sha256": "c7243e49db2fc00b5655d8f8a41462b1be6de9cb33b592d7098f4bd6e677d077",
+      "first": "train/other_unclear/other_unclear_0011.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0011.jpg"
+    },
+    {
+      "sha256": "decac598262f328cdaec690db91b366dbbfd07b7ec2f7d6bb684016974ce1665",
+      "first": "train/other_unclear/other_unclear_0034.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0034.jpg"
+    },
+    {
+      "sha256": "212676683649d8e360fc035d32c3ff90b40ef3fac015d5cbd070a0a9140cdecf",
+      "first": "train/other_unclear/other_unclear_0040.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0040.jpg"
+    },
+    {
+      "sha256": "a156ab885e0e5d045fff838475084d6e221371e1e96884e5d4990a0c244802ac",
+      "first": "train/other_unclear/other_unclear_0018.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0018.jpg"
+    },
+    {
+      "sha256": "3701ff8fcf063c152b968c47e71dc378092c7d28ecf9ae15aa3cfd43d8d4b0d1",
+      "first": "train/other_unclear/other_unclear_0017.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0017.jpg"
+    },
+    {
+      "sha256": "dda3eef627f7f3b3a476245d00d9ee68fbaaba68df9d9933a24ee7c3de1ee41e",
+      "first": "train/other_unclear/other_unclear_0013.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0013.jpg"
+    },
+    {
+      "sha256": "89921387405fa2c2e18443f10e1b52ac8239647a92f41532a537f30ac4f75b00",
+      "first": "train/other_unclear/other_unclear_0030.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0030.jpg"
+    },
+    {
+      "sha256": "9a47732e36d281d21fd8b18bb0766b540f92afafcb7bd1116ad20dc73d040cf8",
+      "first": "train/other_unclear/other_unclear_0026.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0026.jpg"
+    },
+    {
+      "sha256": "586621153bc02d6a4694848f54d3fd13d5f6e4c7f4fbf31baaca231e2278324a",
+      "first": "train/other_unclear/other_unclear_0006.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0006.jpg"
+    },
+    {
+      "sha256": "78fbf6552ec0f3c09f25f48b46b02d8708ba129bdf5db642cc644080ffaa2d1a",
+      "first": "train/other_unclear/other_unclear_0032.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0032.jpg"
+    },
+    {
+      "sha256": "7d188027df1e455bbacc780f0139dabea2b2c01521ef3b1f0eac4911980ba0c5",
+      "first": "train/other_unclear/other_unclear_0005.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0005.jpg"
+    },
+    {
+      "sha256": "0ddedcb24d5f721c1daf6bfd8e687ce9a59df15ee897445241b030bd610050d3",
+      "first": "train/other_unclear/other_unclear_0016.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0016.jpg"
+    },
+    {
+      "sha256": "e8f6cae573363e7aa9eba16b72514c5fdc08950775d7f6a294fc8dc600e80f3b",
+      "first": "train/other_unclear/other_unclear_0025.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0025.jpg"
+    },
+    {
+      "sha256": "27211c391a7aefd8acfa654f2dbb13334428abed74ecf0324d1cbc8c5dc5bdd3",
+      "first": "train/other_unclear/other_unclear_0037.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0037.jpg"
+    },
+    {
+      "sha256": "9e6918bedb1d3a0716cdff6a4c651e20102f2bddb80cfb7557eaacdcd0e32a47",
+      "first": "train/other_unclear/other_unclear_0019.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0019.jpg"
+    },
+    {
+      "sha256": "0d538b73bd0e586e47fca36bb6b1300a20a9bc3b5882b21d66835c6747510bcf",
+      "first": "train/other_unclear/other_unclear_0036.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0036.jpg"
+    },
+    {
+      "sha256": "c62a55391565622a89a0f6bb05cf8454eacd989b9eb4a0ba4184c3b1e0e0867d",
+      "first": "train/other_unclear/other_unclear_0003.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0003.jpg"
+    },
+    {
+      "sha256": "11f3f8b16557c14e3b4cfffcf10b389cb90ff492993fd2052bb8581ae8e3cd71",
+      "first": "train/other_unclear/other_unclear_0004.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0004.jpg"
+    },
+    {
+      "sha256": "d3870e1894435aaf706caa036ff291776a292fc4f14f701619b35625891ca9ed",
+      "first": "train/other_unclear/other_unclear_0012.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0012.jpg"
+    },
+    {
+      "sha256": "29340bce558874686775f4b4a1328e1bdd070a7b4c3403517a06e788b5ea9a56",
+      "first": "train/other_unclear/other_unclear_0031.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0031.jpg"
+    },
+    {
+      "sha256": "d011fe20b179c66151df889ced34bf1c135ccff1f977f4ccc097db8f0d2c2d30",
+      "first": "train/other_unclear/other_unclear_0009.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0009.jpg"
+    },
+    {
+      "sha256": "bc0a9f2c1150dcded35d8228c8d8bb1834b284d30b4bbd265571770810c7467a",
+      "first": "train/other_unclear/other_unclear_0033.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0033.jpg"
+    },
+    {
+      "sha256": "e2b5e1723dbe48bf2a5da1f13e2f8178ccf9156fd022b40f7d7f3bfd849b97bd",
+      "first": "train/other_unclear/other_unclear_0008.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0008.jpg"
+    },
+    {
+      "sha256": "35109fae1edf24a597e63cbcb381cf46f5a2d834c55a10f281a47249f5b6e21a",
+      "first": "train/other_unclear/other_unclear_0010.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0010.jpg"
+    },
+    {
+      "sha256": "0e70a2b3f9ec43b0ac83e03da60657389e4a3f0b26d15631699e702db35637c0",
+      "first": "train/other_unclear/other_unclear_0002.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0002.jpg"
+    },
+    {
+      "sha256": "b4d57b7da4383f5a0529781fed9606dd0e660e0dfcbe853bdadd22ccfe1385f7",
+      "first": "train/other_unclear/other_unclear_0029.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0029.jpg"
+    },
+    {
+      "sha256": "ec49408417edc62764539ead67dbe3d673a29d387a1942d708bb51837534aaff",
+      "first": "train/other_unclear/other_unclear_0035.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0035.jpg"
+    },
+    {
+      "sha256": "d3f0673485be88fda0a1e2defc233d26ab4a7d96b007c51eea2cb8dda6217897",
+      "first": "train/other_unclear/other_unclear_0028.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0028.jpg"
+    },
+    {
+      "sha256": "cc306d90b5ed6b7098d36a507b8b781a4970f72ef5255ea998291698c84a28e9",
+      "first": "train/other_unclear/other_unclear_0038.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0038.jpg"
+    },
+    {
+      "sha256": "9ac2dcf389de6c3b477b99620c3a679cff3c439edce023cf505bd0e690ba0e4b",
+      "first": "train/other_unclear/other_unclear_0022.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0022.jpg"
+    },
+    {
+      "sha256": "e48e6b57b788328910951a43a7bf4dad83d84d78049550b3fce79c74dbd00409",
+      "first": "train/other_unclear/other_unclear_0024.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0024.jpg"
+    },
+    {
+      "sha256": "ad7d826292b942c94c27b7d4816f0e42ff3a0584212bf728a854bda811da2e3a",
+      "first": "train/other_unclear/other_unclear_0014.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0014.jpg"
+    },
+    {
+      "sha256": "e7bf7539e40b6f4f842db6159f0ddc7694d948c0dcff051bb1267a2107820aa7",
+      "first": "train/other_unclear/other_unclear_0021.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0021.jpg"
+    },
+    {
+      "sha256": "f0865709e10a27ae1fe2792f4f4816503dc25d076a8738238d3b1bc3ab467601",
+      "first": "train/other_unclear/other_unclear_0020.jpg",
+      "duplicate": "val/other_unclear/other_unclear_0020.jpg"
+    },
+    {
+      "sha256": "bf520ac441b609ad1335256fcfc6bcdf8d72480e4598e54adf3fdbbc8fd943a3",
+      "first": "train/sua_nuoc/sua_nuoc_0004.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0004.jpg"
+    },
+    {
+      "sha256": "40276af92caa8e5b387da0ee0dbb86a08b0d0b59cc73a7d5fb98506ecc5c8f77",
+      "first": "train/sua_nuoc/sua_nuoc_0011.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0011.jpg"
+    },
+    {
+      "sha256": "5bf210ce92ac71d738e5f80d4008ee4b16753bd7e0cc85f005c9ea0dff9e7ad7",
+      "first": "train/sua_nuoc/sua_nuoc_0006.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0006.jpg"
+    },
+    {
+      "sha256": "8d3bc4e6bdf7c7f4d81b945346d5b7c50b2de9aedf1ef0a03387d5119dc2aaae",
+      "first": "train/sua_nuoc/sua_nuoc_0017.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0017.jpg"
+    },
+    {
+      "sha256": "7c3979fa092e5ef80be9f641b3620946072ab3c276891b477e3b0ec04bad588c",
+      "first": "train/sua_nuoc/sua_nuoc_0040.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0040.jpg"
+    },
+    {
+      "sha256": "e65afa4eeb923ecf8609a22f1cf2a7349165f5f177204ef94c1eaed1576cae3e",
+      "first": "train/sua_nuoc/sua_nuoc_0013.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0013.jpg"
+    },
+    {
+      "sha256": "39905ab30410246609208561630e721a0a5b96381bd14e54f7b14804e9a54ec3",
+      "first": "train/sua_nuoc/sua_nuoc_0022.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0022.jpg"
+    },
+    {
+      "sha256": "da45764e1f96e3977d42c871212ff4b1dc72bcd18aa4b79529873c82c92a7dd3",
+      "first": "train/sua_nuoc/sua_nuoc_0005.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0005.jpg"
+    },
+    {
+      "sha256": "18cc5448bc33f51f5caa8a3ac5ba4259f302eb96d42181e5ebb3b545de33b887",
+      "first": "train/sua_nuoc/sua_nuoc_0009.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0009.jpg"
+    },
+    {
+      "sha256": "430a9e7bb49132df791c42c545a4a31cd802904a9b6644dacb1065bcd27adece",
+      "first": "train/sua_nuoc/sua_nuoc_0061.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0010.jpg"
+    },
+    {
+      "sha256": "4c1f72d59cdba024db2d27323422465a9b04c03b3f66f26ae60a2d01aaf03562",
+      "first": "train/sua_nuoc/sua_nuoc_0024.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0024.jpg"
+    },
+    {
+      "sha256": "f7648406fe9dcbe26b07e27a45a53939376f2ca0ec6098b8e20be7bec8d7d501",
+      "first": "train/sua_nuoc/sua_nuoc_0015.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0015.jpg"
+    },
+    {
+      "sha256": "364589c7a6c8a77c03c258363b28802b1ff9c742e5c217d1d820ed76f9681b06",
+      "first": "train/sua_nuoc/sua_nuoc_0132.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0035.jpg"
+    },
+    {
+      "sha256": "c6e41bfe1dd7fbef4a15ca6ca90303843da7a4d1e6ee3d45276bf884a049d241",
+      "first": "train/sua_nuoc/sua_nuoc_0021.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0021.jpg"
+    },
+    {
+      "sha256": "9d682dae93c2ad51bd5f1b3c322eef74bf277a4447e7b8928272ef37048868be",
+      "first": "train/sua_nuoc/sua_nuoc_0036.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0036.jpg"
+    },
+    {
+      "sha256": "8415d9acf92054bf5b9bbfcf87abe2da67125c9e29e6c922f2ee124a9b2e0985",
+      "first": "train/sua_nuoc/sua_nuoc_0019.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0019.jpg"
+    },
+    {
+      "sha256": "700afee389702e470deb3eba0ae22a0b17a78397844683c596bca74975e5d6aa",
+      "first": "train/sua_nuoc/sua_nuoc_0034.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0034.jpg"
+    },
+    {
+      "sha256": "adf1ecc5455b5ce8ffc0f38d63b28133a634fccf99a55df0cbd424e0e45dd075",
+      "first": "train/sua_nuoc/sua_nuoc_0008.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0008.jpg"
+    },
+    {
+      "sha256": "78abc9818b9bf85202c9098fb857420395129f3b42f6ca3a2424f78799459421",
+      "first": "train/sua_nuoc/sua_nuoc_0030.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0030.jpg"
+    },
+    {
+      "sha256": "78fc5558a88092bc3bb0159b60ed9849462b394257a2a459542e19128240dac6",
+      "first": "train/sua_nuoc/sua_nuoc_0003.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0003.jpg"
+    },
+    {
+      "sha256": "dec8909e6634b0c7aba99bd5060d6481d30004c54c93c31b57ed348b929887c3",
+      "first": "train/sua_nuoc/sua_nuoc_0020.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0020.jpg"
+    },
+    {
+      "sha256": "7bc06a5255384f80be8600335c4560e73f5dd4e4528c258257b9bc6dee60194a",
+      "first": "train/sua_nuoc/sua_nuoc_0039.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0039.jpg"
+    },
+    {
+      "sha256": "29dea68b723ab7b544b4b5b75187ca7310d93ee974e18b8171e1181d58562334",
+      "first": "train/sua_nuoc/sua_nuoc_0028.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0028.jpg"
+    },
+    {
+      "sha256": "43e1b44c4b46831e54aa1d215a567ea32d04266aa7ffd2a918c08fd86b8d4865",
+      "first": "train/sua_nuoc/sua_nuoc_0018.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0018.jpg"
+    },
+    {
+      "sha256": "11b9dedea718172feb7d315360509239147d5ac6846e0a75764ef137c43d1aed",
+      "first": "train/sua_nuoc/sua_nuoc_0002.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0002.jpg"
+    },
+    {
+      "sha256": "9d8d4f4b00cfae38473f549e1ecfb3d2138df1d8b443720da63b69dd807f96dd",
+      "first": "train/sua_nuoc/sua_nuoc_0026.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0026.jpg"
+    },
+    {
+      "sha256": "87aadb19c54eb026987945f9952507ba58f88d95e4427569768409fe66abe463",
+      "first": "train/sua_nuoc/sua_nuoc_0027.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0027.jpg"
+    },
+    {
+      "sha256": "dfdaf2b901318e2e43e1bf6480dd8912232b9b81a736c3ff45a808d08375ee90",
+      "first": "train/sua_nuoc/sua_nuoc_0031.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0031.jpg"
+    },
+    {
+      "sha256": "233f6c79b7a8c8477d5b7eb787d88ad3d7d6d3915bab17a759e7dfeafe0656a9",
+      "first": "train/sua_nuoc/sua_nuoc_0029.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0029.jpg"
+    },
+    {
+      "sha256": "03835db9e576563edaa53c11719db43057d7ebaa00b14b14ed8a64098232d100",
+      "first": "train/sua_nuoc/sua_nuoc_0025.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0025.jpg"
+    },
+    {
+      "sha256": "f34a7d01a1dafd2af197afa7ab368f4d735666c49b753f5aab3c47c132355926",
+      "first": "train/sua_nuoc/sua_nuoc_0016.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0016.jpg"
+    },
+    {
+      "sha256": "2c100be27223cc5de0842a531e4b289d604b424cd9392b4c77a727d0d4626918",
+      "first": "train/sua_nuoc/sua_nuoc_0138.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0032.jpg"
+    },
+    {
+      "sha256": "aa0e93d2eb0f1214c974926159df72745c46e30d6bd0f44a7893a4d2abd56e29",
+      "first": "train/sua_nuoc/sua_nuoc_0038.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0038.jpg"
+    },
+    {
+      "sha256": "700afee389702e470deb3eba0ae22a0b17a78397844683c596bca74975e5d6aa",
+      "first": "train/sua_nuoc/sua_nuoc_0034.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0014.jpg"
+    },
+    {
+      "sha256": "11d05189560234ec363c567ed6f02dcf9b2634600be77b2f21f3ac18813ec9ab",
+      "first": "train/sua_nuoc/sua_nuoc_0094.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0033.jpg"
+    },
+    {
+      "sha256": "ab4d996c35488e4b498302ecd7cbf3754c8be6a48ec37c64b8ab3da4144f4576",
+      "first": "train/sua_nuoc/sua_nuoc_0012.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0012.jpg"
+    },
+    {
+      "sha256": "9441344a302fc731b3c40e167728ded79136b737d54ba9f9018455ee9f3a0cab",
+      "first": "train/sua_nuoc/sua_nuoc_0037.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0037.jpg"
+    },
+    {
+      "sha256": "ea620f23046cd3a220e493ca65987ebc143be012daa567c5da9b038b1032f75e",
+      "first": "train/sua_nuoc/sua_nuoc_0007.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0007.jpg"
+    },
+    {
+      "sha256": "484a304b910a0e16aae075ac8febb7957bb347dfb1a1af845f372d06c8949e70",
+      "first": "train/sua_nuoc/sua_nuoc_0023.jpg",
+      "duplicate": "val/sua_nuoc/sua_nuoc_0023.jpg"
+    },
+    {
+      "sha256": "739c317eb63fcd76d2fd1b25deff528462cf3930ed7ffab001cec4ac7f0c302f",
+      "first": "train/lam_vuon/lam_vuon_0010.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0010.jpg"
+    },
+    {
+      "sha256": "a18e5012a824c7708c4a6a95ffc596589e5c25965cb1bf568be7ec8c38424bbe",
+      "first": "train/lam_vuon/lam_vuon_0028.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0028.jpg"
+    },
+    {
+      "sha256": "ca5286724e75fe0ce014414a8f7b6717f18a02fb5875734eb36e909af23416e8",
+      "first": "train/lam_vuon/lam_vuon_0031.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0031.jpg"
+    },
+    {
+      "sha256": "a4e4d60183b9f99e313611fda0d707c1ba53569e4374f498b39dadbf1cd8971a",
+      "first": "train/lam_vuon/lam_vuon_0018.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0018.jpg"
+    },
+    {
+      "sha256": "59f875c8e1c8bb72ed492b468965a18b7ca39a95d0e986f75b2e3306abbf503e",
+      "first": "train/lam_vuon/lam_vuon_0015.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0015.jpg"
+    },
+    {
+      "sha256": "cca2806058b1d8bb1303204b68ad78945411a47dfa02f727d7fb117b8389c6aa",
+      "first": "train/lam_vuon/lam_vuon_0003.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0003.jpg"
+    },
+    {
+      "sha256": "76f4c918f76f8d7536319356c3fd1a8d256cf353a0f15948a3d1d64603c815f8",
+      "first": "train/lam_vuon/lam_vuon_0036.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0036.jpg"
+    },
+    {
+      "sha256": "7370b87e35e42709fda98fb391e9065e42a6ea2893c69565c09f7249f9448eda",
+      "first": "train/lam_vuon/lam_vuon_0033.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0033.jpg"
+    },
+    {
+      "sha256": "d9cdab620bb4d25d9404ffabb49aabd83fa0f8fa8bcce018f5e11aa3730cb193",
+      "first": "train/lam_vuon/lam_vuon_0001.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0001.jpg"
+    },
+    {
+      "sha256": "cc3df76d2ea531831ed994b4c993016503bc2aa202defd14a4e0c070958c4afa",
+      "first": "train/lam_vuon/lam_vuon_0025.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0025.jpg"
+    },
+    {
+      "sha256": "7ae5ca9b057c11b8cc61ee85278711f67a185563d9ee8ba0a53901307ab59d9e",
+      "first": "train/lam_vuon/lam_vuon_0037.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0037.jpg"
+    },
+    {
+      "sha256": "cc3a378eaa71042f156f60f9c8354cf8257bd0e339a2d9e3c764697f066647b3",
+      "first": "train/lam_vuon/lam_vuon_0013.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0013.jpg"
+    },
+    {
+      "sha256": "ab0eb9e508294b52475ea924a134b4d3eccdba780ea1f350c11bd491137e5038",
+      "first": "train/lam_vuon/lam_vuon_0039.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0039.jpg"
+    },
+    {
+      "sha256": "f6b72258b359b7d41fe1375a12b087d4c11f27ab615287c83c8c9c96b94f4a07",
+      "first": "train/lam_vuon/lam_vuon_0027.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0027.jpg"
+    },
+    {
+      "sha256": "371c8792b90cd5e92c5c56b8dd691fd2ea9d9a45b0a38e5831e41eaec35e990e",
+      "first": "train/lam_vuon/lam_vuon_0026.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0026.jpg"
+    },
+    {
+      "sha256": "a0b6eb108f82fe96221dce120e968cd4080c4cb1c62011a5f48b476e14ca0256",
+      "first": "train/lam_vuon/lam_vuon_0029.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0029.jpg"
+    },
+    {
+      "sha256": "720008d66362fa32f5f710c3f6797cc64bc50593fb35e32c2db3e893964bd5aa",
+      "first": "train/lam_vuon/lam_vuon_0007.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0007.jpg"
+    },
+    {
+      "sha256": "445b4f7f796d6fbe9f33160606d5edeede7728d515031ec9156c73f9140df1a3",
+      "first": "train/lam_vuon/lam_vuon_0006.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0006.jpg"
+    },
+    {
+      "sha256": "7cdbfd1745ef04bada07d4192341719c4d9970afd99832a9682e655f0f857d63",
+      "first": "train/lam_vuon/lam_vuon_0030.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0030.jpg"
+    },
+    {
+      "sha256": "d935d71ca6d437f99d77969d76694a5d78681b65fb028974447c614d24bb087b",
+      "first": "train/lam_vuon/lam_vuon_0023.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0023.jpg"
+    },
+    {
+      "sha256": "c75cf0e3332e3d1b5fbad95dc15501ea52f500d6a987b183485ea8c9fbbfa587",
+      "first": "train/lam_vuon/lam_vuon_0032.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0032.jpg"
+    },
+    {
+      "sha256": "4023cac3631bce6b7e79fbe65bdffa16126fca512fee847253f4e537358e764e",
+      "first": "train/lam_vuon/lam_vuon_0020.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0020.jpg"
+    },
+    {
+      "sha256": "e27a05bfb315423f5f395ff197359d2403686d5497ea3458018535bd09aabfa7",
+      "first": "train/lam_vuon/lam_vuon_0022.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0022.jpg"
+    },
+    {
+      "sha256": "5a0983bdf0e00f74d129362056a065918992ca39034b21d908d9dd16faa2e62d",
+      "first": "train/lam_vuon/lam_vuon_0004.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0004.jpg"
+    },
+    {
+      "sha256": "d361eccb34eccb8c39e632e064bd940a5752ec27217bd956e7822869679bfd9e",
+      "first": "train/lam_vuon/lam_vuon_0014.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0014.jpg"
+    },
+    {
+      "sha256": "9f7f9b059164b10375267eb7103441655b924ce0f0d1c0455476f4cff3cfafd7",
+      "first": "train/lam_vuon/lam_vuon_0017.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0017.jpg"
+    },
+    {
+      "sha256": "7c9db9fc66d9d38b34a341cbd552f8107fc2b96ba30bbe39ce7523ef6a2ddf52",
+      "first": "train/lam_vuon/lam_vuon_0035.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0035.jpg"
+    },
+    {
+      "sha256": "3c74845d76fbfe8ad121db2afb1aea9d2e97ea1f582405685728ba55d1a422a3",
+      "first": "train/lam_vuon/lam_vuon_0024.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0024.jpg"
+    },
+    {
+      "sha256": "dd10279d0bb147c9d61680b4d212c82ef2b58c23a49a146934fc016022baaf1a",
+      "first": "train/lam_vuon/lam_vuon_0034.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0034.jpg"
+    },
+    {
+      "sha256": "9e97ca199d95673581b0aa5198cc5d9f4a0415ca935d5f092b0cb05af8209870",
+      "first": "train/lam_vuon/lam_vuon_0016.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0016.jpg"
+    },
+    {
+      "sha256": "2a3bfa71241a2b54140e88e0a307eff2f126a7575a24babff5faa339f50f29ee",
+      "first": "train/lam_vuon/lam_vuon_0038.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0038.jpg"
+    },
+    {
+      "sha256": "1eebf50c2ca89ea031ec3c5c26f7ed04b54ad2218fb649021df3cc9238e37877",
+      "first": "train/lam_vuon/lam_vuon_0005.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0005.jpg"
+    },
+    {
+      "sha256": "ec4487b2cfc228cb7e7937940db706d8096d3ce19cf9a9a2925618d52207ecbc",
+      "first": "train/lam_vuon/lam_vuon_0019.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0019.jpg"
+    },
+    {
+      "sha256": "a3dd15d2b689fe29af04f11705530c217c4fdd73b03a160141cfedaeb7b0f797",
+      "first": "train/lam_vuon/lam_vuon_0012.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0012.jpg"
+    },
+    {
+      "sha256": "46a5840c13dc2dfd24971625ae31e245f66ef7ea206cf552451fabb856dfea6a",
+      "first": "train/lam_vuon/lam_vuon_0008.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0008.jpg"
+    },
+    {
+      "sha256": "f79b546b53a2f5b40e7b29464b34b8c42368d26a5e2e94bd88f9d58063d12491",
+      "first": "train/lam_vuon/lam_vuon_0002.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0002.jpg"
+    },
+    {
+      "sha256": "fc7e074feac0cd0bed09278f5c57e248c7c3c97186040b0528ca5985928584d5",
+      "first": "train/lam_vuon/lam_vuon_0011.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0011.jpg"
+    },
+    {
+      "sha256": "a6631ef7d3c93b8b6fa36222b9a4527f74e06ce7e8b574bb9cf6f3c28c22871e",
+      "first": "train/lam_vuon/lam_vuon_0021.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0021.jpg"
+    },
+    {
+      "sha256": "e902ab2f8f6ada617bc9d19da319fc82e98fa20045542ff50374f433951a84c7",
+      "first": "train/lam_vuon/lam_vuon_0040.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0040.jpg"
+    },
+    {
+      "sha256": "8929dd0577f06bc43048751ae17b4917c693dc8ffc0c6820a28885e51b2daf2e",
+      "first": "train/lam_vuon/lam_vuon_0009.jpg",
+      "duplicate": "val/lam_vuon/lam_vuon_0009.jpg"
+    },
+    {
+      "sha256": "cb6daf80936334229202e6011029f30216e3d305a8af538dd776f3838a77e248",
+      "first": "train/sua_dien/sua_dien_0004.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0004.jpg"
+    },
+    {
+      "sha256": "10602fe1fd6fc474f42fa4564f1965a731b75bec2b4e7504d07d0d433b598709",
+      "first": "train/sua_dien/sua_dien_0032.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0032.jpg"
+    },
+    {
+      "sha256": "c3a7f30085ff8e7c21e40da42028d558228e84fac3e30a66d42329b814707a93",
+      "first": "train/sua_dien/sua_dien_0009.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0009.jpg"
+    },
+    {
+      "sha256": "149dccb5f741d480abc1c9c867a62293a85db476a1db09778a181caf8ec28a46",
+      "first": "train/sua_dien/sua_dien_0037.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0037.jpg"
+    },
+    {
+      "sha256": "27c38b2218e4d61ed401fa367d3cdbe11cb51929594faf2cbaa66734684752c9",
+      "first": "train/sua_dien/sua_dien_0006.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0006.jpg"
+    },
+    {
+      "sha256": "5a9f63b630a042b822d5c87f2787dc7026b30daea2c6c5183eb2823b27f6905e",
+      "first": "train/sua_dien/sua_dien_0008.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0008.jpg"
+    },
+    {
+      "sha256": "24817fe0753ced5b752045260f057eff88e3e7d61303c7e429ea6b2279471358",
+      "first": "train/sua_dien/sua_dien_0031.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0031.jpg"
+    },
+    {
+      "sha256": "2a560372f25508c1209f49b18add6b3974e54b15ecc90074501644fab6f1dfb0",
+      "first": "train/sua_dien/sua_dien_0025.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0025.jpg"
+    },
+    {
+      "sha256": "b8d74007770c805d7731d3f91de5c7a1ee6028613222c22275ba95703fff4448",
+      "first": "train/sua_dien/sua_dien_0018.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0018.jpg"
+    },
+    {
+      "sha256": "3bcd57c85fad314021f5f4fb506a620473b288f1c1f7dae1b587a7a67c8a5b3e",
+      "first": "train/sua_dien/sua_dien_0030.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0030.jpg"
+    },
+    {
+      "sha256": "6263d290f0f8a38cdc384f4083cd1e258833914bbdc32fbe76799d8949bca793",
+      "first": "train/sua_dien/sua_dien_0015.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0015.jpg"
+    },
+    {
+      "sha256": "40eb323c0cca7c26de7ff6d7efb58c2d6fbe001dba5ddd99cd679f75720cfedc",
+      "first": "train/sua_dien/sua_dien_0020.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0020.jpg"
+    },
+    {
+      "sha256": "215f3c1668d9b37fe9555bd53950b50fc4895584c9d3ab0cf0a25443dab024df",
+      "first": "train/sua_dien/sua_dien_0033.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0033.jpg"
+    },
+    {
+      "sha256": "b5dffcef9ea17c089d47c71231a985f75219bd2a1f98c367ae729996f9653924",
+      "first": "train/sua_dien/sua_dien_0023.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0023.jpg"
+    },
+    {
+      "sha256": "a06f6f5f6484ec003c1940d7e9fdd0d9b7917c628eeb64d51299565593000b1c",
+      "first": "train/sua_dien/sua_dien_0016.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0016.jpg"
+    },
+    {
+      "sha256": "5a9f63b630a042b822d5c87f2787dc7026b30daea2c6c5183eb2823b27f6905e",
+      "first": "train/sua_dien/sua_dien_0008.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0007.jpg"
+    },
+    {
+      "sha256": "97ea7636cd136c7b91a144f37bf2e5c8470ae5c59593da712ed26ac271f8bb37",
+      "first": "train/sua_dien/sua_dien_0035.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0035.jpg"
+    },
+    {
+      "sha256": "52099ee8e2a5f1d3513377a68d01bb82c0ad4c9d9cc8b7bb7ef7ce482da8bf8a",
+      "first": "train/sua_dien/sua_dien_0017.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0017.jpg"
+    },
+    {
+      "sha256": "e153635cd19a56797a3a57bf53cfff2e27cb16bfef3ef6700cbd78216c77a291",
+      "first": "train/sua_dien/sua_dien_0011.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0011.jpg"
+    },
+    {
+      "sha256": "e10d4ecc27585673efb0960d3f0045ad0895b09ce9c36539681436dd0b41f00c",
+      "first": "train/sua_dien/sua_dien_0038.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0038.jpg"
+    },
+    {
+      "sha256": "4c1624cecf9a6385278c5c4d9dff22494b02c5ac05a073af2c74fdcf06f54cf3",
+      "first": "train/sua_dien/sua_dien_0026.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0026.jpg"
+    },
+    {
+      "sha256": "dd661066b9bb093f5e7190c9d78182b6d0f3ae6bf2b1395cf2cad341fa5e091c",
+      "first": "train/sua_dien/sua_dien_0013.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0013.jpg"
+    },
+    {
+      "sha256": "f064e80309658b4f31ed8cc3915ea75f58bbf7929c3387b50381b74713fda2cc",
+      "first": "train/sua_dien/sua_dien_0003.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0003.jpg"
+    },
+    {
+      "sha256": "10c94ad06b3d25e18c6291e7463b305475c67ed7ecc64b1ffa73daf76fb1860a",
+      "first": "train/sua_dien/sua_dien_0024.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0024.jpg"
+    },
+    {
+      "sha256": "98a91290374bb011c6aa6931f7e7b8719ee67be655fc147e99c10180dd8685d8",
+      "first": "train/sua_dien/sua_dien_0034.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0034.jpg"
+    },
+    {
+      "sha256": "bc317b4348a66ee0ecaa296ce4392ccc26b37952c7648061fa434d38710cd27b",
+      "first": "train/sua_dien/sua_dien_0040.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0040.jpg"
+    },
+    {
+      "sha256": "f31cc5c648291865eba1177e0c725d2c8e263e063702c160bbc1cb21024e3d2c",
+      "first": "train/sua_dien/sua_dien_0010.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0010.jpg"
+    },
+    {
+      "sha256": "f064e80309658b4f31ed8cc3915ea75f58bbf7929c3387b50381b74713fda2cc",
+      "first": "train/sua_dien/sua_dien_0003.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0012.jpg"
+    },
+    {
+      "sha256": "be48a38bc497c36f32ef62086860fa093c84dcc5c5f8de72f8a273b3dd904743",
+      "first": "train/sua_dien/sua_dien_0005.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0005.jpg"
+    },
+    {
+      "sha256": "20babe4726243255d447b01fbca26b475787cad33ad1c85bb94c0b8a8133c14c",
+      "first": "train/sua_dien/sua_dien_0027.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0027.jpg"
+    },
+    {
+      "sha256": "1b93c3efa93047f1487b04f46eed16996973c1675989cf43a01dde59386e05d3",
+      "first": "train/sua_dien/sua_dien_0014.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0014.jpg"
+    },
+    {
+      "sha256": "487b1b84fc909faa83194bc0eab236dc1a8d29ab30f2a0f0e43e6982a4b7da7c",
+      "first": "train/sua_dien/sua_dien_0107.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0019.jpg"
+    },
+    {
+      "sha256": "246dac1828a8e69bf8a4d14958c02af728436745c1a6ecebdc3aee0ef118bc53",
+      "first": "train/sua_dien/sua_dien_0021.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0021.jpg"
+    },
+    {
+      "sha256": "dbb0e9679d23e03f1554658744c7be7585b7d0fe25277071495a06dbc920f400",
+      "first": "train/sua_dien/sua_dien_0022.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0022.jpg"
+    },
+    {
+      "sha256": "e7e4379904d7f5776e8d0d57ddf2bea14c1d112dd9d417ab5989805a5fe1f883",
+      "first": "train/sua_dien/sua_dien_0039.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0039.jpg"
+    },
+    {
+      "sha256": "42b84ca80ba9ed57fc1394abf00107fce33220c25e21a7728560465c712e56fc",
+      "first": "train/sua_dien/sua_dien_0036.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0036.jpg"
+    },
+    {
+      "sha256": "b5f702045269fd02c9d47a688c2b6bff7bbbe676e60a037f8571dc24f407e79c",
+      "first": "train/sua_dien/sua_dien_0002.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0002.jpg"
+    },
+    {
+      "sha256": "b0354a3833728dd0818876ba08bf78a7299a6848a69d73ff6a127f004e1de6bd",
+      "first": "train/sua_dien/sua_dien_0028.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0028.jpg"
+    },
+    {
+      "sha256": "71b254f57c909fe68fc2775a63ab1650c32ceebdf5bece923848afdcc5e03b4a",
+      "first": "train/sua_dien/sua_dien_0029.jpg",
+      "duplicate": "val/sua_dien/sua_dien_0029.jpg"
+    },
+    {
+      "sha256": "6b696982384bbe7cfb23ad4c86f76bbc742e99d8c4772097a730660495814051",
+      "first": "train/dien_lanh/dien_lanh_0011.jpg",
+      "duplicate": "test/dien_lanh/dien_lanh_0011.jpg"
+    },
+    {
+      "sha256": "f07e979fc9f3c97a5e474869d967457419c342bd66098c9f8ff0ff4a2bec8644",
+      "first": "train/dien_lanh/dien_lanh_0018.jpg",
+      "duplicate": "test/dien_lanh/dien_lanh_0018.jpg"
+    },
+    {
+      "sha256": "33869ba524401e48daa3bbec21926e6728fcdca9bb72e508746d6c975c437d8b",
+      "first": "train/dien_lanh/dien_lanh_0077.jpg",
+      "duplicate": "test/dien_lanh/dien_lanh_0015.jpg"
+    },
+    {
+      "sha256": "091d152c87e0ed1a22bb81914a07255905a43304c53a6ab5c25ae762b8cc8acc",
+      "first": "train/dien_lanh/dien_lanh_0101.jpg",
+      "duplicate": "test/dien_lanh/dien_lanh_0002.jpg"
+    },
+    {
+      "sha256": "2bb070e05bc94ae178454d82263a04901f30d86b55a81c969ccc54149e75606c",
+      "first": "train/dien_lanh/dien_lanh_0019.jpg",
+      "duplicate": "test/dien_lanh/dien_lanh_0019.jpg"
+    },
+    {
+      "sha256": "40eb5656e979623feabe9a18f5c7d35d991ebc2892b7b5b35129275046d3e03a",
+      "first": "train/dien_lanh/dien_lanh_0137.jpg",
+      "duplicate": "test/dien_lanh/dien_lanh_0009.jpg"
+    },
+    {
+      "sha256": "5c961fe793ed7838c71f29be4426f941cd71b6c6aaa55d3e2a1fac17f21ecf67",
+      "first": "train/dien_lanh/dien_lanh_0013.jpg",
+      "duplicate": "test/dien_lanh/dien_lanh_0013.jpg"
+    },
+    {
+      "sha256": "750a3723d78ce0c295fa7541f71e987136f965fc699032599fdda484d1af2571",
+      "first": "train/dien_lanh/dien_lanh_0010.jpg",
+      "duplicate": "test/dien_lanh/dien_lanh_0010.jpg"
+    },
+    {
+      "sha256": "a9c0d63327596fe0317a7afc978125ef4b035afc10ecc152058d0a05c12fd77a",
+      "first": "train/dien_lanh/dien_lanh_0004.jpg",
+      "duplicate": "test/dien_lanh/dien_lanh_0004.jpg"
+    },
+    {
+      "sha256": "ea852d2a477208a9236cd8442df74fc39866c5bb098e201366324ecbaff3c225",
+      "first": "train/dien_lanh/dien_lanh_0032.jpg",
+      "duplicate": "test/dien_lanh/dien_lanh_0006.jpg"
+    },
+    {
+      "sha256": "1852efe7a94591012d23504699a94bc4814e0eaa0c3a4f62a7e8251a9b5496bc",
+      "first": "train/dien_lanh/dien_lanh_0007.jpg",
+      "duplicate": "test/dien_lanh/dien_lanh_0007.jpg"
+    },
+    {
+      "sha256": "81e8b39d588f87255cd778a24a4bb4967cd4c7d14a4efaa00a98a6ce0521b0ce",
+      "first": "train/dien_lanh/dien_lanh_0083.jpg",
+      "duplicate": "test/dien_lanh/dien_lanh_0003.jpg"
+    },
+    {
+      "sha256": "72c71eea18afaa978f03fc0d3a026c9a3eb1f23fe55c89567dad75b346e4ecf8",
+      "first": "train/dien_lanh/dien_lanh_0060.jpg",
+      "duplicate": "test/dien_lanh/dien_lanh_0020.jpg"
+    },
+    {
+      "sha256": "f6d809e719e6a9e06db7bcbf10036541a4ff91c887b85b40454b5ec6c302e3bf",
+      "first": "train/dien_lanh/dien_lanh_0023.jpg",
+      "duplicate": "test/dien_lanh/dien_lanh_0017.jpg"
+    },
+    {
+      "sha256": "5b5905764422407b78a3067895c745be6e85f57f885eddb4646c88b3cd333446",
+      "first": "train/dien_lanh/dien_lanh_0050.jpg",
+      "duplicate": "test/dien_lanh/dien_lanh_0016.jpg"
+    },
+    {
+      "sha256": "9119b7712f8ab35e0de54cef13b7e2734fe468ee6dc126c1c7c45ad4ae2e7410",
+      "first": "train/dien_lanh/dien_lanh_0059.jpg",
+      "duplicate": "test/dien_lanh/dien_lanh_0012.jpg"
+    },
+    {
+      "sha256": "8cc30b80ac3998ac67e991a2c578059a6ac07759fad3c32a25d0685d899f20d5",
+      "first": "train/dien_lanh/dien_lanh_0025.jpg",
+      "duplicate": "test/dien_lanh/dien_lanh_0008.jpg"
+    },
+    {
+      "sha256": "2363520e50085f4951d695376328e43e5fd62c6871ddf20bf980d96878f18925",
+      "first": "train/dien_lanh/dien_lanh_0044.jpg",
+      "duplicate": "test/dien_lanh/dien_lanh_0014.jpg"
+    },
+    {
+      "sha256": "40eb5656e979623feabe9a18f5c7d35d991ebc2892b7b5b35129275046d3e03a",
+      "first": "train/dien_lanh/dien_lanh_0137.jpg",
+      "duplicate": "test/dien_lanh/dien_lanh_0005.jpg"
+    },
+    {
+      "sha256": "6b9e862a8da853a1e6db0ecf1bf1215762938df557171095d3c9124eba1abc2a",
+      "first": "train/thiet_bi/thiet_bi_0007.jpg",
+      "duplicate": "test/thiet_bi/thiet_bi_0007.jpg"
+    },
+    {
+      "sha256": "71f32543a81b0d9a8a1ce16be759df57a28d7967687578434f57d21b24390149",
+      "first": "train/thiet_bi/thiet_bi_0064.jpg",
+      "duplicate": "test/thiet_bi/thiet_bi_0008.jpg"
+    },
+    {
+      "sha256": "00889f649008b17cf9e80c9e950a1e3d6a255088b65656caecbd211538dfa44a",
+      "first": "train/thiet_bi/thiet_bi_0018.jpg",
+      "duplicate": "test/thiet_bi/thiet_bi_0018.jpg"
+    },
+    {
+      "sha256": "71f32543a81b0d9a8a1ce16be759df57a28d7967687578434f57d21b24390149",
+      "first": "train/thiet_bi/thiet_bi_0064.jpg",
+      "duplicate": "test/thiet_bi/thiet_bi_0002.jpg"
+    },
+    {
+      "sha256": "e2670cdd7e95d6d27e52f9624d64cc8187ced28db0c1899a7f57435d2d5e50df",
+      "first": "train/thiet_bi/thiet_bi_0065.jpg",
+      "duplicate": "test/thiet_bi/thiet_bi_0005.jpg"
+    },
+    {
+      "sha256": "e6d1f4046e1f0abb2bca39c16f9fa65d7da695f624e9e844a6baf5d38eced5b2",
+      "first": "train/thiet_bi/thiet_bi_0019.jpg",
+      "duplicate": "test/thiet_bi/thiet_bi_0019.jpg"
+    },
+    {
+      "sha256": "f9b517e75a15db9c070425c3db6d5c8920a5d495134db8cd6c216e92cc33e1cc",
+      "first": "train/thiet_bi/thiet_bi_0114.jpg",
+      "duplicate": "test/thiet_bi/thiet_bi_0012.jpg"
+    },
+    {
+      "sha256": "81b496fedaad9ae537f2b33226e5ae5468ed4f5311289633d68f9d7857514fd5",
+      "first": "train/thiet_bi/thiet_bi_0120.jpg",
+      "duplicate": "test/thiet_bi/thiet_bi_0014.jpg"
+    },
+    {
+      "sha256": "dd4e9fa3f887e940ea36d0fc9c4236426b79413c2b2bbe39983080ffc4864205",
+      "first": "train/thiet_bi/thiet_bi_0122.jpg",
+      "duplicate": "test/thiet_bi/thiet_bi_0003.jpg"
+    },
+    {
+      "sha256": "802997d9926778d073451627d7dc147a5eaee30f8318188094f974db134f552b",
+      "first": "train/thiet_bi/thiet_bi_0121.jpg",
+      "duplicate": "test/thiet_bi/thiet_bi_0020.jpg"
+    },
+    {
+      "sha256": "3150e408896295be37e5c751b710e7257fcff45ad6f134fb5c6e1813eb33a146",
+      "first": "train/thiet_bi/thiet_bi_0134.jpg",
+      "duplicate": "test/thiet_bi/thiet_bi_0013.jpg"
+    },
+    {
+      "sha256": "f9b517e75a15db9c070425c3db6d5c8920a5d495134db8cd6c216e92cc33e1cc",
+      "first": "train/thiet_bi/thiet_bi_0114.jpg",
+      "duplicate": "test/thiet_bi/thiet_bi_0006.jpg"
+    },
+    {
+      "sha256": "d657cf7384408c38e9356af3e78cad944f43e0456e2592ffdfba24f8b1fe74e5",
+      "first": "train/thiet_bi/thiet_bi_0015.jpg",
+      "duplicate": "test/thiet_bi/thiet_bi_0015.jpg"
+    },
+    {
+      "sha256": "4c649ac1752aab99518d8131887238caa84b112db07546c4d42a1c9cd7de4cc8",
+      "first": "train/thiet_bi/thiet_bi_0044.jpg",
+      "duplicate": "test/thiet_bi/thiet_bi_0009.jpg"
+    },
+    {
+      "sha256": "db4e60613a1ac4cf112867c01be2b319e527b115387c2f3a922606abd1ce8437",
+      "first": "train/thiet_bi/thiet_bi_0016.jpg",
+      "duplicate": "test/thiet_bi/thiet_bi_0016.jpg"
+    },
+    {
+      "sha256": "6b9e862a8da853a1e6db0ecf1bf1215762938df557171095d3c9124eba1abc2a",
+      "first": "train/thiet_bi/thiet_bi_0007.jpg",
+      "duplicate": "test/thiet_bi/thiet_bi_0011.jpg"
+    },
+    {
+      "sha256": "050d600fef0e5be98e53dd6dbbac1eaa080b9bb063fe3d846a5ac0d70387d1cb",
+      "first": "train/thiet_bi/thiet_bi_0088.jpg",
+      "duplicate": "test/thiet_bi/thiet_bi_0017.jpg"
+    },
+    {
+      "sha256": "6aa7e7c36ce689b2cc36a35944c3571a6b3e45c23283d10377214f62c6b4ca5e",
+      "first": "train/thiet_bi/thiet_bi_0123.jpg",
+      "duplicate": "test/thiet_bi/thiet_bi_0004.jpg"
+    },
+    {
+      "sha256": "783bde41f99c81be49e13a3dda7cb3adbc4b72f60c1a073bd90537073dc337a2",
+      "first": "train/thiet_bi/thiet_bi_0083.jpg",
+      "duplicate": "test/thiet_bi/thiet_bi_0010.jpg"
+    },
+    {
+      "sha256": "032bc61f38f81c764188a7e3d200a0190b2d8cda89ea7aa6b9326b4fba361158",
+      "first": "train/other_unclear/other_unclear_0015.jpg",
+      "duplicate": "test/other_unclear/other_unclear_0015.jpg"
+    },
+    {
+      "sha256": "5c20b7a6657357be1af9ddb326db1b6ac4915e950a5809895ce8a996ad7aab45",
+      "first": "train/other_unclear/other_unclear_0007.jpg",
+      "duplicate": "test/other_unclear/other_unclear_0007.jpg"
+    },
+    {
+      "sha256": "c7243e49db2fc00b5655d8f8a41462b1be6de9cb33b592d7098f4bd6e677d077",
+      "first": "train/other_unclear/other_unclear_0011.jpg",
+      "duplicate": "test/other_unclear/other_unclear_0011.jpg"
+    },
+    {
+      "sha256": "a156ab885e0e5d045fff838475084d6e221371e1e96884e5d4990a0c244802ac",
+      "first": "train/other_unclear/other_unclear_0018.jpg",
+      "duplicate": "test/other_unclear/other_unclear_0018.jpg"
+    },
+    {
+      "sha256": "3701ff8fcf063c152b968c47e71dc378092c7d28ecf9ae15aa3cfd43d8d4b0d1",
+      "first": "train/other_unclear/other_unclear_0017.jpg",
+      "duplicate": "test/other_unclear/other_unclear_0017.jpg"
+    },
+    {
+      "sha256": "dda3eef627f7f3b3a476245d00d9ee68fbaaba68df9d9933a24ee7c3de1ee41e",
+      "first": "train/other_unclear/other_unclear_0013.jpg",
+      "duplicate": "test/other_unclear/other_unclear_0013.jpg"
+    },
+    {
+      "sha256": "586621153bc02d6a4694848f54d3fd13d5f6e4c7f4fbf31baaca231e2278324a",
+      "first": "train/other_unclear/other_unclear_0006.jpg",
+      "duplicate": "test/other_unclear/other_unclear_0006.jpg"
+    },
+    {
+      "sha256": "7d188027df1e455bbacc780f0139dabea2b2c01521ef3b1f0eac4911980ba0c5",
+      "first": "train/other_unclear/other_unclear_0005.jpg",
+      "duplicate": "test/other_unclear/other_unclear_0005.jpg"
+    },
+    {
+      "sha256": "0ddedcb24d5f721c1daf6bfd8e687ce9a59df15ee897445241b030bd610050d3",
+      "first": "train/other_unclear/other_unclear_0016.jpg",
+      "duplicate": "test/other_unclear/other_unclear_0016.jpg"
+    },
+    {
+      "sha256": "9e6918bedb1d3a0716cdff6a4c651e20102f2bddb80cfb7557eaacdcd0e32a47",
+      "first": "train/other_unclear/other_unclear_0019.jpg",
+      "duplicate": "test/other_unclear/other_unclear_0019.jpg"
+    },
+    {
+      "sha256": "c62a55391565622a89a0f6bb05cf8454eacd989b9eb4a0ba4184c3b1e0e0867d",
+      "first": "train/other_unclear/other_unclear_0003.jpg",
+      "duplicate": "test/other_unclear/other_unclear_0003.jpg"
+    },
+    {
+      "sha256": "11f3f8b16557c14e3b4cfffcf10b389cb90ff492993fd2052bb8581ae8e3cd71",
+      "first": "train/other_unclear/other_unclear_0004.jpg",
+      "duplicate": "test/other_unclear/other_unclear_0004.jpg"
+    },
+    {
+      "sha256": "d3870e1894435aaf706caa036ff291776a292fc4f14f701619b35625891ca9ed",
+      "first": "train/other_unclear/other_unclear_0012.jpg",
+      "duplicate": "test/other_unclear/other_unclear_0012.jpg"
+    },
+    {
+      "sha256": "d011fe20b179c66151df889ced34bf1c135ccff1f977f4ccc097db8f0d2c2d30",
+      "first": "train/other_unclear/other_unclear_0009.jpg",
+      "duplicate": "test/other_unclear/other_unclear_0009.jpg"
+    },
+    {
+      "sha256": "e2b5e1723dbe48bf2a5da1f13e2f8178ccf9156fd022b40f7d7f3bfd849b97bd",
+      "first": "train/other_unclear/other_unclear_0008.jpg",
+      "duplicate": "test/other_unclear/other_unclear_0008.jpg"
+    },
+    {
+      "sha256": "35109fae1edf24a597e63cbcb381cf46f5a2d834c55a10f281a47249f5b6e21a",
+      "first": "train/other_unclear/other_unclear_0010.jpg",
+      "duplicate": "test/other_unclear/other_unclear_0010.jpg"
+    },
+    {
+      "sha256": "0e70a2b3f9ec43b0ac83e03da60657389e4a3f0b26d15631699e702db35637c0",
+      "first": "train/other_unclear/other_unclear_0002.jpg",
+      "duplicate": "test/other_unclear/other_unclear_0002.jpg"
+    },
+    {
+      "sha256": "ad7d826292b942c94c27b7d4816f0e42ff3a0584212bf728a854bda811da2e3a",
+      "first": "train/other_unclear/other_unclear_0014.jpg",
+      "duplicate": "test/other_unclear/other_unclear_0014.jpg"
+    },
+    {
+      "sha256": "f0865709e10a27ae1fe2792f4f4816503dc25d076a8738238d3b1bc3ab467601",
+      "first": "train/other_unclear/other_unclear_0020.jpg",
+      "duplicate": "test/other_unclear/other_unclear_0020.jpg"
+    },
+    {
+      "sha256": "bf520ac441b609ad1335256fcfc6bcdf8d72480e4598e54adf3fdbbc8fd943a3",
+      "first": "train/sua_nuoc/sua_nuoc_0004.jpg",
+      "duplicate": "test/sua_nuoc/sua_nuoc_0004.jpg"
+    },
+    {
+      "sha256": "40276af92caa8e5b387da0ee0dbb86a08b0d0b59cc73a7d5fb98506ecc5c8f77",
+      "first": "train/sua_nuoc/sua_nuoc_0011.jpg",
+      "duplicate": "test/sua_nuoc/sua_nuoc_0011.jpg"
+    },
+    {
+      "sha256": "5bf210ce92ac71d738e5f80d4008ee4b16753bd7e0cc85f005c9ea0dff9e7ad7",
+      "first": "train/sua_nuoc/sua_nuoc_0006.jpg",
+      "duplicate": "test/sua_nuoc/sua_nuoc_0006.jpg"
+    },
+    {
+      "sha256": "8d3bc4e6bdf7c7f4d81b945346d5b7c50b2de9aedf1ef0a03387d5119dc2aaae",
+      "first": "train/sua_nuoc/sua_nuoc_0017.jpg",
+      "duplicate": "test/sua_nuoc/sua_nuoc_0017.jpg"
+    },
+    {
+      "sha256": "e65afa4eeb923ecf8609a22f1cf2a7349165f5f177204ef94c1eaed1576cae3e",
+      "first": "train/sua_nuoc/sua_nuoc_0013.jpg",
+      "duplicate": "test/sua_nuoc/sua_nuoc_0013.jpg"
+    },
+    {
+      "sha256": "da45764e1f96e3977d42c871212ff4b1dc72bcd18aa4b79529873c82c92a7dd3",
+      "first": "train/sua_nuoc/sua_nuoc_0005.jpg",
+      "duplicate": "test/sua_nuoc/sua_nuoc_0005.jpg"
+    },
+    {
+      "sha256": "18cc5448bc33f51f5caa8a3ac5ba4259f302eb96d42181e5ebb3b545de33b887",
+      "first": "train/sua_nuoc/sua_nuoc_0009.jpg",
+      "duplicate": "test/sua_nuoc/sua_nuoc_0009.jpg"
+    },
+    {
+      "sha256": "430a9e7bb49132df791c42c545a4a31cd802904a9b6644dacb1065bcd27adece",
+      "first": "train/sua_nuoc/sua_nuoc_0061.jpg",
+      "duplicate": "test/sua_nuoc/sua_nuoc_0010.jpg"
+    },
+    {
+      "sha256": "f7648406fe9dcbe26b07e27a45a53939376f2ca0ec6098b8e20be7bec8d7d501",
+      "first": "train/sua_nuoc/sua_nuoc_0015.jpg",
+      "duplicate": "test/sua_nuoc/sua_nuoc_0015.jpg"
+    },
+    {
+      "sha256": "8415d9acf92054bf5b9bbfcf87abe2da67125c9e29e6c922f2ee124a9b2e0985",
+      "first": "train/sua_nuoc/sua_nuoc_0019.jpg",
+      "duplicate": "test/sua_nuoc/sua_nuoc_0019.jpg"
+    },
+    {
+      "sha256": "adf1ecc5455b5ce8ffc0f38d63b28133a634fccf99a55df0cbd424e0e45dd075",
+      "first": "train/sua_nuoc/sua_nuoc_0008.jpg",
+      "duplicate": "test/sua_nuoc/sua_nuoc_0008.jpg"
+    },
+    {
+      "sha256": "78fc5558a88092bc3bb0159b60ed9849462b394257a2a459542e19128240dac6",
+      "first": "train/sua_nuoc/sua_nuoc_0003.jpg",
+      "duplicate": "test/sua_nuoc/sua_nuoc_0003.jpg"
+    },
+    {
+      "sha256": "dec8909e6634b0c7aba99bd5060d6481d30004c54c93c31b57ed348b929887c3",
+      "first": "train/sua_nuoc/sua_nuoc_0020.jpg",
+      "duplicate": "test/sua_nuoc/sua_nuoc_0020.jpg"
+    },
+    {
+      "sha256": "43e1b44c4b46831e54aa1d215a567ea32d04266aa7ffd2a918c08fd86b8d4865",
+      "first": "train/sua_nuoc/sua_nuoc_0018.jpg",
+      "duplicate": "test/sua_nuoc/sua_nuoc_0018.jpg"
+    },
+    {
+      "sha256": "11b9dedea718172feb7d315360509239147d5ac6846e0a75764ef137c43d1aed",
+      "first": "train/sua_nuoc/sua_nuoc_0002.jpg",
+      "duplicate": "test/sua_nuoc/sua_nuoc_0002.jpg"
+    },
+    {
+      "sha256": "f34a7d01a1dafd2af197afa7ab368f4d735666c49b753f5aab3c47c132355926",
+      "first": "train/sua_nuoc/sua_nuoc_0016.jpg",
+      "duplicate": "test/sua_nuoc/sua_nuoc_0016.jpg"
+    },
+    {
+      "sha256": "700afee389702e470deb3eba0ae22a0b17a78397844683c596bca74975e5d6aa",
+      "first": "train/sua_nuoc/sua_nuoc_0034.jpg",
+      "duplicate": "test/sua_nuoc/sua_nuoc_0014.jpg"
+    },
+    {
+      "sha256": "ab4d996c35488e4b498302ecd7cbf3754c8be6a48ec37c64b8ab3da4144f4576",
+      "first": "train/sua_nuoc/sua_nuoc_0012.jpg",
+      "duplicate": "test/sua_nuoc/sua_nuoc_0012.jpg"
+    },
+    {
+      "sha256": "ea620f23046cd3a220e493ca65987ebc143be012daa567c5da9b038b1032f75e",
+      "first": "train/sua_nuoc/sua_nuoc_0007.jpg",
+      "duplicate": "test/sua_nuoc/sua_nuoc_0007.jpg"
+    },
+    {
+      "sha256": "739c317eb63fcd76d2fd1b25deff528462cf3930ed7ffab001cec4ac7f0c302f",
+      "first": "train/lam_vuon/lam_vuon_0010.jpg",
+      "duplicate": "test/lam_vuon/lam_vuon_0010.jpg"
+    },
+    {
+      "sha256": "a4e4d60183b9f99e313611fda0d707c1ba53569e4374f498b39dadbf1cd8971a",
+      "first": "train/lam_vuon/lam_vuon_0018.jpg",
+      "duplicate": "test/lam_vuon/lam_vuon_0018.jpg"
+    },
+    {
+      "sha256": "59f875c8e1c8bb72ed492b468965a18b7ca39a95d0e986f75b2e3306abbf503e",
+      "first": "train/lam_vuon/lam_vuon_0015.jpg",
+      "duplicate": "test/lam_vuon/lam_vuon_0015.jpg"
+    },
+    {
+      "sha256": "cca2806058b1d8bb1303204b68ad78945411a47dfa02f727d7fb117b8389c6aa",
+      "first": "train/lam_vuon/lam_vuon_0003.jpg",
+      "duplicate": "test/lam_vuon/lam_vuon_0003.jpg"
+    },
+    {
+      "sha256": "d9cdab620bb4d25d9404ffabb49aabd83fa0f8fa8bcce018f5e11aa3730cb193",
+      "first": "train/lam_vuon/lam_vuon_0001.jpg",
+      "duplicate": "test/lam_vuon/lam_vuon_0001.jpg"
+    },
+    {
+      "sha256": "cc3a378eaa71042f156f60f9c8354cf8257bd0e339a2d9e3c764697f066647b3",
+      "first": "train/lam_vuon/lam_vuon_0013.jpg",
+      "duplicate": "test/lam_vuon/lam_vuon_0013.jpg"
+    },
+    {
+      "sha256": "720008d66362fa32f5f710c3f6797cc64bc50593fb35e32c2db3e893964bd5aa",
+      "first": "train/lam_vuon/lam_vuon_0007.jpg",
+      "duplicate": "test/lam_vuon/lam_vuon_0007.jpg"
+    },
+    {
+      "sha256": "445b4f7f796d6fbe9f33160606d5edeede7728d515031ec9156c73f9140df1a3",
+      "first": "train/lam_vuon/lam_vuon_0006.jpg",
+      "duplicate": "test/lam_vuon/lam_vuon_0006.jpg"
+    },
+    {
+      "sha256": "4023cac3631bce6b7e79fbe65bdffa16126fca512fee847253f4e537358e764e",
+      "first": "train/lam_vuon/lam_vuon_0020.jpg",
+      "duplicate": "test/lam_vuon/lam_vuon_0020.jpg"
+    },
+    {
+      "sha256": "5a0983bdf0e00f74d129362056a065918992ca39034b21d908d9dd16faa2e62d",
+      "first": "train/lam_vuon/lam_vuon_0004.jpg",
+      "duplicate": "test/lam_vuon/lam_vuon_0004.jpg"
+    },
+    {
+      "sha256": "d361eccb34eccb8c39e632e064bd940a5752ec27217bd956e7822869679bfd9e",
+      "first": "train/lam_vuon/lam_vuon_0014.jpg",
+      "duplicate": "test/lam_vuon/lam_vuon_0014.jpg"
+    },
+    {
+      "sha256": "9f7f9b059164b10375267eb7103441655b924ce0f0d1c0455476f4cff3cfafd7",
+      "first": "train/lam_vuon/lam_vuon_0017.jpg",
+      "duplicate": "test/lam_vuon/lam_vuon_0017.jpg"
+    },
+    {
+      "sha256": "9e97ca199d95673581b0aa5198cc5d9f4a0415ca935d5f092b0cb05af8209870",
+      "first": "train/lam_vuon/lam_vuon_0016.jpg",
+      "duplicate": "test/lam_vuon/lam_vuon_0016.jpg"
+    },
+    {
+      "sha256": "1eebf50c2ca89ea031ec3c5c26f7ed04b54ad2218fb649021df3cc9238e37877",
+      "first": "train/lam_vuon/lam_vuon_0005.jpg",
+      "duplicate": "test/lam_vuon/lam_vuon_0005.jpg"
+    },
+    {
+      "sha256": "ec4487b2cfc228cb7e7937940db706d8096d3ce19cf9a9a2925618d52207ecbc",
+      "first": "train/lam_vuon/lam_vuon_0019.jpg",
+      "duplicate": "test/lam_vuon/lam_vuon_0019.jpg"
+    },
+    {
+      "sha256": "a3dd15d2b689fe29af04f11705530c217c4fdd73b03a160141cfedaeb7b0f797",
+      "first": "train/lam_vuon/lam_vuon_0012.jpg",
+      "duplicate": "test/lam_vuon/lam_vuon_0012.jpg"
+    },
+    {
+      "sha256": "46a5840c13dc2dfd24971625ae31e245f66ef7ea206cf552451fabb856dfea6a",
+      "first": "train/lam_vuon/lam_vuon_0008.jpg",
+      "duplicate": "test/lam_vuon/lam_vuon_0008.jpg"
+    },
+    {
+      "sha256": "f79b546b53a2f5b40e7b29464b34b8c42368d26a5e2e94bd88f9d58063d12491",
+      "first": "train/lam_vuon/lam_vuon_0002.jpg",
+      "duplicate": "test/lam_vuon/lam_vuon_0002.jpg"
+    },
+    {
+      "sha256": "fc7e074feac0cd0bed09278f5c57e248c7c3c97186040b0528ca5985928584d5",
+      "first": "train/lam_vuon/lam_vuon_0011.jpg",
+      "duplicate": "test/lam_vuon/lam_vuon_0011.jpg"
+    },
+    {
+      "sha256": "8929dd0577f06bc43048751ae17b4917c693dc8ffc0c6820a28885e51b2daf2e",
+      "first": "train/lam_vuon/lam_vuon_0009.jpg",
+      "duplicate": "test/lam_vuon/lam_vuon_0009.jpg"
+    },
+    {
+      "sha256": "cb6daf80936334229202e6011029f30216e3d305a8af538dd776f3838a77e248",
+      "first": "train/sua_dien/sua_dien_0004.jpg",
+      "duplicate": "test/sua_dien/sua_dien_0004.jpg"
+    },
+    {
+      "sha256": "c3a7f30085ff8e7c21e40da42028d558228e84fac3e30a66d42329b814707a93",
+      "first": "train/sua_dien/sua_dien_0009.jpg",
+      "duplicate": "test/sua_dien/sua_dien_0009.jpg"
+    },
+    {
+      "sha256": "27c38b2218e4d61ed401fa367d3cdbe11cb51929594faf2cbaa66734684752c9",
+      "first": "train/sua_dien/sua_dien_0006.jpg",
+      "duplicate": "test/sua_dien/sua_dien_0006.jpg"
+    },
+    {
+      "sha256": "5a9f63b630a042b822d5c87f2787dc7026b30daea2c6c5183eb2823b27f6905e",
+      "first": "train/sua_dien/sua_dien_0008.jpg",
+      "duplicate": "test/sua_dien/sua_dien_0008.jpg"
+    },
+    {
+      "sha256": "b8d74007770c805d7731d3f91de5c7a1ee6028613222c22275ba95703fff4448",
+      "first": "train/sua_dien/sua_dien_0018.jpg",
+      "duplicate": "test/sua_dien/sua_dien_0018.jpg"
+    },
+    {
+      "sha256": "6263d290f0f8a38cdc384f4083cd1e258833914bbdc32fbe76799d8949bca793",
+      "first": "train/sua_dien/sua_dien_0015.jpg",
+      "duplicate": "test/sua_dien/sua_dien_0015.jpg"
+    },
+    {
+      "sha256": "40eb323c0cca7c26de7ff6d7efb58c2d6fbe001dba5ddd99cd679f75720cfedc",
+      "first": "train/sua_dien/sua_dien_0020.jpg",
+      "duplicate": "test/sua_dien/sua_dien_0020.jpg"
+    },
+    {
+      "sha256": "a06f6f5f6484ec003c1940d7e9fdd0d9b7917c628eeb64d51299565593000b1c",
+      "first": "train/sua_dien/sua_dien_0016.jpg",
+      "duplicate": "test/sua_dien/sua_dien_0016.jpg"
+    },
+    {
+      "sha256": "5a9f63b630a042b822d5c87f2787dc7026b30daea2c6c5183eb2823b27f6905e",
+      "first": "train/sua_dien/sua_dien_0008.jpg",
+      "duplicate": "test/sua_dien/sua_dien_0007.jpg"
+    },
+    {
+      "sha256": "52099ee8e2a5f1d3513377a68d01bb82c0ad4c9d9cc8b7bb7ef7ce482da8bf8a",
+      "first": "train/sua_dien/sua_dien_0017.jpg",
+      "duplicate": "test/sua_dien/sua_dien_0017.jpg"
+    },
+    {
+      "sha256": "e153635cd19a56797a3a57bf53cfff2e27cb16bfef3ef6700cbd78216c77a291",
+      "first": "train/sua_dien/sua_dien_0011.jpg",
+      "duplicate": "test/sua_dien/sua_dien_0011.jpg"
+    },
+    {
+      "sha256": "dd661066b9bb093f5e7190c9d78182b6d0f3ae6bf2b1395cf2cad341fa5e091c",
+      "first": "train/sua_dien/sua_dien_0013.jpg",
+      "duplicate": "test/sua_dien/sua_dien_0013.jpg"
+    },
+    {
+      "sha256": "f064e80309658b4f31ed8cc3915ea75f58bbf7929c3387b50381b74713fda2cc",
+      "first": "train/sua_dien/sua_dien_0003.jpg",
+      "duplicate": "test/sua_dien/sua_dien_0003.jpg"
+    },
+    {
+      "sha256": "f31cc5c648291865eba1177e0c725d2c8e263e063702c160bbc1cb21024e3d2c",
+      "first": "train/sua_dien/sua_dien_0010.jpg",
+      "duplicate": "test/sua_dien/sua_dien_0010.jpg"
+    },
+    {
+      "sha256": "f064e80309658b4f31ed8cc3915ea75f58bbf7929c3387b50381b74713fda2cc",
+      "first": "train/sua_dien/sua_dien_0003.jpg",
+      "duplicate": "test/sua_dien/sua_dien_0012.jpg"
+    },
+    {
+      "sha256": "be48a38bc497c36f32ef62086860fa093c84dcc5c5f8de72f8a273b3dd904743",
+      "first": "train/sua_dien/sua_dien_0005.jpg",
+      "duplicate": "test/sua_dien/sua_dien_0005.jpg"
+    },
+    {
+      "sha256": "1b93c3efa93047f1487b04f46eed16996973c1675989cf43a01dde59386e05d3",
+      "first": "train/sua_dien/sua_dien_0014.jpg",
+      "duplicate": "test/sua_dien/sua_dien_0014.jpg"
+    },
+    {
+      "sha256": "487b1b84fc909faa83194bc0eab236dc1a8d29ab30f2a0f0e43e6982a4b7da7c",
+      "first": "train/sua_dien/sua_dien_0107.jpg",
+      "duplicate": "test/sua_dien/sua_dien_0019.jpg"
+    },
+    {
+      "sha256": "b5f702045269fd02c9d47a688c2b6bff7bbbe676e60a037f8571dc24f407e79c",
+      "first": "train/sua_dien/sua_dien_0002.jpg",
+      "duplicate": "test/sua_dien/sua_dien_0002.jpg"
+    }
+  ],
+  "total_files": 1200,
+  "unique_files": 654,
+  "duplicate_count": 546
+}

@@ -1,0 +1,24 @@
+Starting Metro Bundler
+Android Bundled 4370ms node_modules/expo-router/entry.js (918 modules)
+
+› Assets (23):
+node_modules/@react-navigation/elements/lib/module/assets/back-icon-mask.png (653 B)
+node_modules/@react-navigation/elements/lib/module/assets/back-icon.png (4 variations | 152 B)
+node_modules/@react-navigation/elements/lib/module/assets/clear-icon.png (4 variations | 425 B)
+node_modules/@react-navigation/elements/lib/module/assets/close-icon.png (4 variations | 235 B)
+node_modules/@react-navigation/elements/lib/module/assets/search-icon.png (4 variations | 599 B)
+node_modules/expo-router/assets/error.png (469 B)
+node_modules/expo-router/assets/file.png (138 B)
+node_modules/expo-router/assets/forward.png (188 B)
+node_modules/expo-router/assets/pkg.png (364 B)
+node_modules/expo-router/assets/sitemap.png (465 B)
+node_modules/expo-router/assets/unmatched.png (4.75 kB)
+
+› android bundles (2):
+_expo/static/js/android/entry-d69ad773f0e2f2e27523b0a0881d92d7.hbc (1.56 MB)
+_expo/static/js/android/entry-d69ad773f0e2f2e27523b0a0881d92d7.hbc.map (6.07 MB)
+
+› Files (1):
+metadata.json (1.72 kB)
+
+Exported: /tmp/fixgo-s03-research-export

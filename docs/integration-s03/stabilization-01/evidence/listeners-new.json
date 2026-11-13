@@ -1,0 +1,80 @@
+[
+  {
+    "port": 3000,
+    "pid": 458584,
+    "cwd": "/home/vanvi/Work/fixgo-integration-s03/server",
+    "cmdline": [
+      "/home/vanvi/.nvm/versions/node/v20.20.2/bin/node",
+      "/home/vanvi/Work/fixgo-integration-s03/server/node_modules/@babel/node/lib/_babel-node",
+      "src/main.js"
+    ]
+  },
+  {
+    "port": 8000,
+    "pid": 458480,
+    "cwd": "/home/vanvi/Work/fixgo-integration-s03/ai-service",
+    "cmdline": [
+      ".venv/bin/python",
+      "-m",
+      "uvicorn",
+      "main:app",
+      "--host",
+      "0.0.0.0",
+      "--port",
+      "8000",
+      "--reload",
+      "--reload-exclude",
+      ".venv"
+    ]
+  },
+  {
+    "port": 8000,
+    "pid": 458553,
+    "cwd": "/home/vanvi/Work/fixgo-integration-s03/ai-service",
+    "cmdline": [
+      "/home/vanvi/Work/fixgo-integration-s03/ai-service/.venv/bin/python",
+      "-B",
+      "-c",
+      "from multiprocessing.spawn import spawn_main; spawn_main(tracker_fd=5, pipe_handle=7)",
+      "--multiprocessing-fork"
+    ]
+  },
+  {
+    "port": 8081,
+    "pid": 458550,
+    "cwd": "/home/vanvi/Work/fixgo-integration-s03/customer-app",
+    "cmdline": [
+      "node",
+      "/home/vanvi/Work/fixgo-integration-s03/customer-app/node_modules/.bin/expo",
+      "start",
+      "--dev-client",
+      "--port",
+      "8081",
+      "--localhost"
+    ]
+  },
+  {
+    "port": 8082,
+    "pid": 458530,
+    "cwd": "/home/vanvi/Work/fixgo-integration-s03/worker-app",
+    "cmdline": [
+      "node",
+      "/home/vanvi/Work/fixgo-integration-s03/worker-app/node_modules/.bin/expo",
+      "start",
+      "--dev-client",
+      "--port",
+      "8082",
+      "--localhost"
+    ]
+  },
+  {
+    "port": 5173,
+    "pid": 458528,
+    "cwd": "/home/vanvi/Work/fixgo-integration-s03/client",
+    "cmdline": [
+      "node",
+      "/home/vanvi/Work/fixgo-integration-s03/client/node_modules/.bin/vite",
+      "--strictPort"
+    ]
+  }
+]

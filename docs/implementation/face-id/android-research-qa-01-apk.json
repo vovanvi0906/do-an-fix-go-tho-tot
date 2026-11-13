@@ -1,0 +1,22 @@
+{
+  "applicationId": "com.fixgo.faceresearch",
+  "scheme": "fixgoresearch",
+  "devClientPackaged": true,
+  "hermesArm64": true,
+  "backupEnabled": false,
+  "debugLoopbackHttp": true,
+  "permissions": [
+    "android.permission.SYSTEM_ALERT_WINDOW",
+    "android.permission.CAMERA",
+    "android.permission.INTERNET",
+    "android.permission.VIBRATE",
+    "com.fixgo.faceresearch.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION",
+    "com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE"
+  ],
+  "apkBytes": 127303787,
+  "apkSha256": "2078133738f9075f3bac81fc62436a3f9dd460376dc25bdcb06493de04b6801f",
+  "signerSha256": "fac61745dc0903786fb9ede62a962b399f7348f0bb6f899b8332667591033b9c",
+  "signatureVerified": true,
+  "installed": false,
+  "physicalDeviceQA": "ANDROID PENDING"
+}

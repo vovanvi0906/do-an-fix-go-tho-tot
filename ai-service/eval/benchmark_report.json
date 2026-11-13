@@ -1,0 +1,14 @@
+{
+  "sample_count": 7,
+  "category_accuracy": 0.8571,
+  "target_top1_accuracy": 0.7143,
+  "target_top3_accuracy": 0.8571,
+  "service_recall_at_1": 0.7143,
+  "service_recall_at_3": 0.8571,
+  "service_recall_at_5": 0.8571,
+  "service_mrr": 0.7857,
+  "abstention_rate": 0.1429,
+  "wrong_target_rate": 0.0,
+  "latency_p50_ms": 19.5,
+  "latency_p95_ms": 25.0
+}

@@ -1,3 +1,5 @@
+import { FaceCoreModule } from '../workers/face/face-core.module';
+import { FaceCaptureBlockedGuard } from '../workers/face/face-capture-blocked.guard';
 import { OrderAccessGuard } from './order-access.guard';
 import { Module } from '@nestjs/common';
 import { OrdersController } from './orders.controller';
@@ -12,10 +14,11 @@ import { PrismaModule } from '../../infrastructure/database/prisma.module';
 import { RedisModule } from '../../infrastructure/redis/redis.module';
 
 @Module({
-  imports: [PrismaModule, UsersModule, RedisModule, AiModule],
+  imports: [PrismaModule, UsersModule, RedisModule, AiModule, FaceCoreModule],
   controllers: [OrdersController],
   providers: [
     OrderAccessGuard,
+    FaceCaptureBlockedGuard,
     OrdersService,
     OrdersRepository,
     OrderWorkflowService,

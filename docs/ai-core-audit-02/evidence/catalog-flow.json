@@ -1,0 +1,26 @@
+{
+  "verification": "VERIFIED_RESOLVER_EXECUTION_WITH_REAL_CATALOG_SNAPSHOT",
+  "inference": "STUBBED_NOT_A_REAL_IMAGE_PREDICTION",
+  "databaseWrites": 0,
+  "firstResponse": {
+    "status": "needs_more_info",
+    "serviceId": null,
+    "availableServices": 289,
+    "hasTargetId": false
+  },
+  "customerConfirmedSymptom": "switch_power",
+  "secondResponse": {
+    "status": "suggested",
+    "source": "rules",
+    "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+    "serviceId": "00a5f8a1-29f9-4179-adc1-556cb7bad482",
+    "serviceName": "Sửa công tắc không hoạt động",
+    "price": 100000,
+    "unit": "điểm"
+  },
+  "resolvedTargetFromCatalog": {
+    "id": "f2b5a73e-b1e3-45c2-97c1-a09015ad18b6",
+    "name": "Công tắc điện"
+  },
+  "booking": "NOT_SUBMITTED_STATIC_CALL_CHAIN_ONLY"
+}

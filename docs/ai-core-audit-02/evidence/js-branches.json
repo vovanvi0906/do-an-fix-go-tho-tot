@@ -1,0 +1,58 @@
+{
+  "assertions": "PASS_CURRENT_BEHAVIOR_NOT_SECURITY_PASS",
+  "network": "none",
+  "database": "in_memory_stubs_only",
+  "checks": 8,
+  "results": [
+    {
+      "case": "daily_accepts_heuristic_without_method_proof",
+      "writes": 1
+    },
+    {
+      "case": "daily_accepts_model_without_method_proof",
+      "writes": 1
+    },
+    {
+      "case": "transport_failure_daily_false_order_fallback_true",
+      "daily": false,
+      "order": true,
+      "fetch": "stubbed_exception"
+    },
+    {
+      "case": "order_heuristic_0.95",
+      "granted": true,
+      "needsManualReview": false,
+      "writtenFields": [
+        "faceVerifiedAt",
+        "kycStatus"
+      ]
+    },
+    {
+      "case": "order_model_0.2",
+      "granted": false,
+      "needsManualReview": true,
+      "writtenFields": [
+        "kycStatus"
+      ]
+    },
+    {
+      "case": "order_model_not-a-number",
+      "granted": true,
+      "needsManualReview": false,
+      "writtenFields": [
+        "faceVerifiedAt",
+        "kycStatus"
+      ]
+    },
+    {
+      "case": "generic_ai_signature_mismatch",
+      "forwardedArgumentCount": 2,
+      "expectedArgumentCount": 3
+    },
+    {
+      "case": "completion_persists_heuristic_score",
+      "passed": true,
+      "orderTransitionObserved": false
+    }
+  ]
+}

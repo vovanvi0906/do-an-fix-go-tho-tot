@@ -1,0 +1,19 @@
+{
+  "repository": "https://github.com/minivision-ai/Silent-Face-Anti-Spoofing",
+  "commit": "b6d5f04ad78778917853b25c778acef6d5626d15",
+  "weightsDownloaded": false,
+  "artifacts": [
+    {
+      "name": "2.7_80x80_MiniFASNetV2.pth",
+      "bytes": 1849453,
+      "gitBlobSha1": "47c4af2023fb072c0f5b0e0ade4824053a0558e1",
+      "metadataUrl": "https://github.com/minivision-ai/Silent-Face-Anti-Spoofing/blob/b6d5f04ad78778917853b25c778acef6d5626d15/resources/anti_spoof_models/2.7_80x80_MiniFASNetV2.pth"
+    },
+    {
+      "name": "4_0_0_80x80_MiniFASNetV1SE.pth",
+      "bytes": 1856130,
+      "gitBlobSha1": "55a25b316ef33ced3925687007a31a5e306990db",
+      "metadataUrl": "https://github.com/minivision-ai/Silent-Face-Anti-Spoofing/blob/b6d5f04ad78778917853b25c778acef6d5626d15/resources/anti_spoof_models/4_0_0_80x80_MiniFASNetV1SE.pth"
+    }
+  ]
+}
