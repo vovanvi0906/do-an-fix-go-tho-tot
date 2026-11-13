@@ -1,0 +1,16 @@
+{
+  "458584": {
+    "FACE_CORE_ENABLED": "false",
+    "FACE_BIOMETRIC_CAPTURE_APPROVED": "false",
+    "FACE_RESEARCH_CAPTURE_APPROVED": "false",
+    "FACE_RESEARCH_APP": "false",
+    "databaseIsDisposable": true
+  },
+  "458553": {
+    "FACE_CORE_ENABLED": "false",
+    "FACE_BIOMETRIC_CAPTURE_APPROVED": "false",
+    "FACE_RESEARCH_CAPTURE_APPROVED": "false",
+    "FACE_RESEARCH_APP": "false",
+    "databaseIsDisposable": true
+  }
+}

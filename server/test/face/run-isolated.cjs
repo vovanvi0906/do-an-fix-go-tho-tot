@@ -52,6 +52,8 @@ try {
   const triggers=sql("SELECT tgname FROM pg_trigger WHERE NOT tgisinternal AND tgname LIKE 'biometric_%';");
   for (const name of ['biometric_template_immutable','biometric_review_authority','biometric_template_authority','biometric_session_immutable','biometric_proof_guard','biometric_state_monotonic','biometric_session_authority']) if(!triggers.includes(name)) throw new Error('Missing custom DB guard: '+name);
   console.log('Prisma diff empty and custom Order FK/trigger catalog verified: PASS');
+  if (process.argv.includes('--runtime-smoke')) run(process.execPath, ['test/s03/runtime-smoke.cjs'], { env, stdio: 'inherit' });
+  if (process.argv.includes('--usb-script-smoke')) run(process.execPath, ['test/s03/runtime-smoke.cjs', '--usb-script'], { env, stdio: 'inherit' });
   const first = run(process.execPath, ['node_modules/jest/bin/jest.js', '--config', 'test/face/jest.config.cjs', '--runInBand'], { env, stdio: 'inherit' });
   if (process.argv.includes('--arc01')) run(process.execPath, ['node_modules/jest/bin/jest.js', '--config', 'test/jest-arc01.config.cjs', '--runInBand'], { env: { ...env, ARC01_TEST_DATABASE_URL: url }, stdio: 'inherit' });
   const biometricCount = sql('SELECT count(*) FROM biometric_templates;');
