@@ -82,6 +82,7 @@ model WorkerProfile {
   workerServices     WorkerService[]
   workerWallet       WorkerWallet?
 
+  @@unique([id, userId], map: "biometric_worker_identity_key")
   @@index([currentLocation], type: Gist)
   @@index([currentLat, currentLng])
   @@map("worker_profiles")
@@ -541,7 +542,9 @@ model BiometricReview {
   worker            WorkerProfile       @relation(fields: [workerId], references: [id], onDelete: Cascade)
   reviewer          User                @relation("BiometricReviewer", fields: [reviewerId], references: [id])
   templates         BiometricTemplate[]
+  sessions          BiometricSession[]
 
+  @@unique([id, workerId, epoch], map: "biometric_review_binding_key")
   @@index([workerId, revokedAt, expiresAt])
   @@map("biometric_reviews")
 }
@@ -560,40 +563,45 @@ model BiometricTemplate {
   revokedAt      DateTime?
   deletedAt      DateTime?
   worker         WorkerProfile      @relation(fields: [workerId], references: [id], onDelete: Cascade)
-  review         BiometricReview    @relation(fields: [reviewId], references: [id])
+  review         BiometricReview    @relation(fields: [reviewId, workerId, epoch], references: [id, workerId, epoch], onDelete: Restrict, onUpdate: Restrict)
   sessions       BiometricSession[]
   proofs         BiometricProof[]
 
+  @@unique([id, workerId, version, epoch, modelVersion], map: "biometric_template_binding_key")
   @@unique([workerId, version])
   @@map("biometric_templates")
 }
 
 model BiometricSession {
-  id              String             @id @default(uuid())
-  workerId        String
-  userId          String
-  purpose         String
-  orderId         String?
-  requestKey      String
-  epoch           Int
-  templateId      String?
-  templateVersion Int
-  modelVersion    String
-  reviewId        String?
-  nonceHash       String
-  state           String             @default("PENDING")
-  attempts        Int                @default(0)
-  captureDigest   String?
-  claimId         String?
-  errorCode       String?
-  createdAt       DateTime           @default(now())
-  expiresAt       DateTime
-  consumedAt      DateTime?
-  worker          WorkerProfile      @relation(fields: [workerId], references: [id], onDelete: Cascade)
-  order           Order?             @relation(fields: [orderId], references: [id])
-  template        BiometricTemplate? @relation(fields: [templateId], references: [id])
-  proof           BiometricProof?
+  id               String             @id @default(uuid())
+  workerId         String
+  userId           String
+  purpose          String
+  orderId          String?
+  requestKey       String
+  epoch            Int
+  templateId       String?
+  templateVersion  Int
+  modelVersion     String
+  reviewId         String
+  nonceHash        String
+  state            String             @default("PENDING")
+  attempts         Int                @default(0)
+  captureDigest    String?
+  claimId          String?
+  errorCode        String?
+  createdAt        DateTime           @default(now())
+  expiresAt        DateTime
+  consumedAt       DateTime?
+  worker           WorkerProfile      @relation(fields: [workerId, userId], references: [id, userId], onDelete: Cascade, onUpdate: Restrict)
+  order            Order?             @relation(fields: [orderId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  template         BiometricTemplate? @relation(fields: [templateId, workerId, templateVersion, epoch, modelVersion], references: [id, workerId, version, epoch, modelVersion], onDelete: Restrict, onUpdate: Restrict)
+  review           BiometricReview    @relation(fields: [reviewId, workerId, epoch], references: [id, workerId, epoch], onDelete: Restrict, onUpdate: Restrict)
+  proof            BiometricProof?    @relation("BiometricProofSession")
+  orderBoundProofs BiometricProof[]   @relation("BiometricProofOrder")
 
+  @@unique([id, workerId, templateId, templateVersion, epoch, purpose, modelVersion], map: "biometric_session_binding_key")
+  @@unique([id, orderId], map: "biometric_session_order_key")
   @@unique([workerId, requestKey])
   @@index([workerId, createdAt])
   @@map("biometric_sessions")
@@ -616,11 +624,13 @@ model BiometricProof {
   expiresAt       DateTime
   consumedAt      DateTime?
   revokedAt       DateTime?
-  session         BiometricSession  @relation(fields: [sessionId], references: [id])
+  session         BiometricSession  @relation("BiometricProofSession", fields: [sessionId, workerId, templateId, templateVersion, epoch, purpose, modelVersion], references: [id, workerId, templateId, templateVersion, epoch, purpose, modelVersion], onDelete: Restrict, onUpdate: Restrict)
   worker          WorkerProfile     @relation(fields: [workerId], references: [id], onDelete: Cascade)
-  template        BiometricTemplate @relation(fields: [templateId], references: [id])
-  order           Order?            @relation(fields: [orderId], references: [id])
+  template        BiometricTemplate @relation(fields: [templateId, workerId, templateVersion, epoch, modelVersion], references: [id, workerId, version, epoch, modelVersion], onDelete: Restrict, onUpdate: Restrict)
+  order           Order?            @relation(fields: [orderId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  orderSession    BiometricSession? @relation("BiometricProofOrder", fields: [sessionId, orderId], references: [id, orderId], onDelete: Restrict, onUpdate: Restrict)
 
+  @@unique([sessionId, workerId, templateId, templateVersion, epoch, purpose, modelVersion], map: "biometric_proof_binding_key")
   @@index([workerId, purpose, expiresAt])
   @@index([orderId, consumedAt])
   @@map("biometric_proofs")

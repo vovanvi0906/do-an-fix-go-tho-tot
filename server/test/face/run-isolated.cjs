@@ -35,11 +35,33 @@ try {
   sql(baseline);
   const migration = readFileSync(join(root, 'prisma/migrations/20261113190000_face_core_v2/migration.sql'), 'utf8');
   sql(`BEGIN;\n${migration}\nCOMMIT;`);
+  const hardening = readFileSync(join(root, 'prisma/migrations/20261113200000_face_binding_hardening/migration.sql'), 'utf8');
+  // Reproduce the v2 SET NULL + purpose CHECK conflict before changing the FK policy.
+  run(process.execPath, ['test/face/audit-v2-delete.cjs', '--keep-invalid'], { env, stdio: 'inherit' });
+  let invalidRejected = false;
+  try { sql(hardening); } catch (error) { invalidRejected = /null values|not-null/.test(error.message); }
+  if (!invalidRejected) throw new Error('Invalid v2 lineage should abort hardening');
+  if (!sql("SELECT conname FROM pg_constraint WHERE conname='biometric_sessions_workerId_fkey';").includes('biometric_sessions_workerId_fkey')) throw new Error('DDL did not roll back atomically');
+  if (!sql('SELECT count(*) FROM biometric_sessions;').includes('1')) throw new Error('Invalid v2 row was silently repaired/deleted');
+  console.log('Invalid v2 lineage rejected, DDL rolled back, source record unchanged: PASS');
+  sql('TRUNCATE biometric_sessions, users, service_categories CASCADE');
+  sql(hardening);
+  run(process.execPath, ['node_modules/prisma/build/index.js','migrate','diff','--from-url',url,'--to-schema-datamodel','prisma/schema.prisma','--script','--exit-code'], {env});
+  const deleteRules=sql("SELECT conname,confdeltype FROM pg_constraint WHERE conname IN ('biometric_sessions_orderId_fkey','biometric_proofs_orderId_fkey');");
+  if ((deleteRules.match(/\| r/g)||[]).length!==2) throw new Error('Order delete rules not RESTRICT');
+  const triggers=sql("SELECT tgname FROM pg_trigger WHERE NOT tgisinternal AND tgname LIKE 'biometric_%';");
+  for (const name of ['biometric_template_immutable','biometric_review_authority','biometric_template_authority','biometric_session_immutable','biometric_proof_guard','biometric_state_monotonic','biometric_session_authority']) if(!triggers.includes(name)) throw new Error('Missing custom DB guard: '+name);
+  console.log('Prisma diff empty and custom Order FK/trigger catalog verified: PASS');
   const first = run(process.execPath, ['node_modules/jest/bin/jest.js', '--config', 'test/face/jest.config.cjs', '--runInBand'], { env, stdio: 'inherit' });
+  const biometricCount = sql('SELECT count(*) FROM biometric_templates;');
+  sql(readFileSync(join(root, 'prisma/face-binding-rollback-isolated.sql'), 'utf8'));
+  if (sql('SELECT count(*) FROM biometric_templates;') !== biometricCount) throw new Error('Hardening rollback lost template records');
+  sql(hardening);
   const legacyCount = sql('SELECT count(*) FROM users;');
   sql(readFileSync(join(root, 'prisma/face-core-rollback-isolated.sql'), 'utf8'));
   if (sql('SELECT count(*) FROM users;') !== legacyCount) throw new Error('Rollback changed legacy rows');
   sql(`BEGIN;\n${migration}\nCOMMIT;`);
+  sql(hardening);
   console.log('Migration apply, PostgreSQL integration, destructive isolated rollback preserving legacy rows, and reapply: PASS');
 } finally {
   if (created) run('docker', ['rm', '-f', container]);

@@ -1,5 +1,5 @@
 // Synthetic protocol fixtures ONLY. Gateway assertions are not biometric/PAD measurements.
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import { randomBytes, randomUUID } from 'crypto';
 import { FaceCoreService } from '../../src/modules/workers/face/face-core.service';
 import { faceCoreConfig } from '../../src/modules/workers/face/face-core.config';
@@ -252,9 +252,8 @@ test('Admin start retains permission while consuming proof under worker lock wit
 
 test('durable proof with wrong template version is never trusted', async () => {
   await enroll(); const result = await issue('DAILY');
-  await db.biometricProof.update({ where: { id: result.proof.id }, data: { templateVersion: 2 } });
-  await expect(core.workerTx(user.id, (tx,w) => core.requireDaily(tx,w.id))).rejects.toThrow('DAILY_PROOF_REQUIRED');
-  expect((await core.status(user.id)).dailyProof).toBeNull();
+  await expect(db.biometricProof.update({ where: { id: result.proof.id }, data: { templateVersion: 2 } })).rejects.toThrow();
+  expect((await core.status(user.id)).dailyProof.id).toBe(result.proof.id);
 });
 
 test('blocking worker invalidates authorization from an otherwise current order proof even for Admin start', async () => {
@@ -263,4 +262,129 @@ test('blocking worker invalidates authorization from an otherwise current order 
   const flow = new OrderWorkflowService(db, { emitStatusChanged: jest.fn() }, core);
   await expect(flow.transition(order.id, admin.id, 'IN_PROGRESS')).rejects.toThrow('APPROVED_ACTIVE_WORKER_REQUIRED');
   expect((await db.biometricProof.findUnique({ where: { id: proof.id } })).consumedAt).toBeNull();
+});
+
+// Migration hardening: direct DML exercises constraints as defense against writer bugs.
+test.each(['userId','reviewId','templateVersion','epoch','modelVersion','templateId'])('DB rejects session binding mismatch %s', async field => {
+  await enroll(); const s = await session('DAILY');
+  const saved = await db.biometricSession.findUnique({ where: { id: s.id } });
+  const other = await db.user.create({ data: { role: 'WORKER', workerProfile: { create: { approvalStatus: 'APPROVED' } } }, include: { workerProfile: true } });
+  const otherCore = new FaceCoreService(db,gateway,options);
+  const otherReview = await otherCore.review(admin.id,other.workerProfile.id,{kind:'ENROLLMENT',reviewedIdentity:true,evidenceReference:'synthetic:other',evidenceDigest:'c'.repeat(64),reason:'synthetic',expiresAt:new Date(Date.now()+86400000).toISOString()});
+  const changes = { userId: other.id, reviewId: otherReview.id, templateVersion: 999, epoch: 999, modelVersion: 'other-model', templateId: null };
+  await expect(db.biometricSession.create({ data: { ...saved, id: randomUUID(), requestKey: randomUUID(), [field]: changes[field] } })).rejects.toThrow();
+  expect(await db.biometricSession.count()).toBe(2);
+});
+test.each(['workerId','purpose','epoch','templateVersion','modelVersion','orderId'])('DB rejects proof binding mismatch %s', async field => {
+  await enroll(); const original = (await issue('ORDER')).proof;
+  const saved = await db.biometricProof.findUnique({ where: { id: original.id } });
+  const otherOrder = await db.order.create({ data: { workerId: worker.id, customerId: customer.id, categoryId: order.categoryId, status: 'ARRIVED', addressText:'synthetic',lat:0,lng:0,estimatedPrice:1 } });
+  const changes = { workerId: randomUUID(), purpose:'DAILY', epoch:999, templateVersion:999, modelVersion:'other-model', orderId:otherOrder.id };
+  await expect(db.$transaction(async tx => {
+    await tx.biometricProof.delete({ where: { id: original.id } });
+    await tx.biometricProof.create({ data: { ...saved, id:randomUUID(), [field]:changes[field], ...(field==='purpose'?{orderId:null}:{}) } });
+  })).rejects.toThrow();
+  expect((await db.biometricProof.findUnique({ where: { id:original.id } })).consumedAt).toBeNull();
+});
+test('DB forbids proof issuance for pending session', async () => {
+  await enroll(); const p = (await issue('DAILY')).proof, pending = await session('DAILY');
+  const saved = await db.biometricProof.findUnique({where:{id:p.id}});
+  await expect(db.biometricProof.create({data:{...saved,id:randomUUID(),sessionId:pending.id}})).rejects.toThrow('BIOMETRIC_PROOF_AUTHORITY_INVALID');
+  expect(await db.biometricProof.count()).toBe(1);
+});
+test.each(['session','proof'])('Order hard-delete is explicitly RESTRICTED with %s evidence', async stage => {
+  await enroll(); const s = await session('ORDER'); if(stage==='proof') await submit(s);
+  await expect(db.order.delete({where:{id:order.id}})).rejects.toMatchObject({code:'P2003'});
+  expect(await db.order.findUnique({where:{id:order.id}})).not.toBeNull();
+  expect((await db.biometricSession.findUnique({where:{id:s.id}})).orderId).toBe(order.id);
+});
+test('Order without biometric history remains hard-deletable', async () => {
+  await db.order.delete({where:{id:order.id}}); expect(await db.order.findUnique({where:{id:order.id}})).toBeNull();
+});
+test.each(['purpose','nonceHash','expiresAt','epoch'])('session scope cannot be rewritten: %s', async field => {
+  const s = await session('ENROLLMENT');
+  const changes={purpose:'DAILY',nonceHash:'b'.repeat(64),expiresAt:new Date(Date.now()+600000),epoch:999};
+  await expect(db.biometricSession.update({where:{id:s.id},data:{[field]:changes[field]}})).rejects.toThrow('BIOMETRIC_SESSION_IMMUTABLE');
+});
+test('proof cannot extend TTL, retarget scope or undo consumption', async () => {
+  await enroll(); const p=(await issue('ORDER')).proof;
+  await expect(db.biometricProof.update({where:{id:p.id},data:{expiresAt:new Date(Date.now()+86400000)}})).rejects.toThrow('BIOMETRIC_PROOF_IMMUTABLE');
+  await core.workerTx(user.id,(tx,w)=>core.consumeOrder(tx,w.id,order.id));
+  await expect(db.biometricProof.update({where:{id:p.id},data:{consumedAt:null}})).rejects.toThrow('BIOMETRIC_PROOF_IMMUTABLE');
+});
+test('epoch fence makes historical template/proof unusable without rewriting their history', async () => {
+  await enroll(); await issue('DAILY');
+  await db.biometricState.update({where:{workerId:worker.id},data:{epoch:{increment:1}}});
+  await expect(core.workerTx(user.id,(tx,w)=>core.requireDaily(tx,w.id))).rejects.toThrow('DAILY_PROOF_REQUIRED');
+  expect((await core.status(user.id)).dailyProof).toBeNull();
+  await expect(db.biometricState.update({where:{workerId:worker.id},data:{epoch:0}})).rejects.toThrow('BIOMETRIC_STATE_REGRESSION');
+});
+test('ciphertext erasure cannot be reversed or replaced with JSON null', async () => {
+  await enroll(); const t=await db.biometricTemplate.findFirst();
+  await core.withdraw(user.id);
+  await expect(db.biometricTemplate.update({where:{id:t.id},data:{encrypted:t.encrypted,deletedAt:null,revokedAt:null}})).rejects.toThrow();
+  expect((await db.biometricTemplate.findUnique({where:{id:t.id}})).encrypted).toBeNull();
+});
+test('template cannot bind a revoked review', async () => {
+  await enroll(); const t=await db.biometricTemplate.findFirst();
+  await db.biometricReview.update({where:{id:t.reviewId},data:{revokedAt:new Date()}});
+  await expect(db.biometricTemplate.create({data:{...t,id:randomUUID(),version:2}})).rejects.toThrow('BIOMETRIC_TEMPLATE_AUTHORITY_INVALID');
+});
+
+test('template cannot bind review belonging to another worker', async () => {
+  await enroll(); const t=await db.biometricTemplate.findFirst();
+  const other=await db.user.create({data:{role:'WORKER',workerProfile:{create:{approvalStatus:'APPROVED'}}},include:{workerProfile:true}});
+  const review=await core.review(admin.id,other.workerProfile.id,{kind:'ENROLLMENT',reviewedIdentity:true,evidenceReference:'synthetic:other',evidenceDigest:'d'.repeat(64),reason:'synthetic',expiresAt:new Date(Date.now()+86400000).toISOString()});
+  await expect(db.biometricTemplate.create({data:{...t,id:randomUUID(),version:2,reviewId:review.id}})).rejects.toThrow('BIOMETRIC_TEMPLATE_AUTHORITY_INVALID');
+});
+test.each([Prisma.JsonNull,{format:null,iv:'a',tag:'a',ciphertext:'a'},{format:'sface-aes256gcm-v1',iv:123,tag:'a',ciphertext:'a'}])('DB rejects malformed encrypted envelope %#', async encrypted => {
+  await enroll(); const t=await db.biometricTemplate.findFirst();
+  await expect(db.biometricTemplate.create({data:{...t,id:randomUUID(),version:2,encrypted}})).rejects.toThrow();
+  expect(await db.biometricTemplate.count()).toBe(1);
+});
+test('review record cannot name non-Admin as approving reviewer', async () => {
+  const r=await db.biometricReview.findFirst();
+  await expect(db.biometricReview.create({data:{...r,id:randomUUID(),reviewerId:user.id}})).rejects.toThrow('BIOMETRIC_REVIEW_AUTHORITY_INVALID');
+});
+test('persisted envelope with old AAD cannot verify as a newer version', async () => {
+  await enroll(); const old=await db.biometricTemplate.findFirst();
+  const r=await review('REENROLLMENT');
+  await db.biometricTemplate.create({data:{...old,id:randomUUID(),version:2,epoch:1,reviewId:r.id,revokedAt:null,deletedAt:null,createdAt:new Date()}});
+  await db.biometricState.update({where:{workerId:worker.id},data:{lastVersion:2}});
+  await expect(issue('DAILY')).rejects.toThrow('FACE_EVIDENCE_REJECTED');
+  expect(await db.biometricProof.count()).toBe(0);
+});
+
+test('historical proof cannot be consumed after order assignment changes', async () => {
+  await enroll(); const p=(await issue('ORDER')).proof;
+  const other=await db.user.create({data:{role:'WORKER',workerProfile:{create:{approvalStatus:'APPROVED'}}},include:{workerProfile:true}});
+  await db.order.update({where:{id:order.id},data:{workerId:other.workerProfile.id}});
+  await expect(core.workerTx(user.id,(tx,w)=>core.consumeOrder(tx,w.id,order.id))).rejects.toThrow('ORDER_ACCESS_DENIED');
+  expect((await db.biometricProof.findUnique({where:{id:p.id}})).consumedAt).toBeNull();
+});
+test('DB session/proof insertion checks current order owner without rewriting historical evidence', async () => {
+  await enroll(); const p=(await issue('ORDER')).proof;
+  const source=await db.biometricProof.findUnique({where:{id:p.id}});
+  const sourceSession=await db.biometricSession.findUnique({where:{id:source.sessionId}});
+  const other=await db.user.create({data:{role:'WORKER',workerProfile:{create:{approvalStatus:'APPROVED'}}},include:{workerProfile:true}});
+  await db.order.update({where:{id:order.id},data:{workerId:other.workerProfile.id}});
+  await expect(db.biometricSession.create({data:{...sourceSession,id:randomUUID(),requestKey:randomUUID(),state:'PENDING',attempts:0,consumedAt:null}})).rejects.toThrow('BIOMETRIC_ORDER_AUTHORITY_INVALID');
+  await expect(db.$transaction(async tx=>{await tx.biometricProof.delete({where:{id:p.id}});await tx.biometricProof.create({data:{...source,id:randomUUID()}});})).rejects.toThrow('BIOMETRIC_ORDER_AUTHORITY_INVALID');
+  expect((await db.biometricProof.findUnique({where:{id:p.id}})).workerId).toBe(worker.id);
+});
+
+test('duplicate completed submission never reports success for an expired proof', async () => {
+  await enroll(); options.dailyMs=25;
+  const s=await session('DAILY'); const result=await submit(s);
+  await new Promise(r=>setTimeout(r,50));
+  await expect(submit(s)).rejects.toThrow('PROOF_EXPIRED_OR_CONSUMED');
+  expect(await db.biometricProof.count()).toBe(1);
+  expect((await db.biometricProof.findUnique({where:{id:result.proof.id}})).expiresAt).toEqual(result.proof.expiresAt);
+});
+test('duplicate order result is denied after assignment change', async () => {
+  await enroll(); const s=await session('ORDER'); await submit(s);
+  const other=await db.user.create({data:{role:'WORKER',workerProfile:{create:{approvalStatus:'APPROVED'}}},include:{workerProfile:true}});
+  await db.order.update({where:{id:order.id},data:{workerId:other.workerProfile.id}});
+  await expect(submit(s)).rejects.toThrow('ORDER_ACCESS_DENIED');
+  expect(await db.biometricProof.count()).toBe(1);
 });

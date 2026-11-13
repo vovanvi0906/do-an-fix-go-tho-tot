@@ -47,13 +47,16 @@ export class FaceCoreService {
     await tx.biometricAudit.create({ data: { actorId, workerId, action, reason, targetId } });
   }
   async current(tx, workerId) {
-    return tx.biometricTemplate.findFirst({ where: { workerId, revokedAt: null, deletedAt: null } });
+    const state = await tx.biometricState.findUnique({ where: { workerId } });
+    if (!state) return null;
+    return tx.biometricTemplate.findFirst({ where: { workerId, epoch: state.epoch, version: state.lastVersion, revokedAt: null, deletedAt: null } });
   }
   consentValid(state) { return state && state.consentVersion === this.options.consentVersion && state.consentedAt && !state.withdrawnAt; }
   cryptoReady() {
     return this.options.keys?.[this.options.currentKeyId]?.length === 32 && this.options.nonceKey?.length >= 32;
   }
   async ready() {
+    this.policy();
     const caps = await this.gateway.capabilities();
     if (!this.options.captureApproved) fail('BIOMETRIC_DATA_POLICY_NOT_APPROVED');
     if (!this.cryptoReady()) fail('FACE_KEYS_NOT_CONFIGURED');
@@ -64,12 +67,13 @@ export class FaceCoreService {
     return createHmac('sha256', this.options.nonceKey).update(JSON.stringify([session.id, session.workerId, session.userId])).digest('base64url');
   }
   async status(userId, orderId) {
+    this.policy();
+    let caps;
+    try { caps = await this.gateway.capabilities(); } catch (_) { caps = {}; }
     return this.workerTx(userId, async (tx, worker, now) => {
       const state = await tx.biometricState.findUnique({ where: { workerId: worker.id } });
       const template = await this.current(tx, worker.id);
       const review = state && await tx.biometricReview.findFirst({ where: { workerId: worker.id, epoch: state.epoch, revokedAt: null, expiresAt: { gt: now } }, orderBy: { approvedAt: 'desc' } });
-      let caps;
-      try { caps = await this.gateway.capabilities(); } catch (_) { caps = {}; }
       const blockers = [];
       if (worker.approvalStatus !== 'APPROVED') blockers.push('WORKER_APPROVAL_REQUIRED');
       if (!review) blockers.push('IDENTITY_REVIEW_REQUIRED');
@@ -210,11 +214,11 @@ export class FaceCoreService {
       if (!this.consentValid(state) || session.epoch !== state.epoch || session.expiresAt <= now || session.modelVersion !== caps.modelVersion) fail('SESSION_EXPIRED_OR_REVOKED');
       if (!/^[a-f0-9]{64}$/.test(session.nonceHash) || !timingSafeEqual(Buffer.from(digest(nonce)), Buffer.from(session.nonceHash))) fail('INVALID_NONCE');
       if (worker.approvalStatus !== 'APPROVED') fail('WORKER_APPROVAL_REQUIRED');
+      await this.orderAccess(tx, worker, session.purpose, session.orderId);
       if (session.state === 'SUCCEEDED') {
         if (session.captureDigest !== captureDigest) throw new ConflictException('REPLAY_PAYLOAD_CHANGED');
         return { done: true, result: await this.completed(tx, session) };
       }
-      await this.orderAccess(tx, worker, session.purpose, session.orderId);
       if (session.state !== 'PENDING') throw new ConflictException('SESSION_BUSY_OR_REVOKED');
       const attempts = await tx.biometricSession.aggregate({ where: { workerId: worker.id, createdAt: { gt: new Date(+now - this.options.windowMs) } }, _sum: { attempts: true } });
       if (session.attempts >= this.options.attempts || attempts._sum.attempts >= this.options.windowAttempts) fail('FACE_RATE_LIMITED');
@@ -247,11 +251,15 @@ export class FaceCoreService {
     } finally { clearTimeout(timer); }
   }
   async completed(tx, session) {
-    if (session.purpose === 'ENROLLMENT') {
-      const template = await tx.biometricTemplate.findUnique({ where: { workerId_version: { workerId: session.workerId, version: session.templateVersion } } });
-      return { verified: false, enrolled: true, template: metaTemplate(template) };
-    }
-    return { verified: true, proof: metaProof(await tx.biometricProof.findUnique({ where: { sessionId: session.id } })) };
+    const template = await this.current(tx, session.workerId);
+    if (!template || template.version !== session.templateVersion || template.modelVersion !== session.modelVersion) fail('TRUSTED_TEMPLATE_REQUIRED');
+    if (session.purpose === 'ENROLLMENT') return { verified: false, enrolled: true, template: metaTemplate(template) };
+    const proof = await tx.biometricProof.findUnique({ where: { sessionId: session.id } });
+    const now = await this.now(tx);
+    if (!proof || proof.revokedAt || proof.consumedAt || proof.expiresAt <= now || proof.issuedAt > now ||
+        proof.workerId !== session.workerId || proof.orderId !== session.orderId || proof.purpose !== session.purpose ||
+        proof.templateId !== template.id || proof.templateVersion !== template.version || proof.epoch !== session.epoch || proof.modelVersion !== template.modelVersion) fail('PROOF_EXPIRED_OR_CONSUMED');
+    return { verified: true, proof: metaProof(proof) };
   }
   async finish(userId, id, claimId, caps, evidence) {
     return this.workerTx(userId, async (tx, worker, now) => {
@@ -304,13 +312,15 @@ export class FaceCoreService {
     return metaProof(proof);
   }
   async consumeOrder(tx, workerId, orderId, actorId) {
-    this.policy(); await this.eligibleWorker(tx, workerId);
+    this.policy(); const worker = await this.eligibleWorker(tx, workerId);
     const state = await tx.biometricState.findUnique({ where: { workerId } }), now = await this.now(tx);
     const template = await this.current(tx, workerId);
     if (!this.consentValid(state) || !template) fail('ORDER_FACE_PROOF_REQUIRED');
     const proof = await tx.biometricProof.findFirst({ where: { workerId, orderId, templateId: template.id, templateVersion: template.version, modelVersion: template.modelVersion, epoch: state.epoch,
       purpose: 'ORDER', revokedAt: null, consumedAt: null, issuedAt: { lte: now }, expiresAt: { gt: now } }, orderBy: { issuedAt: 'desc' } });
     if (!proof) fail('ORDER_FACE_PROOF_REQUIRED');
+    // Keep historical order lineage, but never consume for a changed current assignee/stage.
+    await this.orderAccess(tx, worker, 'ORDER', orderId);
     const changed = await tx.biometricProof.updateMany({ where: { id: proof.id, workerId, orderId, consumedAt: null, revokedAt: null, expiresAt: { gt: now } }, data: { consumedAt: now } });
     if (changed.count !== 1) throw new ConflictException('PROOF_ALREADY_CONSUMED');
     await this.audit(tx, actorId || (await tx.workerProfile.findUnique({ where: { id: workerId }, select: { userId: true } })).userId, workerId, 'ORDER_PROOF_CONSUMED', 'START_WORK', proof.id);
