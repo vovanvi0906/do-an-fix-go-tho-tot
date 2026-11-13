@@ -365,11 +365,14 @@ class CompareBeforeAfterResponse(BaseModel):
 
 
 class FaceVerifyResponse(BaseModel):
-    verified: bool
-    confidence: float
+    verified: bool = False
+    confidence: Optional[float] = None
+    status: str
+    reason: str
+    method: str = "none"
     workerId: Optional[str] = None
-    message: str
-    engine: str = Field(default="heuristic", description="'model' | 'heuristic'")
+    message: str = "Identity matching only; no liveness assessment."
+    engine: str = "unavailable"
 
 
 # Mapping các lớp nhận diện của YOLO (COCO Dataset & đồ gia dụng) sang Danh mục FixGo
@@ -848,100 +851,67 @@ async def face_verify(
     photoUrl: Optional[str] = Form(None),
     idCardImageUrl: Optional[str] = Form(None),
 ):
-    """
-    POST /ai/face-verify
-    Xác thực sinh trắc học khuôn mặt thợ
-    -> Nạp OpenCV YuNet phát hiện khuôn mặt & SFace trích xuất 128-D vector Cosine Embeddings
-    -> Fallback Heuristic khi không có khuôn mặt hoặc ảnh lỗi.
-    """
     wid = workerId or "unknown-worker"
-    p_input = photoUrl or ""
-    id_card_input = idCardImageUrl or ""
-
+    selfie, reference = photoUrl, idCardImageUrl
     if file:
-        p_input = await file.read()
+        selfie = await file.read()
     else:
         try:
-            body_json = await request.json()
-            wid = body_json.get("workerId") or wid
-            p_input = body_json.get("photoUrl") or body_json.get("faceImageUrl") or p_input
-            id_card_input = body_json.get("idCardImageUrl") or id_card_input
+            body = await request.json()
+            wid = body.get("workerId") or wid
+            selfie = body.get("photoUrl") or body.get("faceImageUrl") or selfie
+            reference = body.get("idCardImageUrl") or reference
         except Exception:
             pass
 
-    p_url_str = str(p_input) if isinstance(p_input, str) else ""
-
-    # 1. Kiểm tra trường hợp kiểm thử cờ giả lập độ khớp thấp
-    if "unmatched" in p_url_str or "fake" in p_url_str or "low_confidence" in p_url_str:
+    def result(status, reason, score=None):
+        compared = status in ("MATCH", "NON_MATCH")
         return FaceVerifyResponse(
-            verified=False,
-            confidence=0.45,
-            workerId=wid,
-            message="Độ khớp khuôn mặt thấp (< 60%). Yêu cầu kiểm duyệt thủ công bởi Admin.",
-            engine="heuristic",
+            verified=status == "MATCH", status=status, reason=reason,
+            confidence=score, workerId=wid,
+            method="sface_cosine" if compared else "none",
+            engine="model" if compared else "unavailable",
         )
 
-    # 2. THỬ CHẠY MÔ HÌNH NHẬN DIỆN THỰC (OPENCV YUNET + SFACE)
-    face_detector = getattr(request.app.state, "face_detector", None)
-    face_recognizer = getattr(request.app.state, "face_recognizer", None)
-    img_selfie = decode_image_to_cv2(p_input)
-
-    if face_detector is not None and img_selfie is not None:
-        try:
-            h, w, _ = img_selfie.shape
-            face_detector.setInputSize((w, h))
-            _, faces = face_detector.detect(img_selfie)
-
-            if faces is not None and len(faces) > 0:
-                best_face = faces[0]
-                det_score = float(best_face[-1])
-
-                # Nếu có thêm ảnh CCCD/Avatar để so sánh 2 khuôn mặt (Face Matching)
-                img_idcard = decode_image_to_cv2(id_card_input)
-                if face_recognizer is not None and img_idcard is not None:
-                    h2, w2, _ = img_idcard.shape
-                    face_detector.setInputSize((w2, h2))
-                    _, faces2 = face_detector.detect(img_idcard)
-
-                    if faces2 is not None and len(faces2) > 0:
-                        aligned1 = face_recognizer.alignCrop(img_selfie, best_face)
-                        aligned2 = face_recognizer.alignCrop(img_idcard, faces2[0])
-                        feature1 = face_recognizer.feature(aligned1)
-                        feature2 = face_recognizer.feature(aligned2)
-                        cosine_score = float(face_recognizer.match(feature1, feature2, cv2.FaceRecognizerSF_FR_COSINE))
-
-                        matched = cosine_score >= 0.60
-                        confidence = round(min(0.98, max(0.40, cosine_score)), 2)
-
-                        return FaceVerifyResponse(
-                            verified=matched,
-                            confidence=confidence,
-                            workerId=wid,
-                            message=f"Xác thực khuôn mặt qua OpenCV SFace (Độ khớp Cosine: {confidence * 100:.1f}%).",
-                            engine="model",
-                        )
-
-                # Nếu chỉ gửi 1 ảnh selfie: Xác thực khuôn mặt người thật hợp lệ (Liveness / Face Detected)
-                confidence = round(min(0.97, max(0.80, det_score)), 2)
-                return FaceVerifyResponse(
-                    verified=True,
-                    confidence=confidence,
-                    workerId=wid,
-                    message=f"Phát hiện khuôn mặt kỹ thuật viên hợp lệ qua OpenCV YuNet (Confidence: {confidence * 100:.1f}%).",
-                    engine="model",
-                )
-
-        except Exception as e:
-            logger.warning(f"⚠️ [Face Verification Error]: {e}, fallback sang heuristic...")
-
-    # 3. HEURISTIC FALLBACK
-    return FaceVerifyResponse(
-        verified=True,
-        confidence=0.95,
-        workerId=wid,
-        message="Xác thực sinh trắc học khuôn mặt thợ thành công (Chế độ Heuristic).",
-        engine="heuristic",
-    )
+    detector = getattr(request.app.state, "face_detector", None)
+    recognizer = getattr(request.app.state, "face_recognizer", None)
+    if detector is None or recognizer is None:
+        return result("TECHNICAL_ERROR", "MODEL_NOT_READY")
+    if not reference:
+        return result("INCONCLUSIVE", "REFERENCE_MISSING")
+    try:
+        images = [decode_image_to_cv2(value) for value in (selfie, reference)]
+        if any(image is None for image in images):
+            return result("TECHNICAL_ERROR", "DECODE_FAILED")
+        faces = []
+        for image in images:
+            h, w = image.shape[:2]
+            detector.setInputSize((w, h))
+            _, detected = detector.detect(image)
+            count = 0 if detected is None else len(detected)
+            if count != 1:
+                return result("INCONCLUSIVE", "NO_FACE" if count == 0 else "MULTIPLE_FACES")
+            faces.append(detected[0])
+        features = []
+        for image, face in zip(images, faces):
+            aligned = recognizer.alignCrop(image, face)
+            if aligned is None or aligned.size == 0:
+                return result("TECHNICAL_ERROR", "ALIGNMENT_FAILED")
+            feature = recognizer.feature(aligned)
+            if (feature is None or feature.shape != (1, 128)
+                    or not np.isfinite(feature).all() or np.linalg.norm(feature) == 0):
+                return result("TECHNICAL_ERROR", "INVALID_EMBEDDING")
+            features.append(feature)
+        raw_score = recognizer.match(*features, cv2.FaceRecognizerSF_FR_COSINE)
+        if isinstance(raw_score, (str, bool)):
+            return result("TECHNICAL_ERROR", "INVALID_SCORE")
+        score = float(raw_score)
+        if not math.isfinite(score) or not -1 <= score <= 1:
+            return result("TECHNICAL_ERROR", "INVALID_SCORE")
+        return result("MATCH" if score >= 0.60 else "NON_MATCH", "COMPARED", score)
+    except Exception:
+        logger.warning("Face identity comparison failed")
+        return result("TECHNICAL_ERROR", "COMPARISON_FAILED")
 
 
 # ==========================================

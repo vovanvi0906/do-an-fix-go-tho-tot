@@ -16,12 +16,7 @@ export function getFallbackCompare(afterImageUrl = '') {
   };
 }
 
-export function getFallbackFaceVerify(workerId, selfieUrl = '') {
-  const isLow = selfieUrl.includes('unmatched') || selfieUrl.includes('low_confidence');
-  return {
-    verified: !isLow,
-    confidence: isLow ? 0.48 : 0.95,
-    workerId,
-    message: isLow ? 'Độ khớp khuôn mặt thấp (< 60%). Chuyển vào hàng đợi kiểm duyệt thủ công bởi Admin.' : 'Xác thực khuôn mặt thành công.',
-  };
+export function getFallbackFaceVerify() {
+  return { verified: false, confidence: null, status: 'TECHNICAL_ERROR',
+    reason: 'AI_UNAVAILABLE', engine: 'unavailable', method: 'none' };
 }

@@ -1,3 +1,4 @@
+import { validFaceResult } from './face-result';
 import { Injectable, Dependencies } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { getFallbackCompare, getFallbackFaceVerify } from './aiFallbackHelper';
@@ -69,18 +70,21 @@ export class FastApiAiClient {
     return getFallbackCompare(afterImageUrl);
   }
 
-  async verifyFace(workerId, selfieUrl, idCardImageUrl = '', { allowFallback = true } = {}) {
+  async verifyFace(workerId, selfieUrl, idCardImageUrl = '') {
     try {
       const response = await fetch(`${this.baseUrl}/ai/face-verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ workerId, photoUrl: selfieUrl, idCardImageUrl }),
+        signal: AbortSignal.timeout(15000),
       });
-      if (response.ok) return await response.json();
+      if (response.ok) {
+        const result = await response.json();
+        if (validFaceResult(result) && result.workerId === workerId) return result;
+      }
     } catch (err) {
       console.warn('FastAPI AI Service (/ai/face-verify) không phản hồi:', err.message);
     }
-    if (!allowFallback) return { verified: false, confidence: 0 };
     return getFallbackFaceVerify(workerId, selfieUrl);
   }
 

@@ -11,19 +11,8 @@ export class AiService {
   }
 
   async verifyFace(workerUserId, faceImageUrl, idCardImageUrl) {
-    const result = await this.fastApiAiClient.verifyFace(
-      faceImageUrl,
-      idCardImageUrl,
-    );
-
-    if (result.matched && workerUserId) {
-      await this.prisma.workerProfile.update({
-        where: { userId: workerUserId },
-        data: { idCardVerified: true },
-      });
-    }
-
-    return result;
+    // Caller-supplied reference supports comparison only, never account approval.
+    return this.fastApiAiClient.verifyFace(workerUserId, faceImageUrl, idCardImageUrl);
   }
 
   async analyzeBeforeAfter(orderId, beforeImageUrl, afterImageUrl) {
