@@ -5,12 +5,12 @@ import { Ionicons } from '@expo/vector-icons';
 export const VerificationResultModal = ({ visible, result, onClose, onRetry }) => {
   if (!result) return null;
   const isSuccess = result.verified;
-  const confidencePercent = Number.isFinite(result.confidence) ? (result.confidence * 100).toFixed(1) : null;
+  const cosine = Number.isFinite(result.identityScore) ? result.identityScore.toFixed(3) : null;
 
   return (
-    <Modal visible={visible} transparent animationType="fade">
-      <View style={styles.overlay}>
-        <View style={styles.card}>
+    <Modal nativeID="face-result-modal" visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+      <View nativeID="face-result-overlay" style={styles.overlay}>
+        <View nativeID="face-result-card" style={styles.card}>
           <View style={[styles.iconCircle, isSuccess ? styles.successBg : styles.failBg]}>
             <Ionicons
               name={isSuccess ? 'checkmark-circle' : 'alert-circle'}
@@ -18,22 +18,22 @@ export const VerificationResultModal = ({ visible, result, onClose, onRetry }) =
               color={isSuccess ? '#16A34A' : '#DC2626'}
             />
           </View>
-          <Text style={styles.title}>
+          <Text nativeID="face-result-title" accessibilityRole="header" style={styles.title}>
             {isSuccess ? 'Xác thực thành công' : 'Chưa xác thực được'}
           </Text>
-          {confidencePercent !== null ? <Text style={styles.scoreText}>
-            Độ khớp sinh trắc học: <Text style={styles.boldScore}>{confidencePercent}%</Text>
+          {cosine !== null ? <Text style={styles.scoreText}>
+            Điểm tương đồng cosine: <Text style={styles.boldScore}>{cosine}</Text>
           </Text> : null}
-          <Text style={styles.message}>
-            {result.message || (isSuccess ? 'Đạt chuẩn nhận diện an toàn' : 'Vui lòng chụp lại rõ nét hơn')}
+          <Text nativeID="face-result-message" accessibilityLiveRegion="polite" style={styles.message}>
+            {result.message || (isSuccess ? 'Máy chủ đã xác nhận bằng chứng xác thực' : 'Vui lòng chụp lại rõ nét hơn')}
           </Text>
           <View style={styles.btnRow}>
             {isSuccess ? (
-              <TouchableOpacity style={styles.btnPrimary} onPress={onClose}>
+              <TouchableOpacity nativeID="face-result-close" accessibilityRole="button" style={styles.btnPrimary} onPress={onClose}>
                 <Text style={styles.btnPrimaryText}>Quay lại</Text>
               </TouchableOpacity>
             ) : (
-              <TouchableOpacity style={styles.btnRetry} onPress={onRetry}>
+              <TouchableOpacity nativeID="face-result-retry" accessibilityRole="button" style={styles.btnRetry} onPress={onRetry}>
                 <Text style={styles.btnPrimaryText}>Thử lại</Text>
               </TouchableOpacity>
             )}

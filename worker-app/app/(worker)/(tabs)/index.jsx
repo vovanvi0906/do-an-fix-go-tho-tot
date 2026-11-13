@@ -13,7 +13,6 @@ import {
   Alert,
 } from 'react-native';
 import * as Location from 'expo-location';
-import * as ImagePicker from 'expo-image-picker';
 import { apiClient } from '../../../src/services/api/apiClient';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -89,35 +88,9 @@ export default function WorkerDashboardScreen() {
     }
   };
 
-  const dailyCheckIn = async () => {
-    if (statusLock.current) return;
-    statusLock.current = true;
-    setIsChangingStatus(true);
-
-    try {
-      const permission = await ImagePicker.requestCameraPermissionsAsync();
-      if (permission.status !== 'granted') throw new Error('Cần quyền camera để chụp selfie');
-      const result = await ImagePicker.launchCameraAsync({ cameraType: ImagePicker.CameraType.front, quality: 0.7 });
-      if (result.canceled || !result.assets?.[0]) return;
-      const asset = result.assets[0];
-      const form = new FormData();
-      if (asset.uri.startsWith('data:') || asset.uri.startsWith('blob:')) {
-        form.append('image', await (await fetch(asset.uri)).blob(), 'selfie.jpg');
-      } else {
-        form.append('image', { uri: asset.uri, name: 'selfie.jpg', type: 'image/jpeg' });
-      }
-      await apiClient.post('/workers/verify-face-daily', form, { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 60000 });
-      const current = await loadProfile();
-      if (!hasShiftVerification(current)) throw new Error('Máy chủ chưa xác nhận check-in. Vui lòng thử lại');
-      await reloadProfile();
-      setShowDailyCheckIn(false);
-    } catch (error) {
-      Alert.alert('Check-in chưa thành công', error.message);
-    } finally {
-      statusLock.current = false;
-      setIsChangingStatus(false);
-    }
-
+  const dailyCheckIn = () => {
+    setShowDailyCheckIn(false);
+    router.push('/(worker)/verification/face');
   };
 
   useEffect(() => {
@@ -210,8 +183,8 @@ export default function WorkerDashboardScreen() {
         <View style={{ flex: 1, justifyContent: 'center', padding: 24, backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <View style={{ padding: 24, backgroundColor: 'white', borderRadius: 16, gap: 16 }}>
             <Text style={{ fontSize: 18, fontWeight: '700' }}>Check-in khuôn mặt hằng ngày</Text>
-            <Text>Chụp selfie trực diện để bật nhận đơn trong 24 giờ tới.</Text>
-            <TouchableOpacity disabled={isChangingStatus} onPress={dailyCheckIn}><Text>Chụp selfie và xác thực</Text></TouchableOpacity>
+            <Text>Cần đăng ký khuôn mặt đáng tin cậy trước khi check-in. Kiểm tra trạng thái và hướng dẫn trước khi chụp ảnh.</Text>
+            <TouchableOpacity nativeID="worker-face-status-button" accessibilityRole="button" disabled={isChangingStatus} onPress={dailyCheckIn}><Text>Kiểm tra xác thực khuôn mặt</Text></TouchableOpacity>
             {isChangingStatus && <ActivityIndicator />}
             <TouchableOpacity disabled={isChangingStatus} onPress={() => setShowDailyCheckIn(false)}><Text>Để sau</Text></TouchableOpacity>
           </View>

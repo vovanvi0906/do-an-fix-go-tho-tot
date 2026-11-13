@@ -1,92 +1,96 @@
 import { apiClient } from '../../../services/api/apiClient';
-import { hasShiftVerification } from '../../auth/services/workerEligibility';
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { AppState } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
-export const useFaceVerification = (orderId, onSuccess) => {
+export const useFaceVerification = (orderId, onSuccess, mode = 'daily') => {
   const lock = useRef(false);
+  const generation = useRef(0);
+  const pending = useRef(null);
   const [imageUri, setImageUri] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [status, setStatus] = useState(null);
+  const [statusError, setStatusError] = useState('');
+  const [loadingStatus, setLoadingStatus] = useState(true);
 
+  const refresh = useCallback(async () => {
+    pending.current?.abort();
+    const controller = new AbortController();
+    pending.current = controller;
+    const attempt = ++generation.current;
+    lock.current = false; setIsAnalyzing(false);
+    setStatus(null); setStatusError(''); setLoadingStatus(true); setImageUri(null);
+    setResult(null); setShowModal(false);
+    try {
+      const response = await apiClient.get('/workers/me/face/status', { signal: controller.signal });
+      if (attempt === generation.current) setStatus(response.data || response);
+    } catch (error) {
+      if (attempt === generation.current && !controller.signal.aborted) setStatusError('Không tải được trạng thái xác thực. Kiểm tra kết nối rồi thử lại.');
+    } finally {
+      if (attempt === generation.current) setLoadingStatus(false);
+    }
+  }, []);
+  const cancel = useCallback(() => {
+    ++generation.current; pending.current?.abort();
+    lock.current = false; setIsAnalyzing(false); setLoadingStatus(false);
+    setImageUri(null); setResult(null); setShowModal(false); setStatus(null);
+  }, []);
+  useEffect(() => {
+    refresh();
+    const listener = AppState.addEventListener('change', state => {
+      if (state === 'active') refresh(); else cancel();
+    });
+    return () => { ++generation.current; pending.current?.abort(); listener.remove(); };
+  }, [refresh, cancel, orderId, mode]);
+
+  const report = useCallback(message => {
+    setResult({ verified: false, message }); setShowModal(true);
+  }, []);
   const takeSelfie = useCallback(async () => {
-    const perm = await ImagePicker.requestCameraPermissionsAsync();
-    if (!perm.granted) {
-      alert('Vui lòng cấp quyền truy cập Camera để xác thực khuôn mặt');
-      return;
+    // There is no session/capture contract yet. Do not collect images while blocked.
+    if (!(orderId ? status?.canVerifyOrder : status?.canVerifyDaily)) {
+      report('Xác thực chưa sẵn sàng. Vui lòng kiểm tra trạng thái đăng ký khuôn mặt.'); return;
     }
-    const res = await ImagePicker.launchCameraAsync({
-      cameraType: ImagePicker.CameraType.front,
-      allowsEditing: true,
-      aspect: [3, 4],
-      quality: 0.8,
-    });
-    if (!res.canceled && res.assets?.[0]?.uri) {
-      setImageUri(res.assets[0].uri);
-    }
-  }, []);
-
-  const pickImage = useCallback(async () => {
-    const res = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [3, 4],
-      quality: 0.8,
-    });
-    if (!res.canceled && res.assets?.[0]?.uri) {
-      setImageUri(res.assets[0].uri);
-    }
-  }, []);
+    const attempt = generation.current;
+    try {
+      const permission = await ImagePicker.requestCameraPermissionsAsync();
+      if (attempt !== generation.current) return;
+      if (!permission.granted) { report('Cần quyền camera. Bạn có thể cấp quyền trong cài đặt rồi thử lại.'); return; }
+      const capture = await ImagePicker.launchCameraAsync({ cameraType: ImagePicker.CameraType.front, allowsEditing: false, quality: .8 });
+      if (attempt === generation.current && !capture.canceled && capture.assets?.[0]?.uri) setImageUri(capture.assets[0].uri);
+    } catch (_) { if (attempt === generation.current) report('Không mở được camera. Vui lòng thử lại.'); }
+  }, [status, orderId, report]);
 
   const verify = useCallback(async () => {
-    if (!imageUri || lock.current) return;
-    lock.current = true;
+    if (lock.current) return;
+    lock.current = true; setIsAnalyzing(true);
+    const attempt = generation.current;
     try {
-      setIsAnalyzing(true);
-      if (orderId) throw new Error('Backend chưa cung cấp bằng chứng xác thực riêng cho đơn hàng. Vui lòng liên hệ hỗ trợ.');
-      const form = new FormData();
-      if (imageUri.startsWith('blob:') || imageUri.startsWith('data:')) {
-        form.append('image', await (await fetch(imageUri)).blob(), 'selfie.jpg');
-      } else {
-        form.append('image', { uri: imageUri, name: 'selfie.jpg', type: 'image/jpeg' });
-      }
-      await apiClient.post('/workers/verify-face-daily', form, { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 60000 });
-      const response = await apiClient.get('/workers/me');
-      const profile = response.data || response;
-      if (!hasShiftVerification(profile)) throw new Error('Máy chủ chưa xác nhận check-in');
-      const res = { verified: true, message: 'Check-in đầu ca đã được máy chủ xác nhận' };
-      setResult(res.data || res);
-      setShowModal(true);
-      if ((res.data?.verified || res.verified) && onSuccess) {
-        onSuccess(res.data || res);
-      }
-    } catch (err) {
-      setResult({
-        verified: false,
-        confidence: 0,
-        message: err.response?.data?.message || err.message || 'Lỗi kết nối AI Service',
-      });
-      setShowModal(true);
-    } finally {
-      lock.current = false;
-      setIsAnalyzing(false);
-    }
-  }, [imageUri, orderId, onSuccess]);
+      await refresh();
+      // Reading a status/timestamp is never a new biometric session or order proof.
+      if (generation.current === attempt + 1) report('Chưa thể xác thực lúc này. Đăng ký khuôn mặt cần được kiểm tra trước khi bắt đầu ca hoặc công việc.');
+    } finally { lock.current = false; setIsAnalyzing(false); }
+  }, [refresh, report]);
 
-  const reset = useCallback(() => {
-    setShowModal(false);
-    setResult(null);
-  }, []);
-
-  return {
-    imageUri,
-    isAnalyzing,
-    result,
-    showModal,
-    takeSelfie,
-    pickImage,
-    verify,
-    reset,
-  };
+  const preflight = useCallback(async consent => {
+    if (lock.current) return;
+    if (consent !== true) { report('Vui lòng xác nhận đồng ý trước khi kiểm tra điều kiện.'); return; }
+    lock.current = true; setIsAnalyzing(true);
+    const attempt = generation.current;
+    const controller = new AbortController(); pending.current?.abort(); pending.current = controller;
+    try {
+      const response = await apiClient.post(`/workers/me/face/${mode === 'reset' ? 'reset' : 'enrollment'}/preflight`, { consent: true }, { signal: controller.signal });
+      if (attempt !== generation.current) return;
+      const data = response.data || response;
+      setStatus(data);
+      report('Chưa tiếp nhận đăng ký hoặc cấp lại khuôn mặt. Vui lòng liên hệ hỗ trợ để được hướng dẫn; chưa có ảnh hay yêu cầu duyệt nào được lưu.');
+    } catch (_) {
+      if (attempt === generation.current && !controller.signal.aborted) report('Không kiểm tra được điều kiện. Kiểm tra kết nối rồi thử lại.');
+    } finally { if (attempt === generation.current) { lock.current = false; setIsAnalyzing(false); } }
+  }, [mode, report]);
+  const reset = useCallback(() => { setShowModal(false); setResult(null); setImageUri(null); }, []);
+  return { imageUri, isAnalyzing, result, showModal, status, statusError, loadingStatus,
+    takeSelfie, verify, preflight, refresh, cancel, reset };
 };

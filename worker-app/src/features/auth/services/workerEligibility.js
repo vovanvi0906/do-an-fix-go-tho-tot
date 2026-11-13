@@ -1,7 +1,5 @@
-export function hasShiftVerification(profile, now = Date.now()) {
-  const age = now - new Date(profile?.faceVerifiedAt).getTime();
-  return !!profile?.faceVerifiedAt && Number.isFinite(age) && age >= 0 && age < 86400000;
-}
+// Legacy timestamp has no session, template or PAD provenance. Runtime issuance is blocked.
+export function hasShiftVerification() { return false; }
 export function profileRestriction(profile) {
   if (!profile) return 'Chưa tải được hồ sơ. Vui lòng thử lại.';
   if (profile.user?.role !== 'WORKER') return 'Tài khoản không có quyền thợ.';

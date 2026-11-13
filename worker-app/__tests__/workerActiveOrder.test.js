@@ -1,3 +1,4 @@
+import * as eligibility from '../src/features/auth/services/workerEligibility';
 import React from 'react';
 import { Alert } from 'react-native';
 import { apiClient } from '../src/services/api/apiClient';
@@ -52,8 +53,11 @@ it('shows loading then recoverable error without an active card', async () => {
   await waitFor(() => expect(ui.getByText('Không có công việc đang thực hiện.')).toBeTruthy());
 });
 
+afterEach(() => jest.restoreAllMocks());
 it('online waits for backend ACK and never flips after permission denial', async () => {
   orderService.getCurrentWorkerOrder.mockResolvedValue(null);
+  // Isolate availability permission behavior; actual face gate is covered below.
+  jest.spyOn(eligibility, 'hasShiftVerification').mockReturnValue(true);
   Location.requestForegroundPermissionsAsync.mockResolvedValueOnce({ status: 'denied' });
   const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
   const ui = render(<WorkerDashboardScreen />);
@@ -65,6 +69,7 @@ it('online waits for backend ACK and never flips after permission denial', async
   alert.mockRestore();
 });
 it('requires a matching availability ACK', async () => {
+  jest.spyOn(eligibility, 'hasShiftVerification').mockReturnValue(true);
   orderService.getCurrentWorkerOrder.mockResolvedValue(null);
   apiClient.patch.mockResolvedValue({ isOnline: false });
   const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
@@ -75,4 +80,14 @@ it('requires a matching availability ACK', async () => {
   await waitFor(() => expect(alert).toHaveBeenCalled());
   expect(ui.queryByText('ĐANG BẬT NHẬN ĐƠN')).toBeNull();
   alert.mockRestore();
+});
+
+it('legacy check-in opens verification screen without capturing or going online', async () => {
+  orderService.getCurrentWorkerOrder.mockResolvedValue(null);
+  const ui = render(<WorkerDashboardScreen />);
+  await waitFor(() => expect(ui.getByText('Không có công việc đang thực hiện.')).toBeTruthy());
+  fireEvent(ui.getByRole('switch'), 'valueChange', true);
+  await waitFor(() => expect(ui.getByText('Kiểm tra xác thực khuôn mặt')).toBeTruthy());
+  expect(apiClient.patch).not.toHaveBeenCalled();
+  expect(Location.requestForegroundPermissionsAsync).not.toHaveBeenCalled();
 });

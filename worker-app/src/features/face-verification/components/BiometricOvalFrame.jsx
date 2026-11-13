@@ -7,7 +7,7 @@ export const BiometricOvalFrame = ({ imageUri, isAnalyzing }) => {
 
   useEffect(() => {
     if (isAnalyzing) {
-      Animated.loop(
+      const animation = Animated.loop(
         Animated.sequence([
           Animated.timing(scanAnim, {
             toValue: 1,
@@ -20,7 +20,9 @@ export const BiometricOvalFrame = ({ imageUri, isAnalyzing }) => {
             useNativeDriver: true,
           }),
         ])
-      ).start();
+      );
+      animation.start();
+      return () => animation.stop();
     } else {
       scanAnim.setValue(0);
     }
@@ -32,8 +34,8 @@ export const BiometricOvalFrame = ({ imageUri, isAnalyzing }) => {
   });
 
   return (
-    <View style={styles.outerGlow}>
-      <View style={styles.frame}>
+    <View nativeID="face-frame-container" style={styles.outerGlow}>
+      <View nativeID="face-frame-oval" style={styles.frame}>
         {imageUri ? (
           <Image source={{ uri: imageUri }} style={styles.image} resizeMode="cover" />
         ) : (

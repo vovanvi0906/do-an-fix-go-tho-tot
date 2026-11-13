@@ -3,8 +3,8 @@ const now = Date.parse('2026-11-12T08:00:00Z');
 it.each([null, 'invalid', new Date(now + 1).toISOString(), new Date(now - 86400000).toISOString()])('rejects invalid or expired shift %s', faceVerifiedAt => {
   expect(hasShiftVerification({ faceVerifiedAt }, now)).toBe(false);
 });
-it('accepts a backend timestamp only within the shift window', () => {
-  expect(hasShiftVerification({ faceVerifiedAt: new Date(now - 86399999).toISOString() }, now)).toBe(true);
+it('rejects even a recent legacy timestamp without trusted proof', () => {
+  expect(hasShiftVerification({ faceVerifiedAt: new Date(now - 86399999).toISOString() }, now)).toBe(false);
 });
 const profile = { user: { role: 'WORKER', status: 'ACTIVE' }, approvalStatus: 'APPROVED', workerServices: [{ id: 'service' }] };
 it('allows an approved active worker with registered services', () => expect(profileRestriction(profile)).toBe(''));
