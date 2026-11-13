@@ -1,0 +1,56 @@
+.....s.....ss...2026-11-14 02:47:38,916 [INFO] [httpx2] HTTP Request: POST http://testserver/research/infer "HTTP/1.1 401 Unauthorized"
+2026-11-14 02:47:38,921 [INFO] [httpx2] HTTP Request: POST http://testserver/research/infer "HTTP/1.1 403 Forbidden"
+2026-11-14 02:47:38,925 [INFO] [httpx2] HTTP Request: POST http://testserver/research/infer "HTTP/1.1 400 Bad Request"
+2026-11-14 02:47:38,946 [INFO] [httpx2] HTTP Request: POST http://testserver/research/infer "HTTP/1.1 200 OK"
+2026-11-14 02:47:38,952 [INFO] [httpx2] HTTP Request: GET http://testserver/research/capabilities "HTTP/1.1 200 OK"
+....2026-11-14 02:47:38,977 [INFO] [httpx2] HTTP Request: GET http://testserver/research/capabilities "HTTP/1.1 503 Service Unavailable"
+....[31m[1mrequirements:[0m Ultralytics requirement ['pi-heif'] not found, attempting AutoUpdate...
+Collecting pi-heif
+  Downloading pi_heif-1.4.0-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (6.3 kB)
+Requirement already satisfied: pillow>=11.1.0 in ./.venv/lib/python3.14/site-packages (from pi-heif) (13.0.0)
+Downloading pi_heif-1.4.0-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (1.5 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.5/1.5 MB 4.3 MB/s  0:00:00
+Installing collected packages: pi-heif
+Successfully installed pi-heif-1.4.0
+
+[notice] A new release of pip is available: 26.2.2 -> 26.3
+[notice] To update, run: /home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/.venv/bin/python -m pip install --upgrade pip
+
+[31m[1mrequirements:[0m AutoUpdate success ✅ 1.8s
+WARNING ⚠️ [31m[1mrequirements:[0m [1mRestart runtime or rerun command for updates to take effect[0m
+
+..........2026-11-14 02:47:40,947 [INFO] [httpx2] HTTP Request: POST http://testserver/ai/face-verify "HTTP/1.1 401 Unauthorized"
+2026-11-14 02:47:40,950 [INFO] [httpx2] HTTP Request: POST http://testserver/ai/face-verify "HTTP/1.1 503 Service Unavailable"
+.2026-11-14 02:47:40,956 [INFO] [httpx2] HTTP Request: POST http://testserver/ai/face-verify "HTTP/1.1 200 OK"
+2026-11-14 02:47:40,960 [INFO] [httpx2] HTTP Request: POST http://testserver/api/v1/ai/verify-face "HTTP/1.1 200 OK"
+2026-11-14 02:47:40,964 [INFO] [httpx2] HTTP Request: POST http://testserver/ai/face-verify "HTTP/1.1 400 Bad Request"
+2026-11-14 02:47:40,969 [INFO] [httpx2] HTTP Request: POST http://testserver/ai/face-verify "HTTP/1.1 415 Unsupported Media Type"
+2026-11-14 02:47:40,972 [INFO] [httpx2] HTTP Request: POST http://testserver/ai/face-verify "HTTP/1.1 400 Bad Request"
+.2026-11-14 02:47:40,983 [INFO] [httpx2] HTTP Request: POST http://testserver/ai/face-verify "HTTP/1.1 413 Content Too Large"
+.2026-11-14 02:47:44,096 [INFO] [ai-service.clip] 📦 [CLIP] Đang nạp openai/clip-vit-base-patch32 trên CPU...
+
+Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 398/398 [00:00<00:00, 54528.42it/s]
+2026-11-14 02:47:47,204 [INFO] [httpx] HTTP Request: GET http://localhost:3000/api/service-targets "HTTP/1.1 200 OK"
+2026-11-14 02:47:49,443 [INFO] [ai-service.clip] 🔄 [CLIP] Đã đồng bộ và tính Embeddings cho 70 đối tượng.
+2026-11-14 02:47:49,444 [INFO] [ai-service.clip] ✅ [CLIP] Đã nạp thành công và tính sẵn Embeddings 3 tầng từ Database.
+2026-11-14 02:47:50,419 [INFO] [httpx2] HTTP Request: POST http://testserver/ai/v2/diagnose "HTTP/1.1 200 OK"
+.2026-11-14 02:47:50,552 [INFO] [httpx2] HTTP Request: POST http://testserver/ai/v2/diagnose "HTTP/1.1 200 OK"
+.2026-11-14 02:47:50,661 [INFO] [httpx2] HTTP Request: POST http://testserver/ai/v2/diagnose "HTTP/1.1 200 OK"
+.2026-11-14 02:47:50,665 [INFO] [httpx2] HTTP Request: POST http://testserver/ai/v2/diagnose "HTTP/1.1 200 OK"
+.............2026-11-14 02:47:50,683 [INFO] [httpx] HTTP Request: GET http://localhost:3000/api/service-targets "HTTP/1.1 200 OK"
+2026-11-14 02:47:50,684 [INFO] [ai-service.recommendation.catalog] Using existing targets snapshot
+.......2026-11-14 02:47:50,734 [INFO] [httpx2] HTTP Request: POST http://testserver/ai/v2/diagnose "HTTP/1.1 200 OK"
+2026-11-14 02:47:50,737 [INFO] [httpx2] HTTP Request: POST http://testserver/ai/face-verify "HTTP/1.1 503 Service Unavailable"
+2026-11-14 02:47:50,740 [INFO] [httpx2] HTTP Request: POST http://testserver/ai/face-verify "HTTP/1.1 200 OK"
+.
+----------------------------------------------------------------------
+Ran 61 tests in 11.940s
+
+OK (skipped=3)
+
+[LIVE INFERENCE - Appliance]: {'suggestedCategoryId': 'thiet-bi', 'suggestedCategoryName': 'Thiết bị gia dụng', 'suggestedTargetId': 'lo-vi-song', 'suggestedTargetName': 'Lò vi sóng', 'categoryCandidates': [{'id': 'thiet-bi', 'slug': 'thiet-bi', 'name': 'Thiết bị gia dụng', 'confidence': 0.5271, 'provenance': 'ensemble+text'}, {'id': 'dien-lanh', 'slug': 'dien-lanh', 'name': 'Điện lạnh', 'confidence': 0.2424, 'provenance': 'ensemble+text'}, {'id': 'sua-dien', 'slug': 'sua-dien', 'name': 'Sửa điện', 'confidence': 0.0924, 'provenance': 'ensemble+text'}], 'targetCandidates': [{'targetId': 'lo-vi-song', 'targetName': 'Lò vi sóng', 'targetCategory': 'thiet-bi', 'similarity': 0.2571, 'confidence': 0.6285, 'provenance': 'clip_target_similarity'}, {'targetId': 'bep-gas-bep-gas-am', 'targetName': 'Bếp gas / Bếp gas âm', 'targetCategory': 'thiet-bi', 'similarity': 0.2549, 'confidence': 0.6275, 'provenance': 'clip_target_similarity'}, {'targetId': 'bep-tu-bep-hong-ngoai', 'targetName': 'Bếp từ / Bếp hồng ngoại', 'targetCategory': 'thiet-bi', 'similarity': 0.2537, 'confidence': 0.6268, 'provenance': 'clip_target_similarity'}], 'confidence': 0.5271, 'detectedLabels': ['thiet-bi'], 'observableSigns': ['Nhận diện danh mục: Thiết bị gia dụng', 'Nhận diện đối tượng: Lò vi sóng'], 'decision_source': 'ensemble+text', 'engine': 'model', 'model_version': 'fixgo-ai-rec-v1', 'notes': 'Chẩn đoán danh mục và đối tượng thành công.'}
+
+[LIVE INFERENCE - Face OOD]: {'suggestedCategoryId': None, 'suggestedCategoryName': None, 'suggestedTargetId': None, 'suggestedTargetName': None, 'categoryCandidates': [{'id': 'thiet-bi', 'slug': 'thiet-bi', 'name': 'Thiết bị gia dụng', 'confidence': 0.2848, 'provenance': 'ensemble'}, {'id': 'lam-vuon', 'slug': 'lam-vuon', 'name': 'Làm vườn', 'confidence': 0.2448, 'provenance': 'ensemble'}, {'id': 'giup-viec', 'slug': 'giup-viec', 'name': 'Giúp việc', 'confidence': 0.1262, 'provenance': 'ensemble'}], 'targetCandidates': [], 'confidence': None, 'detectedLabels': [], 'observableSigns': [], 'decision_source': 'abstained_ood', 'engine': 'model', 'model_version': 'fixgo-ai-rec-v1', 'notes': 'Ảnh chưa đủ rõ hoặc ngoài danh mục dịch vụ hỗ trợ.'}
+
+[LIVE INFERENCE - Garden]: {'suggestedCategoryId': 'lam-vuon', 'suggestedCategoryName': 'Làm vườn', 'suggestedTargetId': 'hang-rao-cay-bon-hoa-vuon-rau', 'suggestedTargetName': 'Hàng rào cây / Bồn hoa / Vườn rau', 'categoryCandidates': [{'id': 'lam-vuon', 'slug': 'lam-vuon', 'name': 'Làm vườn', 'confidence': 0.8009, 'provenance': 'ensemble+text'}, {'id': 'giup-viec', 'slug': 'giup-viec', 'name': 'Giúp việc', 'confidence': 0.0514, 'provenance': 'ensemble+text'}, {'id': 'thiet-bi', 'slug': 'thiet-bi', 'name': 'Thiết bị gia dụng', 'confidence': 0.0396, 'provenance': 'ensemble+text'}], 'targetCandidates': [{'targetId': 'hang-rao-cay-bon-hoa-vuon-rau', 'targetName': 'Hàng rào cây / Bồn hoa / Vườn rau', 'targetCategory': 'lam-vuon', 'similarity': 0.211, 'confidence': 0.6055, 'provenance': 'clip_target_similarity'}, {'targetId': 'cay-canh-chau-cay', 'targetName': 'Cây cảnh / Chậu cây', 'targetCategory': 'lam-vuon', 'similarity': 0.2099, 'confidence': 0.605, 'provenance': 'clip_target_similarity'}, {'targetId': 'tham-co-bai-co', 'targetName': 'Thảm cỏ / Bãi cỏ', 'targetCategory': 'lam-vuon', 'similarity': 0.2069, 'confidence': 0.6035, 'provenance': 'clip_target_similarity'}], 'confidence': 0.8009, 'detectedLabels': ['lam-vuon'], 'observableSigns': ['Nhận diện danh mục: Làm vườn', 'Nhận diện đối tượng: Hàng rào cây / Bồn hoa / Vườn rau'], 'decision_source': 'ensemble+text', 'engine': 'model', 'model_version': 'fixgo-ai-rec-v1', 'notes': 'Chẩn đoán danh mục và đối tượng thành công.'}

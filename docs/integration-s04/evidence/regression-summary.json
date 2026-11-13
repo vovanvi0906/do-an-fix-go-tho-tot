@@ -1,0 +1,76 @@
+{
+  "backendJest": {
+    "status": "PASS",
+    "tests": 177,
+    "suites": 17
+  },
+  "customerJest": {
+    "status": "PASS",
+    "tests": 115,
+    "suites": 20
+  },
+  "workerJest": {
+    "status": "PASS",
+    "tests": 153,
+    "suites": 20
+  },
+  "pythonDiscover": {
+    "status": "PASS_WITH_SKIP",
+    "pass": 58,
+    "skip": 3
+  },
+  "faceModelsAndBridge": {
+    "status": "PASS",
+    "tests": 6
+  },
+  "facePostgresqlSecurity": {
+    "status": "PASS",
+    "tests": 64
+  },
+  "arc01": {
+    "status": "PASS",
+    "tests": 19,
+    "disposableOnly": true
+  },
+  "backendBuild": {
+    "status": "PASS",
+    "compiledFiles": 156
+  },
+  "backendTypecheck": {
+    "status": "NOT_APPLICABLE",
+    "reason": "JavaScript/Babel project without tsconfig/checkJs"
+  },
+  "customerTypecheck": {
+    "status": "PASS"
+  },
+  "workerTypecheck": {
+    "status": "FAIL",
+    "errors": 11
+  },
+  "adminBuild": {
+    "status": "PASS",
+    "warning": "large bundle"
+  },
+  "customerAndroidJsExport": {
+    "status": "PASS"
+  },
+  "workerAndroidJsExport": {
+    "status": "PASS"
+  },
+  "backendLint": {
+    "status": "FAIL",
+    "errors": 1078,
+    "warnings": 68
+  },
+  "changedFilesLint": {
+    "status": "PASS"
+  },
+  "usbRuntimeFromMainRepo": {
+    "status": "PASS",
+    "database": "disposable",
+    "stoppedAfterCheck": true
+  },
+  "androidUi": {
+    "status": "NOT_RUN"
+  }
+}

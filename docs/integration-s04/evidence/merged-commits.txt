@@ -1,0 +1,39 @@
+84b0d60 merge: integrate S03 Recommendation V2 and secured Face Core for S04
+06b6e72 test(s03): stabilize durable-proof ARC-01 fixtures and Android USB startup
+d5d5c7b docs: finalize S03 validation evidence and remaining blockers
+01ec893 merge: integrate Recommendation V2 and Face Core research for S03
+9e77da5 feat(ai-service): mount recommendation_router V2 into production entrypoint
+a008a4e merge: integrate AI Recommendation V2 from agent/gemini-customer into test/integration-s02-ai-rec
+9db1016 feat(android-qa): build isolated research dev-client and document device handoff
+804aaaf docs(ai-recommendation): clarify uncalibrated baseline and mark live traffic latency as NOT MEASURED
+1c70ae3 test(face-research): verify HTTP lab and document isolated Android pilot
+25f6101 feat(android): isolate Face Research app and nonce-bound camera flows
+93dd336 feat(face-research): add isolated inference APIs and durable measurement sessions
+f926fa3 feat(pad): add pinned experimental MN3 provider and synthetic CPU evidence
+367492f docs(ai-recommendation): refine adb reverse network tracing and codex integration specifics
+927ed1b fix(ai-service): calibrate soft-voting ensemble, enforce OOD abstention and add negative tests
+f212236 feat(ai-recommendation): isolate live inference, decouple confidence from rules, and finalize integration audit
+7ae16c7 feat(eval): prepare consented PAD protocol and measured-trial aggregation
+7c3780a docs(pad): propose pinned MN3 research experiment with license and CPU evidence
+87bb98e docs(db): audit verified project schema with read-only catalog tooling
+c38d752 docs(face): report migration audit tests and isolated model integration limits
+58dab32 feat(face-ai): wire pinned local models with independent identity and PAD outcomes
+f8feed9 fix(face-db): bind biometric lineage and reject stale proof replay
+31f969d docs(ai-recommendation): add comprehensive architecture, data contracts, algorithms and QA documentation
+52ffb56 feat(ai-service): add dataset manifest builder, leakage audit and recommendation benchmark suite
+410ba44 feat(customer-app): implement target candidates, symptom questions, and service recommendation UX
+a61d2aa feat(ai-service): add recommendation package with category ensemble, target matcher, and catalog sync
+fb670ab docs(face): report PostgreSQL results compatibility and remaining rollout approvals
+2d1a82d docs(face-pad): pin checkpoint metadata and propose isolated CPU evaluation
+308eb1c feat(worker): integrate scoped face sessions consent and persisted proof readback
+68fb022 feat(face): implement durable enrollment and scoped proofs with PostgreSQL integration
+3b9e7e7 feat(backend): implement target-scoped diagnosis resolver, active guards and admin sync
+fd7f6d2 feat(face-db): add durable biometric schema and isolated-only rollback
+f6737fd test(face): validate API boundaries and document approval blockers
+c275a15 feat(worker): show face enrollment blockers and remove legacy biometric success
+faaed86 feat(face): add unevaluated PAD boundary and licensed-candidate evaluation plan
+12dbd5d feat(face): define scoped proof policy and block capture before persistence
+813640a feat(face): isolate versioned SFace matching with quality and internal auth
+2cc5938 feat(face): add enrollment capability preflight and encrypted template primitive
+1cb5f8d fix(face): reuse integration fail-closed hotfix without recommendation changes
+a3cbc21 docs(face): synchronize forensic audit with verified SHA-256 manifest

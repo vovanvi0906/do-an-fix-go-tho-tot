@@ -1,0 +1,67 @@
+{
+  "migrationMetadataPresent": false,
+  "preface": {
+    "columns": {
+      "missing": 0,
+      "extra": 0,
+      "changed": 0
+    },
+    "enums": {
+      "missing": 0,
+      "extra": 0,
+      "changed": 0
+    },
+    "constraints": {
+      "missing": 0,
+      "extra": 0,
+      "changed": 0
+    },
+    "indexes": {
+      "missing": 0,
+      "extra": 0,
+      "changed": 0
+    },
+    "triggers": {
+      "missing": 0,
+      "extra": 0,
+      "changed": 0
+    },
+    "functions": {
+      "missing": 0,
+      "extra": 0,
+      "changed": 0
+    }
+  },
+  "target": {
+    "columns": {
+      "missing": 72,
+      "extra": 0,
+      "changed": 0
+    },
+    "enums": {
+      "missing": 0,
+      "extra": 0,
+      "changed": 0
+    },
+    "constraints": {
+      "missing": 28,
+      "extra": 0,
+      "changed": 0
+    },
+    "indexes": {
+      "missing": 21,
+      "extra": 0,
+      "changed": 0
+    },
+    "triggers": {
+      "missing": 7,
+      "extra": 0,
+      "changed": 0
+    },
+    "functions": {
+      "missing": 7,
+      "extra": 0,
+      "changed": 0
+    }
+  }
+}

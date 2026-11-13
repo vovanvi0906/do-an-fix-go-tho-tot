@@ -1,0 +1,4 @@
+Database: localhost:5432/ondemand_db; schema=public; preflight=READ ONLY
+Face Core enabled=false; capture approved=false; missing Face columns=72
+Face schema chưa sẵn sàng; giữ Face Core disabled. Nhận đơn/start vẫn fail-closed.
+PAD readiness vẫn do production gateway kiểm tra; không cấp proof trong preflight.

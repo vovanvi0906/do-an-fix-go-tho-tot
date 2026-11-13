@@ -1,0 +1,117 @@
+v2 Order hard-delete: SET NULL violates purpose CHECK; delete rolled back (reproduced).
+Invalid v2 lineage rejected, DDL rolled back, source record unchanged: PASS
+Prisma diff empty and custom Order FK/trigger catalog verified: PASS
+PASS test/face/core.integration.js (24.028 s)
+  ✓ enrollment persists encrypted versioned template, reviewed evidence and metadata audit (408 ms)
+  ✓ professional approval alone or consent without review cannot enroll (183 ms)
+  ✓ default gateway and data policy remain closed, with no template or capture sent (186 ms)
+  ✓ duplicate concurrent session request returns same durable session and nonce (332 ms)
+  ✓ concurrent enrollment cannot overwrite first committed version (377 ms)
+  ✓ duplicate successful capture returns same proof, changed payload and other nonce rejected (458 ms)
+  ✓ session owned by another worker and wrong-order creation denied (207 ms)
+  ✓ timeout consumes retry budget and late evidence never creates template (454 ms)
+  ✓ PAD NOT_EVALUATED cannot create template (299 ms)
+  ✓ PAD INCONCLUSIVE cannot create template (317 ms)
+  ✓ PAD FAIL cannot create template (285 ms)
+  ✓ daily proof never substitutes for per-order proof or legacy timestamp (471 ms)
+  ✓ two concurrent start-work requests consume exactly once in ARC-01 transaction (441 ms)
+  ✓ failed FSM prerequisite rolls back consumption, audit, history and order update (445 ms)
+  ✓ expired session and expired proof are rejected using PostgreSQL time (601 ms)
+  ✓ withdrawal deletes ciphertext and revokes sessions/proofs; re-enrollment increments version (743 ms)
+  ✓ withdraw during inference prevents commit even if delayed gateway returns PASS (319 ms)
+  ✓ cross-instance session quota enforced under row locks (385 ms)
+  ✓ real Nest HTTP review -> consent -> enrollment -> daily/order proof -> withdraw, PostgreSQL-backed (1231 ms)
+  ✓ multipart preguard rejects unavailable PAD before evidence gateway runs (127 ms)
+  ✓ stored key ID survives rotation; missing retired key cannot grant new proof (330 ms)
+  ✓ invalid result {"identityScore":null} cannot persist proof (328 ms)
+  ✓ invalid result {"verificationMethod":"manual_review"} cannot persist proof (310 ms)
+  ✓ invalid result {"padModelVersion":"unapproved"} cannot persist proof (437 ms)
+  ✓ invalid result {"templateVersion":99} cannot persist proof (456 ms)
+  ✓ invalid result {"qualityDecision":"FAIL"} cannot persist proof (187 ms)
+  ✓ one order proof cannot be consumed for a second assigned order (325 ms)
+  ✓ Admin start retains permission while consuming proof under worker lock with correct audit actor (386 ms)
+  ✓ durable proof with wrong template version is never trusted (312 ms)
+  ✓ blocking worker invalidates authorization from an otherwise current order proof even for Admin start (364 ms)
+  ✓ DB rejects session binding mismatch userId (413 ms)
+  ✓ DB rejects session binding mismatch reviewId (381 ms)
+  ✓ DB rejects session binding mismatch templateVersion (346 ms)
+  ✓ DB rejects session binding mismatch epoch (373 ms)
+  ✓ DB rejects session binding mismatch modelVersion (378 ms)
+  ✓ DB rejects session binding mismatch templateId (374 ms)
+  ✓ DB rejects proof binding mismatch workerId (367 ms)
+  ✓ DB rejects proof binding mismatch purpose (382 ms)
+  ✓ DB rejects proof binding mismatch epoch (333 ms)
+  ✓ DB rejects proof binding mismatch templateVersion (395 ms)
+  ✓ DB rejects proof binding mismatch modelVersion (396 ms)
+  ✓ DB rejects proof binding mismatch orderId (346 ms)
+  ✓ DB forbids proof issuance for pending session (434 ms)
+  ✓ Order hard-delete is explicitly RESTRICTED with session evidence (276 ms)
+  ✓ Order hard-delete is explicitly RESTRICTED with proof evidence (285 ms)
+  ✓ Order without biometric history remains hard-deletable (180 ms)
+  ✓ session scope cannot be rewritten: purpose (223 ms)
+  ✓ session scope cannot be rewritten: nonceHash (246 ms)
+  ✓ session scope cannot be rewritten: expiresAt (242 ms)
+  ✓ session scope cannot be rewritten: epoch (224 ms)
+  ✓ proof cannot extend TTL, retarget scope or undo consumption (393 ms)
+  ✓ epoch fence makes historical template/proof unusable without rewriting their history (241 ms)
+  ✓ ciphertext erasure cannot be reversed or replaced with JSON null (255 ms)
+  ✓ template cannot bind a revoked review (235 ms)
+  ✓ template cannot bind review belonging to another worker (301 ms)
+  ✓ DB rejects malformed encrypted envelope 0 (268 ms)
+  ✓ DB rejects malformed encrypted envelope 1 (257 ms)
+  ✓ DB rejects malformed encrypted envelope 2 (233 ms)
+  ✓ review record cannot name non-Admin as approving reviewer (183 ms)
+  ✓ persisted envelope with old AAD cannot verify as a newer version (304 ms)
+  ✓ historical proof cannot be consumed after order assignment changes (394 ms)
+  ✓ DB session/proof insertion checks current order owner without rewriting historical evidence (374 ms)
+  ✓ duplicate completed submission never reports success for an expired proof (509 ms)
+  ✓ duplicate order result is denied after assignment change (330 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       64 passed, 64 total
+Snapshots:   0 total
+Time:        24.086 s
+Ran all test suites.
+  console.info
+    Unwired workflow rejection stack: BadRequestException: FACE_CHECKIN_EXPIRED
+        at OrderWorkflowService.requireFace (/home/vanvi/Work/do-an-fix-go-tho-tot/server/src/modules/orders/order-workflow.service.js:70:13)
+        at requireFace (/home/vanvi/Work/do-an-fix-go-tho-tot/server/src/modules/orders/order-workflow.service.js:191:19)
+        at Proxy._transactionWithCallback (/home/vanvi/Work/do-an-fix-go-tho-tot/server/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:722:18)
+        at OrderWorkflowService.transition (/home/vanvi/Work/do-an-fix-go-tho-tot/server/src/modules/orders/order-workflow.service.js:81:20)
+        at Object.<anonymous> (/home/vanvi/Work/do-an-fix-go-tho-tot/server/test/arc01.e2e-spec.js:240:9)
+
+      at Object.info (test/arc01.e2e-spec.js:244:17)
+
+  console.info
+    ARC01 negative control: real wired gate=DAILY_PROOF_REQUIRED; missing wiring=FACE_CHECKIN_EXPIRED
+
+      at Object.info (test/arc01.e2e-spec.js:249:15)
+
+PASS test/arc01.e2e-spec.js
+  ARC-01 real PostgreSQL + HTTP + Socket.IO (Redis pubsub not exercised)
+    ✓ legacy timestamp cannot replace daily proof, and missing FaceCore wiring remains closed (166 ms)
+    ✓ daily proof cannot replace ORDER proof and production capture readiness remains closed (68 ms)
+    ✓ valid legacy alias persists canonical travel state and history (52 ms)
+    ✓ rejects invalid transition, wrong worker, foreign customer, wrong role and unauthenticated request (79 ms)
+    ✓ two real concurrent HTTP accepts have exactly one winner (121 ms)
+    ✓ concurrent duplicate mutations create one history row and one socket event only after commit (222 ms)
+    ✓ competing arrive/finish requests cannot skip start or evidence (57 ms)
+    ✓ BEFORE, pending quote, AFTER and settlement are server preconditions (394 ms)
+    ✓ socket rejects cross-owner order room and forged profile identity (19 ms)
+    ✓ refresh JWT and socket without token are rejected (6 ms)
+    ✓ Admin REST uses the same FSM; generic status cannot fake acceptance or settlement (57 ms)
+    ✓ a rolled-back PostgreSQL transaction sends no event or history (104 ms)
+    ✓ only existing matching payment and payout permit completion; duplicate does not write again (46 ms)
+    ✓ one worker cannot accept two orders concurrently (136 ms)
+    ✓ current/detail reload return persisted canonical states and reject outsider reads/writes (58 ms)
+    ✓ Admin/Orders module graph resolves shared workflow dependencies without starting external workers (14 ms)
+    ✓ socket GPS derives the assigned profile instead of trusting workerId (57 ms)
+    ✓ a stale or forged role claim cannot authorize the Admin order endpoint (20 ms)
+    ✓ dispute evidence and history are persisted once with the state change (53 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       19 passed, 19 total
+Snapshots:   0 total
+Time:        4.555 s
+Ran all test suites.
+Migration apply, PostgreSQL integration, destructive isolated rollback preserving legacy rows, and reapply: PASS
