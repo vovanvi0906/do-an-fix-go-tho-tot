@@ -4,6 +4,7 @@ describe('Diagnosis target and service ranking', () => {
   let prisma, ai;
   const category = { id: 'cat-1', slug: 'sua-dien', name: 'Sửa điện', basePrice: 100000 };
   const target1 = { id: 'tgt-1', categoryId: 'cat-1', slug: 'cong-tac-dien', name: 'Công tắc điện', isActive: true };
+  const target2 = { id: 'tgt-2', categoryId: 'cat-1', slug: 'o-cam-dien', name: 'Ổ cắm điện', isActive: true };
   const service1 = { id: 'srv-1', categoryId: 'cat-1', targetId: 'tgt-1', slug: 'sua-cong-tac-khong-hoat-dong',
     name: 'Sửa công tắc không hoạt động', basePrice: 100000, maxPrice: 200000, unit: 'điểm', isActive: true };
   const service2 = { id: 'srv-2', categoryId: 'cat-1', targetId: 'tgt-1', slug: 'thay-cong-tac-hong',
@@ -12,7 +13,7 @@ describe('Diagnosis target and service ranking', () => {
   beforeEach(() => {
     prisma = {
       serviceCategory: { findMany: jest.fn().mockResolvedValue([category]) },
-      serviceTarget: { findMany: jest.fn().mockResolvedValue([target1]) },
+      serviceTarget: { findMany: jest.fn().mockResolvedValue([target1, target2]) },
       service: { findMany: jest.fn().mockResolvedValue([service1, service2]) },
     };
     ai = {
@@ -30,6 +31,12 @@ describe('Diagnosis target and service ranking', () => {
     ).rejects.toThrow('Thiết bị không thuộc danh mục');
   });
 
+  it('rejects non-existent target with BadRequestException', async () => {
+    await expect(
+      resolveDiagnosis(prisma, ai, { imageUrl: 'https://img.test/1.jpg', answers: { categoryId: 'cat-1', targetId: 'non-existent' } })
+    ).rejects.toThrow('Thiết bị không thuộc danh mục');
+  });
+
   it('passes target and scopes services when valid target is selected', async () => {
     const res = await resolveDiagnosis(prisma, ai, {
       imageUrl: 'https://img.test/1.jpg',
@@ -37,11 +44,19 @@ describe('Diagnosis target and service ranking', () => {
     });
     expect(res.status).toBe('needs_more_info');
     expect(res.target).toEqual({ id: 'tgt-1', slug: 'cong-tac-dien', name: 'Công tắc điện' });
-    expect(res.availableTargets).toHaveLength(1);
+    expect(res.availableTargets).toHaveLength(2);
     expect(res.availableServices).toHaveLength(2);
   });
 
-  it('ranks services and includes top ranked recommendations upon symptom confirmation', async () => {
+  it('does not claim internal invisible faults from image alone', async () => {
+    const res = await resolveDiagnosis(prisma, ai, { imageUrl: 'https://img.test/1.jpg' });
+    expect(res.status).toBe('needs_more_info');
+    expect(res.suggestedServiceId).toBeNull();
+    expect(res.observableSigns).toEqual(['Nhận diện danh mục: Sửa điện']);
+    expect(res.reportedSymptoms).toEqual([]);
+  });
+
+  it('ranks services and distinguishes rule ranking score from model confidence', async () => {
     const res = await resolveDiagnosis(prisma, ai, {
       imageUrl: 'https://img.test/1.jpg',
       answers: { categoryId: 'cat-1', targetId: 'tgt-1', symptom: 'switch_power' },
@@ -49,9 +64,9 @@ describe('Diagnosis target and service ranking', () => {
     expect(res.status).toBe('suggested');
     expect(res.source).toBe('rules');
     expect(res.suggestedServiceId).toBe('srv-1');
-    expect(res.suggestedServices.length).toBeGreaterThan(0);
     expect(res.suggestedServices[0].id).toBe('srv-1');
-    expect(res.suggestedServices[0].reason).toContain('Khớp chính xác triệu chứng');
+    expect(res.suggestedServices[0].rankingScore).toBe(100);
+    expect(res.suggestedServices[0].confidence).toBeNull(); // Rules must not claim 95% model confidence!
   });
 
   it('excludes inactive services from suggestions', async () => {

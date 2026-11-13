@@ -5,6 +5,7 @@ from recommendation.schemas import DiagnosisV2Response, CatalogSyncResponse
 from recommendation.category_classifier import evaluate_categories, CATEGORY_NAMES
 from recommendation.target_matcher import match_targets
 from recommendation.catalog_manager import get_catalog_state, sync_catalog
+from recommendation.image_utils import decode_image_to_cv2
 
 logger = logging.getLogger("ai-service.recommendation.router")
 router = APIRouter(prefix="/ai/v2", tags=["recommendation-v2"])
@@ -30,12 +31,13 @@ async def diagnose_v2(
     description: Optional[str] = Form(None),
 ):
     image_bytes, image_url, desc = await extract_request_data(request, file, imageUrl, description)
-    from main import decode_image_to_cv2, HAS_CLIP, is_clip_ready, predict_clip_full
     cv_img = decode_image_to_cv2(image_bytes or image_url)
     if cv_img is None:
         return DiagnosisV2Response(notes="Không đọc được ảnh. Vui lòng chụp lại hoặc chọn dịch vụ.")
 
-    clip_result = predict_clip_full(cv_img) if HAS_CLIP and is_clip_ready() else None
+    import clip_classifier
+    has_clip = clip_classifier.is_ready()
+    clip_result = clip_classifier.predict_clip_full(cv_img) if has_clip else None
     clip_probs = clip_result.get("category_probs") if clip_result else None
     yolo_probs = None
     yolo_model = getattr(request.app.state, "yolo_cls_model", None)
@@ -51,7 +53,11 @@ async def diagnose_v2(
     cat_slug, conf, cat_candidates, source = evaluate_categories(clip_probs, yolo_probs, desc)
     state = get_catalog_state()
     targets_dict = state.get("targets", {})
-    target_embs = state.get("target_embeddings")
+    if not targets_dict:
+        from target_catalog import TARGET_PROMPTS
+        targets_dict = TARGET_PROMPTS
+
+    target_embs = state.get("target_embeddings") or clip_classifier.get_target_embeddings()
     img_feat = clip_result.get("img_feat") if clip_result else None
     target_candidates = match_targets(img_feat, cat_slug, targets_dict, target_embs, top_k=3)
 
@@ -60,7 +66,7 @@ async def diagnose_v2(
     if cat_slug:
         cat_name = CATEGORY_NAMES.get(cat_slug.replace("-", "_"), cat_slug)
         observable.append(f"Nhận diện danh mục: {cat_name}")
-    if top_target:
+    if top_target and top_target.get("targetName"):
         observable.append(f"Nhận diện đối tượng: {top_target['targetName']}")
 
     return DiagnosisV2Response(

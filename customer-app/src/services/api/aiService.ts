@@ -24,7 +24,9 @@ export interface SuggestedServiceItem {
   basePrice: number;
   maxPrice?: number | null;
   unit?: string;
-  confidence?: number;
+  confidence?: number | null;
+  rankingScore?: number;
+  matchScore?: number;
   reason?: string;
   provenance?: string;
 }

@@ -1,53 +1,59 @@
-# Hướng dẫn Tích hợp với Codex (Integration Instructions for ai-service/main.py)
+# Hướng dẫn Tích hợp với Codex và Đề xuất Thứ tự Merge
 
-## 1. Nguyên tắc An toàn và Quyền Sở hữu Code
+## 1. Phân định Ranh giới và Đối chiếu Shared Files
 
-Theo quy định phân quyền của dự án:
-- **Codex** sở hữu file entrypoint `ai-service/main.py`.
-- **Antigravity** KHÔNG chỉnh sửa trực tiếp `ai-service/main.py` để tránh conflict và ghi đè công việc của nhau.
-- Antigravity đã đóng gói toàn bộ chức năng AI Recommendation thành một module độc lập trong thư mục `ai-service/recommendation/`.
+Để bảo đảm an toàn tuyệt đối cho hệ thống, hai agent làm việc độc lập trên hai phân vùng chức năng riêng biệt:
 
-## 2. Các Bước Tích hợp Dành cho Codex
+| Phân vùng chức năng | Phụ trách chính | Phạm vi File | Trạng thái xung đột (Conflict) |
+|---|---|---|---|
+| **Worker Face ID & PAD** | **Codex** | `worker-app/`, `ai-service/face_*`, `server/src/modules/workers/` | Antigravity không sửa bất kỳ dòng nào. |
+| **Customer AI Recommendation** | **Antigravity** | `customer-app/`, `ai-service/recommendation/`, `server/src/modules/orders/diagnosis/` | Codex không can thiệp. |
+| **Entrypoint `ai-service/main.py`** | **Codex sở hữu** | `ai-service/main.py` | Antigravity **không chỉnh sửa trực tiếp**, cung cấp proposal. |
 
-Chỉ cần thêm 2 dòng code vào `ai-service/main.py` để kích hoạt toàn bộ pipeline Recommendation V2:
+👉 **Kết quả kiểm toán đối chiếu (`git diff`): ZERO FILE COLLISION.**
 
-### Bước 1: Import router từ module recommendation
-Tại phần import ở đầu file `ai-service/main.py`:
+---
+
+## 2. Hướng dẫn Mount Router V2 An toàn Tuyệt đối
+
+Router Recommendation V2 được cấu hình prefix `/ai/v2`, độc lập hoàn toàn với các routes Face ID hiện tại (`/ai/verify-face`, `/ai/face-enroll`):
+
 ```python
+# ==============================================================
+# BỔ SUNG VÀO ai-service/main.py (DO CODEX HOẶC LEAD THỰC HIỆN)
+# ==============================================================
+
+# 1. Import router (đầu file ai-service/main.py):
 from recommendation import recommendation_router
-```
 
-### Bước 2: Mount router vào FastAPI App
-Tại vị trí sau khi tạo đối tượng `app = FastAPI(...)`:
-```python
+# 2. Mount router (ngay sau khi khởi tạo FastAPI app):
 app.include_router(recommendation_router)
 ```
 
-## 3. Bản Đề xuất Patch Cụ thể (Patch Proposal)
+### Bảo đảm không ảnh hưởng Face ID:
+- Không thay đổi bất kỳ middleware hay CORS policy nào.
+- Sử dụng chung mô hình `app.state.yolo_cls_model` đã được nạp sẵn trong lifespan.
+- Không chiếm dụng thêm bộ nhớ RAM.
 
-```diff
---- a/ai-service/main.py
-+++ b/ai-service/main.py
-@@ -35,6 +35,7 @@
- from service_catalog import CLASS_PROMPTS, CLASSES, SUB_SERVICES_CATALOG, format_vnd
- from category_helper import match_category_by_keywords
- from target_helper import match_target_by_keywords
-+from recommendation import recommendation_router
+---
 
- logger = logging.getLogger("ai-service")
-@@ -102,6 +103,9 @@
- app = FastAPI(
-     title="FixGo Pro - AI Computer Vision & Service Recommendation Service",
-     version="2.0.0",
- )
-+
-+# Mount AI Recommendation V2 Router (Antigravity Pipeline)
-+app.include_router(recommendation_router)
+## 3. Đề xuất Thứ tự Cherry-pick / Merge An toàn
+
+Nhằm bảo đảm không có thời gian chết (Zero downtime) và không làm gián đoạn môi trường phát triển:
+
+```
+[Bước 1] ──> [Bước 2] ──> [Bước 3] ──> [Bước 4]
+ Backend      Module AI     Codex Mount    Smoke Test
+ & Mobile      Package       Router V2      E2E Song song
 ```
 
-## 4. Cơ chế Dự phòng Tương thích Ngược (Fail-Safe Compatibility)
-
-NestJS Backend (`server/src/infrastructure/external/ai/fastapi-ai.client.js`) đã được thiết kế cơ chế fallback thông minh:
-1. Backend gửi request tới `/ai/v2/diagnose` trước.
-2. Nếu Codex chưa kịp mount router (FastAPI trả về 404), Backend tự động chuyển tiếp liền mạch sang `/ai/diagnose` hiện tại mà không làm gián đoạn trải nghiệm của người dùng.
-3. Ngay khi Codex mount router, hệ thống sẽ tự động chuyển sang khai thác toàn bộ sức mạnh của pipeline V2 mà không cần khởi động lại Backend!
+1. **Bước 1: Merge Backend & Customer App từ `agent/gemini-customer`**:
+   - Backend NestJS đã được tích hợp cơ chế fail-safe: tự động thử `/ai/v2/diagnose`, nếu chưa có sẽ fallback sang `/ai/diagnose` hiện tại mà không báo lỗi.
+   - Giao diện Customer App chuyển sang hợp đồng mới tương thích ngược hoàn hảo.
+2. **Bước 2: Merge thư mục `ai-service/recommendation/` và `ai-service/clip_classifier.py`**:
+   - Cung cấp toàn bộ mã nguồn xử lý thuật toán và schemas V2.
+3. **Bước 3: Codex (hoặc Lead) thêm 2 dòng mount router vào `ai-service/main.py`**:
+   - Kích hoạt endpoint `/ai/v2/diagnose`, `/ai/v2/catalog/sync`, `/ai/v2/catalog/status`.
+4. **Bước 4: Chạy Smoke Test E2E xác nhận cả 2 hệ thống**:
+   - Kiểm tra xác thực khuôn mặt Face ID của thợ: Vẫn hoạt động bình thường.
+   - Kiểm tra chẩn đoán sự cố khách hàng V2: Hoạt động trơn tru với đầy đủ target candidates và đề xuất dịch vụ từ database.

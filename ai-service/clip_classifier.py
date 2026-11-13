@@ -120,6 +120,10 @@ def is_ready() -> bool:
     return _model is not None and _processor is not None and _text_features is not None
 
 
+def get_target_embeddings() -> Optional[Tuple[List[str], torch.Tensor]]:
+    return _target_embeddings
+
+
 def _encode_image(image_input: Union[np.ndarray, Image.Image]) -> Optional[torch.Tensor]:
     if isinstance(image_input, np.ndarray):
         rgb = image_input[:, :, ::-1] if len(image_input.shape) == 3 and image_input.shape[2] == 3 else image_input

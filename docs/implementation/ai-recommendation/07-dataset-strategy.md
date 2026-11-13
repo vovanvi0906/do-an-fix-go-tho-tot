@@ -1,38 +1,41 @@
 # Chiến lược Dữ liệu và Kiểm soát Rò rỉ (Dataset Strategy & Leakage Control)
 
-## 1. Phát hiện Từ Báo cáo Kiểm toán Dữ liệu (Forensic Audit Findings)
+## 1. Phân tích Chi tiết Con số Trùng lặp (Dataset Leakage Breakdown)
 
-Kiểm toán tự động thông qua `dataset_manifest_builder.py` và `exact-leakage.json` xác nhận:
-- Tập dữ liệu 1.200 ảnh lịch sử trong `ai-service/dataset/` hoàn toàn là ảnh tổng hợp (synthetic) được vẽ bằng OpenCV script (`prepare_dataset.py`).
-- **Rò rỉ dữ liệu trùng khớp tuyệt đối (Exact SHA-256 Leakage)**:
-  - Giao Train - Validation: 210 hashes trùng lặp tuyệt đối.
-  - Giao Train - Test: 109 hashes trùng lặp tuyệt đối.
-  - Giao Validation - Test: 109 hashes trùng lặp tuyệt đối.
-  - Tổng số 546 mục trùng lặp hash chéo giữa các tập chia.
-- **Kết luận chuyên môn**: Con số "100% accuracy" hay "Top-1=1.0" trong các báo cáo lịch sử (`results.csv`) là kết quả của việc mô hình học thuộc lòng các mẫu tổng hợp trùng lặp giữa train và test. **Tuyệt đối không sử dụng độ chính xác lịch sử làm thước đo chất lượng sản phẩm.**
+Báo cáo kiểm toán tự động qua `dataset_manifest_builder.py` ghi nhận:
+- **Tổng số tệp ảnh trong tập dữ liệu**: 1.200 tệp (Train: 840, Validation: 240, Test: 120).
+- **Số mã băm SHA-256 duy nhất (Unique Hashes)**: 654 mã băm.
+- **Số lượng mục trùng lặp tuyệt đối (Duplicate Count)**:
+  $$1.200 - 654 = 546 \text{ mục trùng lặp}$$
 
-## 2. Tiêu chuẩn Xây dựng Bộ Dữ liệu Chuẩn (Clean Dataset Protocol)
+### Bảng phân tích rò rỉ chéo giữa các tập chia (Cross-split Leakage):
 
-Để chuẩn bị cho các đợt fine-tune tương lai khi có đủ ảnh thực địa, quy trình thu thập và quản lý dữ liệu bắt buộc tuân thủ:
+| Tập dữ liệu | Tổng số tệp | Số hash duy nhất nội bộ | Trùng lặp với Train | Trùng lặp với Val | Trùng lặp với Test |
+|---|---|---|---|---|---|
+| **Train** | 840 | 646 | — | **210 hashes** | **109 hashes** |
+| **Validation** | 240 | 213 | **210 hashes** | — | **109 hashes** |
+| **Test** | 120 | 114 | **109 hashes** | **109 hashes** | — |
 
-### 2.1. Phân loại và Nguồn gốc (Provenance Classification)
-- Mỗi mẫu ảnh phải được gắn nhãn nguồn gốc rõ ràng:
-  - `origin`: `'real_device_photo'` (ảnh chụp từ điện thoại thực tế có consent), `'synthetic_opencv'` (ảnh tổng hợp từ thuật toán), hoặc `'external_licensed'` (ảnh từ bộ dữ liệu mở có giấy phép).
-  - Nghiêm cấm trộn lẫn ảnh tổng hợp vào tập test dùng để đánh giá năng lực thực tế.
+**Nhận định Kỹ thuật:**
+- Có đến 109 trong tổng số 114 hash của tập Test (tức **95.6%**) đã xuất hiện trong tập Train và Validation.
+- Điều này giải thích tại sao mô hình YOLO trong báo cáo cũ đạt `top1=1.0` (100%) tại epoch 5: mô hình chỉ học thuộc lòng các mẫu tổng hợp trùng lặp giữa các tập chia, không có khả năng khái quát hóa (generalization) trên ảnh thực tế.
+- **Quy tắc An toàn**: Không sử dụng tập dữ liệu này để huấn luyện lại hoặc công bố số liệu chất lượng sản phẩm.
 
-### 2.2. Chiến lược Phân chia Chống Rò rỉ (Disjoint Group Splitting)
-- **Group-disjoint Split**: Phân chia Train / Validation / Test phải nhóm theo:
-  - Thiết bị chụp (`device_id`).
-  - Hộ gia đình / Bối cảnh không gian (`household_id` / `scene_id`).
-  - Phiên chụp (`session_id`).
-- Ảnh cùng một góc máy, cùng một vật thể chụp liên tiếp nhiều lần phải ở cùng một tập (cùng train hoặc cùng test), không được xé lẻ sang hai bên.
-- **Kiểm tra Dedup**: Tự động chặn bằng mã băm SHA-256 và dHash perceptual hash (Hamming distance $\le 4$) trước khi đưa vào pipeline đánh giá.
+---
 
-## 3. Hướng dẫn Gán nhãn Chuẩn hóa (Labeling Guidelines)
+## 2. Tiêu chuẩn Xây dựng Bộ Dữ liệu Mới (Clean Dataset Standard)
 
-| Tầng thông tin | Định nghĩa nhãn | Ví dụ hợp lệ | Lỗi gán nhãn cần tránh |
-|---|---|---|---|
-| **Category** | 1 trong 6 danh mục ngành nghề của FixGo | `sua-dien`, `dien-lanh`, `sua-nuoc` | Gán nhãn dịch vụ con chi tiết làm category |
-| **Target** | Đối tượng / Thiết bị vật lý quan sát được | `cong-tac-dien`, `may-lanh-treo-tuong` | Gán nhãn nguyên nhân hỏng hóc |
-| **Observable Sign** | Dấu hiệu thị giác thực tế có thể nhìn thấy bằng mắt | "Vỡ mặt nạ nhựa", "Chảy nước ở ống xả" | "Hỏng tụ điện", "Mất nguồn" khi chỉ chụp vỏ ngoài |
-| **Relevance Graded** | Mức độ phù hợp của dịch vụ đề xuất (0 - 3) | 3: Đúng lỗi cần sửa; 2: Dịch vụ bảo trì liên quan; 0: Dịch vụ sai thiết bị | Gán tất cả dịch vụ trong cùng category là đúng |
+Để xây dựng bộ dữ liệu ảnh thực địa tin cậy cho tương lai:
+
+1. **Phân loại nguồn gốc rõ ràng (Provenance Tagging)**:
+   - Tách biệt hoàn toàn `real_device_photo` và `synthetic_opencv`.
+   - Lưu trữ `source_manifest.json` ghi rõ ngày thu thập, thiết bị camera, người gán nhãn.
+2. **Phân chia Group-Disjoint**:
+   - Khóa phân chia theo `household_id` hoặc `session_id`. Toàn bộ ảnh của cùng một thiết bị hoặc một buổi chụp chỉ được nằm trong 1 tập duy nhất (Train hoặc Test).
+3. **Bộ lọc Dedup Tự động**:
+   - Chặn ngay lập tức các tệp có SHA-256 trùng khớp hoặc dHash perceptual distance $\le 4$ giữa các tập chia.
+4. **Gán nhãn Đa cấp (Hierarchical Multi-Labeling)**:
+   - Cấp 1: Category (6 danh mục nghề nghiệp).
+   - Cấp 2: Target (70 đối tượng thiết bị).
+   - Cấp 3: Dấu hiệu thị giác quan sát được (`observableSigns`).
+   - Cấp 4: Mức độ liên quan dịch vụ theo thang điểm 0 - 3 (Graded Relevance).

@@ -19,19 +19,19 @@ export function rankServices(services, options = {}) {
     .filter((t) => t.length > 2);
 
   const scored = pool.map((svc) => {
-    let score = 0.5;
+    let rankingScore = 50;
     let reason = 'Dịch vụ phù hợp trong danh mục';
     let provenance = 'catalog_match';
 
     if (symptomSlug && svc.slug === symptomSlug) {
-      score = 0.95;
+      rankingScore = 100;
       reason = `Khớp chính xác triệu chứng đã xác nhận: ${svc.name}`;
       provenance = 'symptom_match';
     } else if (descTokens.length > 0) {
       const nameLower = svc.name.toLowerCase();
       const hits = descTokens.filter((tok) => nameLower.includes(tok)).length;
       if (hits > 0) {
-        score = Math.min(0.9, 0.5 + hits * 0.15);
+        rankingScore = Math.min(90, 50 + hits * 15);
         reason = `Khớp với mô tả của khách hàng (${hits} từ khóa)`;
         provenance = 'keyword_match';
       }
@@ -45,11 +45,13 @@ export function rankServices(services, options = {}) {
       basePrice: Number(svc.basePrice),
       maxPrice: svc.maxPrice == null ? null : Number(svc.maxPrice),
       unit: svc.unit || 'lần',
-      confidence: Math.round(score * 100) / 100,
+      rankingScore,
+      matchScore: rankingScore,
+      confidence: null,
       reason,
       provenance,
     };
   });
 
-  return scored.sort((a, b) => b.confidence - a.confidence).slice(0, topK);
+  return scored.sort((a, b) => b.rankingScore - a.rankingScore).slice(0, topK);
 }
