@@ -1,3 +1,6 @@
+import { plainToInstance } from 'class-transformer';
+import { validateSync } from 'class-validator';
+import { FacePreflightDto } from '../dto/face-preflight.dto';
 import { Injectable, Dependencies, ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../../infrastructure/database/prisma.service';
 
@@ -33,8 +36,9 @@ export class FaceIdentityService {
   }
 
   async preflight(userId, body, reset = false) {
-    if (!body || body.consent !== true || Object.keys(body).some(k => k !== 'consent')) {
-      throw new BadRequestException('EXPLICIT_CONSENT_REQUIRED_NO_BIOMETRIC_INPUT');
+    if (!body || Array.isArray(body) || typeof body !== 'object' || Object.keys(body).some(key => key !== 'consent') ||
+        validateSync(plainToInstance(FacePreflightDto, body), { whitelist: true, forbidNonWhitelisted: true }).length) {
+      throw new BadRequestException('EXPLICIT_CONSENT_REQUIRED_NO_BIOMETRIC_INPUT: Vui lòng đồng ý; không gửi dữ liệu khuôn mặt ở bước này');
     }
     const status = await this.status(userId);
     return { ...status, action: reset ? 'RESET' : 'ENROLLMENT', accepted: false,

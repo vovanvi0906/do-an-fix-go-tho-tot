@@ -1,5 +1,8 @@
 # API contracts
 
+Metadata endpoints return {success:true,data:...}; success indicates request handling only,
+not biometric enrollment. Preflight data.accepted is always false.
+
 All Nest paths below have the application's /api prefix. JWT ACTIVE WORKER required;
 workerId/reference/template/proof decision are never accepted from mobile as authority.
 
@@ -34,5 +37,7 @@ FACE_IDENTITY_THRESHOLD set identically on AI/Nest, default .60 retained as prov
 baseline, independent of AI_CONFIDENCE_THRESHOLD. No accuracy/FAR claim for this default.
 Payload limit ~5MiB encoded image plus JSON/vector overhead; image <=12 million pixels.
 Authenticated service requests only; deployment must impose rate/concurrency quotas.
+Use a cryptographically random service secret from deployment secret storage, shared only
+by Nest and AI; never include it in the mobile application.
 Public biometric capture is unavailable, so repeated requests cannot issue sessions or
 run inference through these flows. Full cross-instance retry limits await durable storage.

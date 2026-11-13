@@ -6,7 +6,7 @@ describe('proposed session policy (offline, no production issuer)', () => {
     const now = new Date('2026-11-13T10:00:00Z');
     input = {
       now, nonce: challenge.nonce, threshold: .6,
-      actor: { workerId: 'w', userId: 'u', purpose: 'ORDER', orderId: 'o' },
+      actor: { role: 'WORKER', status: 'ACTIVE', workerId: 'w', userId: 'u', purpose: 'ORDER', orderId: 'o' },
       session: { id: 's', workerId: 'w', userId: 'u', purpose: 'ORDER', orderId: 'o', nonceHash: challenge.nonceHash,
         templateVersion: 1, modelVersion: 'synthetic-v1', createdAt: now, expiresAt: new Date(+now + 120000), consumedAt: null },
       template: { workerId: 'w', version: 1, modelVersion: 'synthetic-v1', status: 'ACTIVE' },
@@ -24,6 +24,8 @@ describe('proposed session policy (offline, no production issuer)', () => {
     expect(assessFaceSession(input)).toBe('PAD_NOT_PASSED');
   });
   test.each([
+    ['actor', { role: 'CUSTOMER' }, 'ACTIVE_WORKER_REQUIRED'],
+    ['actor', { status: 'BLOCKED' }, 'ACTIVE_WORKER_REQUIRED'],
     ['actor', { workerId: 'other' }, 'WRONG_WORKER'],
     ['actor', { userId: 'other' }, 'WRONG_WORKER'],
     ['actor', { orderId: 'other' }, 'WRONG_PURPOSE_OR_ORDER'],
@@ -50,6 +52,7 @@ describe('proposed session policy (offline, no production issuer)', () => {
     input.actor.purpose = input.session.purpose = 'DAILY';
     expect(assessFaceSession(input)).toBe('WRONG_PURPOSE_OR_ORDER');
     input.session.orderId = null;
+    input.actor.orderId = null;
     expect(assessFaceSession(input)).toBe('ELIGIBLE_FOR_ATOMIC_CONSUMPTION');
   });
   test('conditional consumption predicate binds scope and unconsumed state', () => {

@@ -18,7 +18,7 @@ describe('enrollment capability, never an approval', () => {
   test('legacy reference is quarantined and no overwrite occurs', async () => {
     expect(await make({ ...worker, faceProfile: { id: 'legacy' } }).status('u')).toMatchObject({ enrollmentStatus: 'LEGACY_UNTRUSTED', canEnroll: false, templateVersion: null });
   });
-  test.each([{}, { consent: false }, { consent: true, workerId: 'other' }, { consent: true, photoUrl: 'photo' }])('reject no consent or client reference %#', async body => {
+  test.each([{}, { consent: false }, { consent: 'true' }, 'true', [], { consent: true, workerId: 'other' }, { consent: true, photoUrl: 'photo' }].map(value => [value]))('reject no consent or client reference %#', async body => {
     await expect(make(worker).preflight('u', body)).rejects.toThrow('EXPLICIT_CONSENT');
   });
 });

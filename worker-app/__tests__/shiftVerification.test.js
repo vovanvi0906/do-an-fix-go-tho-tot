@@ -6,7 +6,7 @@ import * as ImagePicker from 'expo-image-picker';
 jest.mock('../src/services/api/apiClient', () => ({ apiClient: { post: jest.fn(), get: jest.fn() } }));
 jest.mock('expo-image-picker', () => ({ requestCameraPermissionsAsync: jest.fn(), launchCameraAsync: jest.fn(), CameraType: { front: 'front' } }));
 const blocked = { enrollmentStatus: 'PENDING_REVIEW', canVerifyDaily: false, canVerifyOrder: false, dailyProof: null };
-beforeEach(() => { jest.resetAllMocks(); apiClient.get.mockResolvedValue(blocked); jest.spyOn(AppState, 'addEventListener').mockReturnValue({ remove: jest.fn() }); });
+beforeEach(() => { jest.resetAllMocks(); apiClient.get.mockResolvedValue({ success: true, data: blocked }); jest.spyOn(AppState, 'addEventListener').mockReturnValue({ remove: jest.fn() }); });
 async function ready(orderId, mode) {
   const hook = renderHook(() => useFaceVerification(orderId, undefined, mode));
   await waitFor(() => expect(hook.result.current.loadingStatus).toBe(false));
@@ -39,7 +39,7 @@ it('preflight requires consent and never reports accepted enrollment', async () 
   const hook = await ready(undefined, 'enrollment');
   await act(async () => hook.result.current.preflight(false));
   expect(apiClient.post).not.toHaveBeenCalled();
-  apiClient.post.mockResolvedValue({ ...blocked, accepted: false, reviewRequestSubmitted: false });
+  apiClient.post.mockResolvedValue({ success: true, data: { ...blocked, accepted: false, reviewRequestSubmitted: false } });
   await act(async () => hook.result.current.preflight(true));
   expect(apiClient.post).toHaveBeenCalledWith('/workers/me/face/enrollment/preflight', { consent: true }, expect.any(Object));
   expect(hook.result.current.result.verified).toBe(false);

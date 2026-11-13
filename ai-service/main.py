@@ -279,9 +279,13 @@ async def lifespan(app: FastAPI):
     # Face-only provenance: bind templates to the actual loaded weight artifacts.
     app.state.face_model_version = None
     if app.state.face_detector is not None and app.state.face_recognizer is not None:
-        import hashlib
-        digests = [hashlib.sha256(path.read_bytes()).hexdigest() for path in (yunet_path, sface_path)]
-        app.state.face_model_version = "yunet-sface:" + ":".join(digests)
+        try:
+            import hashlib
+            digests = [hashlib.sha256(path.read_bytes()).hexdigest() for path in (yunet_path, sface_path)]
+            app.state.face_model_version = "yunet-sface:" + ":".join(digests)
+        except OSError:
+            # Isolate face provenance failure from Customer diagnosis startup.
+            logger.warning("Face model provenance unavailable")
 
     yield
 

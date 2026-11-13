@@ -16,10 +16,11 @@ const boundString = value => typeof value === 'string' && value.length > 0;
 export function assessFaceSession({ session, actor, nonce, template, evidence, now = new Date(), threshold = .60 }) {
   if (!finiteDate(now) || !session || !actor || !template || !evidence ||
       !Number.isFinite(threshold) || threshold < -1 || threshold > 1) return 'INVALID_CONTEXT';
+  if (actor.role !== 'WORKER' || actor.status !== 'ACTIVE') return 'ACTIVE_WORKER_REQUIRED';
   if (!boundString(session.id) || !boundString(session.workerId) || !boundString(session.userId) ||
       session.workerId !== actor.workerId || session.userId !== actor.userId) return 'WRONG_WORKER';
   if (!['DAILY', 'ORDER'].includes(session.purpose) || session.purpose !== actor.purpose ||
-      (session.purpose === 'ORDER' ? !boundString(session.orderId) || session.orderId !== actor.orderId : session.orderId !== null)) return 'WRONG_PURPOSE_OR_ORDER';
+      (session.purpose === 'ORDER' ? !boundString(session.orderId) || session.orderId !== actor.orderId : session.orderId !== null || actor.orderId != null)) return 'WRONG_PURPOSE_OR_ORDER';
   if (!finiteDate(session.createdAt) || !finiteDate(session.expiresAt) || session.createdAt > now ||
       session.expiresAt <= now || session.expiresAt - session.createdAt > PROPOSED_SESSION_TTL_MS ||
       session.expiresAt <= session.createdAt) return 'SESSION_EXPIRED';

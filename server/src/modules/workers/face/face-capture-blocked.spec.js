@@ -1,3 +1,5 @@
+import { FaceIdentityController } from './face-identity.controller';
+import { FaceIdentityService } from './face-identity.service';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { WorkersController } from '../workers.controller';
@@ -16,8 +18,8 @@ describe('Nest capture gate before multipart persistence', () => {
   let app;
   beforeAll(async () => {
     const module = await Test.createTestingModule({
-      controllers: [WorkersController, OrdersController],
-      providers: [FaceCaptureBlockedGuard, { provide: WorkersService, useValue: {} }, { provide: OrdersService, useValue: {} }],
+      controllers: [WorkersController, OrdersController, FaceIdentityController],
+      providers: [{ provide: FaceIdentityService, useValue: new FaceIdentityService({ workerProfile: { findUnique: async () => ({ user: { role: 'WORKER', status: 'ACTIVE' }, approvalStatus: 'APPROVED' }) } }) }, FaceCaptureBlockedGuard, { provide: WorkersService, useValue: {} }, { provide: OrdersService, useValue: {} }],
     }).overrideGuard(JwtAuthGuard).useValue({ canActivate: ctx => { ctx.switchToHttp().getRequest().user = { userId: 'synthetic-u' }; return true; } })
       .overrideGuard(RolesGuard).useValue({ canActivate: () => true })
       .overrideGuard(OrderAccessGuard).useValue({ canActivate: () => true })
@@ -36,4 +38,20 @@ describe('Nest capture gate before multipart persistence', () => {
     expect(response.status).toBe(403);
     expect(response.body.message).toContain('FACE_CAPTURE_UNAVAILABLE');
   });
+  test('status response is metadata and matches worker envelope', async () => {
+    const response = await request(app.getHttpServer()).get('/workers/me/face/status');
+    expect(response.status).toBe(200);
+    expect(response.body).toMatchObject({ success: true, data: { canEnroll: false, dailyProof: null } });
+    expect(JSON.stringify(response.body)).not.toContain('faceEmbedding');
+  });
+  test('preflight validates at runtime despite JS decorator metadata limits', async () => {
+    const response = await request(app.getHttpServer()).post('/workers/me/face/enrollment/preflight').send({ consent: 'true', workerId: 'other' });
+    expect(response.status).toBe(400);
+  });
+  test('preflight response never claims registration accepted', async () => {
+    const response = await request(app.getHttpServer()).post('/workers/me/face/enrollment/preflight').send({ consent: true });
+    expect(response.status).toBe(201);
+    expect(response.body).toMatchObject({ success: true, data: { accepted: false, reviewRequestSubmitted: false } });
+  });
+
 });
