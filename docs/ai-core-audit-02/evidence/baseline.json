@@ -1,0 +1,11 @@
+{
+  "head": "be082dc91bc05ff3c05177acd72fe786fc478f6a",
+  "branch": "integration/fixgo-sprint-02",
+  "statusBefore": "clean",
+  "requiredAncestors": {
+    "1a5ef38": true,
+    "a173810": true
+  },
+  "date": "2026-11-13",
+  "timezone": "Asia/Ho_Chi_Minh"
+}
