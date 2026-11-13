@@ -276,6 +276,13 @@ async def lifespan(app: FastAPI):
     loaded_count = sum(1 for v in app.state.models_status.values() if v)
     logger.info(f"🎉 [Lifespan] Hoàn tất nạp mô hình. Trạng thái: {app.state.models_status} ({loaded_count}/6 engine sẵn sàng)")
 
+    # Face-only provenance: bind templates to the actual loaded weight artifacts.
+    app.state.face_model_version = None
+    if app.state.face_detector is not None and app.state.face_recognizer is not None:
+        import hashlib
+        digests = [hashlib.sha256(path.read_bytes()).hexdigest() for path in (yunet_path, sface_path)]
+        app.state.face_model_version = "yunet-sface:" + ":".join(digests)
+
     yield
 
     logger.info("🛑 [Lifespan] Giải phóng tài nguyên AI Microservice...")
@@ -362,17 +369,6 @@ class CompareBeforeAfterResponse(BaseModel):
     cleanlinessScore: Optional[float] = Field(default=None, description="Độ hoàn thiện & sạch sẽ bề mặt ảnh After")
     diffRatio: Optional[float] = Field(default=None, description="Tỉ lệ diện tích điểm ảnh có thay đổi")
     histScore: Optional[float] = None
-
-
-class FaceVerifyResponse(BaseModel):
-    verified: bool = False
-    confidence: Optional[float] = None
-    status: str
-    reason: str
-    method: str = "none"
-    workerId: Optional[str] = None
-    message: str = "Identity matching only; no liveness assessment."
-    engine: str = "unavailable"
 
 
 # Mapping các lớp nhận diện của YOLO (COCO Dataset & đồ gia dụng) sang Danh mục FixGo
@@ -842,76 +838,8 @@ async def compare_before_after(
 # ==========================================
 # ENDPOINT 3: POST /ai/face-verify
 # ==========================================
-@app.post("/ai/face-verify", response_model=FaceVerifyResponse)
-@app.post("/api/v1/ai/verify-face", response_model=FaceVerifyResponse)
-async def face_verify(
-    request: Request,
-    workerId: Optional[str] = Form(None),
-    file: Optional[UploadFile] = File(None),
-    photoUrl: Optional[str] = Form(None),
-    idCardImageUrl: Optional[str] = Form(None),
-):
-    wid = workerId or "unknown-worker"
-    selfie, reference = photoUrl, idCardImageUrl
-    if file:
-        selfie = await file.read()
-    else:
-        try:
-            body = await request.json()
-            wid = body.get("workerId") or wid
-            selfie = body.get("photoUrl") or body.get("faceImageUrl") or selfie
-            reference = body.get("idCardImageUrl") or reference
-        except Exception:
-            pass
-
-    def result(status, reason, score=None):
-        compared = status in ("MATCH", "NON_MATCH")
-        return FaceVerifyResponse(
-            verified=status == "MATCH", status=status, reason=reason,
-            confidence=score, workerId=wid,
-            method="sface_cosine" if compared else "none",
-            engine="model" if compared else "unavailable",
-        )
-
-    detector = getattr(request.app.state, "face_detector", None)
-    recognizer = getattr(request.app.state, "face_recognizer", None)
-    if detector is None or recognizer is None:
-        return result("TECHNICAL_ERROR", "MODEL_NOT_READY")
-    if not reference:
-        return result("INCONCLUSIVE", "REFERENCE_MISSING")
-    try:
-        images = [decode_image_to_cv2(value) for value in (selfie, reference)]
-        if any(image is None for image in images):
-            return result("TECHNICAL_ERROR", "DECODE_FAILED")
-        faces = []
-        for image in images:
-            h, w = image.shape[:2]
-            detector.setInputSize((w, h))
-            _, detected = detector.detect(image)
-            count = 0 if detected is None else len(detected)
-            if count != 1:
-                return result("INCONCLUSIVE", "NO_FACE" if count == 0 else "MULTIPLE_FACES")
-            faces.append(detected[0])
-        features = []
-        for image, face in zip(images, faces):
-            aligned = recognizer.alignCrop(image, face)
-            if aligned is None or aligned.size == 0:
-                return result("TECHNICAL_ERROR", "ALIGNMENT_FAILED")
-            feature = recognizer.feature(aligned)
-            if (feature is None or feature.shape != (1, 128)
-                    or not np.isfinite(feature).all() or np.linalg.norm(feature) == 0):
-                return result("TECHNICAL_ERROR", "INVALID_EMBEDDING")
-            features.append(feature)
-        raw_score = recognizer.match(*features, cv2.FaceRecognizerSF_FR_COSINE)
-        if isinstance(raw_score, (str, bool)):
-            return result("TECHNICAL_ERROR", "INVALID_SCORE")
-        score = float(raw_score)
-        if not math.isfinite(score) or not -1 <= score <= 1:
-            return result("TECHNICAL_ERROR", "INVALID_SCORE")
-        return result("MATCH" if score >= 0.60 else "NON_MATCH", "COMPARED", score)
-    except Exception:
-        logger.warning("Face identity comparison failed")
-        return result("TECHNICAL_ERROR", "COMPARISON_FAILED")
+from face_router import router as face_router
+app.include_router(face_router)
 
 
 # ==========================================

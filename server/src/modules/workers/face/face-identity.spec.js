@@ -41,7 +41,7 @@ describe('encrypted versioned template primitive (synthetic vectors only)', () =
     const bytes = Buffer.from(envelope.ciphertext, 'base64'); bytes[0] ^= 1;
     expect(() => openTemplate({ ...envelope, ciphertext: bytes.toString('base64') }, context, key)).toThrow();
   });
-  test.each([[], Array(128).fill(NaN), Array(128).fill(0)])('invalid embeddings rejected %#', value => {
+  test.each([[], Array(128).fill(NaN), Array(128).fill(0)].map(value => [value]))('invalid embeddings rejected %#', value => {
     expect(() => sealTemplate(value, context, key)).toThrow('INVALID_EMBEDDING');
   });
 });
