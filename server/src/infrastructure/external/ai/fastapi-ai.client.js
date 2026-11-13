@@ -27,26 +27,23 @@ export class FastApiAiClient {
    * output: { suggestedCategoryId, confidence (0-1), detectedLabels: string[] }
    */
   async diagnoseIncident(imageUrl, description = '') {
-    try {
-      const response = await fetch(`${this.baseUrl}/ai/diagnose`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageUrl, description }),
-        signal: AbortSignal.timeout(15000),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        if (result && typeof result === 'object' && !Array.isArray(result)) return result;
+    const payload = JSON.stringify({ imageUrl, description });
+    for (const path of ['/ai/v2/diagnose', '/ai/diagnose']) {
+      try {
+        const response = await fetch(`${this.baseUrl}${path}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payload,
+          signal: AbortSignal.timeout(15000),
+        });
+        if (response.ok) {
+          const result = await response.json();
+          if (result && typeof result === 'object' && !Array.isArray(result)) return result;
+        }
+      } catch (err) {
+        console.warn(`FastAPI AI Service (${path}) lỗi:`, err.message);
       }
-    } catch (err) {
-      console.warn(
-        'FastAPI AI Service (/ai/diagnose) không phản hồi, chuyển sang chọn dịch vụ thủ công:',
-        err.message,
-      );
     }
-
-    // Không sinh kết quả nhận diện khi AI chưa bật hoặc offline
     return { status: 'unavailable', engine: 'unavailable', confidence: null, detectedLabels: [], notes: 'AI chưa khả dụng. Vui lòng chọn dịch vụ.' };
   }
 

@@ -1,114 +1,101 @@
 import { BadRequestException } from '@nestjs/common';
-import { randomUUID } from 'node:crypto';
+import { STATUS, DECISION_SOURCE, REASON_CODES } from './diagnosis-constants';
+import { validateDiagnosisInput } from './diagnosis-input-validator';
+import { createInitialResult } from './diagnosis-payload-builder';
+import { buildSymptomOptions, SYMPTOM_RULES } from './symptom-taxonomy';
+import { rankServices, formatPriceRange } from './service-ranker';
 
-// Triệu chứng do khách xác nhận; slug phải khớp chính xác catalog đang hoạt động.
-export const SYMPTOM_RULES = {
-  'dien-lanh': [
-    ['ac_leak', 'Máy lạnh chảy nước', 'sua-may-lanh-chay-nuoc'],
-    ['ac_weak', 'Máy lạnh không lạnh / lạnh yếu', 'kiem-tra-may-lanh-khong-lanh-hoac-lanh-yeu'],
-    ['fridge_weak', 'Tủ lạnh không lạnh', 'sua-tu-lanh-khong-lanh'],
-    ['washer_spin', 'Máy giặt không vắt', 'sua-may-giat-khong-vat'],
-  ],
-  'thiet-bi': [
-    ['stove_power', 'Bếp không lên nguồn', 'sua-bep-khong-len-nguon'],
-    ['stove_heat', 'Bếp không nóng / nóng yếu', 'sua-bep-khong-nong-nong-yeu'],
-    ['heater_heat', 'Bình nóng lạnh không nóng', 'sua-binh-khong-nong'],
-  ],
-  'sua-nuoc': [
-    ['toilet_flush', 'Bồn cầu xả yếu', 'sua-bon-cau-xa-yeu'],
-    ['pump_power', 'Bơm không chạy', 'sua-bom-khong-chay'],
-  ],
-  'sua-dien': [
-    ['switch_power', 'Công tắc không hoạt động', 'sua-cong-tac-khong-hoat-dong'],
-    ['wire_damage', 'Dây điện cũ / xuống cấp', 'thay-day-cu-xuong-cap'],
-  ],
-};
+export { SYMPTOM_RULES };
+
+async function resolveCategory(prisma, aiClient, input, result, categories) {
+  const { answers = {}, imageUrl, description = '' } = input;
+  if (answers.categoryId) {
+    const category = categories.find((c) => c.id === answers.categoryId);
+    if (!category) throw new BadRequestException('Danh mục không khả dụng');
+    return { category, ai: null };
+  }
+  const ai = await aiClient.diagnoseIncident(imageUrl, description);
+  const score = typeof ai.confidence === 'number' && Number.isFinite(ai.confidence) &&
+    ai.confidence >= 0 && ai.confidence <= 1 ? ai.confidence : null;
+  if (ai.engine !== 'model') {
+    Object.assign(result, { status: STATUS.UNAVAILABLE, source: DECISION_SOURCE.UNAVAILABLE,
+      decisionSource: DECISION_SOURCE.UNAVAILABLE, reason: REASON_CODES.AI_UNAVAILABLE,
+      reasonCodes: [REASON_CODES.AI_UNAVAILABLE], message: 'AI chưa khả dụng. Bạn có thể chọn dịch vụ thủ công.' });
+    return { category: null, ai };
+  }
+  result.source = DECISION_SOURCE.MODEL;
+  result.decisionSource = DECISION_SOURCE.MODEL;
+  result.confidence = result.modelScore = score;
+  const threshold = aiClient.confidenceThreshold ?? 0.6;
+  const category = (score !== null && score >= threshold)
+    ? categories.find((c) => c.slug === ai.suggestedCategoryId || c.id === ai.suggestedCategoryId) : null;
+  if (!category) {
+    Object.assign(result, { reason: REASON_CODES.IMAGE_UNCERTAIN, reasonCodes: [REASON_CODES.IMAGE_UNCERTAIN],
+      message: 'Chưa xác định được nhóm. Vui lòng chọn danh mục.' });
+  } else {
+    result.detectedLabels = [category.name];
+    result.observableSigns = [`Nhận diện danh mục: ${category.name}`];
+  }
+  return { category, ai };
+}
+
+function resolveService(services, category, answers) {
+  if (answers.serviceId) {
+    const service = services.find((s) => s.id === answers.serviceId);
+    if (!service) throw new BadRequestException('Dịch vụ không thuộc danh mục hoặc đã ngừng hoạt động');
+    return { service, source: DECISION_SOURCE.MANUAL, reason: REASON_CODES.CUSTOMER_SELECTED };
+  }
+  if (answers.symptom) {
+    const rules = SYMPTOM_RULES[category?.slug] || [];
+    const rule = rules.find((r) => r[0] === answers.symptom);
+    const targetSlug = rule ? rule[2] : answers.symptom;
+    const service = services.find((s) => s.slug === targetSlug);
+    if (!service) throw new BadRequestException('Triệu chứng không được hỗ trợ trong danh mục');
+    return { service, source: DECISION_SOURCE.RULES, reason: REASON_CODES.SYMPTOM_CONFIRMED };
+  }
+  return { service: null, source: null, reason: null };
+}
 
 export async function resolveDiagnosis(prisma, aiClient, input) {
+  validateDiagnosisInput(input);
   const { imageUrl, description = '', answers = {} } = input;
-  if (typeof imageUrl !== 'string' || !imageUrl.trim() || typeof description !== 'string' ||
-      !answers || typeof answers !== 'object' || Array.isArray(answers)) {
-    throw new BadRequestException('Dữ liệu chẩn đoán không hợp lệ');
-  }
-  for (const key of Object.keys(answers)) {
-    if (!['categoryId', 'serviceId', 'symptom'].includes(key) || typeof answers[key] !== 'string') {
-      throw new BadRequestException('Câu trả lời không hợp lệ');
-    }
-  }
-  if (answers.serviceId && answers.symptom) throw new BadRequestException('Chỉ chọn một dịch vụ hoặc một triệu chứng');
-  if ((answers.serviceId || answers.symptom) && !answers.categoryId) {
-    throw new BadRequestException('Vui lòng chọn danh mục trước');
-  }
   const categories = await prisma.serviceCategory.findMany({ where: { isActive: true } });
-  const result = {
-    requestId: randomUUID(), status: 'manual_selection', source: 'manual',
-    imageUrl, confidence: null, modelScore: null, detectedLabels: [],
-    suggestedCategoryId: null, suggestedCategoryName: null,
-    suggestedServiceId: null, suggestedServiceName: null, suggestedServiceConfidence: null,
-    estimatedPriceMin: null, estimatedPriceMax: null, estimatedPriceRange: null,
-    category: null, service: null, priceEstimate: null,
-    requiresManualSelection: true, questions: [], availableServices: [],
-    availableCategories: categories.map(c => ({ id: c.id, name: c.name, basePrice: Number(c.basePrice) })),
-    issueDescription: description, reason: 'category_required',
-    message: 'Vui lòng chọn danh mục và dịch vụ phù hợp.',
-  };
-  let category;
-  if (answers.categoryId) {
-    category = categories.find(c => c.id === answers.categoryId);
-    if (!category) throw new BadRequestException('Danh mục không khả dụng');
-  } else {
-    const ai = await aiClient.diagnoseIncident(imageUrl, description);
-    const score = typeof ai.confidence === 'number' && Number.isFinite(ai.confidence) &&
-      ai.confidence >= 0 && ai.confidence <= 1 ? ai.confidence : null;
-    if (ai.engine !== 'model') {
-      return { ...result, status: 'unavailable', source: 'unavailable', reason: 'ai_unavailable',
-        message: 'AI chưa khả dụng. Bạn có thể chọn dịch vụ thủ công.' };
-    }
-    result.source = 'model';
-    result.confidence = result.modelScore = score;
-    if (score !== null && score >= (aiClient.confidenceThreshold ?? 0.6)) {
-      category = categories.find(c => c.slug === ai.suggestedCategoryId || c.id === ai.suggestedCategoryId);
-    }
-    if (!category) return { ...result, reason: 'image_uncertain', message: 'Chưa xác định được nhóm. Vui lòng chọn danh mục.' };
-    // Nhãn nhóm không đồng nghĩa đã phát hiện nguyên nhân hỏng.
-    result.detectedLabels = [category.name];
-  }
-  const services = await prisma.service.findMany({
-    where: { categoryId: category.id, isActive: true }, orderBy: { name: 'asc' },
-  });
-  const rules = (SYMPTOM_RULES[category.slug] ?? []).filter(rule => services.some(s => s.slug === rule[2]));
+  const result = createInitialResult(imageUrl, description, categories);
+  const { category, ai } = await resolveCategory(prisma, aiClient, input, result, categories);
+  if (!category) return result;
+
+  const [targets, services] = await Promise.all([
+    (prisma.serviceTarget?.findMany ? prisma.serviceTarget.findMany({ where: { categoryId: category.id, isActive: true }, orderBy: { sortOrder: 'asc' } }) : Promise.resolve([])),
+    prisma.service.findMany({ where: { categoryId: category.id, isActive: true }, orderBy: { name: 'asc' } }),
+  ]);
+  const target = answers.targetId ? targets.find((t) => t.id === answers.targetId) : null;
+  if (answers.targetId && !target) throw new BadRequestException('Thiết bị không thuộc danh mục');
+  const symptomOptions = buildSymptomOptions(category.slug, services, target);
+
   Object.assign(result, {
     category: { id: category.id, slug: category.slug, name: category.name },
+    target: target ? { id: target.id, slug: target.slug, name: target.name } : null,
     suggestedCategoryId: category.id, suggestedCategoryName: category.name,
-    status: 'needs_more_info', reason: 'symptom_required',
+    suggestedTargetId: target?.id || ai?.suggestedTargetId || null,
+    suggestedTargetName: target?.name || ai?.suggestedTargetName || null,
+    status: STATUS.NEEDS_MORE_INFO, needsMoreInfo: true, reason: REASON_CODES.SYMPTOM_REQUIRED,
+    reasonCodes: [REASON_CODES.CATEGORY_DETECTED, REASON_CODES.SYMPTOM_REQUIRED],
+    availableTargets: targets.map((t) => ({ id: t.id, name: t.name, slug: t.slug, categoryId: t.categoryId })),
+    availableServices: services.map((s) => ({ id: s.id, name: s.name, basePrice: Number(s.basePrice), unit: s.unit })),
+    questions: symptomOptions.length ? [{ id: 'symptom', label: 'Thiết bị đang gặp tình trạng nào?', options: symptomOptions }] : [],
     message: 'Xác nhận triệu chứng hoặc chọn dịch vụ bên dưới. Ảnh chưa xác định được nguyên nhân hỏng.',
-    availableServices: services.map(s => ({ id: s.id, name: s.name, basePrice: Number(s.basePrice), unit: s.unit })),
-    questions: rules.length ? [{ id: 'symptom', label: 'Thiết bị đang gặp tình trạng nào?',
-      options: rules.map(([value, label]) => ({ value, label })) }] : [],
   });
-  let service;
-  if (answers.serviceId) {
-    service = services.find(s => s.id === answers.serviceId);
-    if (!service) throw new BadRequestException('Dịch vụ không thuộc danh mục hoặc đã ngừng hoạt động');
-    result.source = 'manual';
-  } else if (answers.symptom) {
-    const rule = rules.find(r => r[0] === answers.symptom);
-    if (!rule) throw new BadRequestException('Triệu chứng không được hỗ trợ trong danh mục');
-    service = services.find(s => s.slug === rule[2]);
-    result.source = 'rules';
-  }
+
+  const { service, source, reason } = resolveService(services, category, answers);
   if (!service) return result;
-  const min = Number(service.basePrice);
-  const max = service.maxPrice == null ? null : Number(service.maxPrice);
+  const priceRange = formatPriceRange(service.basePrice, service.maxPrice, service.unit);
+  const ranked = rankServices(services, { targetId: target?.id, symptomSlug: service.slug, description });
   return {
-    ...result, status: 'suggested', reason: result.source === 'rules' ? 'symptom_confirmed' : 'customer_selected',
-    requiresManualSelection: false, questions: [],
-    service: { id: service.id, slug: service.slug, name: service.name, unit: service.unit },
-    suggestedServiceId: service.id, suggestedServiceName: service.name,
-    estimatedPriceMin: min, estimatedPriceMax: max,
-    priceEstimate: { min, max, unit: service.unit },
-    estimatedPriceRange: { min, max, unit: service.unit,
-      formatted: max == null ? `Từ ${min.toLocaleString('vi-VN')} đ` : `${min.toLocaleString('vi-VN')} đ ~ ${max.toLocaleString('vi-VN')} đ` },
+    ...result, status: STATUS.SUGGESTED, source, decisionSource: source, reason, reasonCodes: [reason],
+    requiresManualSelection: false, needsMoreInfo: false, questions: [], service, suggestedServices: ranked,
+    suggestedServiceId: service.id, suggestedServiceName: service.name, estimatedPriceMin: priceRange.min,
+    estimatedPriceMax: priceRange.max, priceEstimate: priceRange, estimatedPriceRange: priceRange,
+    reportedSymptoms: answers.symptom ? [answers.symptom] : [],
     message: 'Dịch vụ theo thông tin bạn xác nhận. Giá tham khảo; thợ kiểm tra và báo giá thực tế.',
   };
 }
