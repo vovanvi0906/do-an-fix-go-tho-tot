@@ -166,7 +166,7 @@ Ran all test suites.
   if (r.status !== 0) throw new Error(`${cmd} failed: ${(r.stderr || r.stdout || '').slice(-5000)}`);
                       ^
 
-Error: /home/vanvi/.nvm/versions/node/v20.20.2/bin/node failed: 
+Error: /home/vanvi/.nvm/versions/node/v20.20.2/bin/node failed:
     at run (/home/vanvi/Work/fixgo-integration-s03/server/test/face/run-isolated.cjs:13:29)
     at Object.<anonymous> (/home/vanvi/Work/fixgo-integration-s03/server/test/face/run-isolated.cjs:56:3)
     at Module._compile (node:internal/modules/cjs/loader:1521:14)

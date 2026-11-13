@@ -16,7 +16,7 @@ Merge-base Gemini–Codex và repo chính–Codex: `4edb191a6788299b18fb576c7e91
 Merge-base repo chính–Gemini: `803ec3210ac56893490ee2d4e7fc8a7cb70d212e`.
 Danh sách commit hai phía và inventory diff 178 files: xem `evidence/*commits.txt`, `evidence/codex-diff-inventory.tsv`.
 Merge thực hiện bằng `git merge --no-ff --no-commit agent/codex-worker` **chỉ trong S03**.
-HEAD cuối cùng: `git -C ~/Work/fixgo-integration-s03 rev-parse HEAD`; merge commit có hai parent `9e77da5` và `9db1016` (xem `git log --merges -1`).
+Merge commit: `01ec8935c7df19b357c237735b6cd09357aa0c44`. HEAD bàn giao gồm commit evidence tiếp theo, tra bằng `git -C ~/Work/fixgo-integration-s03 rev-parse HEAD`; merge commit có hai parent `9e77da5` và `9db1016` (xem `git log --merges -1`).
 
 ## Review và toàn bộ conflicts
 
@@ -60,7 +60,7 @@ Ba harness disposable đổi baseline `f6737fd` sang `9e77da5`: `run-isolated.cj
 | Research Android export/isolation | PASS; 916 sources, forbidden Worker modules = 0 | `research-export.json` |
 | USB scripts | `bash -n` PASS, byte-for-byte unchanged so với Gemini | kiểm tra Git |
 
-Ba SKIP Python ban đầu: test live bridge cần explicit model directory (đã chạy riêng PASS); hai test PAD runtime cần explicit experimental runtime. Research E2E riêng đã load PAD model thật trong runtime isolated. Không coi synthetic blank là positive-face accuracy test.
+Ba SKIP Python ban đầu thuộc live bridge và real-model smoke, đều cần explicit `FACE_TEST_MODEL_DIR`. Đã chạy lại live bridge riêng (1 PASS) và toàn bộ `eval.test_face_models` với `PYTHONPATH=eval` (5 PASS, gồm 2 real-model smoke): xem `face-real-models.log`. Research E2E riêng đã load PAD model thật trong runtime isolated. Không coi synthetic blank là positive-face accuracy test.
 
 Ba lỗi ARC-01 cũ:
 1. `two real concurrent HTTP accepts have exactly one winner`: mong 201/409, nhận 400/400.
@@ -98,3 +98,5 @@ ADB đã thấy một thiết bị `device`; **chưa cài/chạy APK S03, chưa 
 ## Ghi nhận môi trường
 
 Lần Python discover đầu dùng virtualenv repo chính (read-only dự kiến), nhưng Ultralytics tự cài `pi-heif 1.4.0`. Đã gỡ đúng package đó ngay sau test, và đặt `ULTRALYTICS_AUTOINSTALL=false` cho các lần chạy sau. Git của ba worktree ban đầu không đổi; không thay source/config của họ. Các lần Node test/build dùng bản copy dependencies riêng S03; Prisma generate chỉ ghi client trong S03 và dùng URL dummy hoặc disposable. Không đưa env/secrets/snapshot raw/APK/weights vào commit.
+
+Evidence logs được loại trailing whitespace khi lưu; không thay kết quả. Working tree bàn giao sạch sau commit evidence; cả hai HEAD nguồn là ancestor của HEAD S03.

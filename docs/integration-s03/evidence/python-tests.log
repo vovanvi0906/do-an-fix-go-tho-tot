@@ -14,7 +14,9 @@ Successfully installed pi-heif-1.4.0
 WARNING ⚠️ [31m[1mrequirements:[0m [1mRestart runtime or rerun command for updates to take effect[0m
 
 .............Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
-Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]Loading weights: 100%|██████████| 398/398 [00:00<00:00, 25297.91it/s]
+
+Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 398/398 [00:00<00:00, 25297.91it/s]
 ⚠️ [CLIP] Không thể kết nối Backend ([Errno 111] Connection refused). Sử dụng target_catalog fallback.
 ................Could not fetch targets from Backend: [Errno 111] Connection refused
 .......
