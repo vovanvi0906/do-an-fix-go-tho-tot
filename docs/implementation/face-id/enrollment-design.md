@@ -1,29 +1,43 @@
-# Enrollment — PARTIAL, writes BLOCKED
+# Enrollment v2 — durable backend implemented, real capture blocked
 
-Runtime GET /workers/me/face/status selects worker by JWT subject and checks ACTIVE
-WORKER again in the service. Professional approval is not evidence of reviewed identity.
-Legacy FaceProfile rows are LEGACY_UNTRUSTED even when isRegistered is true.
-PENDING_REVIEW means prerequisites need review, NOT that a review request was queued.
-Preflight requires explicit consent, accepts no image/reference/workerId, returns
-accepted=false and reviewRequestSubmitted=false. It does not collect biometric data.
-Reset preflight never changes or deletes a template and reports workflow unavailable.
+New authority is BiometricReview, not WorkerProfile.approvalStatus or idCardVerified.
+ACTIVE Admin must attest reviewedIdentity, identify an evidence record by opaque ID
+and digest, give a reason, type and expiry (max30days). Worker must be ACTIVE WORKER
+and professionally APPROVED. The evidence record is an Admin attestation/reference;
+this implementation does not verify an external identity-provider document or compare
+capture to an ID photo. Real review procedures/evidence custody still require approval.
 
-Independent template encryption primitive uses AES-256-GCM, random 96-bit IV,
-128-bit authentication tag and AAD binding workerId/templateVersion/modelVersion.
-Only 128 finite, nonzero components accepted. Caller supplies a 32-byte key;
-no key/default is embedded and no runtime template writer invokes this primitive yet.
-Tests use synthetic vectors. Production needs KMS/key ID/rotation and approved storage.
+Worker records explicit consent to requiredConsentVersion. It is durable and audited.
+Only after review+consent+keys+capture-data approval+evaluated PAD can a fresh ENROLLMENT
+session be created. Backend selects worker/version/model from JWT/state. No embedding or
+avatar is accepted from mobile. The gateway must deliver session/worker/model/version,
+quality PASS, evaluated PAD PASS with exact provider version, and finite 128-component
+embedding. Production gateway is unavailable; tests inject a synthetic gateway in test
+modules only. No real face/image was collected or evaluated.
 
-Proposed actual enrollment sequence: approved identity evidence review → explicit
-consent version → fresh enrollment session → camera capture + quality + evaluated PAD
-→ compare to reviewed reference under approved policy → encrypt/version template →
-atomic create if absent + audit actor/action/reason. Existing template cannot be
-upserted. Re-enrollment requires separate step-up/administrator authorization, version
-increment, revocation of all sessions/proofs and immutable metadata audit. Manual review
-must never automatically promote model failure or PAD uncertainty to live verification.
+Under worker row lock, finalize rechecks review/account/consent/epoch/session expiry,
+claim and absence of an active template. It creates encrypted immutable version N+1,
+consumes the session, increments lastVersion and appends metadata audit in one tx.
+Concurrent enrollment cannot overwrite the winner. DB unique indexes/immutability
+trigger reinforce the service invariant. There is no template upsert/update API.
 
-Retention/deletion proposal: minimize raw captures, private temporary storage and
-short configured deletion deadline, encrypted template while consent is active,
-revocation immediate on withdrawal, asynchronous confirmed object deletion and
-metadata-only audit retained under an approved policy. Exact retention and access roles
-need owner approval before capture/persistence. No real biometric data was accessed.
+AES-256-GCM envelope uses random96-bit IV, 128-bit tag and AAD workerId/version/model;
+stored in BiometricTemplate.encrypted, with keyId. Reads select template by JWT worker,
+load key by stored ID, authenticate/decrypt and use embedding only in process for AI.
+Rotation can retain old key IDs for reads and choose a new current key for new versions.
+Missing keys/tampered envelopes cannot grant proof. Environment keyring is an isolated-
+experiment adapter, not production KMS. No key/vector/capture/private URL gets logged.
+
+REENROLLMENT requires a new Admin review. Its transaction increments epoch, revokes
+previous authority/proofs/sessions, erases old encrypted payload and records new review.
+Consent still must be current; after withdrawal it must be recorded anew. Next version
+is monotonic even after deletion. There is no Worker reset-request queue/Admin UI yet;
+Worker guidance directs them to Admin for the reviewed reset API.
+
+DELETE template withdraws consent and nulls managed ciphertext in the same transaction
+as revocations/offline status/audit. It does not pretend to erase PostgreSQL WAL/MVCC/
+backups or legacy FaceProfile/Cloudinary objects outside v2 ownership. Backup retention,
+legacy inventory/deletion, KMS and metadata/session cleanup need approved policy before
+real data. No raw capture is persisted by v2 (multipart memory/AI process only); memory
+zeroization is not guaranteed by JS/Python runtimes. Scores/digests/audit remain protected
+metadata and require a separately approved retention schedule.

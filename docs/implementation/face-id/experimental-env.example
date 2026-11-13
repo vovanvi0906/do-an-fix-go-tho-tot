@@ -1,0 +1,18 @@
+# Documentation only. Never point the isolated test harness at the project DATABASE_URL.
+FACE_CORE_ENABLED=false
+FACE_BIOMETRIC_CAPTURE_APPROVED=false
+FACE_CONSENT_VERSION=experimental-v1
+FACE_TEMPLATE_KEY_ID=isolated-key-v1
+# Supply secret JSON dictionary {keyId:base64(32 random bytes)} via secret store; no real key committed.
+FACE_TEMPLATE_KEYS_JSON={}
+# Separate random >=32-byte HMAC key, base64. Never send either keyring or nonce key to mobile.
+FACE_NONCE_KEY_BASE64=
+FACE_SESSION_TTL_MS=120000
+FACE_DAILY_TTL_MS=28800000
+FACE_ORDER_TTL_MS=300000
+FACE_SESSION_ATTEMPTS=3
+FACE_WINDOW_ATTEMPTS=5
+FACE_WINDOW_MS=900000
+FACE_INFERENCE_TIMEOUT_MS=15000
+FACE_IDENTITY_THRESHOLD=0.60
+# Runtime gateway does not implement an evaluated PAD; there is deliberately no mock/pass flag.

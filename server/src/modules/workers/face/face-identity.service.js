@@ -1,3 +1,4 @@
+import { FaceCoreService } from './face-core.service';
 import { plainToInstance } from 'class-transformer';
 import { validateSync } from 'class-validator';
 import { FacePreflightDto } from '../dto/face-preflight.dto';
@@ -6,11 +7,12 @@ import { PrismaService } from '../../../infrastructure/database/prisma.service';
 
 // Capability status only. No pending request or template is fabricated/persisted.
 @Injectable()
-@Dependencies(PrismaService)
+@Dependencies(PrismaService, FaceCoreService)
 export class FaceIdentityService {
-  constructor(prisma) { this.prisma = prisma; }
+  constructor(prisma, core) { this.prisma = prisma; this.core = core; }
 
-  async status(userId) {
+  async status(userId, orderId) {
+    if (this.core?.enabled()) return this.core.status(userId, orderId);
     const worker = await this.prisma.workerProfile.findUnique({
       where: { userId },
       include: { user: { select: { role: true, status: true } }, faceProfile: { select: { id: true } } },

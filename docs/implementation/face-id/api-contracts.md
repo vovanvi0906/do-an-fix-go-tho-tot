@@ -1,43 +1,46 @@
-# API contracts
+# Face Core v2 API contracts
 
-Metadata endpoints return {success:true,data:...}; success indicates request handling only,
-not biometric enrollment. Preflight data.accepted is always false.
+Nest prefix /api. Responses {success:true,data:...}; success means request handled,
+not identity verified. JWT/ACTIVE account and role checked; services recheck worker/
+Admin authority. Default FACE_CORE_ENABLED=false preserves the old fail-closed release.
 
-All Nest paths below have the application's /api prefix. JWT ACTIVE WORKER required;
-workerId/reference/template/proof decision are never accepted from mobile as authority.
-
-| Endpoint | Runtime behavior |
+| Method/path | Body / result |
 |---|---|
-| GET /workers/me/face/status | capabilities, blockers, legacy quarantine; no biometric fields |
-| POST /workers/me/face/enrollment/preflight | body {consent:true}; accepted=false; no persisted request |
-| POST /workers/me/face/reset/preflight | body {consent:true}; blocked, no template mutation |
-| POST /workers/verify-face-daily | legacy intake blocked; no proof issuance |
-| POST /orders/:id/face-verify[-upload] | existing ownership/stage checks; no proof issuance |
+| GET /workers/me/face/status?orderId=UUID | Metadata only. Legacy status when disabled, durable status when enabled. Order query checks assigned-worker ownership. |
+| GET /workers/me/face/capabilities?orderId=UUID | Durable status (requires enabled feature/schema); requiredConsentVersion, templateVersion, review eligibility, blockers, dailyProof and orderProof. |
+| POST /workers/me/face/consent | {consent:true,version}; durable consent/audit; does not enroll. |
+| POST /admin/workers/:workerId/face/identity-reviews | ADMIN only: {reviewedIdentity:true,kind:ENROLLMENT/REENROLLMENT,evidenceReference,evidenceDigest,reason,expiresAt}. Reference is opaque record ID, not avatar/photo URL. |
+| POST /workers/me/face/sessions | {purpose:ENROLLMENT/DAILY/ORDER,requestKey:UUID,orderId?:UUID}; returns {id,nonce,purpose,orderId,templateVersion,expiresAt,state}. Same key returns same unexpired session/nonce; cross-scope reuse rejects. |
+| POST /workers/me/face/sessions/:id/capture | Multipart image + nonce. JPEG/PNG <=5MiB in memory; auth/ownership/session/readiness guard before multer. No Cloudinary storage. |
+| POST /workers/me/face/sessions/:id/submit | JSON {nonce,photo:dataURI}; small test/integration captures <=90,000 characters, within existing global JSON parser limit. No global Customer parser change. |
+| DELETE /workers/me/face/template | Withdrawal transaction: clear consent, erase managed ciphertext, revoke reviews/sessions/proofs, turn worker offline, metadata audit. |
+| POST /workers/me/face/enrollment/preflight, /reset/preflight | Legacy compatibility; never claims a queued review or enrollment success. Admin review API supplies actual authority. |
 
-Internal POST /ai/face-verify (alias /api/v1/ai/verify-face): JSON only, shared
-AI_FACE_SERVICE_TOKEN supplied in x-face-service-token, same env on Nest and AI;
-missing configuration 503, invalid token 401. Private network/TLS still required.
-Input backend-selected workerId, sessionId, photo (JPEG/PNG data URI), templateEmbedding
-(128 finite nonzero components), integer templateVersion, modelVersion. The backend
-transport method verifyFaceTemplate is implemented but no public route may call it
-until durable session + trusted template provisioning is approved. Legacy URL/multipart
-matching is retired and fails closed. No local paths or URL fetch in the face decoder.
+Old /workers/verify-face-daily and /orders/:id/face-verify[-upload] remain blocked.
+New session/capture endpoints replace these intakes. No client workerId, reference,
+embedding, padDecision, score or verified flag accepted. Runtime DTO validation is
+explicit because JS @Bind metadata alone cannot guarantee ValidationPipe enforcement.
 
-Output identityDecision MATCH/NON_MATCH/INCONCLUSIVE/TECHNICAL_ERROR,
-identityScore raw cosine [-1,1] or null (not probability), verificationMethod
-'yunet_sface_cosine' or 'none', modelVersion actual loaded artifact SHA-256 pair,
-templateVersion, qualityDecision PASS/FAIL/NOT_EVALUATED,
-padDecision NOT_EVALUATED, errorCode, workerId/sessionId echoes.
-Compatibility status/verified/confidence/method fields describe identity only;
-verified does NOT authorize daily/online/order transition. Nest legacy gates are closed.
-New transport validates exact worker/session/model/template and finite scores; it never
-converts unavailable/unknown method into matching. Transport timeout 15 seconds.
+Enrollment result: {enrolled:true,verified:false,template:{id,version,modelVersion,...}}.
+Enrollment is distinct from a daily/order verification. Verification result:
+{verified:true,proof:{id,purpose,orderId,templateVersion,issuedAt,expiresAt,consumedAt}}.
+No nonce/hash, capture digest, ciphertext, embedding or review evidence is in status.
+Worker UI refetches status and requires the same persisted proof/template version;
+upload response alone is insufficient. Start-work never accepts a UI success flag.
 
-FACE_IDENTITY_THRESHOLD set identically on AI/Nest, default .60 retained as provisional
-baseline, independent of AI_CONFIDENCE_THRESHOLD. No accuracy/FAR claim for this default.
-Payload limit ~5MiB encoded image plus JSON/vector overhead; image <=12 million pixels.
-Authenticated service requests only; deployment must impose rate/concurrency quotas.
-Use a cryptographically random service secret from deployment secret storage, shared only
-by Nest and AI; never include it in the mobile application.
-Public biometric capture is unavailable, so repeated requests cannot issue sessions or
-run inference through these flows. Full cross-instance retry limits await durable storage.
+Readiness failures: FACE_CORE_DISABLED / BIOMETRIC_DATA_POLICY_NOT_APPROVED /
+FACE_KEYS_NOT_CONFIGURED / PAD_NOT_EVALUATED. Scope/nonce/stage/expiry conflicts reject;
+FACE_RATE_LIMITED rejects attempts/session quota. Inference/network/score/quality/PAD
+failure returns FACE_EVIDENCE_REJECTED, does not issue proof, records a safe error code
+and retry count. Requests cannot use old faceVerifiedAt as evidence. No auto-KYC grant.
+
+## AI boundary
+
+Existing internal POST /ai/face-verify: x-face-service-token, JSON inline photo,
+backend-selected decrypted templateEmbedding, workerId/sessionId and exact model/
+template version. Raw cosine is NOT probability. AI remains YuNet → alignment → SFace
+with quality gates; PAD always NOT_EVALUATED. FaceEvidenceGateway.capabilities is
+hard-coded unavailable until a licensed/evaluated provider is implemented; there is
+no environment option to return test PASS. Synthetic gateway exists only under tests.
+Therefore enrollment extraction and successful proof issuance remain blocked in runtime.
+AI/Nest token/private TLS/network and licensed provider remain deployment prerequisites.

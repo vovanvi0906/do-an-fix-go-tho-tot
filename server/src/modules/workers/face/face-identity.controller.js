@@ -1,6 +1,6 @@
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { FacePreflightDto } from '../dto/face-preflight.dto';
-import { Controller, Get, Post, Bind, Req, Body, UseGuards, Dependencies } from '@nestjs/common';
+import { Controller, Get, Post, Bind, Req, Body, Query, UseGuards, Dependencies } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
@@ -17,8 +17,8 @@ export class FaceIdentityController {
   @Get('status')
   @ApiOperation({ summary: 'Trạng thái khả dụng Face ID, không cấp proof' })
   @ApiResponse({ status: 200, description: 'Capabilities và blockers; không có dữ liệu sinh trắc học' })
-  @Bind(Req())
-  async status(req) { return { success: true, data: await this.service.status(req.user.userId) }; }
+  @Bind(Req(), Query('orderId'))
+  async status(req, orderId) { return { success: true, data: await this.service.status(req.user.userId, orderId) }; }
   @Post('enrollment/preflight')
   @ApiOperation({ summary: 'Kiểm tra điều kiện đăng ký, chưa thu nhận khuôn mặt' })
   @ApiBody({ type: FacePreflightDto })
