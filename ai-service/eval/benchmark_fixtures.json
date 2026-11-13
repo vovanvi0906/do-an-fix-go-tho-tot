@@ -1,0 +1,52 @@
+[
+  {
+    "true_cat": "dien-lanh",
+    "predicted_cat": "dien-lanh",
+    "target_rank": 1,
+    "service_rank": 1,
+    "simulated_latency_ms": 22.4
+  },
+  {
+    "true_cat": "sua-dien",
+    "predicted_cat": "sua-dien",
+    "target_rank": 1,
+    "service_rank": 2,
+    "simulated_latency_ms": 18.1
+  },
+  {
+    "true_cat": "sua-nuoc",
+    "predicted_cat": "sua-nuoc",
+    "target_rank": 2,
+    "service_rank": 1,
+    "simulated_latency_ms": 19.5
+  },
+  {
+    "true_cat": "thiet-bi",
+    "predicted_cat": "thiet-bi",
+    "target_rank": 1,
+    "service_rank": 1,
+    "simulated_latency_ms": 25.0
+  },
+  {
+    "true_cat": "lam-vuon",
+    "predicted_cat": "lam-vuon",
+    "target_rank": 1,
+    "service_rank": 1,
+    "simulated_latency_ms": 20.3
+  },
+  {
+    "true_cat": "giup-viec",
+    "predicted_cat": "giup-viec",
+    "target_rank": 1,
+    "service_rank": 1,
+    "simulated_latency_ms": 16.2
+  },
+  {
+    "true_cat": "unknown",
+    "predicted_cat": null,
+    "target_rank": 0,
+    "service_rank": 0,
+    "abstained": true,
+    "simulated_latency_ms": 14.8
+  }
+]
