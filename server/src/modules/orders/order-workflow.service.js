@@ -1,3 +1,4 @@
+import { hasTrustedFaceProof } from '../../infrastructure/external/ai/face-result';
 import {
   Injectable,
   Dependencies,
@@ -63,13 +64,7 @@ export class OrderWorkflowService {
   }
 
   requireFace(worker) {
-    const age = Date.now() - new Date(worker?.faceVerifiedAt).getTime();
-    if (
-      !worker?.faceVerifiedAt ||
-      !Number.isFinite(age) ||
-      age < 0 ||
-      age >= 86400000
-    ) {
+    if (!hasTrustedFaceProof(worker)) {
       throw new BadRequestException('FACE_CHECKIN_EXPIRED');
     }
   }

@@ -1,3 +1,4 @@
+import { validFaceResult, hasTrustedFaceProof } from '../../infrastructure/external/ai/face-result';
 import {
   Injectable,
   Dependencies,
@@ -208,7 +209,7 @@ export class WorkersService {
     if (isOnline && (!Number.isFinite(lat) || Math.abs(lat) > 90 || !Number.isFinite(lng) || Math.abs(lng) > 180)) {
       throw new BadRequestException('Vui lòng gửi tọa độ GPS hợp lệ');
     }
-    if (isOnline && (!worker.faceVerifiedAt || Date.now() - new Date(worker.faceVerifiedAt).getTime() >= 86400000)) {
+    if (isOnline && (!hasTrustedFaceProof(worker))) {
       throw new BadRequestException('Vui lòng xác thực khuôn mặt hằng ngày trước khi bật nhận đơn');
     }
 
@@ -269,12 +270,10 @@ export class WorkersService {
     const reference = worker.faceProfile?.facePhotoUrl;
     if (!reference) throw new BadRequestException('Hồ sơ chưa có ảnh khuôn mặt đã đăng ký');
     const result = await this.fastApiAiClient.verifyFace(worker.id, photoUrl, reference, { allowFallback: false });
-    if (!result.verified || !Number.isFinite(Number(result.confidence)) || Number(result.confidence) < this.fastApiAiClient.confidenceThreshold) {
+    if (!validFaceResult(result) || result.status !== 'MATCH') {
       throw new BadRequestException('Chưa xác thực được khuôn mặt. Vui lòng thử lại khi AI khả dụng');
     }
-    const faceVerifiedAt = new Date();
-    await this.prisma.workerProfile.update({ where: { id: worker.id }, data: { faceVerifiedAt } });
-    return { faceVerifiedAt };
+    throw new BadRequestException('FACE_PROOF_UNAVAILABLE: Chưa có enrollment và proof đáng tin cậy');
   }
 
   async findNearby(lat, lng, radius = 15.0) {
