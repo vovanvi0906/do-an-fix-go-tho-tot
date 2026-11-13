@@ -16,36 +16,33 @@ def fuse_category_scores(
     yolo_probs: Optional[Dict[str, float]],
     description: Optional[str] = "",
 ) -> Tuple[Dict[str, float], str]:
-    if clip_probs and yolo_probs:
-        clip_top = max(clip_probs, key=clip_probs.get)
-        yolo_top = max(yolo_probs, key=yolo_probs.get)
-        if clip_top == yolo_top and clip_top != "other_unclear":
-            w_clip = clip_probs[clip_top] ** 2
-            w_yolo = yolo_probs[yolo_top] ** 2
-            total = (w_clip + w_yolo) or 1.0
-            scores = {k: (w_yolo * yolo_probs.get(k, 0) + w_clip * clip_probs.get(k, 0)) / total
-                      for k in set(clip_probs) | set(yolo_probs)}
-            source = "ensemble"
-        elif yolo_top == "other_unclear" or yolo_probs[yolo_top] < 0.40:
-            scores, source = clip_probs, "clip"
-        else:
-            scores, source = yolo_probs, "yolo"
-    elif clip_probs:
-        scores, source = clip_probs, "clip"
-    elif yolo_probs:
-        scores, source = yolo_probs, "yolo"
+    if not clip_probs and not yolo_probs:
+        return {}, "unavailable"
+    if clip_probs and not yolo_probs:
+        scores, source = dict(clip_probs), "clip"
+    elif yolo_probs and not clip_probs:
+        scores, source = dict(yolo_probs), "yolo"
     else:
-        scores, source = {}, "unavailable"
+        yolo_top = max(yolo_probs, key=yolo_probs.get)
+        if yolo_top == "other_unclear":
+            scores, source = dict(clip_probs), "clip"
+        else:
+            w_clip, w_yolo = 0.6, 0.4
+            all_keys = set(clip_probs) | set(yolo_probs)
+            scores = {k: w_clip * clip_probs.get(k, 0.0) + w_yolo * yolo_probs.get(k, 0.0) for k in all_keys}
+            source = "ensemble"
 
     if description and scores:
         matched = match_category_by_keywords(description)
         if matched:
             k = matched.replace("-", "_")
             if k in scores:
-                scores[k] = min(1.0, scores[k] + 0.35)
+                scores[k] = scores[k] * 1.8
                 source = f"{source}+text"
 
-    return scores, source
+    total = sum(scores.values()) or 1.0
+    normalized = {k: round(v / total, 4) for k, v in scores.items()}
+    return normalized, source
 
 
 def evaluate_categories(

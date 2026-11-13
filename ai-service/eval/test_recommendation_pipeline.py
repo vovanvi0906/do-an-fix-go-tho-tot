@@ -69,6 +69,44 @@ class RecommendationPipelineTests(unittest.TestCase):
         self.assertEqual(res[0]["targetCategory"], "sua-dien")
         self.assertGreater(res[0]["confidence"], res[1]["confidence"])
 
+    def test_target_matcher_negative_below_similarity_threshold(self):
+        targets = {
+            "cong-tac-dien": {"id": "t1", "name": "Công tắc điện", "category": "sua-dien"},
+        }
+        img_feat = torch.tensor([[1.0, 0.0, 0.0, 0.0]], dtype=torch.float32)
+        # Target embedding is completely orthogonal (cosine sim = 0.05 < 0.20 min_similarity)
+        target_embs = (
+            ["cong-tac-dien"],
+            torch.tensor([[0.05, 0.99, 0.0, 0.0]], dtype=torch.float32),
+        )
+        res = match_targets(
+            img_feat=img_feat,
+            category_slug="sua-dien",
+            targets_dict=targets,
+            target_embeddings=target_embs,
+            top_k=2,
+            min_similarity=0.20,
+        )
+        self.assertEqual(len(res), 0)
+
+    def test_target_matcher_negative_target_not_in_category(self):
+        targets = {
+            "voi-nuoc": {"id": "t3", "name": "Vòi nước", "category": "sua-nuoc"},
+        }
+        img_feat = torch.tensor([[1.0, 0.0, 0.0, 0.0]], dtype=torch.float32)
+        target_embs = (
+            ["voi-nuoc"],
+            torch.tensor([[1.0, 0.0, 0.0, 0.0]], dtype=torch.float32),
+        )
+        # Querying sua-dien when only sua-nuoc exists
+        res = match_targets(
+            img_feat=img_feat,
+            category_slug="sua-dien",
+            targets_dict=targets,
+            target_embeddings=target_embs,
+        )
+        self.assertEqual(len(res), 0)
+
     def test_catalog_manager_sync_and_state(self):
         res = sync_catalog()
         self.assertEqual(res["status"], "synced")

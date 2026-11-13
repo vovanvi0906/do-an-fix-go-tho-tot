@@ -63,10 +63,11 @@ class LiveModelInferenceTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         print("\n[LIVE INFERENCE - Face OOD]:", data)
-        # Face is NOT a valid repair category -> must not force a high-confidence target
-        if data.get("suggestedCategoryId"):
-            # If any category assigned, confidence should be low or marked uncertain
-            self.assertTrue(data.get("confidence") is None or data.get("confidence") < 0.85)
+        # Face is NOT a valid repair category -> system must strictly abstain
+        self.assertIsNone(data["suggestedCategoryId"])
+        self.assertEqual(data["targetCandidates"], [])
+        self.assertEqual(data["decision_source"], "abstained_ood")
+        self.assertIsNone(data["confidence"])
 
     def test_unreadable_image_handling(self):
         response = self.client.post("/ai/v2/diagnose", json={"imageUrl": "invalid_path.jpg", "description": ""})

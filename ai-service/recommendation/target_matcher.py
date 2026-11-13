@@ -8,14 +8,15 @@ def match_targets(
     targets_dict: Dict[str, Dict[str, Any]],
     target_embeddings: Optional[Any],
     top_k: int = 3,
+    min_similarity: float = 0.20,
 ) -> List[Dict[str, Any]]:
-    if img_feat is None or not targets_dict:
+    if img_feat is None or not targets_dict or not category_slug:
         return []
 
-    norm_cat = category_slug.replace("_", "-") if category_slug else None
+    norm_cat = category_slug.replace("_", "-")
     filtered_keys = [
         k for k, meta in targets_dict.items()
-        if not norm_cat or not meta.get("category") or meta.get("category") == norm_cat
+        if not meta.get("category") or meta.get("category") == norm_cat
     ]
     if not filtered_keys:
         return []
@@ -33,6 +34,9 @@ def match_targets(
                 key=lambda p: p[1],
                 reverse=True,
             )
+            if not ranked_pairs or ranked_pairs[0][1] < min_similarity:
+                return []
+
             candidates = []
             for idx, sim in ranked_pairs[:top_k]:
                 key = keys[idx]
@@ -48,14 +52,4 @@ def match_targets(
                 })
             return candidates
 
-    return [
-        {
-            "targetId": targets_dict[k].get("id") or k,
-            "targetName": targets_dict[k].get("name", k),
-            "targetCategory": targets_dict[k].get("category", norm_cat),
-            "similarity": 0.5,
-            "confidence": 0.5,
-            "provenance": "catalog_fallback",
-        }
-        for k in filtered_keys[:top_k]
-    ]
+    return []

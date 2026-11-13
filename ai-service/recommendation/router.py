@@ -59,7 +59,7 @@ async def diagnose_v2(
 
     target_embs = state.get("target_embeddings") or clip_classifier.get_target_embeddings()
     img_feat = clip_result.get("img_feat") if clip_result else None
-    target_candidates = match_targets(img_feat, cat_slug, targets_dict, target_embs, top_k=3)
+    target_candidates = match_targets(img_feat, cat_slug, targets_dict, target_embs, top_k=3) if cat_slug else []
 
     top_target = target_candidates[0] if target_candidates else None
     observable = []
@@ -68,6 +68,9 @@ async def diagnose_v2(
         observable.append(f"Nhận diện danh mục: {cat_name}")
     if top_target and top_target.get("targetName"):
         observable.append(f"Nhận diện đối tượng: {top_target['targetName']}")
+
+    final_source = source if cat_slug else ("abstained_ood" if source != "unavailable" else "unavailable")
+    notes = "Chẩn đoán danh mục và đối tượng thành công." if cat_slug else "Ảnh chưa đủ rõ hoặc ngoài danh mục dịch vụ hỗ trợ."
 
     return DiagnosisV2Response(
         suggestedCategoryId=cat_slug,
@@ -79,9 +82,9 @@ async def diagnose_v2(
         confidence=conf,
         detectedLabels=[cat_slug] if cat_slug else [],
         observableSigns=observable,
-        decision_source=source,
+        decision_source=final_source,
         engine="model" if source != "unavailable" else "unavailable",
-        notes="Chẩn đoán danh mục và đối tượng thành công." if cat_slug else "Ảnh chưa đủ rõ để phân loại.",
+        notes=notes,
     )
 
 
