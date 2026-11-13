@@ -1,3 +1,5 @@
+> Current priority: [PAD model selection](pad-selection-report.md), [approved-scope read-only DB report](project-schema-readonly-report.md), [proposed participant/Android protocol](participant-test-protocol.md) and [concrete next experiment](pad-experiment-handoff.md). No PAD weights/data experiment or project DDL has been performed.
+
 # Face Core — migration hardening and real-model handoff
 
 See the latest [migration audit](migration-review-v3.md), [real-model integration](real-model-integration.md), [v3 tests](test-report-v3.md) and [read-only schema reconciliation plan](schema-reconciliation-plan.md).
