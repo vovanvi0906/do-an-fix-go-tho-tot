@@ -1,0 +1,14 @@
+[
+  {
+    "name": "upstream-MIT.txt",
+    "url": "https://raw.githubusercontent.com/kprokofi/light-weight-face-anti-spoofing/82a2c26bacff5462c6f9320c34ae0363ccbed497/LICENSE",
+    "sha256": "36bbbe52e0602c3ce36f4ecfd6f8cd7d1ae334217e436ed4692a8de27e3de6a8",
+    "bytes": 1072
+  },
+  {
+    "name": "descriptor-license.txt",
+    "url": "https://raw.githubusercontent.com/kirillProkofiev/training_extensions/kp/antispoofing/LICENSE",
+    "sha256": "4d10fe5f3aa176b05b229a248866bad70b834c173f1252a814ff4748d8a13837",
+    "bytes": 10255
+  }
+]

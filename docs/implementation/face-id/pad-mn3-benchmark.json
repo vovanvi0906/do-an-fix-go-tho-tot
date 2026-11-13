@@ -1,0 +1,55 @@
+{
+  "synthetic_only": true,
+  "accuracy_evaluated": false,
+  "model_sha256": "c4c99af04603b62d7e44f6f4daeb33e0daeccc696008c0b1d62f6f5cebbb3262",
+  "input_patterns": 6,
+  "parity_onnxruntime_vs_openvino_fp32_max_abs": 5.364418029785156e-07,
+  "per_pattern_max_abs": [
+    7.450580596923828e-09,
+    1.4668330550193787e-08,
+    5.364418029785156e-07,
+    2.2351741790771484e-07,
+    5.587935447692871e-08,
+    8.440110832452774e-10
+  ],
+  "converted_bgr_baked_preprocessing_max_abs": 4.172325134277344e-07,
+  "latency_includes": "validation, BGR-to-RGB normalization, async CPU inference, output validation; excludes face detection/crop/network",
+  "runs": [
+    {
+      "threads": 1,
+      "load_compile_ms": 243.96523500035983,
+      "samples": 100,
+      "warmup": 10,
+      "p50_ms": 2.827720999448502,
+      "p95_ms": 4.274252150207758,
+      "min_ms": 2.5385549997736234,
+      "max_ms": 4.705303999799071
+    },
+    {
+      "threads": 2,
+      "load_compile_ms": 243.64100200000394,
+      "samples": 100,
+      "warmup": 10,
+      "p50_ms": 2.2510620001412462,
+      "p95_ms": 3.86109045084595,
+      "min_ms": 1.6711360003682785,
+      "max_ms": 5.707979998987867
+    },
+    {
+      "threads": 4,
+      "load_compile_ms": 217.8072449987667,
+      "samples": 100,
+      "warmup": 10,
+      "p50_ms": 2.7414360010880046,
+      "p95_ms": 9.341794550982739,
+      "min_ms": 1.5739059999759775,
+      "max_ms": 36.44014800011064
+    }
+  ],
+  "process_peak_rss_kib": 379220,
+  "versions": {
+    "openvino": "2026.4.1-22982-e213a147257-releases/2026/4",
+    "onnxruntime": "1.23.2",
+    "numpy": "2.4.6"
+  }
+}
