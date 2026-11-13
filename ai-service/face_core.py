@@ -2,6 +2,7 @@
 import base64
 import math
 from dataclasses import dataclass
+from pad_contract import UnavailablePad
 
 try:
     import cv2
@@ -31,7 +32,7 @@ def outcome(decision, code, score=None, quality='NOT_EVALUATED', model=None, ver
     return dict(identityDecision=decision, identityScore=score,
                 verificationMethod='yunet_sface_cosine' if compared else 'none',
                 modelVersion=model, templateVersion=version, qualityDecision=quality,
-                padDecision='NOT_EVALUATED', errorCode=code,
+                padDecision=UnavailablePad().assess(None).decision, errorCode=code,
                 # Compatibility fields describe identity only; never an authorization proof.
                 status=decision, reason=code, confidence=score, verified=compared and decision == 'MATCH',
                 method='sface_cosine' if compared else 'none', engine='model' if compared else 'unavailable')
