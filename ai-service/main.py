@@ -303,6 +303,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# AI Recommendation V2 Router (Prefix: /ai/v2)
+from recommendation import recommendation_router
+app.include_router(recommendation_router)
+
 
 # ==========================================
 # PYDANTIC SCHEMAS (RESPONSE & REQUEST)
