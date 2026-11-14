@@ -33,6 +33,9 @@ export interface SuggestedServiceItem {
 
 export interface AiDiagnosisResponse {
   requestId: string;
+  symptomCatalogEnabled?: boolean;
+  selectedSymptomIds?: string[];
+  hasMore?: boolean;
   status: 'suggested' | 'needs_more_info' | 'manual_selection' | 'unavailable';
   source: 'model' | 'rules' | 'manual' | 'unavailable';
   suggestedCategoryId: string | null;
@@ -67,7 +70,7 @@ export interface AiDiagnosisResponse {
 export async function diagnoseIssueImage(
   imageUri: string,
   description = '',
-  answers: Record<string, string> = {},
+  answers: Record<string, string | string[]> = {},
 ): Promise<AiDiagnosisResponse> {
   if (typeof imageUri !== 'string' || !/^(https?:\/\/[^\s]+|file:\/\/[^\s]+|content:\/\/[^\s]+|blob:[^\s]+)$/.test(imageUri)) {
     throw Object.assign(new Error('Ảnh không hợp lệ. Vui lòng chọn hoặc chụp lại ảnh.'), { code: 'IMAGE_URI_INVALID' });

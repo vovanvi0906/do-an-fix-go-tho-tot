@@ -3,17 +3,17 @@ import { View, Text, Pressable } from 'react-native';
 
 export default function TargetCandidateSection({ result, onSelectTarget, onSelectCategory, busy }) {
   const [showPicker, setShowPicker] = useState(false);
-  const target = result?.targetCandidates?.[0] || (result?.suggestedTargetName ? {
-    targetId: result.suggestedTargetId, targetName: result.suggestedTargetName, confidence: result.confidence || 0.8,
+  const target = (result?.suggestedTargetName ? {
+    targetId: result.suggestedTargetId, targetName: result.suggestedTargetName,
   } : null);
 
   return (
     <View nativeID="target-candidate-section" style={{ marginVertical: 8 }}>
       {target && !showPicker && (
         <View style={{ padding: 12, backgroundColor: '#F0F9FF', borderRadius: 8, borderColor: '#BAE6FD', borderWidth: 1 }}>
-          <Text style={{ fontSize: 13, color: '#0369A1', fontWeight: '600' }}>Thiết bị nhận diện:</Text>
+          <Text style={{ fontSize: 13, color: '#0369A1', fontWeight: '600' }}>{result?.target ? 'Bạn đã xác nhận thiết bị:' : 'AI gợi ý thiết bị (cần xác nhận):'}</Text>
           <Text style={{ fontSize: 16, fontWeight: '700', color: '#0C4A6E', marginVertical: 4 }}>
-            {target.targetName} {target.confidence ? `(${Math.round(target.confidence * 100)}%)` : ''}
+            {target.targetName}
           </Text>
           <View style={{ flexDirection: 'row', gap: 8, marginTop: 6 }}>
             <Pressable nativeID="btn-confirm-target" disabled={busy}
@@ -30,7 +30,7 @@ export default function TargetCandidateSection({ result, onSelectTarget, onSelec
         </View>
       )}
 
-      {showPicker && (
+      {(showPicker || !target) && (
         <View style={{ marginTop: 8 }}>
           <Text style={{ fontWeight: '600', marginBottom: 6 }}>Chọn thiết bị chính xác:</Text>
           {result?.availableTargets?.map((t) => (
@@ -38,14 +38,6 @@ export default function TargetCandidateSection({ result, onSelectTarget, onSelec
               onPress={() => { setShowPicker(false); onSelectTarget(t.id); }}
               style={{ padding: 10, marginVertical: 3, backgroundColor: '#F1F5F9', borderRadius: 6 }}>
               <Text style={{ color: '#1E293B' }}>{t.name}</Text>
-            </Pressable>
-          ))}
-          <Text style={{ fontWeight: '600', marginTop: 10, marginBottom: 4 }}>Hoặc đổi danh mục:</Text>
-          {result?.availableCategories?.map((c) => (
-            <Pressable key={c.id} nativeID={`category-choice-${c.id}`} disabled={busy}
-              onPress={() => { setShowPicker(false); onSelectCategory(c.id); }}
-              style={{ padding: 8, marginVertical: 2, backgroundColor: '#E2E8F0', borderRadius: 6 }}>
-              <Text style={{ color: '#334155' }}>{c.name}</Text>
             </Pressable>
           ))}
         </View>

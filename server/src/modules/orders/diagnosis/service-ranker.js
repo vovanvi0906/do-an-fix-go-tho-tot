@@ -1,5 +1,6 @@
 export function formatPriceRange(min, max, unit = 'lần') {
-  const minNum = Number(min);
+  const minNum = min == null ? null : Number(min);
+  if (minNum == null || !Number.isFinite(minNum)) return { min: null, max: null, unit, formatted: 'Thợ báo giá sau kiểm tra' };
   const maxNum = max == null ? null : Number(max);
   const formatted =
     maxNum == null
@@ -11,7 +12,7 @@ export function formatPriceRange(min, max, unit = 'lần') {
 export function rankServices(services, options = {}) {
   const { targetId, symptomSlug, description = '', topK = 3 } = options;
   let pool = targetId ? services.filter((s) => s.targetId === targetId) : services;
-  if (!pool.length) pool = services;
+  if (!pool.length) return [];
 
   const descTokens = description
     .toLowerCase()
@@ -42,7 +43,7 @@ export function rankServices(services, options = {}) {
       name: svc.name,
       slug: svc.slug,
       targetId: svc.targetId,
-      basePrice: Number(svc.basePrice),
+      basePrice: svc.basePrice == null ? null : Number(svc.basePrice),
       maxPrice: svc.maxPrice == null ? null : Number(svc.maxPrice),
       unit: svc.unit || 'lần',
       rankingScore,
@@ -53,5 +54,5 @@ export function rankServices(services, options = {}) {
     };
   });
 
-  return scored.sort((a, b) => b.rankingScore - a.rankingScore).slice(0, topK);
+  return scored.sort((a, b) => b.rankingScore - a.rankingScore).slice(0, Math.max(0, Math.min(3, topK)));
 }

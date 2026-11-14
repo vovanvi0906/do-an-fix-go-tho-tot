@@ -50,6 +50,8 @@ export default function AiScanModal({
   const scanGeneration = useRef(0);
   const [statusTextIndex, setStatusTextIndex] = useState(0);
 
+  useEffect(() => { if (!visible) scanGeneration.current += 1; return () => { scanGeneration.current += 1; }; }, [visible]);
+
   // ── Animated Values ─────────────────────────────────────────────────────
   const laserAnim = useRef(new Animated.Value(0)).current;
   const resultFadeAnim = useRef(new Animated.Value(0)).current;
@@ -142,7 +144,7 @@ export default function AiScanModal({
       }
 
       const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [4, 3],
         quality: 0.8,
@@ -167,7 +169,7 @@ export default function AiScanModal({
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [4, 3],
         quality: 0.8,
@@ -206,7 +208,8 @@ export default function AiScanModal({
       }, remainingTime);
     } catch (error: any) {
       if (generation !== scanGeneration.current) return;
-      setModalStep('idle');
+      setDiagnosisResult({ status: 'unavailable', imageUrl: uri, availableCategories: [], availableServices: [], questions: [], categoryName: 'Chọn thiết bị thủ công', notes: 'Không thể phân tích ảnh. Thử lại hoặc chọn danh mục thủ công.' } as unknown as AiDiagnosisResponse);
+      setModalStep('result');
       Alert.alert(
         'Không thể phân tích',
         error?.message || 'Không thể kết nối máy chủ. Vui lòng thử lại sau.'
@@ -242,8 +245,8 @@ export default function AiScanModal({
                 <Ionicons name="sparkles" size={16} color="#38BDF8" />
               </View>
               <View>
-                <Text style={styles.headerTitleText}>Chẩn đoán sự cố AI 2.0</Text>
-                <Text style={styles.headerSubText}>Nhận diện thị giác máy tính & Báo giá tức thì</Text>
+                <Text style={styles.headerTitleText}>AI gợi ý thiết bị và dấu hiệu</Text>
+                <Text style={styles.headerSubText}>Xác nhận thiết bị • Chọn triệu chứng • Tìm dịch vụ</Text>
               </View>
             </View>
 
@@ -345,7 +348,7 @@ export default function AiScanModal({
           )}
 
           {/* ── BƯỚC 3: Thẻ Kết quả Chẩn đoán & Báo giá (Result State) ────── */}
-          {modalStep === 'result' && diagnosisResult && (
+          {visible && modalStep === 'result' && diagnosisResult && (<>
             <ScrollView
               nativeID="modal-ai-result-scroll"
               showsVerticalScrollIndicator={false}
@@ -369,12 +372,7 @@ export default function AiScanModal({
                     </View>
                     <View style={{ flex: 1, marginLeft: 8 }}>
                       <Text style={styles.resultCategoryTitle}>{diagnosisResult.categoryName}</Text>
-                      <Text style={styles.confidenceText}>
-                        Điểm nhận diện nhóm:{' '}
-                        <Text style={styles.confidenceHighlight}>
-                          {diagnosisResult.confidence == null ? 'Chưa có' : `${(diagnosisResult.confidence * 100).toFixed(0)}%`}
-                        </Text>
-                      </Text>
+                      <Text style={styles.confidenceText}>AI gợi ý — hãy xác nhận thiết bị và triệu chứng</Text>
                     </View>
                   </View>
 
@@ -397,11 +395,6 @@ export default function AiScanModal({
                           <Ionicons name="construct" size={12} color="#047857" style={{ marginRight: 4 }} />
                           <Text style={styles.serviceTagText}>Dịch vụ đề xuất</Text>
                         </View>
-                        {diagnosisResult.suggestedServiceConfidence && (
-                          <Text style={styles.serviceConfidenceText}>
-                            Độ khớp: {Math.round(diagnosisResult.suggestedServiceConfidence * 100)}%
-                          </Text>
-                        )}
                       </View>
                       <Text style={styles.serviceDetailNameText}>
                         {diagnosisResult.suggestedServiceName}
@@ -413,7 +406,7 @@ export default function AiScanModal({
                 {/* Khung Báo giá Dự toán */}
                 <View style={styles.priceEstimateCard}>
                   <View style={styles.priceHeaderRow}>
-                    <Text style={styles.priceEstimateLabel}>Báo giá dự toán minh bạch</Text>
+                    <Text style={styles.priceEstimateLabel}>Giá tham khảo từ catalog</Text>
                     <View style={styles.arrivalChip}>
                       <Ionicons name="flash" size={11} color="#0284C7" style={{ marginRight: 2 }} />
                       <Text style={styles.arrivalChipText}>Theo lịch đặt</Text>
@@ -436,7 +429,9 @@ export default function AiScanModal({
                 </View>
 
                 <DiagnosisChoices result={diagnosisResult} imageUrl={selectedImageUri}
-                  onResult={setDiagnosisResult} onReset={() => setDiagnosisResult(prev => prev ? { ...prev, status: 'needs_more_info' } : prev)} />
+                  onResult={setDiagnosisResult} onReset={() => setDiagnosisResult(prev => prev ? { ...prev, status: 'needs_more_info', suggestedServiceId: null, suggestedServiceName: null, suggestedServices: [], estimatedPriceRange: null } : prev)} />
+              </Animated.View>
+            </ScrollView>
                 {/* Hành động */}
                 <View style={styles.resultActionsRow}>
                   <Pressable
@@ -469,9 +464,7 @@ export default function AiScanModal({
                     <Text style={styles.retakeText}>Chụp lại ảnh khác</Text>
                   </Pressable>
                 </View>
-              </Animated.View>
-            </ScrollView>
-          )}
+          </>)}
         </View>
       </View>
     </Modal>
@@ -823,6 +816,8 @@ const styles = StyleSheet.create({
   resultActionsRow: {
     gap: 8,
     marginTop: 6,
+    padding: 12,
+    backgroundColor: '#FFFFFF',
   },
   confirmOrderBtn: {
     flexDirection: 'row',

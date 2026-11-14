@@ -3,6 +3,8 @@ export const SYMPTOM_RULES = {
   'dien-lanh': [
     ['ac_leak', 'Máy lạnh chảy nước', 'sua-may-lanh-chay-nuoc'],
     ['ac_weak', 'Máy lạnh không lạnh / lạnh yếu', 'kiem-tra-may-lanh-khong-lanh-hoac-lanh-yeu'],
+    ['fridge_frost', 'Ngăn mát tủ lạnh đóng tuyết', 'sua-ngan-mat-dong-tuyet'],
+    ['fridge_leak', 'Tủ lạnh rò nước', 'sua-tu-lanh-ro-nuoc'],
     ['fridge_weak', 'Tủ lạnh không lạnh', 'sua-tu-lanh-khong-lanh'],
     ['washer_spin', 'Máy giặt không vắt', 'sua-may-giat-khong-vat'],
   ],
@@ -37,8 +39,5 @@ export function buildSymptomOptions(categorySlug, activeServices, target) {
     return matched.map(([value, label]) => ({ value, label }));
   }
 
-  return targetServices.slice(0, 6).map((s) => ({
-    value: s.slug,
-    label: s.name,
-  }));
+  return []; // Service names are not symptom evidence.
 }

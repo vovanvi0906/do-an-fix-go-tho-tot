@@ -7,11 +7,14 @@ jest.mock('../../services/api/aiService', () => ({
   diagnoseIssueImage: jest.fn(),
 }));
 
+jest.mock('../../services/api/catalogService', () => ({ catalogService: { getCategories: jest.fn().mockResolvedValue([]), getServicesPage: jest.fn().mockResolvedValue([]) } }));
+
 const mockResultWithTarget = {
   imageUrl: 'https://example.test/switch.jpg',
   suggestedCategoryId: 'cat-elec',
   suggestedTargetId: 'tgt-switch',
   suggestedTargetName: 'Công tắc điện',
+  target: { id: 'tgt-switch', name: 'Công tắc điện' },
   confidence: 0.85,
   targetCandidates: [
     { targetId: 'tgt-switch', targetName: 'Công tắc điện', targetCategory: 'sua-dien', confidence: 0.85 },
@@ -22,10 +25,10 @@ const mockResultWithTarget = {
     { id: 'tgt-outlet', name: 'Ổ cắm điện' },
   ],
   availableServices: [
-    { id: 'srv-switch-fix', name: 'Sửa công tắc không hoạt động', basePrice: 100000, unit: 'điểm' },
+    { id: 'srv-switch-fix', targetId: 'tgt-switch', name: 'Sửa công tắc không hoạt động', basePrice: 100000, unit: 'điểm' },
   ],
   suggestedServices: [
-    { id: 'srv-switch-fix', name: 'Sửa công tắc không hoạt động', basePrice: 100000, unit: 'điểm', reason: 'Khớp triệu chứng' },
+    { id: 'srv-switch-fix', targetId: 'tgt-switch', name: 'Sửa công tắc không hoạt động', basePrice: 100000, unit: 'điểm', reason: 'Khớp triệu chứng' },
   ],
   questions: [
     {

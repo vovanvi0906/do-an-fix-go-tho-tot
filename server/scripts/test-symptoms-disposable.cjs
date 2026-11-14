@@ -1,0 +1,63 @@
+// Explicit disposable URL only. Never load .env or fall back to DATABASE_URL.
+const { execFileSync } = require('node:child_process');
+const { mkdtempSync, writeFileSync } = require('node:fs');
+const { tmpdir } = require('node:os');
+const path = require('node:path');
+const assert = require('node:assert/strict');
+const { PrismaClient } = require('@prisma/client');
+const { assertDisposable } = require('../test/symptoms/disposable.cjs');
+const root = path.resolve(__dirname, '..');
+const url = assertDisposable(process.env.DISPOSABLE_DATABASE_URL);
+const env = { ...process.env, DATABASE_URL: url, DISPOSABLE_DATABASE_URL: url };
+const sql = file => execFileSync('psql', [url, '-v', 'ON_ERROR_STOP=1', '-f', file], { env, stdio: ['ignore', 'pipe', 'pipe'] });
+const run = (command, args) => execFileSync(command, args, { cwd: root, env, stdio: 'inherit' });
+const columns = db => db.$queryRawUnsafe(`SELECT table_name, column_name, data_type, is_nullable FROM information_schema.columns WHERE table_schema='public' ORDER BY table_name, ordinal_position`);
+(async () => {
+  const temp = mkdtempSync(path.join(tmpdir(), 'fixgo-symptoms-'));
+  let db = new PrismaClient({ datasourceUrl: url });
+  assert.equal((await db.$queryRaw`SELECT current_database() AS name`)[0].name, 'fixgo_symptoms_disposable');
+  await db.$disconnect();
+  writeFileSync(path.join(temp, 'reset.sql'), 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;');
+  sql(path.join(temp, 'reset.sql'));
+  writeFileSync(path.join(temp, 'baseline.prisma'), execFileSync('git', ['show', 'b50075f:server/prisma/schema.prisma'], { cwd: root }));
+  run(process.execPath, [require.resolve('prisma/build/index.js'), 'migrate', 'diff', '--from-empty', '--to-schema-datamodel', path.join(temp, 'baseline.prisma'), '--script', '--output', path.join(temp, 'baseline.sql')]);
+  sql(path.join(temp, 'baseline.sql'));
+  db = new PrismaClient({ datasourceUrl: url });
+  const baselineColumns = await columns(db);
+  await db.serviceCategory.create({ data: { id: 'phase-c-legacy-category', name: 'Legacy fixture' } });
+  await db.service.create({ data: { id: 'phase-c-legacy-service', name: 'Legacy no target', categoryId: 'phase-c-legacy-category', basePrice: 111111 } });
+  await db.user.create({ data: { id: 'phase-c-legacy-user', role: 'CUSTOMER' } });
+  await db.order.create({ data: { id: 'phase-c-legacy-order', categoryId: 'phase-c-legacy-category', customerId: 'phase-c-legacy-user', serviceId: 'phase-c-legacy-service', addressText: 'Disposable control', lat: 0, lng: 0, estimatedPrice: 111111 } });
+  const legacy = await db.order.findUnique({ where: { id: 'phase-c-legacy-order' } });
+  await db.$disconnect();
+  const migration = path.join(root, 'prisma/migrations/20261114000000_symptom_catalog_v3/migration.sql');
+  sql(migration);
+  run(process.execPath, [require.resolve('jest/bin/jest'), '--config', 'test/symptoms/jest.config.cjs', '--runInBand']);
+  db = new PrismaClient({ datasourceUrl: url });
+  const [beforeServices, beforeOrders] = await Promise.all([db.service.count(), db.order.count()]);
+  await db.$disconnect();
+  sql(path.join(root, 'prisma/rollback/symptom_catalog_v3.sql'));
+  db = new PrismaClient({ datasourceUrl: url });
+  assert.deepEqual(await columns(db), baselineColumns, 'Rollback must restore original column metadata including Face/Order');
+  assert.deepEqual(await db.order.findUnique({ where: { id: legacy.id } }), legacy, 'Legacy order must survive migration/rollback unchanged');
+  assert.equal(await db.service.count(), beforeServices);
+  assert.equal(await db.order.count(), beforeOrders);
+  assert.equal((await db.service.findUnique({ where: { id: 'phase-c-legacy-service' } })).targetId, null);
+  // Exercise the real resolver after rollback, when symptom tables do not exist.
+  require('@babel/register')({ extensions: ['.js'] });
+  const { resolveDiagnosis } = require('../src/modules/orders/diagnosis/diagnosis-resolver');
+  const previousFlag = process.env.SYMPTOM_CATALOG_ENABLED;
+  process.env.SYMPTOM_CATALOG_ENABLED = 'false';
+  try {
+    const manual = await resolveDiagnosis(db, {}, { imageUrl: 'https://example.test/no-symptom-schema.jpg', answers: { categoryId: 'phase-c-legacy-category', serviceId: 'phase-c-legacy-service' } });
+    assert.equal(manual.status, 'suggested');
+    assert.equal(manual.estimatedPriceMin, 111111);
+  } finally { if (previousFlag === undefined) delete process.env.SYMPTOM_CATALOG_ENABLED; else process.env.SYMPTOM_CATALOG_ENABLED = previousFlag; }
+  await db.$disconnect();
+  sql(migration);
+  db = new PrismaClient({ datasourceUrl: url });
+  assert.equal(await db.symptom.count(), 0);
+  assert.equal(await db.order.count(), beforeOrders);
+  await db.$disconnect();
+  console.log('PASS: migration, HTTP/JWT/catalog integration, rollback, metadata/legacy preservation, reapply. No proposal data imported.');
+})().catch(error => { console.error('FAIL disposable validation:', error.message); process.exitCode = 1; });

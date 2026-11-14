@@ -143,30 +143,33 @@ model ServiceTarget {
   updatedAt   DateTime        @updatedAt
   category    ServiceCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   services    Service[]
+  symptoms    Symptom[]
 
   @@map("service_targets")
 }
 
 model Service {
-  id                   String          @id @default(uuid())
+  id                   String           @id @default(uuid())
   categoryId           String
   targetId             String?
   name                 String
-  slug                 String?         @unique
+  slug                 String?          @unique
   description          String?
-  basePrice            Decimal         @db.Decimal(12, 2)
-  maxPrice             Decimal?        @db.Decimal(12, 2)
+  basePrice            Decimal          @db.Decimal(12, 2)
+  maxPrice             Decimal?         @db.Decimal(12, 2)
   unit                 String?
   estimatedDurationMin Int?
-  isPopular            Boolean         @default(false)
-  isActive             Boolean         @default(true)
-  createdAt            DateTime        @default(now())
-  updatedAt            DateTime        @updatedAt
+  isPopular            Boolean          @default(false)
+  isActive             Boolean          @default(true)
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
   orders               Order[]
-  category             ServiceCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  target               ServiceTarget?  @relation(fields: [targetId], references: [id], onDelete: SetNull)
+  category             ServiceCategory  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  target               ServiceTarget?   @relation(fields: [targetId], references: [id], onDelete: SetNull)
   workerServices       WorkerService[]
+  symptomMappings      SymptomService[]
 
+  @@unique([id, targetId], map: "services_id_target_key")
   @@map("services")
 }
 
@@ -660,4 +663,72 @@ model BiometricAudit {
 
   @@index([workerId, createdAt])
   @@map("biometric_audits")
+}
+
+enum SymptomKind {
+  VISUAL_OBSERVABLE
+  USER_REPORTED
+  REQUIRES_TECHNICIAN_CHECK
+}
+
+enum CatalogReviewStatus {
+  NEEDS_REVIEW
+  APPROVED
+  REJECTED
+}
+
+model Symptom {
+  id           String              @id @default(uuid())
+  targetId     String
+  code         String
+  name         String
+  description  String?
+  aliases      String[]            @default([])
+  kind         SymptomKind         @default(USER_REPORTED)
+  reviewStatus CatalogReviewStatus @default(NEEDS_REVIEW)
+  isActive     Boolean             @default(false)
+  sortOrder    Int                 @default(0)
+  createdBy    String
+  updatedBy    String
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  target       ServiceTarget       @relation(fields: [targetId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  mappings     SymptomService[]
+
+  @@unique([targetId, code])
+  @@unique([id, targetId], map: "symptoms_id_target_key")
+  @@index([targetId, isActive, sortOrder])
+  @@map("symptoms")
+}
+
+model SymptomService {
+  symptomId    String
+  serviceId    String
+  targetId     String
+  priority     Int                 @default(0)
+  reason       String?
+  reviewStatus CatalogReviewStatus @default(NEEDS_REVIEW)
+  isActive     Boolean             @default(false)
+  createdBy    String
+  updatedBy    String
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  symptom      Symptom             @relation(fields: [symptomId, targetId], references: [id, targetId], onDelete: Restrict, onUpdate: Restrict)
+  service      Service             @relation(fields: [serviceId, targetId], references: [id, targetId], onDelete: Restrict, onUpdate: Restrict)
+
+  @@id([symptomId, serviceId])
+  @@index([targetId, isActive, priority])
+  @@map("symptom_services")
+}
+
+model SymptomCatalogAudit {
+  id        String   @id @default(uuid())
+  actorId   String
+  action    String
+  entityId  String
+  changes   Json
+  createdAt DateTime @default(now())
+
+  @@index([entityId, createdAt])
+  @@map("symptom_catalog_audits")
 }

@@ -88,4 +88,30 @@ describe('Diagnosis target and service ranking', () => {
     expect(res.reason).toBe('image_uncertain');
     expect(res.suggestedCategoryId).toBeNull();
   });
+  it('canonicalizes a fallback AI slug before the UI confirms it', async () => {
+    ai.diagnoseIncident.mockResolvedValue({ engine: 'model', confidence: .85, suggestedCategoryId: 'sua-dien', suggestedTargetId: target1.slug });
+    const first = await resolveDiagnosis(prisma, ai, { imageUrl: 'https://img.test/1.jpg' });
+    expect(first.suggestedTargetId).toBe(target1.id);
+    expect(first.questions).toEqual([]);
+    const confirmed = await resolveDiagnosis(prisma, ai, { imageUrl: first.imageUrl, answers: { categoryId: first.suggestedCategoryId, targetId: first.suggestedTargetId } });
+    expect(confirmed.target.id).toBe(target1.id);
+  });
+  it('drops unknown AI target IDs instead of passing them to confirmation', async () => {
+    ai.diagnoseIncident.mockResolvedValue({ engine: 'model', confidence: .85, suggestedCategoryId: 'sua-dien', suggestedTargetId: 'stale-id' });
+    expect((await resolveDiagnosis(prisma, ai, { imageUrl: 'https://img.test/1.jpg' })).suggestedTargetId).toBeNull();
+  });
+  it('does not offer or accept another target service or symptom', async () => {
+    const answers = { categoryId: category.id, targetId: target2.id };
+    const result = await resolveDiagnosis(prisma, ai, { imageUrl: 'https://img.test/1.jpg', answers });
+    expect(result.availableServices).toEqual([]); expect(result.questions).toEqual([]);
+    await expect(resolveDiagnosis(prisma, ai, { imageUrl: result.imageUrl, answers: { ...answers, serviceId: service1.id } })).rejects.toThrow();
+    await expect(resolveDiagnosis(prisma, ai, { imageUrl: result.imageUrl, answers: { ...answers, symptom: 'switch_power' } })).rejects.toThrow();
+  });
+
+  it('never invents a target by matching an absent AI ID to a null slug', async () => {
+    prisma.serviceTarget.findMany.mockResolvedValue([{ ...target1, slug: null }]);
+    ai.diagnoseIncident.mockResolvedValue({ engine: 'model', confidence: .85, suggestedCategoryId: 'sua-dien', suggestedTargetId: null });
+    expect((await resolveDiagnosis(prisma, ai, { imageUrl: 'https://img.test/1.jpg' })).suggestedTargetId).toBeNull();
+  });
+
 });

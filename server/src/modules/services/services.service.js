@@ -1,4 +1,5 @@
 import { Injectable, Dependencies, NotFoundException } from '@nestjs/common';
+import { activeTarget, pageQuery } from '../symptoms/symptom-catalog';
 import { PrismaService } from '../../infrastructure/database/prisma.service';
 
 @Injectable()
@@ -54,21 +55,30 @@ export class ServicesService {
     });
   }
 
-  async getServices(categoryId, targetId) {
+  async getServices(categoryId, targetId, query = {}) {
+    if (targetId) await activeTarget(this.prisma, targetId, categoryId);
+    const paged = query.page !== undefined || query.limit !== undefined || query.search !== undefined;
+    const pagination = paged ? pageQuery(query) : null;
     const where = {
       isActive: true,
       ...(categoryId ? { categoryId } : {}),
       ...(targetId ? { targetId } : {}),
+      category: { isActive: true },
+      ...(pagination?.search ? { OR: [{ name: { contains: pagination.search, mode: 'insensitive' } }, { description: { contains: pagination.search, mode: 'insensitive' } }] } : {}),
     };
 
-    return this.prisma.service.findMany({
+    const items = await this.prisma.service.findMany({
       where,
       include: {
         category: true,
         target: true,
       },
-      orderBy: { name: 'asc' },
+      orderBy: [{ name: 'asc' }, { id: 'asc' }],
+      ...(pagination ? { skip: pagination.skip, take: pagination.limit } : {}),
     });
+    if (!pagination) return items; // Preserve legacy array contract.
+    const total = await this.prisma.service.count({ where });
+    return { items, total, page: pagination.page, limit: pagination.limit, hasMore: pagination.page * pagination.limit < total };
   }
 
   async getServiceById(id) {

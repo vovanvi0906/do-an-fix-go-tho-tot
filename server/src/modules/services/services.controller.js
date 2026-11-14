@@ -46,9 +46,12 @@ export class ServicesController {
   @ApiOperation({ summary: 'Lấy danh sách dịch vụ (lọc theo categoryId hoặc targetId)' })
   @ApiQuery({ name: 'categoryId', required: false, type: String })
   @ApiQuery({ name: 'targetId', required: false, type: String })
-  @Bind(Query('categoryId'), Query('targetId'))
-  async getServices(categoryId, targetId) {
-    return this.servicesService.getServices(categoryId, targetId);
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  @Bind(Query('categoryId'), Query('targetId'), Query())
+  async getServices(categoryId, targetId, query) {
+    return this.servicesService.getServices(categoryId, targetId, query);
   }
 
   @Get('services/:id')
