@@ -1,0 +1,6 @@
+node_modules/
+dist/
+trials-*.jsonl
+*.tsbuildinfo
+test-results/
+playwright-report/

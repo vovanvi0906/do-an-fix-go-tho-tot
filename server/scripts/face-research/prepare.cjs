@@ -18,7 +18,8 @@ async function prepare({aiUrl,aiToken,output,sessionMs=120000}={}) {
     const baseline=exec(process.execPath,['node_modules/prisma/build/index.js','migrate','diff','--from-empty','--to-schema-datamodel',baselinePath,'--script'],{env}).replace(/CREATE TABLE "spatial_ref_sys" \([\s\S]*?\);/g,'');
     const sql=input=>exec('docker',['exec','-i',name,'psql','-U','face_research','-d',dbName,'-v','ON_ERROR_STOP=1'],{input});
     sql(baseline);
-    for(const migration of ['20261113190000_face_core_v2','20261113200000_face_binding_hardening'])sql(readFileSync(join(root,'prisma/migrations',migration,'migration.sql'),'utf8'));
+    // Later non-face migrations are applied unchanged so the schema-drift guard below stays strict.
+    for(const migration of ['20261113190000_face_core_v2','20261113200000_face_binding_hardening','20261114000000_symptom_catalog_v3'])sql(readFileSync(join(root,'prisma/migrations',migration,'migration.sql'),'utf8'));
     exec(process.execPath,['node_modules/prisma/build/index.js','migrate','diff','--from-url',databaseUrl,'--to-schema-datamodel','prisma/schema.prisma','--script','--exit-code'],{env});
     sql(readFileSync(join(__dirname,'schema.sql'),'utf8'));sql(`INSERT INTO face_research.environment(id) VALUES('${id}');`);
     const {PrismaClient}=require('@prisma/client');const {JwtService}=require('@nestjs/jwt');const db=new PrismaClient({datasources:{db:{url:databaseUrl}}});
