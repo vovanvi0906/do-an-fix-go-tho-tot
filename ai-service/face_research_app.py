@@ -10,8 +10,9 @@ from fastapi import FastAPI, HTTPException, Request
 from starlette.concurrency import run_in_threadpool
 from face_core import MAX_BYTES
 from face_models import load_face_models
-from face_research import infer_research
-from pad_mn3 import ExperimentalMn3Pad
+from face_research import infer_research, CROP_VERSION, IDENTITY_POLICY, QUALITY_POLICY
+from pad_mn3 import ExperimentalMn3Pad, VERSION as PAD_VERSION, PROFILE, SHA256 as PAD_SHA256
+from pad_policy import PadDecisionGate
 
 
 def create_app(models=None, pad=None):
@@ -38,7 +39,11 @@ def create_app(models=None, pad=None):
     async def capabilities(request: Request):
         authenticate(request)
         return {'researchOnly': True, 'captureAllowed': approved, 'padEvaluated': False, 'proofAllowed': False,
-                'modelVersion': app.state.models.model_version, 'padReady': app.state.pad.error is None}
+                'modelVersion': app.state.models.model_version, 'padReady': app.state.pad.error is None,
+                'padModelVersion': PAD_VERSION, 'padErrorCode': app.state.pad.error,
+                # Status of the reviewed evaluation record, never a readiness self-approval.
+                'padEvaluationStatus': PadDecisionGate(PAD_VERSION, PROFILE, CROP_VERSION, artifact_sha256=PAD_SHA256).status() or 'APPROVED_RECORD_PRESENT',
+                'identityPolicy': IDENTITY_POLICY, 'qualityPolicy': QUALITY_POLICY}
     @app.post('/research/infer')
     async def infer(request: Request):
         authenticate(request)

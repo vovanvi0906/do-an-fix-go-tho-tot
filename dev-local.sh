@@ -8,6 +8,38 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 
+# Lenh phu (khong tham so = hanh vi mac dinh cu, khong doi gi).
+#   ./dev-local.sh --help | faceid [--status|--stop] | all
+# FaceID Lab chay hoan toan tach biet (DB tam rieng), KHONG dung server/.env hay DB chinh.
+FACEID_LAB_SH="scripts/faceid-lab/faceid-lab.sh"
+case "${1:-}" in
+    "") ;;
+    -h|--help|help)
+        cat <<'EOF'
+FixGo dev-local.sh
+  ./dev-local.sh                   Mac dinh: postgres/redis (compose) + prisma db push + Server :3000, AI :8000, Admin :5173
+  ./dev-local.sh faceid            Khoi dong Worker FaceID Lab (stack co lap + web lab), chay nen
+  ./dev-local.sh faceid --status   Trang thai process/port/health/PAD policy
+  ./dev-local.sh faceid --stop     Dung dung cac process/container do launcher tao
+  ./dev-local.sh faceid --help     Cau hinh port/model cua FaceID Lab
+  ./dev-local.sh all               FaceID Lab (nen) + luong mac dinh; Ctrl+C dung ca hai
+EOF
+        exit 0 ;;
+    faceid)
+        shift
+        exec bash "$FACEID_LAB_SH" "$@" ;;
+    all)
+        shift
+        [ $# -eq 0 ] || { echo "ERROR: 'all' khong nhan tham so" >&2; exit 2; }
+        bash "$FACEID_LAB_SH" || { echo "ERROR: FaceID Lab khong khoi dong duoc; khong chay tiep luong mac dinh." >&2; exit 1; }
+        # Dung FaceID Lab khi luong mac dinh ket thuc (Ctrl+C / loi).
+        trap 'bash "$FACEID_LAB_SH" --stop' EXIT
+        ;;
+    *)
+        echo "ERROR: lenh khong hop le: $1 (xem ./dev-local.sh --help)" >&2
+        exit 2 ;;
+esac
+
 mkdir -p logs
 
 # Tu dong copy .env neu chua co
