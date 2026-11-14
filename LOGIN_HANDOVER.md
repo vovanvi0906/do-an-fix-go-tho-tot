@@ -107,7 +107,7 @@ PORT=3000
 NODE_ENV=development
 
 # Database PostgreSQL + PostGIS (Khớp Docker Compose)
-DATABASE_URL="postgresql://postgres:postgrespassword@localhost:5432/ondemand_db?schema=public"
+DATABASE_URL="postgresql://postgres:CHANGE_ME_DATABASE_PASSWORD@localhost:5432/ondemand_db?schema=public"
 
 # Redis Cache
 REDIS_URL="redis://localhost:6380"
@@ -422,7 +422,7 @@ cd doan-kltn-backend
 cp .env.example .env
 ```
 Mở `.env` và kiểm tra:
-- `DATABASE_URL`: Đảm bảo mật khẩu và tên DB khớp với `docker-compose.yml` (`postgrespassword` và `ondemand_db`).
+- `DATABASE_URL`: Đảm bảo mật khẩu và tên DB khớp với `docker-compose.yml` (`CHANGE_ME_DATABASE_PASSWORD` và `ondemand_db`).
 - `REDIS_PORT`: Mặc định là `6380`.
 - `SMTP_USER` & `SMTP_PASS`: Nhập Gmail của bạn và Mật khẩu ứng dụng 16 ký tự để test gửi OTP Email thật.
 
