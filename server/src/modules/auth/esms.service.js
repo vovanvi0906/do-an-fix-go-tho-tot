@@ -51,9 +51,9 @@ export class EsmsService {
    * @returns {Promise<{ success: boolean, smsId: string, codeResult: string, message: string }>}
    */
   async sendOtpSms(phone, otpCode) {
-    const apiKey = process.env.ESMS_API_KEY || '82571DA6FC34F8BD5A1CFCD5F7951D';
+    const apiKey = process.env.ESMS_API_KEY;
     const secretKey =
-      process.env.ESMS_SECRET_KEY || '76CB6899A3234645B37696368681D2';
+      process.env.ESMS_SECRET_KEY;
     const brandname = (process.env.ESMS_BRANDNAME || '').trim();
     const smsType = process.env.ESMS_SMS_TYPE || '2';
     const sandbox = process.env.ESMS_SANDBOX || '0';
