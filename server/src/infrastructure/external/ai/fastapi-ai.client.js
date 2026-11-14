@@ -124,7 +124,9 @@ export class FastApiAiClient {
         if (r?.identityModelReady === true && typeof r.modelVersion === 'string' &&
             /^yunet-sface:[a-f0-9]{64}:[a-f0-9]{64}$/.test(r.modelVersion) && r.verificationMethod === 'yunet_sface_cosine') {
           // Readiness for identity inference is independent of evaluated PAD approval.
-          return { ...unavailable, identityModelReady: true, modelVersion: r.modelVersion };
+          return { ...unavailable, identityModelReady: true, modelVersion: r.modelVersion,
+            padEvaluated: r.padEvaluated === true, padModelVersion: typeof r.padModelVersion === 'string' ? r.padModelVersion : null,
+            padEvaluationReference: typeof r.padEvaluationReference === 'string' ? r.padEvaluationReference : null };
         }
       }
     } catch (_) { /* No secret headers, images or transport details in logs. */ }

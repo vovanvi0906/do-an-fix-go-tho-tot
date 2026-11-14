@@ -1,0 +1,11 @@
+import { createHash } from 'node:crypto';
+import { mkdir, writeFile } from 'node:fs/promises';
+const url = 'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite';
+const response = await fetch(url);
+if (!response.ok) throw Error(`Model download failed: HTTP ${response.status}`);
+const bytes = Buffer.from(await response.arrayBuffer());
+if (createHash('sha256').update(bytes).digest('hex') !== 'b4578f35940bf5a1a655214a1cce5cab13eba73c1297cd78e1a04c2380b0152f') throw Error('Model checksum mismatch');
+const directory = new URL('../../ai-service/weights/', import.meta.url);
+await mkdir(directory, { recursive: true });
+await writeFile(new URL('blaze_face_short_range.tflite', directory), bytes);
+console.log('BlazeFace ready. WASM is provided by the pinned @mediapipe/tasks-vision package.');

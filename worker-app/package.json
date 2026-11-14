@@ -12,19 +12,24 @@
     "test:ci": "jest --runInBand --watch=false",
     "start:debug": "expo start --dev-client --port 8082",
     "check:build": "node ../scripts/check-mobile-build.cjs",
-    "eas-build-post-install": "npm run check:build"
+    "eas-build-post-install": "npm run check:build",
+    "postinstall": "patch-package && node scripts/prepare-face-assets.cjs",
+    "face:assets": "node scripts/prepare-face-assets.cjs"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
     "@expo/metro-runtime": "~4.0.1",
+    "@mediapipe/tasks-vision": "0.10.32",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-native-google-signin/google-signin": "^16.1.5",
+    "@react-native-ml-kit/face-detection": "2.0.1",
     "@tanstack/react-query": "^5.102.8",
     "axios": "^1.7.9",
     "expo": "~52.0.0",
     "expo-application": "~6.0.2",
     "expo-asset": "~11.0.4",
     "expo-auth-session": "~6.0.3",
+    "expo-camera": "~16.0.18",
     "expo-constants": "~17.0.0",
     "expo-crypto": "~14.0.2",
     "expo-dev-client": "~5.0.20",
@@ -61,6 +66,7 @@
     "@types/react": "~18.3.12",
     "jest": "^29.7.0",
     "jest-expo": "~52.0.0",
+    "patch-package": "^8.0.1",
     "react-test-renderer": "^18.3.1",
     "typescript": "^5.9.3"
   },

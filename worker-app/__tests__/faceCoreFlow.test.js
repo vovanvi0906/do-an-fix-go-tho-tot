@@ -77,3 +77,28 @@ it('consent and withdrawal use backend records without automatic enrollment', as
   expect(apiClient.delete).toHaveBeenCalledWith('/workers/me/face/template', expect.any(Object));
   expect(h.result.current.result.verified).toBe(false);
 });
+it('embedded capture creates scoped session before opening, no external camera is launched', async () => {
+  apiClient.post.mockResolvedValueOnce({ data: makeSession() });
+  const h = renderHook(() => useFaceVerification(undefined, undefined, 'daily', { embeddedCamera: true }));
+  await waitFor(() => expect(h.result.current.loadingStatus).toBe(false));
+  await act(async () => h.result.current.takeSelfie());
+  expect(h.result.current.cameraVisible).toBe(true);
+  expect(ImagePicker.launchCameraAsync).not.toHaveBeenCalled();
+  act(() => h.result.current.acceptCapture('file:///synthetic-live.jpg'));
+  expect(h.result.current.imageUri).toBe('file:///synthetic-live.jpg');
+  expect(h.result.current.cameraVisible).toBe(false);
+  act(() => h.result.current.cancel());
+  expect(h.result.current.imageUri).toBeNull();
+  expect(h.result.current.status).toBeNull();
+});
+it('review request is persisted explicitly and does not enroll or overwrite a template', async () => {
+  apiClient.get.mockResolvedValue({ data: { ...ready, reviewKind: 'REENROLLMENT', canRequestReview: true } });
+  const h = await hook(undefined,'reset');
+  apiClient.post.mockResolvedValueOnce({ submitted: true, request: { id: 'request-1', kind: 'REENROLLMENT' } });
+  await act(async () => h.result.current.requestReview(true));
+  expect(apiClient.post).toHaveBeenCalledWith('/workers/me/face/review-requests', { consent: true, kind: 'REENROLLMENT' }, expect.any(Object));
+  expect(h.result.current.status.reviewRequestSubmitted).toBe(true);
+  expect(h.result.current.result).toMatchObject({ requested:true, verified:false });
+  expect(h.result.current.status.templateVersion).toBe(1);
+  expect(ImagePicker.launchCameraAsync).not.toHaveBeenCalled();
+});

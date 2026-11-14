@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-export const VerificationResultModal = ({ visible, result, onClose, onRetry }) => {
+export const VerificationResultModal = ({ visible, result, onClose, onRetry, successLabel = 'Hoàn tất' }) => {
   if (!result) return null;
   const isSuccess = result.verified === true || result.enrolled === true;
   const cosine = Number.isFinite(result.identityScore) ? result.identityScore.toFixed(3) : null;
@@ -19,7 +19,7 @@ export const VerificationResultModal = ({ visible, result, onClose, onRetry }) =
             />
           </View>
           <Text nativeID="face-result-title" accessibilityRole="header" style={styles.title}>
-            {result.enrolled ? 'Đăng ký khuôn mặt đã được lưu' : isSuccess ? 'Xác thực thành công' : 'Chưa xác thực được'}
+            {result.requested ? 'Đã gửi yêu cầu kiểm tra' : result.enrolled ? 'Đăng ký khuôn mặt đã được lưu' : isSuccess ? 'Xác thực thành công' : 'Chưa xác thực được'}
           </Text>
           {cosine !== null ? <Text style={styles.scoreText}>
             Điểm tương đồng cosine: <Text style={styles.boldScore}>{cosine}</Text>
@@ -28,9 +28,9 @@ export const VerificationResultModal = ({ visible, result, onClose, onRetry }) =
             {result.message || (isSuccess ? 'Máy chủ đã xác nhận bằng chứng xác thực' : 'Vui lòng chụp lại rõ nét hơn')}
           </Text>
           <View style={styles.btnRow}>
-            {isSuccess ? (
+            {isSuccess || result.requested ? (
               <TouchableOpacity nativeID="face-result-close" accessibilityRole="button" style={styles.btnPrimary} onPress={onClose}>
-                <Text style={styles.btnPrimaryText}>Quay lại</Text>
+                <Text style={styles.btnPrimaryText}>{result.requested ? 'Đóng' : successLabel}</Text>
               </TouchableOpacity>
             ) : (
               <TouchableOpacity nativeID="face-result-retry" accessibilityRole="button" style={styles.btnRetry} onPress={onRetry}>

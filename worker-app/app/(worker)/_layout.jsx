@@ -1,4 +1,5 @@
 import React from 'react';
+import { FaceLoginPrompt } from '../../src/features/face-verification/components/FaceLoginPrompt';
 import { Stack, Redirect } from 'expo-router';
 
 import { useAuth } from '../../src/features/auth';
@@ -10,10 +11,13 @@ export default function WorkerLayout() {
     return <Redirect href="/(auth)/login-worker" />;
   }
   return (
-    <Stack screenOptions={{ headerShown: false }}>
+    <>
+    <Stack key={user.id} screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="job/[id]" options={{ headerShown: true, title: 'Chi tiết việc làm' }} />
       <Stack.Screen name="verification/face" options={{ headerShown: true, title: 'Xác thực khuôn mặt AI' }} />
     </Stack>
+    <FaceLoginPrompt key={user.id} />
+    </>
   );
 }

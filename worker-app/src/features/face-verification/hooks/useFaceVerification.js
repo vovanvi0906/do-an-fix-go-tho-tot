@@ -1,3 +1,6 @@
+import { faceErrorMessage } from '../utils/faceErrors';
+import { faceIdentityService } from '../services/faceIdentityService';
+import { deleteCaptureFile } from '../utils/captureFiles';
 import * as Crypto from 'expo-crypto';
 import { isCurrentFaceProof } from '../services/proof';
 import { apiClient } from '../../../services/api/apiClient';
@@ -5,7 +8,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { AppState } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
-export const useFaceVerification = (orderId, onSuccess, mode = 'daily') => {
+export const useFaceVerification = (orderId, onSuccess, mode = 'daily', { embeddedCamera = false } = {}) => {
   const lock = useRef(false);
   const captureSession = useRef(null);
   const nativeCameraOpen = useRef(false);
@@ -13,7 +16,13 @@ export const useFaceVerification = (orderId, onSuccess, mode = 'daily') => {
   const requestKey = useRef(null);
   const generation = useRef(0);
   const pending = useRef(null);
-  const [imageUri, setImageUri] = useState(null);
+  const [cameraVisible, setCameraVisible] = useState(false);
+  const imageRef = useRef(null);
+  const [imageUri, setRawImageUri] = useState(null);
+  const setImageUri = useCallback(uri => {
+    if (imageRef.current && imageRef.current !== uri) void deleteCaptureFile(imageRef.current);
+    imageRef.current = uri; setRawImageUri(uri);
+  }, []);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -27,6 +36,8 @@ export const useFaceVerification = (orderId, onSuccess, mode = 'daily') => {
     pending.current = controller;
     const attempt = ++generation.current;
     lock.current = false; setIsAnalyzing(false);
+    setCameraVisible(false);
+    captureSession.current = null; requestKey.current = null;
     setStatus(null); setStatusError(''); setLoadingStatus(true); setImageUri(null);
     setResult(null); setShowModal(false);
     try {
@@ -41,7 +52,7 @@ export const useFaceVerification = (orderId, onSuccess, mode = 'daily') => {
   const cancel = useCallback(() => {
     ++generation.current; pending.current?.abort(); captureSession.current = null; requestKey.current = null;
     lock.current = false; setIsAnalyzing(false); setLoadingStatus(false);
-    setImageUri(null); setResult(null); setShowModal(false); setStatus(null);
+    setCameraVisible(false); setImageUri(null); setResult(null); setShowModal(false); setStatus(null);
   }, []);
   useEffect(() => {
     refresh();
@@ -52,7 +63,7 @@ export const useFaceVerification = (orderId, onSuccess, mode = 'daily') => {
       } else if (nativeCameraOpen.current) nativeCameraSuspended.current = true;
       else cancel();
     });
-    return () => { ++generation.current; pending.current?.abort(); listener.remove(); };
+    return () => { ++generation.current; pending.current?.abort(); listener.remove(); void deleteCaptureFile(imageRef.current); };
   }, [refresh, cancel, orderId, mode]);
 
   const report = useCallback(message => {
@@ -65,9 +76,9 @@ export const useFaceVerification = (orderId, onSuccess, mode = 'daily') => {
       report('Xác thực chưa sẵn sàng. Vui lòng kiểm tra trạng thái đăng ký khuôn mặt.'); return;
     }
     const attempt = generation.current;
-    lock.current = true; nativeCameraOpen.current = true; setIsAnalyzing(true);
+    lock.current = true; nativeCameraOpen.current = !embeddedCamera; setIsAnalyzing(true);
     try {
-      const permission = await ImagePicker.requestCameraPermissionsAsync();
+      const permission = embeddedCamera ? { granted: true } : await ImagePicker.requestCameraPermissionsAsync();
       if (attempt !== generation.current) return;
       if (!permission.granted) { report('Cần quyền camera. Bạn có thể cấp quyền trong cài đặt rồi thử lại.'); return; }
       const purpose = mode === 'enrollment' ? 'ENROLLMENT' : orderId ? 'ORDER' : 'DAILY';
@@ -81,12 +92,22 @@ export const useFaceVerification = (orderId, onSuccess, mode = 'daily') => {
         if (!session.id || !session.nonce || session.purpose !== purpose || (session.orderId || null) !== (purpose === 'ORDER' ? orderId : null) || !(Date.parse(session.expiresAt) > Date.now())) throw new Error('INVALID_SESSION');
         captureSession.current = session;
       }
+      if (embeddedCamera) { setCameraVisible(true); return; }
       const capture = await ImagePicker.launchCameraAsync({ cameraType: ImagePicker.CameraType.front, allowsEditing: false, quality: .8 });
       if (attempt === generation.current && !capture.canceled && capture.assets?.[0]?.uri) setImageUri(capture.assets[0].uri);
     } catch (_) { if (attempt === generation.current) report('Chưa tạo được phiên hoặc mở camera. Kiểm tra kết nối và thử lại.'); }
     finally { nativeCameraOpen.current = false; if (attempt === generation.current) { lock.current = false; setIsAnalyzing(false); } }
-  }, [status, orderId, mode, report]);
+  }, [status, orderId, mode, report, embeddedCamera]);
 
+  const acceptCapture = useCallback(uri => {
+    setCameraVisible(false);
+    if (!captureSession.current || Date.parse(captureSession.current.expiresAt) <= Date.now()) {
+      void deleteCaptureFile(uri); captureSession.current = null; requestKey.current = null;
+      report('Phiên chụp đã hết hạn. Vui lòng bắt đầu lượt quét mới.'); return;
+    }
+    setImageUri(uri);
+  }, [report, setImageUri]);
+  const closeCamera = useCallback(() => { setCameraVisible(false); }, []);
   const verify = useCallback(async () => {
     if (lock.current) return;
     const session = captureSession.current;
@@ -116,7 +137,7 @@ export const useFaceVerification = (orderId, onSuccess, mode = 'daily') => {
       captureSession.current = null; requestKey.current = null;
       setResult(result); setShowModal(true); setImageUri(null);
       onSuccess?.(result);
-    } catch (_) { if (attempt === generation.current && !controller.signal.aborted) report('Chưa xác thực được. Kiểm tra kết nối, ánh sáng và thử lại; phiên hết hạn cần chụp lại.'); }
+    } catch (error) { if (attempt === generation.current && !controller.signal.aborted) report(faceErrorMessage(error, 'Chưa xác thực được. Kiểm tra kết nối, ánh sáng và thử lại; phiên hết hạn cần chụp lại.')); }
     finally { if (attempt === generation.current) { lock.current = false; setIsAnalyzing(false); } }
   }, [imageUri, mode, orderId, report, onSuccess]);
 
@@ -145,6 +166,19 @@ export const useFaceVerification = (orderId, onSuccess, mode = 'daily') => {
     finally { if (generation.current === attempt || generation.current === attempt + 1) { lock.current = false; setIsAnalyzing(false); } }
   }, [refresh, report]);
 
+  const requestReview = useCallback(async consent => {
+    if (consent !== true || lock.current) return;
+    lock.current = true; setIsAnalyzing(true);
+    const attempt = generation.current, controller = new AbortController(); pending.current = controller;
+    try {
+      const kind = status?.reviewKind || (mode === 'reset' || status?.enrollmentStatus === 'WITHDRAWN' || status?.templateVersion ? 'REENROLLMENT' : 'ENROLLMENT');
+      const response = await faceIdentityService.requestReview(kind, controller.signal);
+      if (attempt !== generation.current || response.submitted !== true || !response.request?.id) return;
+      setStatus(previous => ({ ...previous, reviewRequestSubmitted: true, reviewRequest: response.request, canRequestReview: false }));
+      setResult({ verified: false, requested: true, message: 'Yêu cầu kiểm tra danh tính đã được lưu. Quản trị viên sẽ xử lý; mẫu hiện tại chưa bị thay đổi.' }); setShowModal(true);
+    } catch (error) { if (attempt === generation.current && !controller.signal.aborted) report(error.message || 'Chưa gửi được yêu cầu. Vui lòng thử lại.'); }
+    finally { if (attempt === generation.current) { lock.current = false; setIsAnalyzing(false); } }
+  }, [mode, status, report]);
   const preflight = useCallback(async consent => {
     if (lock.current) return;
     if (consent !== true) { report('Vui lòng xác nhận đồng ý trước khi kiểm tra điều kiện.'); return; }
@@ -166,6 +200,6 @@ export const useFaceVerification = (orderId, onSuccess, mode = 'daily') => {
     // Preserve request key/session/capture for an idempotent retry after network failure.
     setShowModal(false); setResult(null);
   }, []);
-  return { imageUri, isAnalyzing, result, showModal, status, statusError, loadingStatus,
-    takeSelfie, verify, recordConsent, withdraw, preflight, refresh, cancel, reset };
+  return { cameraVisible, acceptCapture, closeCamera, imageUri, isAnalyzing, result, showModal, status, statusError, loadingStatus,
+    takeSelfie, verify, requestReview, recordConsent, withdraw, preflight, refresh, cancel, reset };
 };

@@ -1,0 +1,24 @@
+diff --git a/node_modules/@react-native-ml-kit/face-detection/android/build.gradle b/node_modules/@react-native-ml-kit/face-detection/android/build.gradle
+index dba1f24..fc4abe8 100644
+--- a/node_modules/@react-native-ml-kit/face-detection/android/build.gradle
++++ b/node_modules/@react-native-ml-kit/face-detection/android/build.gradle
+@@ -30,6 +30,7 @@ buildscript {
+ }
+ 
+ android {
++    namespace "com.rnmlkit.facedetection"
+     compileSdkVersion safeExtGet('compileSdkVersion', DEFAULT_COMPILE_SDK_VERSION)
+     buildToolsVersion safeExtGet('buildToolsVersion', DEFAULT_BUILD_TOOLS_VERSION)
+     defaultConfig {
+diff --git a/node_modules/@react-native-ml-kit/face-detection/android/src/main/AndroidManifest.xml b/node_modules/@react-native-ml-kit/face-detection/android/src/main/AndroidManifest.xml
+index ac041f5..35c4548 100644
+--- a/node_modules/@react-native-ml-kit/face-detection/android/src/main/AndroidManifest.xml
++++ b/node_modules/@react-native-ml-kit/face-detection/android/src/main/AndroidManifest.xml
+@@ -1,6 +1,5 @@
+ <!-- AndroidManifest.xml -->
+ 
+-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+-          package="com.rnmlkit.facedetection">
++<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+ 
+ </manifest>

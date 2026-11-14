@@ -36,6 +36,18 @@ FACE_LAB_SESSION_TTL_MS=20000 node ../server/scripts/face-lab/lab-stack.cjs
 FACEID_LAB_FIXTURES=<fixturePath> npx playwright test   # Playwright 1.65.1 ↔ Chromium build 1255
 ```
 
+E2E projects: `desktop` (1440×900) and `mobile` (390×844). Screenshots and JSON results go to
+`docs/ai-labs/evidence/$FACEID_LAB_EVIDENCE` (default `faceid-lab-ui-03/after`).
+
+UI layout (dashboard): left sidebar (Overview · Enrollment · Daily · Order · PAD/Identity/Session-Proof
+inspectors · Test Scenarios · Debug/Requests), topbar (Backend/AI/Database/PAD health, environment,
+Research/Face Core switch, Connection button), main workflow (stepper → camera stage → session/submit/
+negative-test cards → result with next action), right inspector rail, and a bottom Debug drawer
+(10-stage timeline, requests, correlation). Tokens are entered in the **Connection Settings** dialog only.
+Stepper states: Pending · Active · Success · Rejected (evaluated, not met) · Blocked (gate/policy,
+incl. PAD NOT_EVALUATED) · Error (technical) · Skipped · Measured (research score, not a decision).
+Redesign notes: [`docs/ai-labs/faceid-lab-ui-redesign-report.md`](../docs/ai-labs/faceid-lab-ui-redesign-report.md).
+
 The dev proxy forwards `/face-research` → `FACEID_LAB_RESEARCH_URL` (default `http://127.0.0.1:3107`)
 and `/api` → `FACEID_LAB_API_URL` (default `http://127.0.0.1:3000`; the lab stack uses `3118`). Both targets must be loopback.
 
