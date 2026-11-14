@@ -2,7 +2,11 @@
 export const SYMPTOM_RULES = {
   'dien-lanh': [
     ['ac_leak', 'Máy lạnh chảy nước', 'sua-may-lanh-chay-nuoc'],
-    ['ac_weak', 'Máy lạnh không lạnh / lạnh yếu', 'kiem-tra-may-lanh-khong-lanh-hoac-lanh-yeu'],
+    [
+      'ac_weak',
+      'Máy lạnh không lạnh / lạnh yếu',
+      'kiem-tra-may-lanh-khong-lanh-hoac-lanh-yeu',
+    ],
     ['fridge_frost', 'Ngăn mát tủ lạnh đóng tuyết', 'sua-ngan-mat-dong-tuyet'],
     ['fridge_leak', 'Tủ lạnh rò nước', 'sua-tu-lanh-ro-nuoc'],
     ['fridge_weak', 'Tủ lạnh không lạnh', 'sua-tu-lanh-khong-lanh'],
@@ -18,14 +22,20 @@ export const SYMPTOM_RULES = {
     ['pump_power', 'Bơm không chạy', 'sua-bom-khong-chay'],
   ],
   'sua-dien': [
-    ['switch_power', 'Công tắc không hoạt động', 'sua-cong-tac-khong-hoat-dong'],
+    [
+      'switch_power',
+      'Công tắc không hoạt động',
+      'sua-cong-tac-khong-hoat-dong',
+    ],
     ['wire_damage', 'Dây điện cũ / xuống cấp', 'thay-day-cu-xuong-cap'],
   ],
 };
 
 export function buildSymptomOptions(categorySlug, activeServices, target) {
   const categoryRules = SYMPTOM_RULES[categorySlug] || [];
-  const validRules = categoryRules.filter((r) => activeServices.some((s) => s.slug === r[2]));
+  const validRules = categoryRules.filter((r) =>
+    activeServices.some((s) => s.slug === r[2]),
+  );
   if (validRules.length > 0 && (!target || !target.id)) {
     return validRules.map(([value, label]) => ({ value, label }));
   }
@@ -34,7 +44,9 @@ export function buildSymptomOptions(categorySlug, activeServices, target) {
     : activeServices;
   if (!targetServices.length) return [];
 
-  const matched = validRules.filter(([,, slug]) => targetServices.some((s) => s.slug === slug));
+  const matched = validRules.filter(([, , slug]) =>
+    targetServices.some((s) => s.slug === slug),
+  );
   if (matched.length > 0) {
     return matched.map(([value, label]) => ({ value, label }));
   }

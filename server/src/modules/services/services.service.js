@@ -57,14 +57,29 @@ export class ServicesService {
 
   async getServices(categoryId, targetId, query = {}) {
     if (targetId) await activeTarget(this.prisma, targetId, categoryId);
-    const paged = query.page !== undefined || query.limit !== undefined || query.search !== undefined;
+    const paged =
+      query.page !== undefined ||
+      query.limit !== undefined ||
+      query.search !== undefined;
     const pagination = paged ? pageQuery(query) : null;
     const where = {
       isActive: true,
       ...(categoryId ? { categoryId } : {}),
       ...(targetId ? { targetId } : {}),
       category: { isActive: true },
-      ...(pagination?.search ? { OR: [{ name: { contains: pagination.search, mode: 'insensitive' } }, { description: { contains: pagination.search, mode: 'insensitive' } }] } : {}),
+      ...(pagination?.search
+        ? {
+            OR: [
+              { name: { contains: pagination.search, mode: 'insensitive' } },
+              {
+                description: {
+                  contains: pagination.search,
+                  mode: 'insensitive',
+                },
+              },
+            ],
+          }
+        : {}),
     };
 
     const items = await this.prisma.service.findMany({
@@ -78,7 +93,13 @@ export class ServicesService {
     });
     if (!pagination) return items; // Preserve legacy array contract.
     const total = await this.prisma.service.count({ where });
-    return { items, total, page: pagination.page, limit: pagination.limit, hasMore: pagination.page * pagination.limit < total };
+    return {
+      items,
+      total,
+      page: pagination.page,
+      limit: pagination.limit,
+      hasMore: pagination.page * pagination.limit < total,
+    };
   }
 
   async getServiceById(id) {
@@ -90,8 +111,14 @@ export class ServicesService {
       },
     });
 
-    if (!service || !service.isActive || (service.category && !service.category.isActive)) {
-      throw new NotFoundException('Dịch vụ không tồn tại hoặc đã ngừng hoạt động');
+    if (
+      !service ||
+      !service.isActive ||
+      (service.category && !service.category.isActive)
+    ) {
+      throw new NotFoundException(
+        'Dịch vụ không tồn tại hoặc đã ngừng hoạt động',
+      );
     }
 
     return service;

@@ -2,38 +2,84 @@ import { resolveDiagnosis } from './diagnosis-resolver';
 
 describe('Diagnosis target and service ranking', () => {
   let prisma, ai;
-  const category = { id: 'cat-1', slug: 'sua-dien', name: 'Sửa điện', basePrice: 100000 };
-  const target1 = { id: 'tgt-1', categoryId: 'cat-1', slug: 'cong-tac-dien', name: 'Công tắc điện', isActive: true };
-  const target2 = { id: 'tgt-2', categoryId: 'cat-1', slug: 'o-cam-dien', name: 'Ổ cắm điện', isActive: true };
-  const service1 = { id: 'srv-1', categoryId: 'cat-1', targetId: 'tgt-1', slug: 'sua-cong-tac-khong-hoat-dong',
-    name: 'Sửa công tắc không hoạt động', basePrice: 100000, maxPrice: 200000, unit: 'điểm', isActive: true };
-  const service2 = { id: 'srv-2', categoryId: 'cat-1', targetId: 'tgt-1', slug: 'thay-cong-tac-hong',
-    name: 'Thay công tắc hỏng', basePrice: 120000, maxPrice: null, unit: 'điểm', isActive: true };
+  const category = {
+    id: 'cat-1',
+    slug: 'sua-dien',
+    name: 'Sửa điện',
+    basePrice: 100000,
+  };
+  const target1 = {
+    id: 'tgt-1',
+    categoryId: 'cat-1',
+    slug: 'cong-tac-dien',
+    name: 'Công tắc điện',
+    isActive: true,
+  };
+  const target2 = {
+    id: 'tgt-2',
+    categoryId: 'cat-1',
+    slug: 'o-cam-dien',
+    name: 'Ổ cắm điện',
+    isActive: true,
+  };
+  const service1 = {
+    id: 'srv-1',
+    categoryId: 'cat-1',
+    targetId: 'tgt-1',
+    slug: 'sua-cong-tac-khong-hoat-dong',
+    name: 'Sửa công tắc không hoạt động',
+    basePrice: 100000,
+    maxPrice: 200000,
+    unit: 'điểm',
+    isActive: true,
+  };
+  const service2 = {
+    id: 'srv-2',
+    categoryId: 'cat-1',
+    targetId: 'tgt-1',
+    slug: 'thay-cong-tac-hong',
+    name: 'Thay công tắc hỏng',
+    basePrice: 120000,
+    maxPrice: null,
+    unit: 'điểm',
+    isActive: true,
+  };
 
   beforeEach(() => {
     prisma = {
       serviceCategory: { findMany: jest.fn().mockResolvedValue([category]) },
-      serviceTarget: { findMany: jest.fn().mockResolvedValue([target1, target2]) },
+      serviceTarget: {
+        findMany: jest.fn().mockResolvedValue([target1, target2]),
+      },
       service: { findMany: jest.fn().mockResolvedValue([service1, service2]) },
     };
     ai = {
       confidenceThreshold: 0.6,
       diagnoseIncident: jest.fn().mockResolvedValue({
-        engine: 'model', confidence: 0.85, suggestedCategoryId: 'sua-dien',
-        suggestedTargetId: 'tgt-1', suggestedTargetName: 'Công tắc điện',
+        engine: 'model',
+        confidence: 0.85,
+        suggestedCategoryId: 'sua-dien',
+        suggestedTargetId: 'tgt-1',
+        suggestedTargetName: 'Công tắc điện',
       }),
     };
   });
 
   it('rejects target belonging to a different category', async () => {
     await expect(
-      resolveDiagnosis(prisma, ai, { imageUrl: 'https://img.test/1.jpg', answers: { categoryId: 'cat-1', targetId: 'foreign-target' } })
+      resolveDiagnosis(prisma, ai, {
+        imageUrl: 'https://img.test/1.jpg',
+        answers: { categoryId: 'cat-1', targetId: 'foreign-target' },
+      }),
     ).rejects.toThrow('Thiết bị không thuộc danh mục');
   });
 
   it('rejects non-existent target with BadRequestException', async () => {
     await expect(
-      resolveDiagnosis(prisma, ai, { imageUrl: 'https://img.test/1.jpg', answers: { categoryId: 'cat-1', targetId: 'non-existent' } })
+      resolveDiagnosis(prisma, ai, {
+        imageUrl: 'https://img.test/1.jpg',
+        answers: { categoryId: 'cat-1', targetId: 'non-existent' },
+      }),
     ).rejects.toThrow('Thiết bị không thuộc danh mục');
   });
 
@@ -43,13 +89,19 @@ describe('Diagnosis target and service ranking', () => {
       answers: { categoryId: 'cat-1', targetId: 'tgt-1' },
     });
     expect(res.status).toBe('needs_more_info');
-    expect(res.target).toEqual({ id: 'tgt-1', slug: 'cong-tac-dien', name: 'Công tắc điện' });
+    expect(res.target).toEqual({
+      id: 'tgt-1',
+      slug: 'cong-tac-dien',
+      name: 'Công tắc điện',
+    });
     expect(res.availableTargets).toHaveLength(2);
     expect(res.availableServices).toHaveLength(2);
   });
 
   it('does not claim internal invisible faults from image alone', async () => {
-    const res = await resolveDiagnosis(prisma, ai, { imageUrl: 'https://img.test/1.jpg' });
+    const res = await resolveDiagnosis(prisma, ai, {
+      imageUrl: 'https://img.test/1.jpg',
+    });
     expect(res.status).toBe('needs_more_info');
     expect(res.suggestedServiceId).toBeNull();
     expect(res.observableSigns).toEqual(['Nhận diện danh mục: Sửa điện']);
@@ -59,7 +111,11 @@ describe('Diagnosis target and service ranking', () => {
   it('ranks services and distinguishes rule ranking score from model confidence', async () => {
     const res = await resolveDiagnosis(prisma, ai, {
       imageUrl: 'https://img.test/1.jpg',
-      answers: { categoryId: 'cat-1', targetId: 'tgt-1', symptom: 'switch_power' },
+      answers: {
+        categoryId: 'cat-1',
+        targetId: 'tgt-1',
+        symptom: 'switch_power',
+      },
     });
     expect(res.status).toBe('suggested');
     expect(res.source).toBe('rules');
@@ -71,47 +127,109 @@ describe('Diagnosis target and service ranking', () => {
 
   it('excludes inactive services from suggestions', async () => {
     prisma.service.findMany.mockResolvedValue([]);
-    const res = await resolveDiagnosis(prisma, ai, { imageUrl: 'https://img.test/1.jpg' });
+    const res = await resolveDiagnosis(prisma, ai, {
+      imageUrl: 'https://img.test/1.jpg',
+    });
     expect(res.availableServices).toEqual([]);
     expect(res.suggestedServiceId).toBeNull();
   });
 
   it('rejects invalid or missing imageUrl with BadRequestException', async () => {
-    await expect(resolveDiagnosis(prisma, ai, { imageUrl: '' })).rejects.toThrow('Dữ liệu chẩn đoán không hợp lệ');
-    await expect(resolveDiagnosis(prisma, ai, null)).rejects.toThrow('Dữ liệu chẩn đoán không hợp lệ');
+    await expect(
+      resolveDiagnosis(prisma, ai, { imageUrl: '' }),
+    ).rejects.toThrow('Dữ liệu chẩn đoán không hợp lệ');
+    await expect(resolveDiagnosis(prisma, ai, null)).rejects.toThrow(
+      'Dữ liệu chẩn đoán không hợp lệ',
+    );
   });
 
   it('handles unknown object with image_uncertain status', async () => {
-    ai.diagnoseIncident.mockResolvedValue({ engine: 'model', confidence: 0.35, suggestedCategoryId: 'unknown' });
-    const res = await resolveDiagnosis(prisma, ai, { imageUrl: 'https://img.test/1.jpg' });
+    ai.diagnoseIncident.mockResolvedValue({
+      engine: 'model',
+      confidence: 0.35,
+      suggestedCategoryId: 'unknown',
+    });
+    const res = await resolveDiagnosis(prisma, ai, {
+      imageUrl: 'https://img.test/1.jpg',
+    });
     expect(res.status).toBe('manual_selection');
     expect(res.reason).toBe('image_uncertain');
     expect(res.suggestedCategoryId).toBeNull();
   });
   it('canonicalizes a fallback AI slug before the UI confirms it', async () => {
-    ai.diagnoseIncident.mockResolvedValue({ engine: 'model', confidence: .85, suggestedCategoryId: 'sua-dien', suggestedTargetId: target1.slug });
-    const first = await resolveDiagnosis(prisma, ai, { imageUrl: 'https://img.test/1.jpg' });
+    ai.diagnoseIncident.mockResolvedValue({
+      engine: 'model',
+      confidence: 0.85,
+      suggestedCategoryId: 'sua-dien',
+      suggestedTargetId: target1.slug,
+    });
+    const first = await resolveDiagnosis(prisma, ai, {
+      imageUrl: 'https://img.test/1.jpg',
+    });
     expect(first.suggestedTargetId).toBe(target1.id);
     expect(first.questions).toEqual([]);
-    const confirmed = await resolveDiagnosis(prisma, ai, { imageUrl: first.imageUrl, answers: { categoryId: first.suggestedCategoryId, targetId: first.suggestedTargetId } });
+    const confirmed = await resolveDiagnosis(prisma, ai, {
+      imageUrl: first.imageUrl,
+      answers: {
+        categoryId: first.suggestedCategoryId,
+        targetId: first.suggestedTargetId,
+      },
+    });
     expect(confirmed.target.id).toBe(target1.id);
   });
   it('drops unknown AI target IDs instead of passing them to confirmation', async () => {
-    ai.diagnoseIncident.mockResolvedValue({ engine: 'model', confidence: .85, suggestedCategoryId: 'sua-dien', suggestedTargetId: 'stale-id' });
-    expect((await resolveDiagnosis(prisma, ai, { imageUrl: 'https://img.test/1.jpg' })).suggestedTargetId).toBeNull();
+    ai.diagnoseIncident.mockResolvedValue({
+      engine: 'model',
+      confidence: 0.85,
+      suggestedCategoryId: 'sua-dien',
+      suggestedTargetId: 'stale-id',
+    });
+    expect(
+      (
+        await resolveDiagnosis(prisma, ai, {
+          imageUrl: 'https://img.test/1.jpg',
+        })
+      ).suggestedTargetId,
+    ).toBeNull();
   });
   it('does not offer or accept another target service or symptom', async () => {
     const answers = { categoryId: category.id, targetId: target2.id };
-    const result = await resolveDiagnosis(prisma, ai, { imageUrl: 'https://img.test/1.jpg', answers });
-    expect(result.availableServices).toEqual([]); expect(result.questions).toEqual([]);
-    await expect(resolveDiagnosis(prisma, ai, { imageUrl: result.imageUrl, answers: { ...answers, serviceId: service1.id } })).rejects.toThrow();
-    await expect(resolveDiagnosis(prisma, ai, { imageUrl: result.imageUrl, answers: { ...answers, symptom: 'switch_power' } })).rejects.toThrow();
+    const result = await resolveDiagnosis(prisma, ai, {
+      imageUrl: 'https://img.test/1.jpg',
+      answers,
+    });
+    expect(result.availableServices).toEqual([]);
+    expect(result.questions).toEqual([]);
+    await expect(
+      resolveDiagnosis(prisma, ai, {
+        imageUrl: result.imageUrl,
+        answers: { ...answers, serviceId: service1.id },
+      }),
+    ).rejects.toThrow();
+    await expect(
+      resolveDiagnosis(prisma, ai, {
+        imageUrl: result.imageUrl,
+        answers: { ...answers, symptom: 'switch_power' },
+      }),
+    ).rejects.toThrow();
   });
 
   it('never invents a target by matching an absent AI ID to a null slug', async () => {
-    prisma.serviceTarget.findMany.mockResolvedValue([{ ...target1, slug: null }]);
-    ai.diagnoseIncident.mockResolvedValue({ engine: 'model', confidence: .85, suggestedCategoryId: 'sua-dien', suggestedTargetId: null });
-    expect((await resolveDiagnosis(prisma, ai, { imageUrl: 'https://img.test/1.jpg' })).suggestedTargetId).toBeNull();
+    prisma.serviceTarget.findMany.mockResolvedValue([
+      { ...target1, slug: null },
+    ]);
+    ai.diagnoseIncident.mockResolvedValue({
+      engine: 'model',
+      confidence: 0.85,
+      suggestedCategoryId: 'sua-dien',
+      suggestedTargetId: null,
+    });
+    expect(
+      (
+        await resolveDiagnosis(prisma, ai, {
+          imageUrl: 'https://img.test/1.jpg',
+        })
+      ).suggestedTargetId,
+    ).toBeNull();
   });
-
 });

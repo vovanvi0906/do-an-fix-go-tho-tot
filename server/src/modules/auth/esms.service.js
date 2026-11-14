@@ -52,8 +52,7 @@ export class EsmsService {
    */
   async sendOtpSms(phone, otpCode) {
     const apiKey = process.env.ESMS_API_KEY;
-    const secretKey =
-      process.env.ESMS_SECRET_KEY;
+    const secretKey = process.env.ESMS_SECRET_KEY;
     const brandname = (process.env.ESMS_BRANDNAME || '').trim();
     const smsType = process.env.ESMS_SMS_TYPE || '2';
     const sandbox = process.env.ESMS_SANDBOX || '0';

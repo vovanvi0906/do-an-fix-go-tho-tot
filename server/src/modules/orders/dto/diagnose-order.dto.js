@@ -20,7 +20,11 @@ export class DiagnoseOrderDto {
   @IsString({ message: 'description phải là chuỗi ký tự' })
   description;
 
-  @ApiPropertyOptional({ type: Object, description: "Câu trả lời: categoryId, targetId, symptomId/symptomIds và serviceId; symptom legacy vẫn hỗ trợ" })
+  @ApiPropertyOptional({
+    type: Object,
+    description:
+      'Câu trả lời: categoryId, targetId, symptomId/symptomIds và serviceId; symptom legacy vẫn hỗ trợ',
+  })
   @IsOptional()
   @IsObject()
   answers;

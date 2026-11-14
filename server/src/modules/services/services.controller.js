@@ -20,21 +20,27 @@ export class ServicesController {
 
   @Get('service-categories')
   @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
-  @ApiOperation({ summary: 'Lấy danh sách các danh mục dịch vụ đang hoạt động' })
+  @ApiOperation({
+    summary: 'Lấy danh sách các danh mục dịch vụ đang hoạt động',
+  })
   async getCategories() {
     return this.servicesService.getCategories();
   }
 
   @Get('service-categories/tree')
   @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
-  @ApiOperation({ summary: 'Lấy toàn bộ cây phân cấp Danh mục -> Đối tượng -> Dịch vụ' })
+  @ApiOperation({
+    summary: 'Lấy toàn bộ cây phân cấp Danh mục -> Đối tượng -> Dịch vụ',
+  })
   async getCategoryTree() {
     return this.servicesService.getCategoryTree();
   }
 
   @Get('service-targets')
   @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
-  @ApiOperation({ summary: 'Lấy danh sách Đối tượng/Thiết bị sửa chữa (Targets)' })
+  @ApiOperation({
+    summary: 'Lấy danh sách Đối tượng/Thiết bị sửa chữa (Targets)',
+  })
   @ApiQuery({ name: 'categoryId', required: false, type: String })
   @Bind(Query('categoryId'))
   async getTargets(categoryId) {
@@ -43,7 +49,9 @@ export class ServicesController {
 
   @Get('services')
   @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
-  @ApiOperation({ summary: 'Lấy danh sách dịch vụ (lọc theo categoryId hoặc targetId)' })
+  @ApiOperation({
+    summary: 'Lấy danh sách dịch vụ (lọc theo categoryId hoặc targetId)',
+  })
   @ApiQuery({ name: 'categoryId', required: false, type: String })
   @ApiQuery({ name: 'targetId', required: false, type: String })
   @ApiQuery({ name: 'page', required: false, type: Number })
