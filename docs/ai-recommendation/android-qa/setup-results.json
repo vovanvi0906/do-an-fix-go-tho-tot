@@ -1,0 +1,66 @@
+{
+  "checkedAt": "2026-11-14T09:41:49.244Z",
+  "serial": "10HF8GFBU200050",
+  "database": "127.0.0.1:55440/fixgo_android_qa",
+  "redis": "127.0.0.1:56381",
+  "featureFlag": false,
+  "checks": {
+    "schemaDependencies": "PASS",
+    "noFaceProofOrTemplates": "PASS",
+    "faceFlagsClosed": "PASS",
+    "redisPing": "PASS",
+    "backendHealth": "PASS",
+    "backendSwagger": "PASS",
+    "aiV2Registered": "PASS",
+    "padRemainsNotEvaluated": "PASS",
+    "aiV2HttpContract": "PASS",
+    "catalogCategories": "PASS",
+    "catalogTargets": "PASS",
+    "catalogServicePaging": "PASS",
+    "symptomFeatureGate": "PASS",
+    "manualDiagnosisDbPrice": "PASS",
+    "diagnosisDidNotCreateOrder": "PASS",
+    "targetMismatchRejected": "PASS",
+    "customerPasswordLogin": "PASS",
+    "workerPasswordLogin": "PASS",
+    "adminPasswordLogin": "PASS",
+    "metro8081": "PASS",
+    "metro8082": "PASS",
+    "vivoReady": "PASS",
+    "adbReverse": "PASS",
+    "unchanged:server/.env": "PASS",
+    "unchanged:customer-app/.env.local": "PASS",
+    "unchanged:worker-app/.env.local": "PASS",
+    "unchanged:ondemand_postgres": "PASS",
+    "unchanged:ondemand_redis": "PASS"
+  },
+  "nativeAndroidAcceptance": "NOT_RUN",
+  "cloudImageUpload": "BLOCKED_QA_CREDENTIALS_NOT_CONFIGURED",
+  "builds": {
+    "customer": {
+      "status": "PASS",
+      "applicationId": "com.fixgo.app",
+      "apk": "customer-app/android/app/build/outputs/apk/debug/app-debug.apk",
+      "sha256": "974c9beeaa664a0a2b8b8d1c2daa624938f8bb375daba727f9f59922a52403a9"
+    },
+    "worker": {
+      "status": "PASS",
+      "applicationId": "com.fixgo.worker",
+      "apk": "worker-app/android/app/build/outputs/apk/debug/app-debug.apk",
+      "sha256": "a081aa33bf865d023b763cb2fbbe26ac433ef91e053df84818b1b9f0da4d605d"
+    }
+  },
+  "metroAndroidBundles": {
+    "customer": {
+      "status": "PASS",
+      "bytes": 10451219
+    },
+    "worker": {
+      "status": "PASS",
+      "bytes": 9496357
+    }
+  },
+  "swaggerDtoRegression": "PASS",
+  "approvalGuard": "PASS_REFUSES_UNREVIEWED_DATA",
+  "installedByThisTask": false
+}
