@@ -1,11 +1,11 @@
 # FIXGO — AI RECOMMENDATION V3
 ## Đặc tả cập nhật toàn diện: nhận diện triệu chứng, đề xuất dịch vụ và trải nghiệm sau khi quét ảnh
 
-**Ngày lập:** 14/11/2026  
-**Dự án:** FixGo — Khóa luận tốt nghiệp  
-**Repository triển khai:** `~/Work/do-an-fix-go-tho-tot`  
-**Mốc tham chiếu:** `integration/fixgo-sprint-02`, HEAD được người dùng xác nhận `b50075f`  
-**Tình trạng tài liệu:** Đặc tả yêu cầu/đề xuất; **chưa phải báo cáo chức năng đã triển khai hoặc được nghiệm thu**.  
+**Ngày lập:** 14/11/2026<br>
+**Dự án:** FixGo — Khóa luận tốt nghiệp<br>
+**Repository triển khai:** `~/Work/do-an-fix-go-tho-tot`<br>
+**Mốc tham chiếu:** `integration/fixgo-sprint-02`, HEAD được người dùng xác nhận `b50075f`<br>
+**Tình trạng tài liệu:** Đặc tả yêu cầu/đề xuất; **chưa phải báo cáo chức năng đã triển khai hoặc được nghiệm thu**.<br>
 **Phạm vi:** Customer AI Scan, AI inference, catalog Category–Target–Symptom–Service, API, quản trị dữ liệu, UX/UI, kiểm thử. Không mở khóa hoặc sửa Face Core/PAD.
 
 ---

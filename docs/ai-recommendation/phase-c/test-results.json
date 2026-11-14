@@ -41,8 +41,8 @@
     "server/prisma/schema.prisma": "00e9f9235e7db100543f99c63366640970d9d32f76ef316ca6c07b3bb30e0b4b",
     "server/prisma/migrations/20261114000000_symptom_catalog_v3/migration.sql": "a4d53ab6c40f8cd694368c44bf238293cac545e1175f159ca924db46438a8528",
     "server/prisma/rollback/symptom_catalog_v3.sql": "b66a5d2dd707bbdbcae70857a5215de571fd54fd904aeb66ad6659800b43cd7b",
-    "docs/ai-recommendation/data/symptoms.csv": "8238902239e7c844a9d2383c5bf864e0d05fd1b5642a9a9264897a1f417027ac",
-    "docs/ai-recommendation/data/symptom-service-mappings.csv": "e8ba438ae90ae65f9c0b5deca0a730c724a6c83a73aa9a1e2705cb0833397422"
+    "docs/ai-recommendation/data/symptoms.csv": "f0cab35eb4a17faaf406d95ded465938f6000fab0fe0a47349c7362395bcb4bf",
+    "docs/ai-recommendation/data/symptom-service-mappings.csv": "f5994aac4c4aca7d968b7b7dcb78ace5d7ccf65d218b307f83b84a31362d6f70"
   },
   "scope": "Automated/disposable only. No production deploy, data import, native acceptance, model accuracy or PAD inference claim."
 }

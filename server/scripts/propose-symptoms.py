@@ -46,7 +46,7 @@ for s in data['services']:
     mappings.append(dict(symptom_id=symptom_id, service_id=s['id'], service_name=raw, target_id=t['id'], priority=0, is_active='false', review_status='NEEDS_REVIEW', reason='Đề xuất từ phạm vi dịch vụ; cần người quản trị xác nhận', review_notes=warning))
 for filename, rows in [('symptoms.csv', symptoms), ('symptom-service-mappings.csv', mappings)]:
     with (out/filename).open('w', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=list(rows[0]) if rows else [])
+        writer = csv.DictWriter(f, fieldnames=list(rows[0]) if rows else [], lineterminator="\n")
         writer.writeheader(); writer.writerows(rows)
 counts = {}
 for code, _ in issues: counts[code] = counts.get(code, 0) + 1
