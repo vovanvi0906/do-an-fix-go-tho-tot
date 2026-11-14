@@ -2,13 +2,16 @@ from typing import Any, Dict, List, Optional
 import torch
 
 
+TARGET_MIN_SIMILARITY = 0.20
+
+
 def match_targets(
     img_feat: Optional[torch.Tensor],
     category_slug: Optional[str],
     targets_dict: Dict[str, Dict[str, Any]],
     target_embeddings: Optional[Any],
     top_k: int = 3,
-    min_similarity: float = 0.20,
+    min_similarity: float = TARGET_MIN_SIMILARITY,
 ) -> List[Dict[str, Any]]:
     if img_feat is None or not targets_dict or not category_slug:
         return []

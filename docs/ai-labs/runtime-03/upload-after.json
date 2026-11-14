@@ -1,0 +1,40 @@
+{
+  "boundedAttempts": 4,
+  "records": [
+    {
+      "attempt": 1,
+      "valid": true,
+      "status": 201,
+      "code": null,
+      "diagnosisStatus": "needs_more_info",
+      "elapsedMs": 3786.781345,
+      "requestId": "lab03-upload-after-0"
+    },
+    {
+      "attempt": 2,
+      "valid": true,
+      "status": 201,
+      "code": null,
+      "diagnosisStatus": "needs_more_info",
+      "elapsedMs": 1978.4001009999997,
+      "requestId": "lab03-upload-after-1"
+    },
+    {
+      "attempt": 3,
+      "valid": true,
+      "status": 201,
+      "code": null,
+      "diagnosisStatus": "needs_more_info",
+      "elapsedMs": 1798.1874430000007,
+      "requestId": "lab03-upload-after-2"
+    },
+    {
+      "attempt": 4,
+      "valid": false,
+      "status": 400,
+      "code": "IMAGE_INVALID",
+      "elapsedMs": 4.05540099999962,
+      "requestId": "lab03-upload-after-3"
+    }
+  ]
+}

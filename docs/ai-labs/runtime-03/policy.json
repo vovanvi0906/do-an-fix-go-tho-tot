@@ -1,0 +1,152 @@
+{
+  "cases": [
+    {
+      "name": "one_service",
+      "result": "PASS",
+      "status": 200,
+      "code": null,
+      "items": [
+        {
+          "id": "1f3bb8b7-d567-4ef6-ad2e-02375d47a18e",
+          "price": 110000,
+          "reason": "Theo triệu chứng bạn xác nhận: [TEST] one",
+          "targetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+          "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+        }
+      ]
+    },
+    {
+      "name": "exact_three_mappings",
+      "result": "PASS",
+      "status": 200,
+      "code": null,
+      "items": [
+        {
+          "id": "1f3bb8b7-d567-4ef6-ad2e-02375d47a18e",
+          "price": 110000,
+          "reason": "Theo triệu chứng bạn xác nhận: [TEST] three",
+          "targetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+          "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+        },
+        {
+          "id": "3372d9f2-bf36-4a63-aa45-1dba4a4190ca",
+          "price": 120000,
+          "reason": "Theo triệu chứng bạn xác nhận: [TEST] three",
+          "targetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+          "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+        },
+        {
+          "id": "9a71b6a8-5fac-49ca-ae52-a763b67e18df",
+          "price": 130000,
+          "reason": "Theo triệu chứng bạn xác nhận: [TEST] three",
+          "targetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+          "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+        }
+      ]
+    },
+    {
+      "name": "four_valid_mappings_cap_three",
+      "result": "PASS",
+      "status": 200,
+      "code": null,
+      "items": [
+        {
+          "id": "1f3bb8b7-d567-4ef6-ad2e-02375d47a18e",
+          "price": 110000,
+          "reason": "Theo triệu chứng bạn xác nhận: [TEST] many",
+          "targetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+          "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+        },
+        {
+          "id": "3372d9f2-bf36-4a63-aa45-1dba4a4190ca",
+          "price": 120000,
+          "reason": "Theo triệu chứng bạn xác nhận: [TEST] many",
+          "targetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+          "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+        },
+        {
+          "id": "9a71b6a8-5fac-49ca-ae52-a763b67e18df",
+          "price": 130000,
+          "reason": "Theo triệu chứng bạn xác nhận: [TEST] many",
+          "targetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+          "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+        }
+      ]
+    },
+    {
+      "name": "empty",
+      "result": "PASS",
+      "status": 200,
+      "code": null,
+      "items": []
+    },
+    {
+      "name": "inactive-mapping",
+      "result": "PASS",
+      "status": 200,
+      "code": null,
+      "items": []
+    },
+    {
+      "name": "inactive-service",
+      "result": "PASS",
+      "status": 200,
+      "code": null,
+      "items": []
+    },
+    {
+      "name": "needs-review",
+      "result": "PASS",
+      "status": 400,
+      "code": "SYMPTOM_NOT_AVAILABLE"
+    },
+    {
+      "name": "inactive",
+      "result": "PASS",
+      "status": 400,
+      "code": "SYMPTOM_NOT_AVAILABLE"
+    },
+    {
+      "name": "foreign",
+      "result": "PASS",
+      "status": 400,
+      "code": "SYMPTOM_TARGET_MISMATCH"
+    },
+    {
+      "name": "category_target_mismatch",
+      "result": "PASS",
+      "status": 400,
+      "code": "TARGET_CATEGORY_MISMATCH"
+    },
+    {
+      "name": "limit_four_rejected",
+      "result": "PASS",
+      "status": 400,
+      "code": "INVALID_LIMIT"
+    },
+    {
+      "name": "public_approved_active_ownership_filter",
+      "result": "PASS",
+      "count": 6
+    },
+    {
+      "name": "catalog_disabled_is_503_not_empty",
+      "result": "PASS",
+      "code": "SYMPTOM_CATALOG_NOT_ENABLED"
+    },
+    {
+      "name": "backend_debug_unauthorized",
+      "result": "PASS",
+      "status": 401
+    },
+    {
+      "name": "ai_debug_unauthorized",
+      "result": "PASS",
+      "status": 401
+    },
+    {
+      "name": "same_request_telemetry_and_unchanged_thresholds",
+      "result": "PASS"
+    }
+  ]
+}

@@ -58,6 +58,8 @@ def fetch_targets_from_backend() -> Dict[str, Dict[str, Any]]:
                         f"a photo of {slug.replace('-', ' ')}",
                     ]
                 targets_dict[slug] = {
+                    "id": item.get("id"),
+                    "slug": slug,
                     "name": name,
                     "category": cat_slug,
                     "prompts": prompts,
@@ -80,6 +82,9 @@ def reload_targets() -> int:
     with torch.no_grad():
         target_embeds = [_embed_prompts(_dynamic_targets[k]["prompts"]) for k in target_keys]
         _target_embeddings = (target_keys, torch.cat(target_embeds, dim=0))
+    from recommendation.catalog_manager import publish_catalog_snapshot
+    source = "static_fallback" if _dynamic_targets is TARGET_PROMPTS else "backend"
+    publish_catalog_snapshot(_dynamic_targets, _target_embeddings, source)
     logger.info(f"🔄 [CLIP] Đã đồng bộ và tính Embeddings cho {len(target_keys)} đối tượng.")
     return len(target_keys)
 

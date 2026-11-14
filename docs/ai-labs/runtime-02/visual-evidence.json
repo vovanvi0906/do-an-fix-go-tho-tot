@@ -1,0 +1,85 @@
+{
+  "at": "2026-11-14T11:46:42.034Z",
+  "browser": "159.0.8154.6",
+  "kind": "real_browser_actual_services_except_explicit_timeout_fault",
+  "checks": [
+    {
+      "name": "desktop_empty",
+      "result": "PASS",
+      "notes": {
+        "viewport": "1440x1000",
+        "overflow": false
+      }
+    },
+    {
+      "name": "mobile_layout",
+      "result": "PASS",
+      "notes": {
+        "viewport": "390x844"
+      }
+    },
+    {
+      "name": "upload_preview",
+      "result": "PASS"
+    },
+    {
+      "name": "timeout_error_stage",
+      "result": "PASS",
+      "notes": "Browser request held before upstream; not model inference failure."
+    },
+    {
+      "name": "retry_real_upload",
+      "result": "PASS",
+      "notes": "Backend + V2 completed after network fault removed"
+    },
+    {
+      "name": "device_confirm_then_catalog_disabled",
+      "result": "PASS"
+    },
+    {
+      "name": "no_fabricated_symptom_options",
+      "result": "PASS"
+    },
+    {
+      "name": "mobile_diagnosis_no_horizontal_overflow",
+      "result": "PASS"
+    },
+    {
+      "name": "debug_timeline",
+      "result": "PASS"
+    },
+    {
+      "name": "v1_clip_yolo_inspector",
+      "result": "PASS"
+    },
+    {
+      "name": "browser_real_http_synthetic_category_benchmark",
+      "result": "PASS",
+      "notes": {
+        "metrics": {
+          "samples": 1,
+          "completed": 1,
+          "errors": 0,
+          "categoryAccuracy": 1,
+          "targetTop3": null,
+          "serviceRecallAt3": null,
+          "abstentionRate": 0,
+          "latencyP50Ms": 1856.8999999999069,
+          "latencyP95Ms": 1856.8999999999069,
+          "inferenceMeanMs": 101.20000000018626
+        },
+        "limitations": "One synthetic category-only smoke; target/service ground truth absent, not generalization accuracy"
+      }
+    },
+    {
+      "name": "no_javascript_errors",
+      "result": "PASS",
+      "notes": []
+    },
+    {
+      "name": "browser_approved_symptom_selection_and_service_success",
+      "result": "BLOCKED",
+      "notes": "Main DB symptom schema absent and shared flag unset. No mock success or self approval."
+    }
+  ]
+}

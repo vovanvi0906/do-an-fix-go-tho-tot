@@ -1,3 +1,4 @@
+import { DiagnosisUploadInterceptor } from './diagnosis/diagnosis-upload.interceptor';
 import { FaceCaptureBlockedGuard } from '../workers/face/face-capture-blocked.guard';
 import { OrderAccessGuard } from './order-access.guard';
 import {
@@ -17,7 +18,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { workerFaceStorage, incidentStorage } from '../../config/cloudinary.config';
+import { workerFaceStorage } from '../../config/cloudinary.config';
 import {
   ApiTags,
   ApiBearerAuth,
@@ -69,7 +70,7 @@ export class OrdersController {
   })
   @Bind(Req(), Body())
   async diagnose(req, diagnoseDto) {
-    return this.ordersService.diagnose(req.user?.userId || req.user?.id, diagnoseDto);
+    return this.ordersService.diagnose(req.user?.userId || req.user?.id, { ...diagnoseDto, requestId:req.requestId });
   }
 
   /**
@@ -77,7 +78,7 @@ export class OrdersController {
    */
   @Public()
   @Post('diagnose-upload')
-  @UseInterceptors(FileInterceptor('image', { storage: incidentStorage }))
+  @UseInterceptors(DiagnosisUploadInterceptor)
   @ApiOperation({
     summary: 'Upload trực tiếp ảnh sự cố từ mobile, lưu Cloudinary và gọi AI chẩn đoán',
   })
@@ -95,6 +96,7 @@ export class OrdersController {
       imageUrl,
       description,
       answers,
+      requestId:req.requestId,
     });
   }
 

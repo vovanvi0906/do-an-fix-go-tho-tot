@@ -1,0 +1,109 @@
+{
+  "at": "2026-11-14T12:40:36.249Z",
+  "browser": "159.0.8154.6",
+  "fixtures": "TEST_APPROVAL_ONLY",
+  "inference": "real pixels synthetic dataset",
+  "checks": [
+    {
+      "name": "real_cloudinary_model_diagnosis",
+      "result": "PASS"
+    },
+    {
+      "name": "approved_symptoms_loaded",
+      "result": "PASS"
+    },
+    {
+      "name": "mapping_one",
+      "result": "PASS",
+      "notes": {
+        "expected": 1
+      }
+    },
+    {
+      "name": "reason_and_price_from_db",
+      "result": "PASS"
+    },
+    {
+      "name": "mapping_three",
+      "result": "PASS",
+      "notes": {
+        "expected": 3
+      }
+    },
+    {
+      "name": "mapping_many",
+      "result": "PASS",
+      "notes": {
+        "expected": 3
+      }
+    },
+    {
+      "name": "mobile_no_overflow",
+      "result": "PASS"
+    },
+    {
+      "name": "mapping_empty",
+      "result": "PASS",
+      "notes": {
+        "expected": 0
+      }
+    },
+    {
+      "name": "empty_mapping_distinct",
+      "result": "PASS"
+    },
+    {
+      "name": "mapping_inactive-mapping",
+      "result": "PASS",
+      "notes": {
+        "expected": 0
+      }
+    },
+    {
+      "name": "mapping_inactive-service",
+      "result": "PASS",
+      "notes": {
+        "expected": 0
+      }
+    },
+    {
+      "name": "target_change_resets_downstream",
+      "result": "PASS"
+    },
+    {
+      "name": "other_target_scoped_symptoms",
+      "result": "PASS"
+    },
+    {
+      "name": "authenticated_inspector_browser",
+      "result": "PASS"
+    },
+    {
+      "name": "benchmark_full_test_fixture_pipeline",
+      "result": "PASS",
+      "notes": {
+        "metrics": {
+          "samples": 1,
+          "completed": 1,
+          "errors": 0,
+          "categoryAccuracy": 1,
+          "targetTop3": 1,
+          "serviceRecallAt3": 1,
+          "targetTop1": 1,
+          "falseRecommendations": 0,
+          "failureRate": 0,
+          "abstentionRate": 0,
+          "latencyP50Ms": 2602.2000000001863,
+          "latencyP95Ms": 2602.2000000001863,
+          "inferenceMeanMs": 110.3999999994412
+        },
+        "provenance": "SYNTHETIC TEST fixture only"
+      }
+    },
+    {
+      "name": "console_errors",
+      "result": "PASS",
+      "notes": []
+    }
+  ]
+}

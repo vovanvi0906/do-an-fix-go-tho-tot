@@ -1,0 +1,425 @@
+{
+  "schemaVersion": 1,
+  "metrics": {
+    "samples": 1,
+    "completed": 1,
+    "errors": 0,
+    "categoryAccuracy": 1,
+    "targetTop3": null,
+    "serviceRecallAt3": null,
+    "abstentionRate": 0,
+    "latencyP50Ms": 1856.8999999999069,
+    "latencyP95Ms": 1856.8999999999069,
+    "inferenceMeanMs": 101.20000000018626
+  },
+  "rows": [
+    {
+      "sampleId": "synthetic-garden-category-only",
+      "image": "lam_vuon/lam_vuon_0001.jpg",
+      "imageSha256": "d9cdab620bb4d25d9404ffabb49aabd83fa0f8fa8bcce018f5e11aa3730cb193",
+      "provenance": "synthetic",
+      "mode": "real_http_inference",
+      "at": "2026-11-14T11:46:39.553Z",
+      "modelVersion": "fixgo-ai-rec-v1",
+      "backendVersion": "fixgo-ai-rec-v1",
+      "expectedCategory": "lam-vuon",
+      "expectedTarget": null,
+      "expectedServiceIds": [],
+      "predictedCategory": "lam-vuon",
+      "predictedTargetIds": [
+        "cay-bong-mat-cay-lon",
+        "e6e9a725-4058-4af4-83b7-a35fc91af354",
+        "tham-co-bai-co",
+        "32acffd8-6255-49b1-8035-eb34a5dff180",
+        "he-thong-tuoi-san-vuon-tong-the",
+        "cc0ab115-0758-4fd3-a4ad-b10a68cd0cdb"
+      ],
+      "predictedServiceIds": [],
+      "categoryCorrect": true,
+      "targetTop3": null,
+      "serviceRecall3": null,
+      "abstained": false,
+      "latencyMs": 1856.8999999999069,
+      "inferenceMs": 101.20000000018626,
+      "traces": [
+        {
+          "clientRequestId": "d17d0e07-7d44-4c46-9544-b43e01554031",
+          "stage": "V2 fusion / target",
+          "endpoint": "ai/ai/v2/diagnose",
+          "status": 200,
+          "durationMs": 101.20000000018626,
+          "at": "2026-11-14T11:46:39.669Z",
+          "response": {
+            "suggestedCategoryId": "lam-vuon",
+            "suggestedCategoryName": "Làm vườn",
+            "suggestedTargetId": "cay-bong-mat-cay-lon",
+            "suggestedTargetName": "Cây bóng mát / Cây lớn",
+            "categoryCandidates": [
+              {
+                "id": "lam-vuon",
+                "slug": "lam-vuon",
+                "name": "Làm vườn",
+                "confidence": 0.9766,
+                "provenance": "ensemble"
+              },
+              {
+                "id": "sua-dien",
+                "slug": "sua-dien",
+                "name": "Sửa điện",
+                "confidence": 0.0044,
+                "provenance": "ensemble"
+              }
+            ],
+            "targetCandidates": [
+              {
+                "targetId": "cay-bong-mat-cay-lon",
+                "targetName": "Cây bóng mát / Cây lớn",
+                "targetCategory": "lam-vuon",
+                "similarity": 0.225,
+                "confidence": 0.6125,
+                "provenance": "clip_target_similarity"
+              },
+              {
+                "targetId": "tham-co-bai-co",
+                "targetName": "Thảm cỏ / Bãi cỏ",
+                "targetCategory": "lam-vuon",
+                "similarity": 0.2238,
+                "confidence": 0.6119,
+                "provenance": "clip_target_similarity"
+              },
+              {
+                "targetId": "he-thong-tuoi-san-vuon-tong-the",
+                "targetName": "Hệ thống tưới / Sân vườn tổng thể",
+                "targetCategory": "lam-vuon",
+                "similarity": 0.2099,
+                "confidence": 0.605,
+                "provenance": "clip_target_similarity"
+              }
+            ],
+            "confidence": 0.9766,
+            "detectedLabels": [
+              "lam-vuon"
+            ],
+            "observableSigns": "[REDACTED]",
+            "decision_source": "ensemble",
+            "engine": "model",
+            "model_version": "fixgo-ai-rec-v1",
+            "notes": "Chẩn đoán danh mục và đối tượng thành công."
+          }
+        },
+        {
+          "clientRequestId": "a01480b7-22f2-49cb-a992-20c7c13c7d85",
+          "serverRequestId": "a01480b7-22f2-49cb-a992-20c7c13c7d85",
+          "stage": "backend inference / catalog",
+          "endpoint": "backend/orders/diagnose-upload",
+          "status": 201,
+          "durationMs": 1726.2000000001863,
+          "at": "2026-11-14T11:46:41.396Z",
+          "response": {
+            "requestId": "c87c75ab-6609-4513-b076-1d9d53f0effe",
+            "status": "needs_more_info",
+            "source": "model",
+            "imageUrl": "[REDACTED]",
+            "confidence": 0.9773,
+            "modelScore": 0.9773,
+            "detectedLabels": [
+              "Làm vườn"
+            ],
+            "categoryCandidates": [],
+            "targetCandidates": [],
+            "suggestedCategoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e",
+            "suggestedCategoryName": "Làm vườn",
+            "suggestedTargetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+            "suggestedTargetName": "Cây bóng mát / Cây lớn",
+            "suggestedServiceId": null,
+            "suggestedServiceName": null,
+            "suggestedServiceConfidence": null,
+            "suggestedServices": [],
+            "estimatedPriceMin": null,
+            "estimatedPriceMax": null,
+            "estimatedPriceRange": null,
+            "category": {
+              "id": "ef9682ad-e5dc-494e-a22f-45df72b68f9e",
+              "slug": "lam-vuon",
+              "name": "Làm vườn"
+            },
+            "target": null,
+            "service": null,
+            "priceEstimate": null,
+            "requiresManualSelection": true,
+            "needsMoreInfo": true,
+            "decisionSource": "model",
+            "modelVersion": "fixgo-ai-rec-v1",
+            "reasonCodes": [
+              "category_detected",
+              "symptom_required"
+            ],
+            "observableSigns": "[REDACTED]",
+            "reportedSymptoms": "[REDACTED]",
+            "questions": [],
+            "availableCategories": [
+              {
+                "id": "76c09b08-3231-4abd-be79-c2da76e06495",
+                "name": "Giúp việc",
+                "basePrice": 120000
+              },
+              {
+                "id": "ef9682ad-e5dc-494e-a22f-45df72b68f9e",
+                "name": "Làm vườn",
+                "basePrice": 150000
+              },
+              {
+                "id": "2a367f64-e8b2-4b94-8227-f5058c842af8",
+                "name": "Sửa nước",
+                "basePrice": 150000
+              },
+              {
+                "id": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+                "name": "Sửa điện",
+                "basePrice": 100000
+              },
+              {
+                "id": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+                "name": "Thiết bị gia dụng",
+                "basePrice": 120000
+              },
+              {
+                "id": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+                "name": "Điện lạnh",
+                "basePrice": 180000
+              }
+            ],
+            "availableTargets": [
+              {
+                "id": "32acffd8-6255-49b1-8035-eb34a5dff180",
+                "name": "Thảm cỏ / Bãi cỏ",
+                "slug": "tham-co-bai-co",
+                "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+              },
+              {
+                "id": "fbcd5b31-5530-43ba-b35b-a32d25479477",
+                "name": "Cây cảnh / Chậu cây",
+                "slug": "cay-canh-chau-cay",
+                "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+              },
+              {
+                "id": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+                "name": "Cây bóng mát / Cây lớn",
+                "slug": "cay-bong-mat-cay-lon",
+                "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+              },
+              {
+                "id": "059da690-c6be-46a8-83d5-d96e250cbe4f",
+                "name": "Hàng rào cây / Bồn hoa / Vườn rau",
+                "slug": "hang-rao-cay-bon-hoa-vuon-rau",
+                "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+              },
+              {
+                "id": "cc0ab115-0758-4fd3-a4ad-b10a68cd0cdb",
+                "name": "Hệ thống tưới / Sân vườn tổng thể",
+                "slug": "he-thong-tuoi-san-vuon-tong-the",
+                "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+              }
+            ],
+            "availableServices": [],
+            "issueDescription": "[REDACTED]",
+            "reason": "symptom_required",
+            "notes": "Vui lòng chọn danh mục và dịch vụ phù hợp.",
+            "message": "Xác nhận triệu chứng hoặc chọn dịch vụ bên dưới. Ảnh chưa xác định được nguyên nhân hỏng.",
+            "symptomCatalogEnabled": false,
+            "selectedSymptomIds": []
+          }
+        },
+        {
+          "clientRequestId": "e2c43606-adf8-43ac-807d-cd78287b9234",
+          "serverRequestId": "e2c43606-adf8-43ac-807d-cd78287b9234",
+          "stage": "device confirmation",
+          "endpoint": "backend/orders/diagnose",
+          "status": 201,
+          "durationMs": 12.900000000372529,
+          "at": "2026-11-14T11:46:41.409Z",
+          "response": {
+            "requestId": "d4a249a5-272e-4a2d-b3ee-b29682e94021",
+            "status": "needs_more_info",
+            "source": "manual",
+            "imageUrl": "[REDACTED]",
+            "confidence": null,
+            "modelScore": null,
+            "detectedLabels": [],
+            "categoryCandidates": [],
+            "targetCandidates": [],
+            "suggestedCategoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e",
+            "suggestedCategoryName": "Làm vườn",
+            "suggestedTargetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+            "suggestedTargetName": "Cây bóng mát / Cây lớn",
+            "suggestedServiceId": null,
+            "suggestedServiceName": null,
+            "suggestedServiceConfidence": null,
+            "suggestedServices": [],
+            "estimatedPriceMin": null,
+            "estimatedPriceMax": null,
+            "estimatedPriceRange": null,
+            "category": {
+              "id": "ef9682ad-e5dc-494e-a22f-45df72b68f9e",
+              "slug": "lam-vuon",
+              "name": "Làm vườn"
+            },
+            "target": {
+              "id": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+              "slug": "cay-bong-mat-cay-lon",
+              "name": "Cây bóng mát / Cây lớn"
+            },
+            "service": null,
+            "priceEstimate": null,
+            "requiresManualSelection": true,
+            "needsMoreInfo": true,
+            "decisionSource": "manual",
+            "modelVersion": "fixgo-ai-rec-v1",
+            "reasonCodes": [
+              "category_detected",
+              "symptom_required"
+            ],
+            "observableSigns": "[REDACTED]",
+            "reportedSymptoms": "[REDACTED]",
+            "questions": [],
+            "availableCategories": [
+              {
+                "id": "76c09b08-3231-4abd-be79-c2da76e06495",
+                "name": "Giúp việc",
+                "basePrice": 120000
+              },
+              {
+                "id": "ef9682ad-e5dc-494e-a22f-45df72b68f9e",
+                "name": "Làm vườn",
+                "basePrice": 150000
+              },
+              {
+                "id": "2a367f64-e8b2-4b94-8227-f5058c842af8",
+                "name": "Sửa nước",
+                "basePrice": 150000
+              },
+              {
+                "id": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+                "name": "Sửa điện",
+                "basePrice": 100000
+              },
+              {
+                "id": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+                "name": "Thiết bị gia dụng",
+                "basePrice": 120000
+              },
+              {
+                "id": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+                "name": "Điện lạnh",
+                "basePrice": 180000
+              }
+            ],
+            "availableTargets": [
+              {
+                "id": "32acffd8-6255-49b1-8035-eb34a5dff180",
+                "name": "Thảm cỏ / Bãi cỏ",
+                "slug": "tham-co-bai-co",
+                "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+              },
+              {
+                "id": "fbcd5b31-5530-43ba-b35b-a32d25479477",
+                "name": "Cây cảnh / Chậu cây",
+                "slug": "cay-canh-chau-cay",
+                "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+              },
+              {
+                "id": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+                "name": "Cây bóng mát / Cây lớn",
+                "slug": "cay-bong-mat-cay-lon",
+                "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+              },
+              {
+                "id": "059da690-c6be-46a8-83d5-d96e250cbe4f",
+                "name": "Hàng rào cây / Bồn hoa / Vườn rau",
+                "slug": "hang-rao-cay-bon-hoa-vuon-rau",
+                "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+              },
+              {
+                "id": "cc0ab115-0758-4fd3-a4ad-b10a68cd0cdb",
+                "name": "Hệ thống tưới / Sân vườn tổng thể",
+                "slug": "he-thong-tuoi-san-vuon-tong-the",
+                "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+              }
+            ],
+            "availableServices": [
+              {
+                "id": "433eeeac-cb74-4fcc-9c63-f04969d044bd",
+                "name": "Bón phân / cải tạo gốc",
+                "basePrice": 150000,
+                "targetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+                "unit": "lần"
+              },
+              {
+                "id": "c227d4e7-3936-494b-94d1-bc806a36fa43",
+                "name": "Chăm sóc cây bóng mát",
+                "basePrice": 150000,
+                "targetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+                "unit": "lần"
+              },
+              {
+                "id": "32691430-ce75-4078-b34b-1c499f05d3ad",
+                "name": "Cắt tỉa cành cây",
+                "basePrice": 150000,
+                "targetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+                "unit": "lần"
+              },
+              {
+                "id": "1ca8ca7a-de79-4167-bd58-d58ffda951c2",
+                "name": "Dọn cành khô / gãy",
+                "basePrice": 150000,
+                "targetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+                "unit": "lần"
+              },
+              {
+                "id": "b8a3b67f-d181-45d8-bc72-8fed59cc96c4",
+                "name": "Khảo sát xử lý cây nguy hiểm bởi đội chuyên môn",
+                "basePrice": 150000,
+                "targetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+                "unit": "lần"
+              },
+              {
+                "id": "b0bfbff3-296f-4b16-b2d1-cccb9189182d",
+                "name": "Kiểm tra cây nghiêng / nguy cơ đổ",
+                "basePrice": 150000,
+                "targetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+                "unit": "lần"
+              },
+              {
+                "id": "07e9e7f4-28de-41d4-9181-b8fb1fd4a9a1",
+                "name": "Thu gom cành sau cắt",
+                "basePrice": 150000,
+                "targetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+                "unit": "lần"
+              },
+              {
+                "id": "cb4006fb-2ecc-453f-863a-6d7843944923",
+                "name": "Trồng / thay cây bóng mát",
+                "basePrice": 150000,
+                "targetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+                "unit": "lần"
+              },
+              {
+                "id": "78d53f1b-9cbc-4d2f-b64e-dcefd25b3ca8",
+                "name": "Tạo tán cây",
+                "basePrice": 150000,
+                "targetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+                "unit": "lần"
+              }
+            ],
+            "issueDescription": "[REDACTED]",
+            "reason": "symptom_required",
+            "notes": "Vui lòng chọn danh mục và dịch vụ phù hợp.",
+            "message": "Xác nhận triệu chứng hoặc chọn dịch vụ bên dưới. Ảnh chưa xác định được nguyên nhân hỏng.",
+            "symptomCatalogEnabled": false,
+            "selectedSymptomIds": []
+          }
+        }
+      ]
+    }
+  ]
+}

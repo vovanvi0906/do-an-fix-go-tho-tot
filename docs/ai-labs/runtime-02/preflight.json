@@ -1,0 +1,31 @@
+{
+  "at": "2026-11-14T11:40:09.944Z",
+  "node": "v20.20.2",
+  "config": {
+    "database": {
+      "host": "localhost",
+      "port": "5432",
+      "name": "ondemand_db"
+    },
+    "cloudinaryConfigured": true,
+    "symptomFlag": "unset",
+    "threshold": "0.6"
+  },
+  "catalogSha256": "45b4a4ee1990628fa35e5f555bd54b9e7806e555711c7d55aebe3382b409a258",
+  "counts": {
+    "categories": 6,
+    "targets": 70,
+    "services": 693
+  },
+  "tables": [
+    {
+      "symptoms": null,
+      "mappings": null
+    }
+  ],
+  "readOnly": [
+    {
+      "transaction_read_only": "on"
+    }
+  ]
+}

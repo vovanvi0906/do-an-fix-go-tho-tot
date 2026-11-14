@@ -1,3 +1,4 @@
+import { inspectRecommendation } from '../orders/diagnosis/recommendation-debug';
 import {
   Injectable,
   Dependencies,
@@ -8,6 +9,7 @@ import { plainToInstance } from 'class-transformer';
 import { validateSync } from 'class-validator';
 import { PrismaService } from '../../infrastructure/database/prisma.service';
 import {
+  catalogRead,
   activeTarget,
   fail,
   listTargetSymptoms,
@@ -76,11 +78,20 @@ export class SymptomsService {
   constructor(prisma) {
     this.prisma = prisma;
   }
+  inspect(body, requestId) { return catalogRead(async () => {
+    const report=await inspectRecommendation(body, requestId);
+    const started=performance.now();
+    const categoryKey=report.result.suggestedCategoryId;
+    const category=categoryKey ? await this.prisma.serviceCategory.findFirst({where:{isActive:true,OR:[{id:categoryKey},{slug:categoryKey}]}}) : null;
+    const targetKey=report.result.suggestedTargetId;
+    const target=category && targetKey ? await this.prisma.serviceTarget.findFirst({where:{categoryId:category.id,isActive:true,OR:[{id:targetKey},{slug:targetKey}]}}) : null;
+    return {...report,backend:{...report.backend,categoryResolved:!!category,categoryGateAccepted:!!category && report.backend.categoryThresholdPassed,canonicalTargetId:target?.id||null,catalogResolutionMs:performance.now()-started}};
+  }); }
   getSymptoms(targetId, categoryId) {
-    return listTargetSymptoms(this.prisma, targetId, categoryId);
+    return catalogRead(() => listTargetSymptoms(this.prisma, targetId, categoryId));
   }
   recommend(query) {
-    return recommendServices(this.prisma, query);
+    return catalogRead(() => recommendServices(this.prisma, query));
   }
   async listAdmin(query = {}) {
     requireCatalog();

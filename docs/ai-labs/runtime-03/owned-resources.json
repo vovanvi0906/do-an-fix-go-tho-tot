@@ -1,0 +1,34 @@
+{
+  "recordedAt": "2026-11-14T12:48:36.590721+00:00",
+  "processes": [
+    {
+      "pid": 131703,
+      "service": "Nest test primary",
+      "port": 3108
+    },
+    {
+      "pid": 104992,
+      "service": "Nest test disabled catalog",
+      "port": 3110
+    },
+    {
+      "pid": 94406,
+      "service": "Vite Lab",
+      "port": 5178
+    },
+    {
+      "pid": 136217,
+      "service": "FastAPI test",
+      "port": 8108,
+      "status": "stopped after actual offline test"
+    }
+  ],
+  "container": {
+    "name": "fixgo-rec-lab03-postgres",
+    "label": "fixgo.task=AI-REC-LAB-03",
+    "port": 55448,
+    "status": "stopped, data preserved"
+  },
+  "scope": "Only resources spawned by AI-REC-LAB-03; historical PIDs must not be blindly reused",
+  "stoppedAt": "2026-11-14T12:53:50.962970+00:00"
+}

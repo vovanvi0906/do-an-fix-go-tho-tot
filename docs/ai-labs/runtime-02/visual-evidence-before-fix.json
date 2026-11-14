@@ -1,0 +1,38 @@
+{
+  "checks": [
+    {
+      "name": "desktop_empty",
+      "result": "PASS",
+      "notes": {
+        "viewport": "1440x1000",
+        "overflow": false
+      }
+    },
+    {
+      "name": "mobile_layout",
+      "result": "PASS",
+      "notes": {
+        "viewport": "390x844"
+      }
+    },
+    {
+      "name": "upload_preview",
+      "result": "PASS"
+    },
+    {
+      "name": "timeout_error_stage",
+      "result": "FAIL",
+      "notes": "Browser request held before upstream; not model inference failure."
+    },
+    {
+      "name": "retry_real_upload",
+      "result": "FAIL",
+      "notes": "Stage cần kiểm tra\n\nbackend inference / catalog · HTTP — · Failed to execute 'fetch' on 'Window': Illegal invocation\n\nThử lại thao tác"
+    },
+    {
+      "name": "browser_qa_execution",
+      "result": "FAIL",
+      "notes": "TimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Debug & health', exact: true })\u001b[22m\n"
+    }
+  ]
+}
