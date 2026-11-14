@@ -1,0 +1,940 @@
+{
+  "at": "2026-11-14T11:46:34.440Z",
+  "kind": "actual_loopback_http_real_models_real_catalog_readonly_real_cloudinary",
+  "cases": [
+    {
+      "name": "storage_upload_and_backend_diagnosis",
+      "result": "PASS",
+      "notes": {
+        "status": 201,
+        "diagnosisStatus": "needs_more_info"
+      }
+    },
+    {
+      "name": "canonical_category_target_confirmation",
+      "result": "PASS",
+      "notes": {
+        "aiSuggested": true,
+        "userSelectedFallback": false
+      }
+    },
+    {
+      "name": "catalog_disabled_returns_503",
+      "result": "PASS",
+      "notes": "SYMPTOM_CATALOG_NOT_ENABLED"
+    },
+    {
+      "name": "recommendations_gated_without_approved_schema",
+      "result": "PASS",
+      "notes": "SYMPTOM_CATALOG_NOT_ENABLED"
+    },
+    {
+      "name": "threshold_difference_kept",
+      "result": "PASS",
+      "notes": {
+        "v2Category": "dien-lanh",
+        "v2Confidence": 0.5529,
+        "backendCategory": null,
+        "backendReasonCodes": [
+          "image_uncertain"
+        ]
+      }
+    },
+    {
+      "name": "low_confidence_or_ood_sua_dien",
+      "result": "PASS",
+      "notes": {
+        "v2Source": "abstained_ood",
+        "backendStatus": "manual_selection",
+        "backendReasonCodes": [
+          "image_uncertain"
+        ]
+      }
+    },
+    {
+      "name": "low_confidence_or_ood_other_unclear",
+      "result": "PASS",
+      "notes": {
+        "v2Source": "abstained_ood",
+        "backendStatus": "manual_selection",
+        "backendReasonCodes": [
+          "image_uncertain"
+        ]
+      }
+    },
+    {
+      "name": "corrupt_storage_upload_rejected",
+      "result": "PASS",
+      "notes": {
+        "status": 500
+      }
+    },
+    {
+      "name": "corrupt_upload_has_actionable_4xx",
+      "result": "FAIL",
+      "notes": {
+        "status": 500,
+        "issue": "Storage error currently mapped to generic 500"
+      }
+    },
+    {
+      "name": "missing_upload_rejected",
+      "result": "PASS",
+      "notes": {
+        "status": 400
+      }
+    },
+    {
+      "name": "non_diagnosis_route_disabled",
+      "result": "PASS",
+      "notes": {
+        "status": 404
+      }
+    },
+    {
+      "name": "approved_symptoms_service_success",
+      "result": "BLOCKED",
+      "notes": "Main DB has no symptom tables; shared flag unset. No approvals/migrations performed."
+    },
+    {
+      "name": "no_active_mapping_real_catalog",
+      "result": "BLOCKED",
+      "notes": "No approved schema/data to exercise genuine empty mapping."
+    }
+  ],
+  "records": [
+    {
+      "method": "GET",
+      "endpoint": "/health",
+      "clientRequestId": "62d988d5-4637-45d7-a69b-b4a6d48ff5d1",
+      "headerRequestId": null,
+      "bodyRequestId": null,
+      "status": 200,
+      "elapsedMs": 27.640771,
+      "response": {
+        "status": "online",
+        "service": "FixGo Pro AI Service",
+        "version": "2.0.0",
+        "clip": true,
+        "classifier_mode": "clip",
+        "engine": "model",
+        "models_loaded": {
+          "clip": true,
+          "yolo_cls": true
+        },
+        "weights_available": [
+          "yolov8n-cls-fixgo.pt"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "endpoint": "/ai/v2/catalog/status",
+      "clientRequestId": "9b17bf01-aa41-4a98-859d-1cf7228588b7",
+      "headerRequestId": null,
+      "bodyRequestId": null,
+      "status": 200,
+      "elapsedMs": 3.20424899999999,
+      "response": {
+        "version": "init",
+        "updatedAt": 0,
+        "targetCount": 0
+      }
+    },
+    {
+      "method": "GET",
+      "endpoint": "/service-categories",
+      "clientRequestId": "f1d119eb-8a9a-4e4e-8e17-295d51889b24",
+      "headerRequestId": "f1d119eb-8a9a-4e4e-8e17-295d51889b24",
+      "bodyRequestId": null,
+      "status": 200,
+      "elapsedMs": 52.09657300000001,
+      "response": {
+        "categoryCount": 6,
+        "serviceCount": 693
+      }
+    },
+    {
+      "method": "POST",
+      "endpoint": "/orders/diagnose-upload",
+      "clientRequestId": "f9e8d501-3ef6-4cd5-a4a1-30ac79ad9fa9",
+      "headerRequestId": "f9e8d501-3ef6-4cd5-a4a1-30ac79ad9fa9",
+      "bodyRequestId": "ec00a6f6-0064-4dde-bd21-08894c8d1f42",
+      "status": 201,
+      "elapsedMs": 2344.80242,
+      "response": {
+        "requestId": "ec00a6f6-0064-4dde-bd21-08894c8d1f42",
+        "status": "needs_more_info",
+        "source": "model",
+        "imageUrl": "[REDACTED]",
+        "confidence": 0.9773,
+        "modelScore": 0.9773,
+        "detectedLabels": [
+          "Làm vườn"
+        ],
+        "categoryCandidates": [],
+        "targetCandidates": [],
+        "suggestedCategoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e",
+        "suggestedCategoryName": "Làm vườn",
+        "suggestedTargetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+        "suggestedTargetName": "Cây bóng mát / Cây lớn",
+        "suggestedServiceId": null,
+        "suggestedServiceName": null,
+        "suggestedServiceConfidence": null,
+        "suggestedServices": [],
+        "estimatedPriceMin": null,
+        "estimatedPriceMax": null,
+        "estimatedPriceRange": null,
+        "category": {
+          "id": "ef9682ad-e5dc-494e-a22f-45df72b68f9e",
+          "slug": "lam-vuon",
+          "name": "Làm vườn"
+        },
+        "target": null,
+        "service": null,
+        "priceEstimate": null,
+        "requiresManualSelection": true,
+        "needsMoreInfo": true,
+        "decisionSource": "model",
+        "modelVersion": "fixgo-ai-rec-v1",
+        "reasonCodes": [
+          "category_detected",
+          "symptom_required"
+        ],
+        "observableSigns": [
+          "Nhận diện danh mục: Làm vườn"
+        ],
+        "reportedSymptoms": [],
+        "questions": [],
+        "availableCategories": [
+          {
+            "id": "76c09b08-3231-4abd-be79-c2da76e06495",
+            "name": "Giúp việc",
+            "basePrice": 120000
+          },
+          {
+            "id": "ef9682ad-e5dc-494e-a22f-45df72b68f9e",
+            "name": "Làm vườn",
+            "basePrice": 150000
+          },
+          {
+            "id": "2a367f64-e8b2-4b94-8227-f5058c842af8",
+            "name": "Sửa nước",
+            "basePrice": 150000
+          },
+          {
+            "id": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+            "name": "Sửa điện",
+            "basePrice": 100000
+          },
+          {
+            "id": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+            "name": "Thiết bị gia dụng",
+            "basePrice": 120000
+          },
+          {
+            "id": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+            "name": "Điện lạnh",
+            "basePrice": 180000
+          }
+        ],
+        "availableTargets": [
+          {
+            "id": "32acffd8-6255-49b1-8035-eb34a5dff180",
+            "name": "Thảm cỏ / Bãi cỏ",
+            "slug": "tham-co-bai-co",
+            "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+          },
+          {
+            "id": "fbcd5b31-5530-43ba-b35b-a32d25479477",
+            "name": "Cây cảnh / Chậu cây",
+            "slug": "cay-canh-chau-cay",
+            "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+          },
+          {
+            "id": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+            "name": "Cây bóng mát / Cây lớn",
+            "slug": "cay-bong-mat-cay-lon",
+            "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+          },
+          {
+            "id": "059da690-c6be-46a8-83d5-d96e250cbe4f",
+            "name": "Hàng rào cây / Bồn hoa / Vườn rau",
+            "slug": "hang-rao-cay-bon-hoa-vuon-rau",
+            "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+          },
+          {
+            "id": "cc0ab115-0758-4fd3-a4ad-b10a68cd0cdb",
+            "name": "Hệ thống tưới / Sân vườn tổng thể",
+            "slug": "he-thong-tuoi-san-vuon-tong-the",
+            "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+          }
+        ],
+        "availableServices": [],
+        "issueDescription": "",
+        "reason": "symptom_required",
+        "notes": "Vui lòng chọn danh mục và dịch vụ phù hợp.",
+        "message": "Xác nhận triệu chứng hoặc chọn dịch vụ bên dưới. Ảnh chưa xác định được nguyên nhân hỏng.",
+        "symptomCatalogEnabled": false,
+        "selectedSymptomIds": []
+      }
+    },
+    {
+      "method": "POST",
+      "endpoint": "/orders/diagnose",
+      "clientRequestId": "54b03b97-6bf6-4d7a-b3f9-1705b406ee14",
+      "headerRequestId": "54b03b97-6bf6-4d7a-b3f9-1705b406ee14",
+      "bodyRequestId": "3fb2c986-214d-43eb-b53c-2cb108743963",
+      "status": 201,
+      "elapsedMs": 27.534190999999737,
+      "response": {
+        "requestId": "3fb2c986-214d-43eb-b53c-2cb108743963",
+        "status": "needs_more_info",
+        "source": "manual",
+        "imageUrl": "[REDACTED]",
+        "confidence": null,
+        "modelScore": null,
+        "detectedLabels": [],
+        "categoryCandidates": [],
+        "targetCandidates": [],
+        "suggestedCategoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e",
+        "suggestedCategoryName": "Làm vườn",
+        "suggestedTargetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+        "suggestedTargetName": "Cây bóng mát / Cây lớn",
+        "suggestedServiceId": null,
+        "suggestedServiceName": null,
+        "suggestedServiceConfidence": null,
+        "suggestedServices": [],
+        "estimatedPriceMin": null,
+        "estimatedPriceMax": null,
+        "estimatedPriceRange": null,
+        "category": {
+          "id": "ef9682ad-e5dc-494e-a22f-45df72b68f9e",
+          "slug": "lam-vuon",
+          "name": "Làm vườn"
+        },
+        "target": {
+          "id": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+          "slug": "cay-bong-mat-cay-lon",
+          "name": "Cây bóng mát / Cây lớn"
+        },
+        "service": null,
+        "priceEstimate": null,
+        "requiresManualSelection": true,
+        "needsMoreInfo": true,
+        "decisionSource": "manual",
+        "modelVersion": "fixgo-ai-rec-v1",
+        "reasonCodes": [
+          "category_detected",
+          "symptom_required"
+        ],
+        "observableSigns": [],
+        "reportedSymptoms": [],
+        "questions": [],
+        "availableCategories": [
+          {
+            "id": "76c09b08-3231-4abd-be79-c2da76e06495",
+            "name": "Giúp việc",
+            "basePrice": 120000
+          },
+          {
+            "id": "ef9682ad-e5dc-494e-a22f-45df72b68f9e",
+            "name": "Làm vườn",
+            "basePrice": 150000
+          },
+          {
+            "id": "2a367f64-e8b2-4b94-8227-f5058c842af8",
+            "name": "Sửa nước",
+            "basePrice": 150000
+          },
+          {
+            "id": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+            "name": "Sửa điện",
+            "basePrice": 100000
+          },
+          {
+            "id": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+            "name": "Thiết bị gia dụng",
+            "basePrice": 120000
+          },
+          {
+            "id": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+            "name": "Điện lạnh",
+            "basePrice": 180000
+          }
+        ],
+        "availableTargets": [
+          {
+            "id": "32acffd8-6255-49b1-8035-eb34a5dff180",
+            "name": "Thảm cỏ / Bãi cỏ",
+            "slug": "tham-co-bai-co",
+            "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+          },
+          {
+            "id": "fbcd5b31-5530-43ba-b35b-a32d25479477",
+            "name": "Cây cảnh / Chậu cây",
+            "slug": "cay-canh-chau-cay",
+            "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+          },
+          {
+            "id": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+            "name": "Cây bóng mát / Cây lớn",
+            "slug": "cay-bong-mat-cay-lon",
+            "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+          },
+          {
+            "id": "059da690-c6be-46a8-83d5-d96e250cbe4f",
+            "name": "Hàng rào cây / Bồn hoa / Vườn rau",
+            "slug": "hang-rao-cay-bon-hoa-vuon-rau",
+            "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+          },
+          {
+            "id": "cc0ab115-0758-4fd3-a4ad-b10a68cd0cdb",
+            "name": "Hệ thống tưới / Sân vườn tổng thể",
+            "slug": "he-thong-tuoi-san-vuon-tong-the",
+            "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+          }
+        ],
+        "availableServices": [
+          {
+            "id": "433eeeac-cb74-4fcc-9c63-f04969d044bd",
+            "name": "Bón phân / cải tạo gốc",
+            "basePrice": 150000,
+            "targetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+            "unit": "lần"
+          },
+          {
+            "id": "c227d4e7-3936-494b-94d1-bc806a36fa43",
+            "name": "Chăm sóc cây bóng mát",
+            "basePrice": 150000,
+            "targetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+            "unit": "lần"
+          },
+          {
+            "id": "32691430-ce75-4078-b34b-1c499f05d3ad",
+            "name": "Cắt tỉa cành cây",
+            "basePrice": 150000,
+            "targetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+            "unit": "lần"
+          },
+          {
+            "id": "1ca8ca7a-de79-4167-bd58-d58ffda951c2",
+            "name": "Dọn cành khô / gãy",
+            "basePrice": 150000,
+            "targetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+            "unit": "lần"
+          },
+          {
+            "id": "b8a3b67f-d181-45d8-bc72-8fed59cc96c4",
+            "name": "Khảo sát xử lý cây nguy hiểm bởi đội chuyên môn",
+            "basePrice": 150000,
+            "targetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+            "unit": "lần"
+          },
+          {
+            "id": "b0bfbff3-296f-4b16-b2d1-cccb9189182d",
+            "name": "Kiểm tra cây nghiêng / nguy cơ đổ",
+            "basePrice": 150000,
+            "targetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+            "unit": "lần"
+          },
+          {
+            "id": "07e9e7f4-28de-41d4-9181-b8fb1fd4a9a1",
+            "name": "Thu gom cành sau cắt",
+            "basePrice": 150000,
+            "targetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+            "unit": "lần"
+          },
+          {
+            "id": "cb4006fb-2ecc-453f-863a-6d7843944923",
+            "name": "Trồng / thay cây bóng mát",
+            "basePrice": 150000,
+            "targetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+            "unit": "lần"
+          },
+          {
+            "id": "78d53f1b-9cbc-4d2f-b64e-dcefd25b3ca8",
+            "name": "Tạo tán cây",
+            "basePrice": 150000,
+            "targetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+            "unit": "lần"
+          }
+        ],
+        "issueDescription": "",
+        "reason": "symptom_required",
+        "notes": "Vui lòng chọn danh mục và dịch vụ phù hợp.",
+        "message": "Xác nhận triệu chứng hoặc chọn dịch vụ bên dưới. Ảnh chưa xác định được nguyên nhân hỏng.",
+        "symptomCatalogEnabled": false,
+        "selectedSymptomIds": []
+      }
+    },
+    {
+      "method": "GET",
+      "endpoint": "/service-targets/e6e9a725-4058-4af4-83b7-a35fc91af354/symptoms?categoryId=ef9682ad-e5dc-494e-a22f-45df72b68f9e",
+      "clientRequestId": "edf2d6b6-685f-4042-93f3-107c5d11f21a",
+      "headerRequestId": "edf2d6b6-685f-4042-93f3-107c5d11f21a",
+      "bodyRequestId": null,
+      "status": 503,
+      "elapsedMs": 9.232590999999957,
+      "response": {
+        "code": "SYMPTOM_CATALOG_NOT_ENABLED",
+        "message": "Quản lý triệu chứng chưa được bật. Bạn vẫn có thể chọn dịch vụ thủ công."
+      }
+    },
+    {
+      "method": "GET",
+      "endpoint": "/services/recommendations?targetId=e6e9a725-4058-4af4-83b7-a35fc91af354&categoryId=ef9682ad-e5dc-494e-a22f-45df72b68f9e&symptomIds=not-approved&limit=3",
+      "clientRequestId": "3bc5d536-a68b-4bce-91e3-d4f21a050181",
+      "headerRequestId": "3bc5d536-a68b-4bce-91e3-d4f21a050181",
+      "bodyRequestId": null,
+      "status": 503,
+      "elapsedMs": 6.3521520000003875,
+      "response": {
+        "code": "SYMPTOM_CATALOG_NOT_ENABLED",
+        "message": "Quản lý triệu chứng chưa được bật. Bạn vẫn có thể chọn dịch vụ thủ công."
+      }
+    },
+    {
+      "method": "POST",
+      "endpoint": "/ai/v2/diagnose",
+      "clientRequestId": "5df367ba-c542-4054-a276-c81fb8ac2881",
+      "headerRequestId": null,
+      "bodyRequestId": null,
+      "status": 200,
+      "elapsedMs": 102.64874900000041,
+      "response": {
+        "suggestedCategoryId": "dien-lanh",
+        "suggestedCategoryName": "Điện lạnh",
+        "suggestedTargetId": "may-giat-may-giat-say",
+        "suggestedTargetName": "Máy giặt / Máy giặt sấy",
+        "categoryCandidates": [
+          {
+            "id": "dien-lanh",
+            "slug": "dien-lanh",
+            "name": "Điện lạnh",
+            "confidence": 0.5529,
+            "provenance": "ensemble"
+          },
+          {
+            "id": "thiet-bi",
+            "slug": "thiet-bi",
+            "name": "Thiết bị gia dụng",
+            "confidence": 0.2327,
+            "provenance": "ensemble"
+          },
+          {
+            "id": "giup-viec",
+            "slug": "giup-viec",
+            "name": "Giúp việc",
+            "confidence": 0.086,
+            "provenance": "ensemble"
+          }
+        ],
+        "targetCandidates": [
+          {
+            "targetId": "may-giat-may-giat-say",
+            "targetName": "Máy giặt / Máy giặt sấy",
+            "targetCategory": "dien-lanh",
+            "similarity": 0.219,
+            "confidence": 0.6095,
+            "provenance": "clip_target_similarity"
+          },
+          {
+            "targetId": "may-say-quan-ao",
+            "targetName": "Máy sấy quần áo",
+            "targetCategory": "dien-lanh",
+            "similarity": 0.2101,
+            "confidence": 0.605,
+            "provenance": "clip_target_similarity"
+          },
+          {
+            "targetId": "may-lam-mat-quat-dieu-hoa",
+            "targetName": "Máy làm mát / Quạt điều hòa",
+            "targetCategory": "dien-lanh",
+            "similarity": 0.2085,
+            "confidence": 0.6042,
+            "provenance": "clip_target_similarity"
+          }
+        ],
+        "confidence": 0.5529,
+        "detectedLabels": [
+          "dien-lanh"
+        ],
+        "observableSigns": [
+          "Nhận diện danh mục: Điện lạnh",
+          "Nhận diện đối tượng: Máy giặt / Máy giặt sấy"
+        ],
+        "decision_source": "ensemble",
+        "engine": "model",
+        "model_version": "fixgo-ai-rec-v1",
+        "notes": "Chẩn đoán danh mục và đối tượng thành công."
+      }
+    },
+    {
+      "method": "POST",
+      "endpoint": "/orders/diagnose",
+      "clientRequestId": "1b77a971-4a70-4a65-b54a-93057d9ea59c",
+      "headerRequestId": "1b77a971-4a70-4a65-b54a-93057d9ea59c",
+      "bodyRequestId": "bdcace03-bc05-4de3-9ab5-fafc0fd40523",
+      "status": 201,
+      "elapsedMs": 90.16113300000006,
+      "response": {
+        "requestId": "bdcace03-bc05-4de3-9ab5-fafc0fd40523",
+        "status": "manual_selection",
+        "source": "model",
+        "imageUrl": "[REDACTED]",
+        "confidence": 0.5529,
+        "modelScore": 0.5529,
+        "detectedLabels": [],
+        "categoryCandidates": [],
+        "targetCandidates": [],
+        "suggestedCategoryId": null,
+        "suggestedCategoryName": null,
+        "suggestedTargetId": null,
+        "suggestedTargetName": null,
+        "suggestedServiceId": null,
+        "suggestedServiceName": null,
+        "suggestedServiceConfidence": null,
+        "suggestedServices": [],
+        "estimatedPriceMin": null,
+        "estimatedPriceMax": null,
+        "estimatedPriceRange": null,
+        "category": null,
+        "target": null,
+        "service": null,
+        "priceEstimate": null,
+        "requiresManualSelection": true,
+        "needsMoreInfo": false,
+        "decisionSource": "model",
+        "modelVersion": "fixgo-ai-rec-v1",
+        "reasonCodes": [
+          "image_uncertain"
+        ],
+        "observableSigns": [],
+        "reportedSymptoms": [],
+        "questions": [],
+        "availableCategories": [
+          {
+            "id": "76c09b08-3231-4abd-be79-c2da76e06495",
+            "name": "Giúp việc",
+            "basePrice": 120000
+          },
+          {
+            "id": "ef9682ad-e5dc-494e-a22f-45df72b68f9e",
+            "name": "Làm vườn",
+            "basePrice": 150000
+          },
+          {
+            "id": "2a367f64-e8b2-4b94-8227-f5058c842af8",
+            "name": "Sửa nước",
+            "basePrice": 150000
+          },
+          {
+            "id": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+            "name": "Sửa điện",
+            "basePrice": 100000
+          },
+          {
+            "id": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+            "name": "Thiết bị gia dụng",
+            "basePrice": 120000
+          },
+          {
+            "id": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+            "name": "Điện lạnh",
+            "basePrice": 180000
+          }
+        ],
+        "availableTargets": [],
+        "availableServices": [],
+        "issueDescription": "",
+        "reason": "image_uncertain",
+        "notes": "Vui lòng chọn danh mục và dịch vụ phù hợp.",
+        "message": "Chưa xác định được nhóm. Vui lòng chọn danh mục."
+      }
+    },
+    {
+      "method": "POST",
+      "endpoint": "/ai/v2/diagnose",
+      "clientRequestId": "085cff3d-c663-48c1-a5bc-58b5c757c756",
+      "headerRequestId": null,
+      "bodyRequestId": null,
+      "status": 200,
+      "elapsedMs": 65.49351100000013,
+      "response": {
+        "suggestedCategoryId": null,
+        "suggestedCategoryName": null,
+        "suggestedTargetId": null,
+        "suggestedTargetName": null,
+        "categoryCandidates": [
+          {
+            "id": "sua-dien",
+            "slug": "sua-dien",
+            "name": "Sửa điện",
+            "confidence": 0.4739,
+            "provenance": "ensemble"
+          },
+          {
+            "id": "thiet-bi",
+            "slug": "thiet-bi",
+            "name": "Thiết bị gia dụng",
+            "confidence": 0.3468,
+            "provenance": "ensemble"
+          }
+        ],
+        "targetCandidates": [],
+        "confidence": null,
+        "detectedLabels": [],
+        "observableSigns": [],
+        "decision_source": "abstained_ood",
+        "engine": "model",
+        "model_version": "fixgo-ai-rec-v1",
+        "notes": "Ảnh chưa đủ rõ hoặc ngoài danh mục dịch vụ hỗ trợ."
+      }
+    },
+    {
+      "method": "POST",
+      "endpoint": "/orders/diagnose",
+      "clientRequestId": "5a133e7e-e6da-450c-8d22-f3ca471e3405",
+      "headerRequestId": "5a133e7e-e6da-450c-8d22-f3ca471e3405",
+      "bodyRequestId": "8aecfad8-24b1-42d1-a67f-75732900ec00",
+      "status": 201,
+      "elapsedMs": 77.19846899999993,
+      "response": {
+        "requestId": "8aecfad8-24b1-42d1-a67f-75732900ec00",
+        "status": "manual_selection",
+        "source": "model",
+        "imageUrl": "[REDACTED]",
+        "confidence": null,
+        "modelScore": null,
+        "detectedLabels": [],
+        "categoryCandidates": [],
+        "targetCandidates": [],
+        "suggestedCategoryId": null,
+        "suggestedCategoryName": null,
+        "suggestedTargetId": null,
+        "suggestedTargetName": null,
+        "suggestedServiceId": null,
+        "suggestedServiceName": null,
+        "suggestedServiceConfidence": null,
+        "suggestedServices": [],
+        "estimatedPriceMin": null,
+        "estimatedPriceMax": null,
+        "estimatedPriceRange": null,
+        "category": null,
+        "target": null,
+        "service": null,
+        "priceEstimate": null,
+        "requiresManualSelection": true,
+        "needsMoreInfo": false,
+        "decisionSource": "model",
+        "modelVersion": "fixgo-ai-rec-v1",
+        "reasonCodes": [
+          "image_uncertain"
+        ],
+        "observableSigns": [],
+        "reportedSymptoms": [],
+        "questions": [],
+        "availableCategories": [
+          {
+            "id": "76c09b08-3231-4abd-be79-c2da76e06495",
+            "name": "Giúp việc",
+            "basePrice": 120000
+          },
+          {
+            "id": "ef9682ad-e5dc-494e-a22f-45df72b68f9e",
+            "name": "Làm vườn",
+            "basePrice": 150000
+          },
+          {
+            "id": "2a367f64-e8b2-4b94-8227-f5058c842af8",
+            "name": "Sửa nước",
+            "basePrice": 150000
+          },
+          {
+            "id": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+            "name": "Sửa điện",
+            "basePrice": 100000
+          },
+          {
+            "id": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+            "name": "Thiết bị gia dụng",
+            "basePrice": 120000
+          },
+          {
+            "id": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+            "name": "Điện lạnh",
+            "basePrice": 180000
+          }
+        ],
+        "availableTargets": [],
+        "availableServices": [],
+        "issueDescription": "",
+        "reason": "image_uncertain",
+        "notes": "Vui lòng chọn danh mục và dịch vụ phù hợp.",
+        "message": "Chưa xác định được nhóm. Vui lòng chọn danh mục."
+      }
+    },
+    {
+      "method": "POST",
+      "endpoint": "/ai/v2/diagnose",
+      "clientRequestId": "c1c9f8ad-6eac-4cf5-aeb6-3b01447ccb57",
+      "headerRequestId": null,
+      "bodyRequestId": null,
+      "status": 200,
+      "elapsedMs": 71.35728699999981,
+      "response": {
+        "suggestedCategoryId": null,
+        "suggestedCategoryName": null,
+        "suggestedTargetId": null,
+        "suggestedTargetName": null,
+        "categoryCandidates": [
+          {
+            "id": "thiet-bi",
+            "slug": "thiet-bi",
+            "name": "Thiết bị gia dụng",
+            "confidence": 0.1991,
+            "provenance": "clip"
+          },
+          {
+            "id": "dien-lanh",
+            "slug": "dien-lanh",
+            "name": "Điện lạnh",
+            "confidence": 0.1163,
+            "provenance": "clip"
+          }
+        ],
+        "targetCandidates": [],
+        "confidence": null,
+        "detectedLabels": [],
+        "observableSigns": [],
+        "decision_source": "abstained_ood",
+        "engine": "model",
+        "model_version": "fixgo-ai-rec-v1",
+        "notes": "Ảnh chưa đủ rõ hoặc ngoài danh mục dịch vụ hỗ trợ."
+      }
+    },
+    {
+      "method": "POST",
+      "endpoint": "/orders/diagnose",
+      "clientRequestId": "bccd1578-2b13-4c2d-aa61-4408ff9ad7f6",
+      "headerRequestId": "bccd1578-2b13-4c2d-aa61-4408ff9ad7f6",
+      "bodyRequestId": "3c8bfb9e-f642-4464-a6f7-abe2620a37a8",
+      "status": 201,
+      "elapsedMs": 81.76979100000017,
+      "response": {
+        "requestId": "3c8bfb9e-f642-4464-a6f7-abe2620a37a8",
+        "status": "manual_selection",
+        "source": "model",
+        "imageUrl": "[REDACTED]",
+        "confidence": null,
+        "modelScore": null,
+        "detectedLabels": [],
+        "categoryCandidates": [],
+        "targetCandidates": [],
+        "suggestedCategoryId": null,
+        "suggestedCategoryName": null,
+        "suggestedTargetId": null,
+        "suggestedTargetName": null,
+        "suggestedServiceId": null,
+        "suggestedServiceName": null,
+        "suggestedServiceConfidence": null,
+        "suggestedServices": [],
+        "estimatedPriceMin": null,
+        "estimatedPriceMax": null,
+        "estimatedPriceRange": null,
+        "category": null,
+        "target": null,
+        "service": null,
+        "priceEstimate": null,
+        "requiresManualSelection": true,
+        "needsMoreInfo": false,
+        "decisionSource": "model",
+        "modelVersion": "fixgo-ai-rec-v1",
+        "reasonCodes": [
+          "image_uncertain"
+        ],
+        "observableSigns": [],
+        "reportedSymptoms": [],
+        "questions": [],
+        "availableCategories": [
+          {
+            "id": "76c09b08-3231-4abd-be79-c2da76e06495",
+            "name": "Giúp việc",
+            "basePrice": 120000
+          },
+          {
+            "id": "ef9682ad-e5dc-494e-a22f-45df72b68f9e",
+            "name": "Làm vườn",
+            "basePrice": 150000
+          },
+          {
+            "id": "2a367f64-e8b2-4b94-8227-f5058c842af8",
+            "name": "Sửa nước",
+            "basePrice": 150000
+          },
+          {
+            "id": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+            "name": "Sửa điện",
+            "basePrice": 100000
+          },
+          {
+            "id": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+            "name": "Thiết bị gia dụng",
+            "basePrice": 120000
+          },
+          {
+            "id": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+            "name": "Điện lạnh",
+            "basePrice": 180000
+          }
+        ],
+        "availableTargets": [],
+        "availableServices": [],
+        "issueDescription": "",
+        "reason": "image_uncertain",
+        "notes": "Vui lòng chọn danh mục và dịch vụ phù hợp.",
+        "message": "Chưa xác định được nhóm. Vui lòng chọn danh mục."
+      }
+    },
+    {
+      "method": "POST",
+      "endpoint": "/orders/diagnose-upload",
+      "clientRequestId": "382edefe-3e51-4eff-a0a1-98a57fa3a488",
+      "headerRequestId": "382edefe-3e51-4eff-a0a1-98a57fa3a488",
+      "bodyRequestId": null,
+      "status": 500,
+      "elapsedMs": 603.4648569999999,
+      "response": {
+        "statusCode": 500,
+        "message": "Internal server error"
+      }
+    },
+    {
+      "method": "POST",
+      "endpoint": "/orders/diagnose-upload",
+      "clientRequestId": "864099fc-3217-4624-b813-7c06d9b87705",
+      "headerRequestId": "864099fc-3217-4624-b813-7c06d9b87705",
+      "bodyRequestId": null,
+      "status": 400,
+      "elapsedMs": 3.196317999999792,
+      "response": {
+        "message": "Vui lòng tải lên file ảnh sự cố hợp lệ (jpg, png, webp)",
+        "error": "Bad Request",
+        "statusCode": 400
+      }
+    },
+    {
+      "method": "POST",
+      "endpoint": "/orders",
+      "clientRequestId": "a0c8021c-ebbc-4263-b7be-a4812d49210f",
+      "headerRequestId": null,
+      "bodyRequestId": null,
+      "status": 404,
+      "elapsedMs": 1.8822299999997085,
+      "response": {
+        "code": "LAB_ROUTE_DISABLED"
+      }
+    }
+  ]
+}

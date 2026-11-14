@@ -1,0 +1,32 @@
+{
+  "frontend": {
+    "status": "PASS",
+    "tests": 29
+  },
+  "backend": {
+    "status": "PASS",
+    "tests": 57,
+    "suites": 7
+  },
+  "ai": {
+    "status": "PASS",
+    "tests": 19
+  },
+  "postgresqlConstraints": {
+    "status": "PASS",
+    "checks": 3
+  },
+  "httpPolicy": {
+    "status": "PASS",
+    "checks": 16
+  },
+  "browserE2E": {
+    "status": "PASS",
+    "checks": 16
+  },
+  "frontendBuild": "PASS",
+  "backendBabel": "PASS",
+  "modelQuality": "BLOCKED_DATA",
+  "mergeReadiness": "READY_WITH_DOCUMENTED_LIMITATIONS",
+  "historicalNominalUpload500": "NOT_REPRODUCED_ROOT_CAUSE_OPEN"
+}

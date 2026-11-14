@@ -27,13 +27,13 @@ export class FastApiAiClient {
    * input: imageUrl, description
    * output: { suggestedCategoryId, confidence (0-1), detectedLabels: string[] }
    */
-  async diagnoseIncident(imageUrl, description = '') {
+  async diagnoseIncident(imageUrl, description = '', requestId) {
     const payload = JSON.stringify({ imageUrl, description });
     for (const path of ['/ai/v2/diagnose', '/ai/diagnose']) {
       try {
         const response = await fetch(`${this.baseUrl}${path}`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', ...(requestId ? {'X-Request-ID':requestId} : {}) },
           body: payload,
           signal: AbortSignal.timeout(15000),
         });

@@ -50,6 +50,7 @@ def load_targets_from_backend() -> Dict[str, Dict[str, Any]]:
 
 def sync_catalog(embed_func=None) -> Dict[str, Any]:
     targets = load_targets_from_backend()
+    source = "backend" if targets else "static_fallback"
     if not targets:
         logger.info("Using existing targets snapshot")
         from target_catalog import TARGET_PROMPTS
@@ -63,17 +64,17 @@ def sync_catalog(embed_func=None) -> Dict[str, Any]:
         except Exception as exc:
             logger.warning("Failed to embed target prompts: %s", exc)
 
-    content_str = json.dumps(keys, sort_keys=True)
+    content_str = json.dumps(targets, sort_keys=True, ensure_ascii=False)
     version = hashlib.sha256(content_str.encode()).hexdigest()[:12]
     now = time.time()
 
     with _lock:
+        _catalog_state["source"] = source
         _catalog_state["version"] = version
         _catalog_state["updated_at"] = now
         _catalog_state["targets"] = targets
         _catalog_state["target_keys"] = keys
-        if embeddings is not None:
-            _catalog_state["target_embeddings"] = embeddings
+        _catalog_state["target_embeddings"] = embeddings
 
     return {
         "status": "synced",
@@ -81,3 +82,13 @@ def sync_catalog(embed_func=None) -> Dict[str, Any]:
         "categoryCount": 6,
         "targetCount": len(targets),
     }
+
+
+def publish_catalog_snapshot(targets, embeddings, source):
+    """Publish metadata and embeddings from the same CLIP load atomically."""
+    version = hashlib.sha256(json.dumps(targets, sort_keys=True, ensure_ascii=False).encode()).hexdigest()[:12]
+    with _lock:
+        _catalog_state.update(targets=dict(targets), target_keys=list(targets),
+                              target_embeddings=embeddings, source=source,
+                              version=version, updated_at=time.time())
+    return version

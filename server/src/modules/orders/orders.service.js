@@ -1,3 +1,4 @@
+import { catalogRead } from '../symptoms/symptom-catalog';
 import { validFaceResult, hasTrustedFaceProof } from '../../infrastructure/external/ai/face-result';
 import { ORDER_STATUS } from './constants/order-status';
 import { resolveDiagnosis } from './diagnosis/diagnosis-resolver';
@@ -75,7 +76,7 @@ export class OrdersService {
    * Business Rule Fallback: Nếu confidence < 0.6 (ngưỡng cấu hình) thì fallback cho khách tự chọn category thủ công, không chặn luồng
    */
   async diagnose(userId, diagnoseDto) {
-    return resolveDiagnosis(this.prisma, this.fastApiAiClient, diagnoseDto);
+    return catalogRead(() => resolveDiagnosis(this.prisma, this.fastApiAiClient, diagnoseDto));
   }
 
   /**

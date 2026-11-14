@@ -1,0 +1,6 @@
+{
+  "diagnosisRequestCount": 3,
+  "frontendHeaderBodyIdsMatch": true,
+  "aiClientHeaderEcho": true,
+  "internalChainId": "lab03-telemetry-chain"
+}
