@@ -1,0 +1,10 @@
+{
+  "status": 503,
+  "body": {
+    "code": "CATALOG_DB_UNAVAILABLE",
+    "stage": "symptom_catalog",
+    "message": "Không kết nối được catalog database."
+  },
+  "elapsedMs": 36.389768999999994,
+  "result": "PASS"
+}

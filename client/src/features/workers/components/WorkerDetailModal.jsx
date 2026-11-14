@@ -1,4 +1,5 @@
 import React from 'react';
+import FaceReviewPanel from './FaceReviewPanel';
 import {
   X,
   Briefcase,
@@ -23,7 +24,7 @@ export default function WorkerDetailModal({ isOpen, onClose, worker }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200 select-none">
-      <div className="relative w-full max-w-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-7 shadow-2xl space-y-5 overflow-hidden">
+      <div className="relative w-full max-w-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-7 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
         {/* Close Button */}
         <button
           type="button"
@@ -165,6 +166,8 @@ export default function WorkerDetailModal({ isOpen, onClose, worker }) {
             )}
           </div>
         </div>
+
+        <FaceReviewPanel key={worker.id} workerId={worker.id} />
 
         {/* Footer */}
         <div className="flex items-center justify-end pt-2 border-t border-slate-100 dark:border-slate-800">

@@ -1,0 +1,32 @@
+{"at":"2026-11-14T12:16:36.335Z","endpoint":"/api/orders/diagnose-upload","name":"Error","httpCode":400,"message":"An unknown file format not allowed"}
+{"at":"2026-11-14T12:23:07.835Z","endpoint":"/api/services/recommendations","name":"BadRequestException","message":"Triệu chứng đã ngừng hoạt động hoặc chưa được duyệt."}
+{"at":"2026-11-14T12:23:07.841Z","endpoint":"/api/services/recommendations","name":"BadRequestException","message":"Triệu chứng đã ngừng hoạt động hoặc chưa được duyệt."}
+{"at":"2026-11-14T12:23:07.847Z","endpoint":"/api/services/recommendations","name":"BadRequestException","message":"Triệu chứng không thuộc thiết bị đã chọn."}
+{"at":"2026-11-14T12:23:07.853Z","endpoint":"/api/services/recommendations","name":"BadRequestException","message":"Thiết bị không thuộc danh mục đã chọn."}
+{"at":"2026-11-14T12:23:07.857Z","endpoint":"/api/services/recommendations","name":"BadRequestException","message":"Chỉ đề xuất tối đa 3 dịch vụ."}
+{"at":"2026-11-14T12:23:07.873Z","endpoint":"/api/services/recommendations","name":"ServiceUnavailableException","message":"Quản lý triệu chứng chưa được bật. Bạn vẫn có thể chọn dịch vụ thủ công."}
+{"at":"2026-11-14T12:23:07.891Z","endpoint":"/api/internal/recommendation/inspect","name":"UnauthorizedException","message":"Unauthorized"}
+{"at":"2026-11-14T12:24:51.486Z","endpoint":"/api/orders/diagnose-upload","name":"BadRequestException","message":"Ảnh phải là JPG, PNG hoặc WebP hợp lệ."}
+{"at":"2026-11-14T12:26:54.049Z","endpoint":"/api/services/recommendations","name":"ServiceUnavailableException","message":"Không kết nối được catalog database."}
+{"at":"2026-11-14T12:30:22.466Z","endpoint":"/api/services/recommendations","name":"BadRequestException","message":"Triệu chứng đã ngừng hoạt động hoặc chưa được duyệt."}
+{"at":"2026-11-14T12:30:35.113Z","endpoint":"/api/services/recommendations","name":"BadRequestException","message":"Triệu chứng đã ngừng hoạt động hoặc chưa được duyệt."}
+{"at":"2026-11-14T12:30:35.119Z","endpoint":"/api/services/recommendations","name":"BadRequestException","message":"Triệu chứng đã ngừng hoạt động hoặc chưa được duyệt."}
+{"at":"2026-11-14T12:30:35.124Z","endpoint":"/api/services/recommendations","name":"BadRequestException","message":"Triệu chứng không thuộc thiết bị đã chọn."}
+{"at":"2026-11-14T12:30:35.130Z","endpoint":"/api/services/recommendations","name":"BadRequestException","message":"Thiết bị không thuộc danh mục đã chọn."}
+{"at":"2026-11-14T12:30:35.135Z","endpoint":"/api/services/recommendations","name":"BadRequestException","message":"Chỉ đề xuất tối đa 3 dịch vụ."}
+{"at":"2026-11-14T12:30:35.151Z","endpoint":"/api/services/recommendations","name":"ServiceUnavailableException","message":"Quản lý triệu chứng chưa được bật. Bạn vẫn có thể chọn dịch vụ thủ công."}
+{"at":"2026-11-14T12:30:35.156Z","endpoint":"/api/internal/recommendation/inspect","name":"UnauthorizedException","message":"Unauthorized"}
+{"at":"2026-11-14T12:36:51.984Z","endpoint":"/api/services/recommendations","name":"BadRequestException","message":"Triệu chứng đã ngừng hoạt động hoặc chưa được duyệt."}
+{"at":"2026-11-14T12:36:51.992Z","endpoint":"/api/services/recommendations","name":"BadRequestException","message":"Triệu chứng đã ngừng hoạt động hoặc chưa được duyệt."}
+{"at":"2026-11-14T12:36:51.999Z","endpoint":"/api/services/recommendations","name":"BadRequestException","message":"Triệu chứng không thuộc thiết bị đã chọn."}
+{"at":"2026-11-14T12:36:52.003Z","endpoint":"/api/services/recommendations","name":"BadRequestException","message":"Thiết bị không thuộc danh mục đã chọn."}
+{"at":"2026-11-14T12:36:52.007Z","endpoint":"/api/services/recommendations","name":"BadRequestException","message":"Chỉ đề xuất tối đa 3 dịch vụ."}
+{"at":"2026-11-14T12:36:52.021Z","endpoint":"/api/services/recommendations","name":"ServiceUnavailableException","message":"Quản lý triệu chứng chưa được bật. Bạn vẫn có thể chọn dịch vụ thủ công."}
+{"at":"2026-11-14T12:36:52.034Z","endpoint":"/api/internal/recommendation/inspect","name":"UnauthorizedException","message":"Unauthorized"}
+{"at":"2026-11-14T12:40:24.086Z","endpoint":"/api/services/recommendations","name":"BadRequestException","message":"Triệu chứng đã ngừng hoạt động hoặc chưa được duyệt."}
+{"at":"2026-11-14T12:40:24.092Z","endpoint":"/api/services/recommendations","name":"BadRequestException","message":"Triệu chứng đã ngừng hoạt động hoặc chưa được duyệt."}
+{"at":"2026-11-14T12:40:24.099Z","endpoint":"/api/services/recommendations","name":"BadRequestException","message":"Triệu chứng không thuộc thiết bị đã chọn."}
+{"at":"2026-11-14T12:40:24.103Z","endpoint":"/api/services/recommendations","name":"BadRequestException","message":"Thiết bị không thuộc danh mục đã chọn."}
+{"at":"2026-11-14T12:40:24.109Z","endpoint":"/api/services/recommendations","name":"BadRequestException","message":"Chỉ đề xuất tối đa 3 dịch vụ."}
+{"at":"2026-11-14T12:40:24.120Z","endpoint":"/api/services/recommendations","name":"ServiceUnavailableException","message":"Quản lý triệu chứng chưa được bật. Bạn vẫn có thể chọn dịch vụ thủ công."}
+{"at":"2026-11-14T12:40:24.127Z","endpoint":"/api/internal/recommendation/inspect","name":"UnauthorizedException","message":"Unauthorized"}

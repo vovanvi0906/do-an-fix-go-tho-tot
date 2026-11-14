@@ -22,7 +22,7 @@ async function resolveCategory(prisma, aiClient, input, result, categories) {
     if (!category) throw new BadRequestException('Danh mục không khả dụng');
     return { category, ai: null };
   }
-  const ai = await aiClient.diagnoseIncident(imageUrl, description);
+  const ai = await aiClient.diagnoseIncident(imageUrl, description, result.requestId);
   const score =
     typeof ai.confidence === 'number' &&
     Number.isFinite(ai.confidence) &&
@@ -109,6 +109,7 @@ export async function resolveDiagnosis(prisma, aiClient, input) {
     where: { isActive: true },
   });
   const result = createInitialResult(imageUrl, description, categories);
+  if (input.requestId) result.requestId = input.requestId;
   const { category, ai } = await resolveCategory(
     prisma,
     aiClient,

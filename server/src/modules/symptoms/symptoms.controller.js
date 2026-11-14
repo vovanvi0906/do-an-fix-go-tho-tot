@@ -1,3 +1,4 @@
+import { RecommendationDebugGuard } from '../orders/diagnosis/recommendation-debug';
 import {
   Controller,
   Get,
@@ -37,6 +38,12 @@ export class SymptomsController {
   constructor(service) {
     this.service = service;
   }
+  @Post('internal/recommendation/inspect')
+  @UseGuards(RecommendationDebugGuard)
+  @ApiBearerAuth()
+  @ApiOperation({summary:'Internal dev/staging authenticated recommendation telemetry'})
+  @Bind(Body(), Req())
+  async inspect(body, req) { return this.service.inspect(body, req.requestId); }
   @Get('service-targets/:id/symptoms')
   @ApiOperation({ summary: 'Triệu chứng active đã duyệt theo thiết bị' })
   @ApiQuery({ name: 'categoryId', required: false })

@@ -244,6 +244,11 @@ async def lifespan(app: FastAPI):
     if face_models.error_code:
         logger.warning("Face models unavailable: %s", face_models.error_code)
 
+    app.state.face_pad = None
+    if os.environ.get('FACE_PAD_MODEL_PATH'):
+        from face_pad import EvaluatedMn3Pad
+        app.state.face_pad = EvaluatedMn3Pad(os.environ['FACE_PAD_MODEL_PATH'])
+
     # 5. Nạp CLIP Zero-Shot Incident Classifier
     app.state.models_status["clip"] = False
     if HAS_CLIP:

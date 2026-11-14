@@ -1,0 +1,5 @@
+{"at":"2026-11-14T11:46:33.333Z","endpoint":"/api/service-targets/e6e9a725-4058-4af4-83b7-a35fc91af354/symptoms","name":"ServiceUnavailableException","message":"Quản lý triệu chứng chưa được bật. Bạn vẫn có thể chọn dịch vụ thủ công."}
+{"at":"2026-11-14T11:46:33.340Z","endpoint":"/api/services/recommendations","name":"ServiceUnavailableException","message":"Quản lý triệu chứng chưa được bật. Bạn vẫn có thể chọn dịch vụ thủ công."}
+{"at":"2026-11-14T11:46:34.433Z","endpoint":"/api/orders/diagnose-upload","name":"Error","httpCode":400,"message":"An unknown file format not allowed"}
+{"at":"2026-11-14T11:46:34.437Z","endpoint":"/api/orders/diagnose-upload","name":"BadRequestException","message":"Vui lòng tải lên file ảnh sự cố hợp lệ (jpg, png, webp)"}
+{"at":"2026-11-14T11:46:37.249Z","endpoint":"/api/service-targets/e6e9a725-4058-4af4-83b7-a35fc91af354/symptoms","name":"ServiceUnavailableException","message":"Quản lý triệu chứng chưa được bật. Bạn vẫn có thể chọn dịch vụ thủ công."}

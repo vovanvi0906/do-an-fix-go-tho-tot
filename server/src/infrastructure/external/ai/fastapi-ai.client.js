@@ -27,13 +27,13 @@ export class FastApiAiClient {
    * input: imageUrl, description
    * output: { suggestedCategoryId, confidence (0-1), detectedLabels: string[] }
    */
-  async diagnoseIncident(imageUrl, description = '') {
+  async diagnoseIncident(imageUrl, description = '', requestId) {
     const payload = JSON.stringify({ imageUrl, description });
     for (const path of ['/ai/v2/diagnose', '/ai/diagnose']) {
       try {
         const response = await fetch(`${this.baseUrl}${path}`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', ...(requestId ? {'X-Request-ID':requestId} : {}) },
           body: payload,
           signal: AbortSignal.timeout(15000),
         });
@@ -124,7 +124,9 @@ export class FastApiAiClient {
         if (r?.identityModelReady === true && typeof r.modelVersion === 'string' &&
             /^yunet-sface:[a-f0-9]{64}:[a-f0-9]{64}$/.test(r.modelVersion) && r.verificationMethod === 'yunet_sface_cosine') {
           // Readiness for identity inference is independent of evaluated PAD approval.
-          return { ...unavailable, identityModelReady: true, modelVersion: r.modelVersion };
+          return { ...unavailable, identityModelReady: true, modelVersion: r.modelVersion,
+            padEvaluated: r.padEvaluated === true, padModelVersion: typeof r.padModelVersion === 'string' ? r.padModelVersion : null,
+            padEvaluationReference: typeof r.padEvaluationReference === 'string' ? r.padEvaluationReference : null };
         }
       }
     } catch (_) { /* No secret headers, images or transport details in logs. */ }

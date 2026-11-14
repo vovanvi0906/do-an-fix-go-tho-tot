@@ -100,7 +100,7 @@ def extract_embedding(image, detector, recognizer, policy):
     return feature, None
 
 
-def compare_capture(capture, template, version, expected_model, detector, recognizer, model_version, policy):
+def compare_capture(capture, template, version, expected_model, detector, recognizer, model_version, policy, pad=None):
     if cv2 is None or np is None or detector is None or recognizer is None or not model_version:
         return outcome('TECHNICAL_ERROR', 'MODEL_NOT_READY')
     if type(version) is not int or version < 1 or not valid_embedding(template):
@@ -121,14 +121,17 @@ def compare_capture(capture, template, version, expected_model, detector, recogn
         score = float(raw)
         if not math.isfinite(score) or not -1 <= score <= 1:
             raise ValueError('INVALID_SCORE')
-        return outcome('MATCH' if score >= policy.threshold else 'NON_MATCH', 'COMPARED', score,
-                       'PASS', model_version, version)
+        result = outcome('MATCH' if score >= policy.threshold else 'NON_MATCH', 'COMPARED', score,
+                         'PASS', model_version, version)
+        evidence = (pad or UnavailablePad()).assess((image, detector))
+        result.update(padDecision=evidence.decision, padModelVersion=evidence.model_version, padErrorCode=evidence.error_code)
+        return result
     except Exception:
         # Do not emit exception text: it may contain paths, images or embeddings.
         return outcome('TECHNICAL_ERROR', 'FACE_PROCESSING_FAILED', model=model_version, version=version)
 
 
-def enroll_capture(capture, version, expected_model, detector, recognizer, model_version, policy):
+def enroll_capture(capture, version, expected_model, detector, recognizer, model_version, policy, pad=None):
     """Prepare enrollment evidence; do not release an embedding without evaluated PAD."""
     if cv2 is None or np is None or detector is None or recognizer is None or not model_version:
         return outcome('TECHNICAL_ERROR', 'MODEL_NOT_READY')
@@ -143,6 +146,11 @@ def enroll_capture(capture, version, expected_model, detector, recognizer, model
         # template for enrollment or label detection/quality as presentation-attack PASS.
         result = outcome('INCONCLUSIVE', 'PAD_NOT_EVALUATED', quality='PASS', model=model_version, version=version)
         result['verificationMethod'] = 'yunet_sface_embedding'
+        evidence = (pad or UnavailablePad()).assess((image, detector))
+        result.update(padDecision=evidence.decision, padModelVersion=evidence.model_version, padErrorCode=evidence.error_code)
+        if evidence.decision == 'PASS' and evidence.model_version:
+            result['embedding'] = feature[0].tolist()
+            result['errorCode'] = None
         return result
     except Exception:
         return outcome('TECHNICAL_ERROR', 'FACE_PROCESSING_FAILED', model=model_version, version=version)

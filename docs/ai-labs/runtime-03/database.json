@@ -1,0 +1,106 @@
+{
+  "identity": {
+    "name": "fixgo_recommendation_lab",
+    "username": "fixgo_rec_lab",
+    "server_port": 5432
+  },
+  "endpoint": {
+    "host": "127.0.0.1",
+    "port": 55448,
+    "database": "fixgo_recommendation_lab"
+  },
+  "sourceReadOnly": true,
+  "sourceHash": "45b4a4ee1990628fa35e5f555bd54b9e7806e555711c7d55aebe3382b409a258",
+  "sourceCounts": {
+    "categories": 6,
+    "targets": 70,
+    "services": 693
+  },
+  "sourceMigrationHistory": [
+    {
+      "history_table": null
+    }
+  ],
+  "baseline": "catalog-only extracted Prisma schema; historical migrations lack service_targets",
+  "migration": "20261114000000_symptom_catalog_v3",
+  "migrationSha256": "a4d53ab6c40f8cd694368c44bf238293cac545e1175f159ca924db46438a8528",
+  "fixtures": {
+    "label": "TEST ONLY, NOT BUSINESS APPROVAL",
+    "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e",
+    "targetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+    "otherTargetId": "059da690-c6be-46a8-83d5-d96e250cbe4f",
+    "services": {
+      "s1": "1f3bb8b7-d567-4ef6-ad2e-02375d47a18e",
+      "s2": "3372d9f2-bf36-4a63-aa45-1dba4a4190ca",
+      "s3": "9a71b6a8-5fac-49ca-ae52-a763b67e18df",
+      "s4": "ad104b1b-b0dc-442f-a38a-d77d03b4c455",
+      "s5": "c59d5a7a-95c0-46a3-a66a-a76c0d296100"
+    },
+    "symptoms": {
+      "one": "64e21255-116f-4e18-a070-739f71f997c8",
+      "three": "ac36dd24-2cb0-4987-ad96-274fbd92ab95",
+      "many": "563b7e8f-72f1-4516-a624-4de8ad7946a1",
+      "empty": "d18374e7-8f21-4510-ae38-88542f1b470d",
+      "needs-review": "d62da97b-847b-4aac-ae8f-0aa3a62b72d7",
+      "inactive": "7bc4159b-ed09-4923-ad97-9f7ca6dd4ca6",
+      "foreign": "1eb6361d-da5d-40c1-a9f9-24a0434ede2e",
+      "inactive-mapping": "a2fed64c-6f31-4843-ae39-44c07109c365",
+      "inactive-service": "aa8e6910-2512-4fc4-afa6-e179e8f9fe88"
+    }
+  },
+  "constraints": [
+    {
+      "conname": "symptom_services_pkey",
+      "contype": "p"
+    },
+    {
+      "conname": "symptom_services_priority_check",
+      "contype": "c"
+    },
+    {
+      "conname": "symptom_services_review_active_check",
+      "contype": "c"
+    },
+    {
+      "conname": "symptom_services_serviceId_targetId_fkey",
+      "contype": "f"
+    },
+    {
+      "conname": "symptom_services_symptomId_targetId_fkey",
+      "contype": "f"
+    },
+    {
+      "conname": "symptoms_pkey",
+      "contype": "p"
+    },
+    {
+      "conname": "symptoms_review_active_check",
+      "contype": "c"
+    },
+    {
+      "conname": "symptoms_sort_order_check",
+      "contype": "c"
+    },
+    {
+      "conname": "symptoms_targetId_fkey",
+      "contype": "f"
+    }
+  ],
+  "checks": [
+    {
+      "name": "category_parent_fk",
+      "result": "PASS",
+      "rejectionCode": "P2003"
+    },
+    {
+      "name": "approval_check",
+      "result": "PASS",
+      "rejectionCode": "23514_CHECK_VIOLATION"
+    },
+    {
+      "name": "composite_fk_same_target",
+      "result": "PASS",
+      "rejectionCode": "P2003"
+    }
+  ]
+}

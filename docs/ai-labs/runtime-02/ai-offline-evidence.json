@@ -1,0 +1,83 @@
+{
+  "at": "2026-11-14T11:47:55.128Z",
+  "kind": "actual_connection_refused_to_owned_test_ai",
+  "status": 201,
+  "clientRequestId": "1f27468a-5ebd-4b43-bc63-72b9f3de1178",
+  "headerRequestId": "1f27468a-5ebd-4b43-bc63-72b9f3de1178",
+  "elapsedMs": 16.526123,
+  "response": {
+    "requestId": "55ebdcd7-592e-4a19-97a6-91d7bc08f585",
+    "status": "unavailable",
+    "source": "unavailable",
+    "imageUrl": "[REDACTED]",
+    "confidence": null,
+    "modelScore": null,
+    "detectedLabels": [],
+    "categoryCandidates": [],
+    "targetCandidates": [],
+    "suggestedCategoryId": null,
+    "suggestedCategoryName": null,
+    "suggestedTargetId": null,
+    "suggestedTargetName": null,
+    "suggestedServiceId": null,
+    "suggestedServiceName": null,
+    "suggestedServiceConfidence": null,
+    "suggestedServices": [],
+    "estimatedPriceMin": null,
+    "estimatedPriceMax": null,
+    "estimatedPriceRange": null,
+    "category": null,
+    "target": null,
+    "service": null,
+    "priceEstimate": null,
+    "requiresManualSelection": true,
+    "needsMoreInfo": false,
+    "decisionSource": "unavailable",
+    "modelVersion": "fixgo-ai-rec-v1",
+    "reasonCodes": [
+      "ai_unavailable"
+    ],
+    "observableSigns": [],
+    "reportedSymptoms": [],
+    "questions": [],
+    "availableCategories": [
+      {
+        "id": "76c09b08-3231-4abd-be79-c2da76e06495",
+        "name": "Giúp việc",
+        "basePrice": 120000
+      },
+      {
+        "id": "ef9682ad-e5dc-494e-a22f-45df72b68f9e",
+        "name": "Làm vườn",
+        "basePrice": 150000
+      },
+      {
+        "id": "2a367f64-e8b2-4b94-8227-f5058c842af8",
+        "name": "Sửa nước",
+        "basePrice": 150000
+      },
+      {
+        "id": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+        "name": "Sửa điện",
+        "basePrice": 100000
+      },
+      {
+        "id": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+        "name": "Thiết bị gia dụng",
+        "basePrice": 120000
+      },
+      {
+        "id": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+        "name": "Điện lạnh",
+        "basePrice": 180000
+      }
+    ],
+    "availableTargets": [],
+    "availableServices": [],
+    "issueDescription": "",
+    "reason": "ai_unavailable",
+    "notes": "Vui lòng chọn danh mục và dịch vụ phù hợp.",
+    "message": "AI chưa khả dụng. Bạn có thể chọn dịch vụ thủ công."
+  },
+  "result": "PASS"
+}

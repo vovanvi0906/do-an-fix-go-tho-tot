@@ -1,6 +1,9 @@
 from typing import Dict, List, Optional, Tuple, Any
 from category_helper import match_category_by_keywords
 
+CATEGORY_MIN_CONFIDENCE = 0.48
+CATEGORY_MIN_MARGIN = 0.10
+
 CATEGORY_NAMES = {
     "sua_dien": "Sửa điện",
     "sua_nuoc": "Sửa nước",
@@ -49,8 +52,8 @@ def evaluate_categories(
     clip_probs: Optional[Dict[str, float]],
     yolo_probs: Optional[Dict[str, float]],
     description: Optional[str] = "",
-    min_confidence: float = 0.48,
-    min_margin: float = 0.10,
+    min_confidence: float = CATEGORY_MIN_CONFIDENCE,
+    min_margin: float = CATEGORY_MIN_MARGIN,
 ) -> Tuple[Optional[str], Optional[float], List[Dict[str, Any]], str]:
     scores, source = fuse_category_scores(clip_probs, yolo_probs, description)
     if not scores or source == "unavailable":

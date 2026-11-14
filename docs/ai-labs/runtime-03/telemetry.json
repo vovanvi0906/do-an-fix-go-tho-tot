@@ -1,0 +1,142 @@
+{
+  "result": {
+    "suggestedCategoryId": "dien-lanh",
+    "suggestedCategoryName": "Điện lạnh",
+    "suggestedTargetId": "eaa18ae1-41b8-4588-bcdb-96192e5a2da8",
+    "suggestedTargetName": "Máy giặt / Máy giặt sấy",
+    "categoryCandidates": [
+      {
+        "id": "dien-lanh",
+        "slug": "dien-lanh",
+        "name": "Điện lạnh",
+        "confidence": 0.5529,
+        "provenance": "ensemble"
+      },
+      {
+        "id": "thiet-bi",
+        "slug": "thiet-bi",
+        "name": "Thiết bị gia dụng",
+        "confidence": 0.2327,
+        "provenance": "ensemble"
+      },
+      {
+        "id": "giup-viec",
+        "slug": "giup-viec",
+        "name": "Giúp việc",
+        "confidence": 0.086,
+        "provenance": "ensemble"
+      }
+    ],
+    "targetCandidates": [
+      {
+        "targetId": "eaa18ae1-41b8-4588-bcdb-96192e5a2da8",
+        "targetName": "Máy giặt / Máy giặt sấy",
+        "targetCategory": "dien-lanh",
+        "similarity": 0.219,
+        "confidence": 0.6095,
+        "provenance": "clip_target_similarity"
+      },
+      {
+        "targetId": "1746c918-2fb7-41ac-a111-5c3e807616bf",
+        "targetName": "Máy sấy quần áo",
+        "targetCategory": "dien-lanh",
+        "similarity": 0.2101,
+        "confidence": 0.605,
+        "provenance": "clip_target_similarity"
+      },
+      {
+        "targetId": "8e1a07e4-134d-4214-8841-ad2969a584fa",
+        "targetName": "Máy làm mát / Quạt điều hòa",
+        "targetCategory": "dien-lanh",
+        "similarity": 0.2085,
+        "confidence": 0.6042,
+        "provenance": "clip_target_similarity"
+      }
+    ],
+    "confidence": 0.5529,
+    "detectedLabels": [
+      "dien-lanh"
+    ],
+    "observableSigns": [
+      "Nhận diện danh mục: Điện lạnh",
+      "Nhận diện đối tượng: Máy giặt / Máy giặt sấy"
+    ],
+    "decision_source": "ensemble",
+    "engine": "model",
+    "model_version": "fixgo-ai-rec-v1",
+    "notes": "Chẩn đoán danh mục và đối tượng thành công."
+  },
+  "debug": {
+    "requestId": "lab03-telemetry-chain",
+    "stagesMs": {
+      "image_decode": 0.3636960000221734,
+      "clip": 128.8034780000089,
+      "yolo": 27.27077500003361,
+      "category_fusion": 0.043932000153290574,
+      "target_resolution": 0.14724799984833226,
+      "total": 156.65102200000547
+    },
+    "clipScores": {
+      "giup_viec": 0.1434,
+      "sua_dien": 0.0833,
+      "sua_nuoc": 0.0279,
+      "dien_lanh": 0.257,
+      "thiet_bi": 0.3875,
+      "lam_vuon": 0.0404,
+      "other_unclear": 0.0605
+    },
+    "yoloScores": {
+      "dien_lanh": 0.9968155026435852,
+      "lam_vuon": 0.0003374959633219987,
+      "other_unclear": 0.0004700243880506605,
+      "sua_dien": 0.0008079350227490067,
+      "sua_nuoc": 0.0010539032518863678,
+      "thiet_bi": 0.0005152631783857942
+    },
+    "modelsLoaded": {
+      "clip": true,
+      "yolo": true
+    },
+    "stageOutcomes": {
+      "model_loading": "ready",
+      "clip": "ready",
+      "yolo": "ready",
+      "category_fusion": "accepted",
+      "target_resolution": "accepted"
+    },
+    "gates": {
+      "categoryMinConfidence": 0.48,
+      "categoryMinMargin": 0.1,
+      "categoryAccepted": true,
+      "confidence": 0.5529,
+      "targetMinSimilarity": 0.2,
+      "targetAccepted": true,
+      "source": "evaluate_categories defaults / match_targets defaults"
+    },
+    "catalog": {
+      "version": "073995e435f1",
+      "source": "backend",
+      "targetCount": 70
+    },
+    "model": {
+      "clip": "openai/clip-vit-base-patch32",
+      "clipCommit": null,
+      "declaredVersion": "fixgo-ai-rec-v1",
+      "yoloSha256": "959d3e9823c55ae0948ce08d75261dca630678d22228404ae03dd4ee7dc7532d",
+      "clipArtifactSha256": "a63082132ba4f97a80bea76823f544493bffa8082296d62d71581a4feff1576f",
+      "clipRevision": "3d74acf9a28c67741b2f4f2ea7635f0aaf6f0268",
+      "clipArtifactFile": "pytorch_model.bin"
+    }
+  },
+  "backend": {
+    "requestId": "lab03-telemetry-chain",
+    "confidenceThreshold": 0.6,
+    "thresholdSource": "AI_CONFIDENCE_THRESHOLD",
+    "categoryThresholdPassed": false,
+    "aiHttpElapsedMs": 707.4839710000088,
+    "categoryResolved": true,
+    "categoryGateAccepted": false,
+    "canonicalTargetId": "eaa18ae1-41b8-4588-bcdb-96192e5a2da8",
+    "catalogResolutionMs": 2.751860999967903
+  }
+}

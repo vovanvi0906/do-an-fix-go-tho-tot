@@ -46,6 +46,8 @@ try {
   console.log('Invalid v2 lineage rejected, DDL rolled back, source record unchanged: PASS');
   sql('TRUNCATE biometric_sessions, users, service_categories CASCADE');
   sql(hardening);
+  // Unrelated later migration (symptom catalog) applied unchanged so the drift check below stays strict.
+  sql(readFileSync(join(root, 'prisma/migrations/20261114000000_symptom_catalog_v3/migration.sql'), 'utf8'));
   run(process.execPath, ['node_modules/prisma/build/index.js','migrate','diff','--from-url',url,'--to-schema-datamodel','prisma/schema.prisma','--script','--exit-code'], {env});
   const deleteRules=sql("SELECT conname,confdeltype FROM pg_constraint WHERE conname IN ('biometric_sessions_orderId_fkey','biometric_proofs_orderId_fkey');");
   if ((deleteRules.match(/\| r/g)||[]).length!==2) throw new Error('Order delete rules not RESTRICT');

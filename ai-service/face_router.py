@@ -21,11 +21,11 @@ def _compare(state, body, enrollment=False):
         if enrollment:
             return enroll_capture(body.get('photo'), body.get('templateVersion'), body.get('modelVersion'),
                                   getattr(state, 'face_detector', None), getattr(state, 'face_recognizer', None),
-                                  getattr(state, 'face_model_version', None), policy)
+                                  getattr(state, 'face_model_version', None), policy, getattr(state, 'face_pad', None))
         return compare_capture(body.get('photo'), body.get('templateEmbedding'),
                                body.get('templateVersion'), body.get('modelVersion'),
                                getattr(state, 'face_detector', None), getattr(state, 'face_recognizer', None),
-                               getattr(state, 'face_model_version', None), policy)
+                               getattr(state, 'face_model_version', None), policy, getattr(state, 'face_pad', None))
 
 
 def require_face_auth(request):
@@ -42,9 +42,11 @@ async def face_capabilities(request: Request):
     require_face_auth(request)
     state = request.app.state
     ready = getattr(state, 'face_detector', None) is not None and getattr(state, 'face_recognizer', None) is not None and bool(getattr(state, 'face_model_version', None))
+    provider = getattr(state, 'face_pad', None)
+    pad_caps = provider.capabilities() if provider else dict(padEvaluated=False, padModelVersion=None, padEvaluationReference=None, padErrorCode='PAD_PROVIDER_NOT_APPROVED')
     return dict(identityModelReady=ready, modelVersion=getattr(state, 'face_model_version', None) if ready else None,
-                verificationMethod='yunet_sface_cosine', padEvaluated=False, padDecision='NOT_EVALUATED',
-                padModelVersion=None, errorCode=None if ready else 'MODEL_NOT_READY')
+                verificationMethod='yunet_sface_cosine', padDecision='NOT_EVALUATED',
+                **pad_caps, errorCode=None if ready else 'MODEL_NOT_READY')
 
 
 @router.post('/ai/face-verify')

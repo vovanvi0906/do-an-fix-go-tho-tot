@@ -1,0 +1,377 @@
+{
+  "kind": "real_pixel_inference_smoke_not_accuracy_benchmark",
+  "transport": "in-process ASGI using existing V2 route",
+  "clip_ready": true,
+  "yolo_sha256": "959d3e9823c55ae0948ce08d75261dca630678d22228404ae03dd4ee7dc7532d",
+  "catalog_source": "existing static fallback (backend deliberately disconnected)",
+  "limitations": [
+    "Synthetic/leaky dataset; no generalization claims",
+    "No backend/DB/Cloudinary flow",
+    "Declared model_version is not a weights hash"
+  ],
+  "records": [
+    {
+      "sample": "dataset/test/dien_lanh/dien_lanh_0001.jpg",
+      "provenance": "synthetic_opencv_templates",
+      "sha256": "124771e6a3a43e89c6702bf68a95ecf9d5dcd56e39922ac9cc2e3df78de73660",
+      "http_status": 200,
+      "asgi_elapsed_ms": 815.42,
+      "response": {
+        "suggestedCategoryId": "dien-lanh",
+        "suggestedCategoryName": "Điện lạnh",
+        "suggestedTargetId": "tu-lanh-tu-lanh-side-by-side",
+        "suggestedTargetName": "Tủ lạnh",
+        "categoryCandidates": [
+          {
+            "id": "dien-lanh",
+            "slug": "dien-lanh",
+            "name": "Điện lạnh",
+            "confidence": 0.5529,
+            "provenance": "ensemble"
+          },
+          {
+            "id": "thiet-bi",
+            "slug": "thiet-bi",
+            "name": "Thiết bị gia dụng",
+            "confidence": 0.2327,
+            "provenance": "ensemble"
+          },
+          {
+            "id": "giup-viec",
+            "slug": "giup-viec",
+            "name": "Giúp việc",
+            "confidence": 0.086,
+            "provenance": "ensemble"
+          }
+        ],
+        "targetCandidates": [
+          {
+            "targetId": "tu-lanh-tu-lanh-side-by-side",
+            "targetName": "Tủ lạnh",
+            "targetCategory": "dien-lanh",
+            "similarity": 0.2303,
+            "confidence": 0.6151,
+            "provenance": "clip_target_similarity"
+          },
+          {
+            "targetId": "may-lanh-dieu-hoa",
+            "targetName": "Máy lạnh / Điều hòa",
+            "targetCategory": "dien-lanh",
+            "similarity": 0.2141,
+            "confidence": 0.607,
+            "provenance": "clip_target_similarity"
+          },
+          {
+            "targetId": "may-say-quan-ao",
+            "targetName": "Máy sấy quần áo",
+            "targetCategory": "dien-lanh",
+            "similarity": 0.2,
+            "confidence": 0.6,
+            "provenance": "clip_target_similarity"
+          }
+        ],
+        "confidence": 0.5529,
+        "detectedLabels": [
+          "dien-lanh"
+        ],
+        "observableSigns": [
+          "Nhận diện danh mục: Điện lạnh",
+          "Nhận diện đối tượng: Tủ lạnh"
+        ],
+        "decision_source": "ensemble",
+        "engine": "model",
+        "model_version": "fixgo-ai-rec-v1",
+        "notes": "Chẩn đoán danh mục và đối tượng thành công."
+      }
+    },
+    {
+      "sample": "dataset/test/lam_vuon/lam_vuon_0001.jpg",
+      "provenance": "synthetic_opencv_templates",
+      "sha256": "d9cdab620bb4d25d9404ffabb49aabd83fa0f8fa8bcce018f5e11aa3730cb193",
+      "http_status": 200,
+      "asgi_elapsed_ms": 115.8,
+      "response": {
+        "suggestedCategoryId": "lam-vuon",
+        "suggestedCategoryName": "Làm vườn",
+        "suggestedTargetId": "tham-co-bai-co",
+        "suggestedTargetName": "Thảm cỏ / Bãi cỏ",
+        "categoryCandidates": [
+          {
+            "id": "lam-vuon",
+            "slug": "lam-vuon",
+            "name": "Làm vườn",
+            "confidence": 0.9766,
+            "provenance": "ensemble"
+          },
+          {
+            "id": "sua-dien",
+            "slug": "sua-dien",
+            "name": "Sửa điện",
+            "confidence": 0.0044,
+            "provenance": "ensemble"
+          }
+        ],
+        "targetCandidates": [
+          {
+            "targetId": "tham-co-bai-co",
+            "targetName": "Thảm cỏ / Bãi cỏ",
+            "targetCategory": "lam-vuon",
+            "similarity": 0.2688,
+            "confidence": 0.6344,
+            "provenance": "clip_target_similarity"
+          },
+          {
+            "targetId": "cay-bong-mat-cay-lon",
+            "targetName": "Cây bóng mát / Cây lớn",
+            "targetCategory": "lam-vuon",
+            "similarity": 0.2551,
+            "confidence": 0.6275,
+            "provenance": "clip_target_similarity"
+          },
+          {
+            "targetId": "he-thong-tuoi-san-vuon-tong-the",
+            "targetName": "Hệ thống tưới / Sân vườn tổng thể",
+            "targetCategory": "lam-vuon",
+            "similarity": 0.2548,
+            "confidence": 0.6274,
+            "provenance": "clip_target_similarity"
+          }
+        ],
+        "confidence": 0.9766,
+        "detectedLabels": [
+          "lam-vuon"
+        ],
+        "observableSigns": [
+          "Nhận diện danh mục: Làm vườn",
+          "Nhận diện đối tượng: Thảm cỏ / Bãi cỏ"
+        ],
+        "decision_source": "ensemble",
+        "engine": "model",
+        "model_version": "fixgo-ai-rec-v1",
+        "notes": "Chẩn đoán danh mục và đối tượng thành công."
+      }
+    },
+    {
+      "sample": "dataset/test/other_unclear/other_unclear_0001.jpg",
+      "provenance": "synthetic_opencv_templates",
+      "sha256": "37f8b284c017db46857bf558a2a6c8a304cc36776334977ff400443f76219b4e",
+      "http_status": 200,
+      "asgi_elapsed_ms": 69.31,
+      "response": {
+        "suggestedCategoryId": null,
+        "suggestedCategoryName": null,
+        "suggestedTargetId": null,
+        "suggestedTargetName": null,
+        "categoryCandidates": [
+          {
+            "id": "thiet-bi",
+            "slug": "thiet-bi",
+            "name": "Thiết bị gia dụng",
+            "confidence": 0.1991,
+            "provenance": "clip"
+          },
+          {
+            "id": "dien-lanh",
+            "slug": "dien-lanh",
+            "name": "Điện lạnh",
+            "confidence": 0.1163,
+            "provenance": "clip"
+          }
+        ],
+        "targetCandidates": [],
+        "confidence": null,
+        "detectedLabels": [],
+        "observableSigns": [],
+        "decision_source": "abstained_ood",
+        "engine": "model",
+        "model_version": "fixgo-ai-rec-v1",
+        "notes": "Ảnh chưa đủ rõ hoặc ngoài danh mục dịch vụ hỗ trợ."
+      }
+    },
+    {
+      "sample": "dataset/test/sua_dien/sua_dien_0001.jpg",
+      "provenance": "synthetic_opencv_templates",
+      "sha256": "c54536e19afd8eedc46881da416446a25b351ecbadcd66b0f3cc072e663b7dd9",
+      "http_status": 200,
+      "asgi_elapsed_ms": 70.41,
+      "response": {
+        "suggestedCategoryId": null,
+        "suggestedCategoryName": null,
+        "suggestedTargetId": null,
+        "suggestedTargetName": null,
+        "categoryCandidates": [
+          {
+            "id": "sua-dien",
+            "slug": "sua-dien",
+            "name": "Sửa điện",
+            "confidence": 0.4739,
+            "provenance": "ensemble"
+          },
+          {
+            "id": "thiet-bi",
+            "slug": "thiet-bi",
+            "name": "Thiết bị gia dụng",
+            "confidence": 0.3468,
+            "provenance": "ensemble"
+          }
+        ],
+        "targetCandidates": [],
+        "confidence": null,
+        "detectedLabels": [],
+        "observableSigns": [],
+        "decision_source": "abstained_ood",
+        "engine": "model",
+        "model_version": "fixgo-ai-rec-v1",
+        "notes": "Ảnh chưa đủ rõ hoặc ngoài danh mục dịch vụ hỗ trợ."
+      }
+    },
+    {
+      "sample": "dataset/test/sua_nuoc/sua_nuoc_0001.jpg",
+      "provenance": "synthetic_opencv_templates",
+      "sha256": "9ab8157a39740dd47e61d89918a6d6d799e073c21620bc4beda210557a091f83",
+      "http_status": 200,
+      "asgi_elapsed_ms": 68.28,
+      "response": {
+        "suggestedCategoryId": "sua-nuoc",
+        "suggestedCategoryName": "Sửa nước",
+        "suggestedTargetId": "pheu-thoat-san-khu-vuc-phong-tam",
+        "suggestedTargetName": "Phễu thoát sàn / Khu vực phòng tắm",
+        "categoryCandidates": [
+          {
+            "id": "sua-nuoc",
+            "slug": "sua-nuoc",
+            "name": "Sửa nước",
+            "confidence": 0.9186,
+            "provenance": "ensemble"
+          },
+          {
+            "id": "thiet-bi",
+            "slug": "thiet-bi",
+            "name": "Thiết bị gia dụng",
+            "confidence": 0.0337,
+            "provenance": "ensemble"
+          },
+          {
+            "id": "giup-viec",
+            "slug": "giup-viec",
+            "name": "Giúp việc",
+            "confidence": 0.0204,
+            "provenance": "ensemble"
+          }
+        ],
+        "targetCandidates": [
+          {
+            "targetId": "pheu-thoat-san-khu-vuc-phong-tam",
+            "targetName": "Phễu thoát sàn / Khu vực phòng tắm",
+            "targetCategory": "sua-nuoc",
+            "similarity": 0.2777,
+            "confidence": 0.6389,
+            "provenance": "clip_target_similarity"
+          },
+          {
+            "targetId": "bon-cau-ket-nuoc",
+            "targetName": "Bồn cầu / Két nước",
+            "targetCategory": "sua-nuoc",
+            "similarity": 0.27,
+            "confidence": 0.635,
+            "provenance": "clip_target_similarity"
+          },
+          {
+            "targetId": "voi-nuoc-voi-sen",
+            "targetName": "Vòi nước / Vòi sen",
+            "targetCategory": "sua-nuoc",
+            "similarity": 0.2687,
+            "confidence": 0.6343,
+            "provenance": "clip_target_similarity"
+          }
+        ],
+        "confidence": 0.9186,
+        "detectedLabels": [
+          "sua-nuoc"
+        ],
+        "observableSigns": [
+          "Nhận diện danh mục: Sửa nước",
+          "Nhận diện đối tượng: Phễu thoát sàn / Khu vực phòng tắm"
+        ],
+        "decision_source": "ensemble",
+        "engine": "model",
+        "model_version": "fixgo-ai-rec-v1",
+        "notes": "Chẩn đoán danh mục và đối tượng thành công."
+      }
+    },
+    {
+      "sample": "dataset/test/thiet_bi/thiet_bi_0001.jpg",
+      "provenance": "synthetic_opencv_templates",
+      "sha256": "7d20607af57046be2c269f2b7418f9aeb665b5fab3b12ab57b0417c8765c1ae5",
+      "http_status": 200,
+      "asgi_elapsed_ms": 69.18,
+      "response": {
+        "suggestedCategoryId": "thiet-bi",
+        "suggestedCategoryName": "Thiết bị gia dụng",
+        "suggestedTargetId": "bep-tu-bep-hong-ngoai",
+        "suggestedTargetName": "Bếp từ / Bếp hồng ngoại",
+        "categoryCandidates": [
+          {
+            "id": "thiet-bi",
+            "slug": "thiet-bi",
+            "name": "Thiết bị gia dụng",
+            "confidence": 0.8998,
+            "provenance": "ensemble"
+          },
+          {
+            "id": "sua-dien",
+            "slug": "sua-dien",
+            "name": "Sửa điện",
+            "confidence": 0.0709,
+            "provenance": "ensemble"
+          },
+          {
+            "id": "dien-lanh",
+            "slug": "dien-lanh",
+            "name": "Điện lạnh",
+            "confidence": 0.0148,
+            "provenance": "ensemble"
+          }
+        ],
+        "targetCandidates": [
+          {
+            "targetId": "bep-tu-bep-hong-ngoai",
+            "targetName": "Bếp từ / Bếp hồng ngoại",
+            "targetCategory": "thiet-bi",
+            "similarity": 0.2686,
+            "confidence": 0.6343,
+            "provenance": "clip_target_similarity"
+          },
+          {
+            "targetId": "bep-gas-bep-gas-am",
+            "targetName": "Bếp gas / Bếp gas âm",
+            "targetCategory": "thiet-bi",
+            "similarity": 0.2551,
+            "confidence": 0.6276,
+            "provenance": "clip_target_similarity"
+          },
+          {
+            "targetId": "noi-com-dien-noi-ap-suat-dien",
+            "targetName": "Nồi cơm điện / Nồi áp suất điện",
+            "targetCategory": "thiet-bi",
+            "similarity": 0.2449,
+            "confidence": 0.6225,
+            "provenance": "clip_target_similarity"
+          }
+        ],
+        "confidence": 0.8998,
+        "detectedLabels": [
+          "thiet-bi"
+        ],
+        "observableSigns": [
+          "Nhận diện danh mục: Thiết bị gia dụng",
+          "Nhận diện đối tượng: Bếp từ / Bếp hồng ngoại"
+        ],
+        "decision_source": "ensemble",
+        "engine": "model",
+        "model_version": "fixgo-ai-rec-v1",
+        "notes": "Chẩn đoán danh mục và đối tượng thành công."
+      }
+    }
+  ]
+}

@@ -172,3 +172,15 @@ export async function recommendServices(
     source: 'confirmed_symptom_catalog',
   };
 }
+
+
+export async function catalogRead(operation) {
+  try { return await operation(); }
+  catch (error) {
+    if (['P1001','P1002','P1008','P1017','P2024'].includes(error?.code))
+      throw new ServiceUnavailableException({code:'CATALOG_DB_UNAVAILABLE',stage:'symptom_catalog',message:'Không kết nối được catalog database.'});
+    if (error?.code === 'P2021')
+      throw new ServiceUnavailableException({code:'CATALOG_SCHEMA_NOT_READY',stage:'symptom_catalog',message:'Schema catalog chưa sẵn sàng.'});
+    throw error;
+  }
+}

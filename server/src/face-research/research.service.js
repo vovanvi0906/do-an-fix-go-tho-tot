@@ -4,6 +4,40 @@ const hash = v => createHash('sha256').update(v).digest('hex');
 export const PAD_VERSION = 'experimental:anti-spoof-mn3:c4c99af04603b62d7e44f6f4daeb33e0daeccc696008c0b1d62f6f5cebbb3262';
 const fail = code => { throw new BadRequestException(code); };
 const text = (x, max=128) => typeof x === 'string' && x.length > 0 && x.length <= max;
+const QUALITY_REASONS=['NO_FACE','MULTIPLE_FACES','INVALID_DETECTION','FACE_SIZE_OR_CROP','TOO_DARK','TOO_BRIGHT','BLUR'];
+const num=(v,min=-Infinity,max=Infinity)=>typeof v==='number'&&Number.isFinite(v)&&v>=min&&v<=max;
+const reject=()=>fail('RESEARCH_EVIDENCE_REJECTED');
+// Debug geometry only. Landmarks/embeddings are not accepted even if the AI sends them.
+function detection(d){
+  if(d==null)return null;
+  if(typeof d!=='object'||!Number.isInteger(d.faceCount)||d.faceCount<0||!Number.isInteger(d.imageWidth)||!Number.isInteger(d.imageHeight)||d.imageWidth<1||d.imageHeight<1)reject();
+  if(!(d.score===null||num(d.score,0,1)))reject();
+  if(!(d.box===null||(Array.isArray(d.box)&&d.box.length===4&&d.box.every(v=>num(v,-1e5,1e5)))))reject();
+  return {faceCount:d.faceCount,imageWidth:d.imageWidth,imageHeight:d.imageHeight,score:d.score,box:d.box?[...d.box]:null};
+}
+function alignment(a){
+  if(a==null)return null;
+  if(a.method!=='sface_align_crop_5pt'||typeof a.performed!=='boolean')reject();
+  return {method:a.method,performed:a.performed};
+}
+// Research PAD gate output: may explain NOT_EVALUATED/INCONCLUSIVE; PASS/FAIL can never enter here.
+function padPolicy(p){
+  if(p==null)return null;
+  if(!['NOT_EVALUATED','INCONCLUSIVE'].includes(p.decision)||p.evaluated!==false||p.threshold!==null||p.evaluationReference!==null||
+     typeof p.reason!=='string'||!/^[A-Z_:]{1,96}$/.test(p.reason))reject();
+  return {decision:p.decision,reason:p.reason,evaluated:false,threshold:null,evaluationReference:null};
+}
+function identityPolicy(p){
+  if(p==null)return null;
+  if(!num(p.threshold,-1,1)||p.status!=='PROVISIONAL_UNCALIBRATED'||p.method!=='yunet_sface_cosine')reject();
+  return {threshold:p.threshold,status:p.status,method:p.method};
+}
+function qualityPolicy(p){
+  if(p==null)return null;
+  const keys=['minFacePixels','minBrightness','maxBrightness','minSharpness','minDetectionScore'];
+  if(typeof p!=='object'||keys.some(k=>!num(p[k],0,100000)))reject();
+  return Object.fromEntries(keys.map(k=>[k,p[k]]));
+}
 export function validateMeasurement(r, session) {
   if (!r || r.researchOnly !== true || r.verified !== false || r.enrolled !== false || r.proof !== null ||
       r.sessionId !== session.id || r.workerId !== session.worker_id || r.modelVersion !== session.model_version ||
@@ -22,7 +56,9 @@ export function validateMeasurement(r, session) {
     if(!q||!['PASS','FAIL','NOT_EVALUATED'].includes(q.decision))fail('RESEARCH_EVIDENCE_REJECTED');
     for(const k of ['brightness','sharpness'])if(q[k]!=null&&!(typeof q[k]==='number'&&Number.isFinite(q[k])&&q[k]>=0))fail('RESEARCH_EVIDENCE_REJECTED');
     if(q.faceCount!=null&&(!Number.isInteger(q.faceCount)||q.faceCount<0))fail('RESEARCH_EVIDENCE_REJECTED');
-    return {decision:q.decision,faceCount:q.faceCount??null,brightness:q.brightness??null,sharpness:q.sharpness??null};
+    const reasons=q.reasons??[];
+    if(!Array.isArray(reasons)||reasons.length>8||reasons.some(x=>!QUALITY_REASONS.includes(x)))fail('RESEARCH_EVIDENCE_REJECTED');
+    return {decision:q.decision,faceCount:q.faceCount??null,brightness:q.brightness??null,sharpness:q.sharpness??null,reasons:[...reasons]};
   }
   if(!r.latencyMs||!Object.keys(r.latencyMs).length||Object.entries(r.latencyMs).some(([k,v])=>!/^((probe|reference)(Detection|CropResize|Sface|Pad)|identityComparison|decode|total)Ms$/.test(k)||typeof v!=='number'||!Number.isFinite(v)||v<0))fail('RESEARCH_EVIDENCE_REJECTED');
   // Whitelist: embeddings/media, unexpected authority fields and exception text never persist.
@@ -30,6 +66,8 @@ export function validateMeasurement(r, session) {
     padDecision:'NOT_EVALUATED',padRealScore:r.padRealScore,padSpoofScore:r.padSpoofScore,
     referencePadRealScore:r.referencePadRealScore,referencePadSpoofScore:r.referencePadSpoofScore,
     quality:quality(r.quality),referenceQuality:quality(r.referenceQuality,true),
+    detection:detection(r.detection),referenceDetection:detection(r.referenceDetection),alignment:alignment(r.alignment),
+    padPolicy:padPolicy(r.padPolicy),identityPolicy:identityPolicy(r.identityPolicy),qualityPolicy:qualityPolicy(r.qualityPolicy),
     modelVersion:r.modelVersion,padModelVersion:r.padModelVersion,cropVersion:r.cropVersion,preprocessingVersion:r.preprocessingVersion,
     policyVersion:r.policyVersion,...Object.fromEntries(['identityErrorCode','padErrorCode','referenceIdentityErrorCode','referencePadErrorCode'].map(k=>[k,typeof r[k]==='string'&&/^[A-Z_]{1,64}$/.test(r[k])?r[k]:null])),errorCode:typeof r.errorCode==='string'&&/^[A-Z_]{1,64}$/.test(r.errorCode)?r.errorCode:null,latencyMs:r.latencyMs};
 }
@@ -79,9 +117,14 @@ export class ResearchService {
     let consentReady=false;
     if(this.config.captureApproved&&this.config.protocolReference){try{await this.db.$transaction(tx=>this.participant(tx,userId,w.id));consentReady=true;}catch(_){}}
     const caps=await this.ai('/research/capabilities');
+    const code=v=>typeof v==='string'&&/^[A-Z_:]{1,96}$/.test(v)?v:null;
+    let idPolicy=null,qPolicy=null;try{idPolicy=identityPolicy(caps.identityPolicy);qPolicy=qualityPolicy(caps.qualityPolicy);}catch(_){}
     return {researchOnly:true,cameraAllowed:consentReady&&caps.captureAllowed===true,
+      captureApprovedByService:this.config.captureApproved===true&&!!this.config.protocolReference,participantConsentReady:consentReady,
       protocolReference:this.config.protocolReference??null,proofAllowed:false,padEvaluated:false,syntheticAvailable:true,
-      modelVersion:caps.modelVersion,padReady:caps.padReady===true};
+      modelVersion:caps.modelVersion,padReady:caps.padReady===true,padModelVersion:caps.padModelVersion===PAD_VERSION?PAD_VERSION:null,
+      padErrorCode:code(caps.padErrorCode),padEvaluationStatus:code(caps.padEvaluationStatus),
+      identityPolicy:idPolicy,qualityPolicy:qPolicy,sessionTtlMs:this.config.sessionMs??120000,maxAttemptsPerSession:3};
   }
   async create(userId,{purpose,orderId=null,requestKey}) {
     if(!['ENROLLMENT','DAILY','ORDER'].includes(purpose)||!text(requestKey)||(purpose==='ORDER'&&!text(orderId)))fail('RESEARCH_SESSION_INPUT_INVALID');

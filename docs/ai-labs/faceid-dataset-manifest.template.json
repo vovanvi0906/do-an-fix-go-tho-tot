@@ -1,0 +1,17 @@
+{
+  "_comment": "TEMPLATE ONLY. Real manifests live outside Git with the encrypted media store. 'samples' must be a list validated by ai-service/eval/face_evaluation.py:validate_manifest. Field values below describe allowed formats; this file contains no data.",
+  "fields": {
+    "sample_id": "UUID or [A-Za-z0-9_-]{1,64}; equals Lab trial_id",
+    "subject_id": "pseudonym S### (mapping stored separately, encrypted, outside Git)",
+    "capture_device": "device class/model, e.g. 'Android-A 13MP front' ([A-Za-z0-9 ._-]{1,48})",
+    "attack_type": "bona_fide | print | screen | video_replay",
+    "ground_truth": "bona_fide | attack (must match attack_type)",
+    "consent_reference": "approved consent record id",
+    "model_version": "PAD/identity model version string incl. SHA-256",
+    "conditions": {"lighting": "normal|low|backlit|bright", "motion": "none|blur", "occlusion": "none|partial", "faces": "single|multiple|none"},
+    "media_sha256": "64 hex of the original capture (media itself never in Git)",
+    "split": "calibration | evaluation (subject-disjoint)",
+    "evaluated_at": "ISO 8601"
+  },
+  "samples": []
+}

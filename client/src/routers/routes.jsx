@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from '../features/auth/pages/LoginPage';
 import RegisterPage from '../features/auth/pages/RegisterPage';
@@ -18,6 +18,8 @@ import ProtectedRoute from '../app/router/ProtectedRoute';
 import AdminLayout from '../layouts/AdminLayout';
 import { useAuth } from '../store/authStore';
 
+const TestAiPage = import.meta.env.DEV ? lazy(() => import('../pages/test-ai/TestAiPage')) : null;
+
 // Điều hướng trang gốc dựa theo vai trò tài khoản đã đăng nhập
 function HomeOrDashboardRedirect() {
   const { role } = useAuth();
@@ -35,6 +37,7 @@ function HomeOrDashboardRedirect() {
 export default function AppRoutes() {
   return (
     <Routes>
+      {TestAiPage && <Route path="/test-ai/*" element={<Suspense fallback={<div className="p-8 text-slate-300">Đang tải AI Studio…</div>}><TestAiPage /></Suspense>} />}
       {/* 1. Public Authentication Routes */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
