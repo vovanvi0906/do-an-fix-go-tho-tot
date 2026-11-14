@@ -1,0 +1,26 @@
+{
+  "train": {
+    "dien_lanh": 140,
+    "lam_vuon": 140,
+    "other_unclear": 140,
+    "sua_dien": 140,
+    "sua_nuoc": 140,
+    "thiet_bi": 140
+  },
+  "val": {
+    "dien_lanh": 40,
+    "lam_vuon": 40,
+    "other_unclear": 40,
+    "sua_dien": 40,
+    "sua_nuoc": 40,
+    "thiet_bi": 40
+  },
+  "test": {
+    "dien_lanh": 20,
+    "lam_vuon": 20,
+    "other_unclear": 20,
+    "sua_dien": 20,
+    "sua_nuoc": 20,
+    "thiet_bi": 20
+  }
+}

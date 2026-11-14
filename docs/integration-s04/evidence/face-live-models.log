@@ -1,0 +1,15 @@
+[ WARN:0@0.381] global net_impl_backend.cpp:345 setPreferableTarget Targets are not supported by the new graph engine for now
+[ WARN:0@0.470] global net_impl_backend.cpp:345 setPreferableTarget Targets are not supported by the new graph engine for now
+test_actual_router_capabilities_and_enrollment_fail_closed_with_real_loaded_models (eval.test_face_models.ActualModelSmokeTests.test_actual_router_capabilities_and_enrollment_fail_closed_with_real_loaded_models) ... ok
+test_real_detector_rejects_blank_capture_and_real_recognizer_emits_finite_shape (eval.test_face_models.ActualModelSmokeTests.test_real_detector_rejects_blank_capture_and_real_recognizer_emits_finite_shape) ... ok
+test_identity_match_remains_separate_and_cannot_be_authorization (eval.test_face_models.EnrollmentBoundaryTests.test_identity_match_remains_separate_and_cannot_be_authorization) ... ok
+test_missing_or_wrong_hash_artifacts_fail_closed (eval.test_face_models.EnrollmentBoundaryTests.test_missing_or_wrong_hash_artifacts_fail_closed) ... ok
+test_quality_sample_never_releases_embedding_without_pad (eval.test_face_models.EnrollmentBoundaryTests.test_quality_sample_never_releases_embedding_without_pad) ... ok
+test_actual_nest_transport_and_real_models_fail_closed_without_face_or_pad (eval.test_face_live_bridge.LiveTransportSmoke.test_actual_nest_transport_and_real_models_fail_closed_without_face_or_pad) ... [ WARN:0@0.634] global net_impl_backend.cpp:345 setPreferableTarget Targets are not supported by the new graph engine for now
+[ WARN:0@0.702] global net_impl_backend.cpp:345 setPreferableTarget Targets are not supported by the new graph engine for now
+ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 1.495s
+
+OK

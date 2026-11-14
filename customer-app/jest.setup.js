@@ -12,7 +12,11 @@ jest.mock('react-native-safe-area-context', () => require('react-native-safe-are
 
 jest.mock('./src/features/auth/services/otpService', () => ({ otpService: {
   sendPhoneOtp: jest.fn(async () => ({ message: 'sent' })),
-  verifyPhoneOtp: jest.fn(async () => ({ verified: true })),
+  verifyPhoneOtp: jest.fn(async () => ({
+    verified: true,
+    registrationProof: 'mock-registration-proof-0123456789abcdef0123456789abcdef0123456789ab',
+    registrationProofExpiresIn: 300,
+  })),
   sendEmailOtp: jest.fn(async () => ({ message: 'sent' })),
   verifyEmailOtp: jest.fn(async () => ({ verified: true })),
 } }));

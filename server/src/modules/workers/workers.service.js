@@ -1,3 +1,5 @@
+import { FaceCoreService } from './face/face-core.service';
+import { validFaceResult, hasTrustedFaceProof } from '../../infrastructure/external/ai/face-result';
 import {
   Injectable,
   Dependencies,
@@ -9,10 +11,11 @@ import { FastApiAiClient } from '../../infrastructure/external/ai/fastapi-ai.cli
 import { AdminGateway } from '../admin/admin.gateway';
 
 @Injectable()
-@Dependencies(PrismaService, AdminGateway, FastApiAiClient)
+@Dependencies(PrismaService, AdminGateway, FastApiAiClient, FaceCoreService)
 export class WorkersService {
-  constructor(prisma, adminGateway, fastApiAiClient) {
+  constructor(prisma, adminGateway, fastApiAiClient, faceCore) {
     this.prisma = prisma;
+    this.faceCore = faceCore;
     this.fastApiAiClient = fastApiAiClient;
     this.adminGateway = adminGateway;
   }
@@ -208,7 +211,7 @@ export class WorkersService {
     if (isOnline && (!Number.isFinite(lat) || Math.abs(lat) > 90 || !Number.isFinite(lng) || Math.abs(lng) > 180)) {
       throw new BadRequestException('Vui lòng gửi tọa độ GPS hợp lệ');
     }
-    if (isOnline && (!worker.faceVerifiedAt || Date.now() - new Date(worker.faceVerifiedAt).getTime() >= 86400000)) {
+    if (isOnline && !this.faceCore?.enabled() && (!hasTrustedFaceProof(worker))) {
       throw new BadRequestException('Vui lòng xác thực khuôn mặt hằng ngày trước khi bật nhận đơn');
     }
 
@@ -237,10 +240,16 @@ export class WorkersService {
       }
     }
 
-    const updated = await this.prisma.workerProfile.update({
-      where: { id: worker.id },
-      data: { isOnline, ...(isOnline ? { currentLat: lat, currentLng: lng } : {}) },
-    });
+    const data = { isOnline, ...(isOnline ? { currentLat: lat, currentLng: lng } : {}) };
+    const updated = this.faceCore?.enabled()
+      ? await this.faceCore.workerTx(userId, async (tx, current) => {
+          if (isOnline) {
+            if (current.approvalStatus !== 'APPROVED' || !await tx.workerService.count({ where: { workerId: current.id } })) throw new BadRequestException('WORKER_NOT_AVAILABLE');
+            await this.faceCore.requireDaily(tx, current.id);
+          }
+          return tx.workerProfile.update({ where: { id: current.id }, data });
+        })
+      : await this.prisma.workerProfile.update({ where: { id: worker.id }, data });
 
     try {
       this.adminGateway?.emitWorkerStatusChanged({
@@ -269,12 +278,10 @@ export class WorkersService {
     const reference = worker.faceProfile?.facePhotoUrl;
     if (!reference) throw new BadRequestException('Hồ sơ chưa có ảnh khuôn mặt đã đăng ký');
     const result = await this.fastApiAiClient.verifyFace(worker.id, photoUrl, reference, { allowFallback: false });
-    if (!result.verified || !Number.isFinite(Number(result.confidence)) || Number(result.confidence) < this.fastApiAiClient.confidenceThreshold) {
+    if (!validFaceResult(result) || result.status !== 'MATCH') {
       throw new BadRequestException('Chưa xác thực được khuôn mặt. Vui lòng thử lại khi AI khả dụng');
     }
-    const faceVerifiedAt = new Date();
-    await this.prisma.workerProfile.update({ where: { id: worker.id }, data: { faceVerifiedAt } });
-    return { faceVerifiedAt };
+    throw new BadRequestException('FACE_PROOF_UNAVAILABLE: Chưa có enrollment và proof đáng tin cậy');
   }
 
   async findNearby(lat, lng, radius = 15.0) {

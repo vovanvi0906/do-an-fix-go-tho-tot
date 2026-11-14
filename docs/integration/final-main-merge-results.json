@@ -1,0 +1,168 @@
+{
+  "date": "2026-11-14",
+  "timezone": "Asia/Ho_Chi_Minh",
+  "decision": "BLOCKED_BEFORE_MAIN_MERGE",
+  "sourceCheckpoint": "a94b87e330796f716ff0fe8e5c335c85b7f6b541",
+  "mainBefore": "c307e34a051e811ed4a6f5adf09a26732e344905",
+  "mainAfter": "c307e34a051e811ed4a6f5adf09a26732e344905",
+  "originMainLocalTrackingRef": "c307e34a051e811ed4a6f5adf09a26732e344905",
+  "remoteFetched": false,
+  "remotePushed": false,
+  "refs": {
+    "main": "c307e34a051e811ed4a6f5adf09a26732e344905",
+    "origin/main": "c307e34a051e811ed4a6f5adf09a26732e344905",
+    "integration/fixgo-sprint-02": "b50075f56787cbeed41f1615a8ff86e590e1ea5c",
+    "feat/ai-recommendation-v3-phase-c": "8aadfc7ed16adddd7ddb0e33bba0dc6658ae8d8c",
+    "integration/fixgo-final-main": "a94b87e330796f716ff0fe8e5c335c85b7f6b541",
+    "agent/backend-auth": "90ea0bbaec9fbf636e8175f5e45585bb738902c5",
+    "agent/codex-worker": "9db10166f4b86289c4b2b34a73daf4e055a2d2d4",
+    "agent/gemini-customer": "804aaaf52007898b479fa3955352e7c573851540",
+    "test/integration-s02-ai-rec": "9e77da53d8fbaec3cc356ff2ae9d5b8b08602837",
+    "test/integration-s03-full-ai": "06b6e7222808f09323bc71c54755c588fb70c850",
+    "backup/main-before-final-20261114-1703": "c307e34a051e811ed4a6f5adf09a26732e344905"
+  },
+  "requiredAncestors": {
+    "main": true,
+    "origin/main": true,
+    "integration/fixgo-sprint-02": true,
+    "feat/ai-recommendation-v3-phase-c": true,
+    "integration/fixgo-final-main": true,
+    "agent/backend-auth": true,
+    "agent/codex-worker": true,
+    "agent/gemini-customer": true,
+    "test/integration-s02-ai-rec": true,
+    "test/integration-s03-full-ai": true
+  },
+  "newCommits": [
+    {
+      "sha": "552111bbaecc55d429f4083ecc4a47d1a2369fd3",
+      "subject": "fix(security): remove embedded credentials and untrack private artifacts"
+    },
+    {
+      "sha": "7a0652d9f34154fc185442ac701f668783d9b525",
+      "subject": "feat(ai): integrate V3 diagnosis UX and symptom catalog"
+    },
+    {
+      "sha": "8a265a7f10c2c4256ed751dee335ed5797bc2eff",
+      "subject": "chore(android-qa): add isolated Android QA environment"
+    },
+    {
+      "sha": "8aadfc7ed16adddd7ddb0e33bba0dc6658ae8d8c",
+      "subject": "docs(ai): record V3 proposals rollout and QA validation"
+    },
+    {
+      "sha": "d83c757de6a267e0e9058892ccd8b6d64c65e926",
+      "subject": "chore(integration): normalize catalog proposal line endings"
+    },
+    {
+      "sha": "c64511ad66bf4b41be7820c15ce4b7ef283ceea7",
+      "subject": "fix(security): require private Compose credentials and redact handover examples"
+    },
+    {
+      "sha": "a94b87e330796f716ff0fe8e5c335c85b7f6b541",
+      "subject": "style(backend): format reviewed integration changes"
+    }
+  ],
+  "tests": {
+    "backendJest": {
+      "status": "PASS",
+      "tests": 184
+    },
+    "customerJest": {
+      "status": "PASS",
+      "tests": 121
+    },
+    "workerJest": {
+      "status": "PASS",
+      "tests": 153
+    },
+    "adminRtl": {
+      "status": "PASS",
+      "tests": 4
+    },
+    "aiContracts": {
+      "status": "PASS",
+      "tests": 29
+    },
+    "symptomPostgres": {
+      "status": "PASS",
+      "tests": 11
+    },
+    "facePostgres": {
+      "status": "PASS",
+      "tests": 64
+    },
+    "arc01PostgresHttpSocket": {
+      "status": "PASS",
+      "tests": 19
+    },
+    "customerTypeScript": {
+      "status": "PASS"
+    },
+    "workerTypeScript": {
+      "status": "FAIL_LEGACY",
+      "errors": 11,
+      "trackedSourceEqualsB50075f": true
+    },
+    "backendLint": {
+      "status": "FAIL_LEGACY_FORMATTING",
+      "baselineErrors": 1078,
+      "finalErrors": 1009,
+      "warnings": 68,
+      "changedBackendFilesErrors": 0,
+      "nonFormattingErrors": 0
+    },
+    "backendBuild": {
+      "status": "PASS"
+    },
+    "adminBuild": {
+      "status": "PASS"
+    },
+    "prismaValidateGenerate": {
+      "status": "PASS"
+    },
+    "androidJsExports": {
+      "status": "PASS",
+      "platforms": [
+        "customer",
+        "worker"
+      ]
+    },
+    "migrationRollbackReapply": {
+      "status": "PASS"
+    },
+    "androidNative": {
+      "status": "SKIP_NOT_PERFORMED"
+    },
+    "finalDeviceRecheck": {
+      "status": "SKIP_DEVICE_DISCONNECTED"
+    }
+  },
+  "security": {
+    "finalIndexScan": {
+      "scope": "entire-index",
+      "filesScanned": 2441,
+      "findings": [],
+      "note": "Pattern and local credential-overlap checks; not proof that previously exposed provider credentials were revoked."
+    },
+    "blockingReason": "Previously exposed provider/database credentials remain in preserved Git history; no evidence of revocation/rotation. Main merge intentionally not executed.",
+    "snapshotRemediations": [
+      "removed hardcoded Cloudinary/eSMS credentials",
+      "removed literal database credentials and private Compose defaults",
+      "redacted credential template and handover document",
+      "untracked APKs and client env.local while preserving physical files"
+    ],
+    "privateQaCommitted": false
+  },
+  "projectDatabase": {
+    "writesPerformed": false,
+    "phaseCTablesPresent": false,
+    "catalogEqualsPrePhaseCSnapshot": true
+  },
+  "androidQa": {
+    "processesRestarted": false,
+    "packagesInstalledOrUninstalled": false,
+    "symptomFlag": false,
+    "faceCaptureApproved": false
+  }
+}

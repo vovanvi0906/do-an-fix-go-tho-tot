@@ -6,6 +6,7 @@ import { RedisModule } from './infrastructure/redis/redis.module';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { CustomersModule } from './modules/customers/customers.module';
+import { SymptomsModule } from './modules/symptoms/symptoms.module';
 import { ServicesModule } from './modules/services/services.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { WorkersModule } from './modules/workers/workers.module';
@@ -24,6 +25,7 @@ import { LogsModule } from './modules/logs/logs.module';
     AuthModule,
     CustomersModule,
     CustomerHomeModule,
+    SymptomsModule,
     ServicesModule,
     AdminModule,
     WorkersModule,

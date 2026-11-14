@@ -1,3 +1,5 @@
+import { FaceCoreService } from '../workers/face/face-core.service';
+import { hasTrustedFaceProof } from '../../infrastructure/external/ai/face-result';
 import {
   Injectable,
   Dependencies,
@@ -15,11 +17,12 @@ import {
 import { OrderTransitionValidator } from './validators/order-transition.validator';
 
 @Injectable()
-@Dependencies(PrismaService, OrdersGateway)
+@Dependencies(PrismaService, OrdersGateway, FaceCoreService)
 export class OrderWorkflowService {
-  constructor(prisma, gateway) {
+  constructor(prisma, gateway, faceCore) {
     this.prisma = prisma;
     this.gateway = gateway;
+    this.faceCore = faceCore;
   }
 
   async actor(db, userId) {
@@ -63,13 +66,7 @@ export class OrderWorkflowService {
   }
 
   requireFace(worker) {
-    const age = Date.now() - new Date(worker?.faceVerifiedAt).getTime();
-    if (
-      !worker?.faceVerifiedAt ||
-      !Number.isFinite(age) ||
-      age < 0 ||
-      age >= 86400000
-    ) {
+    if (!hasTrustedFaceProof(worker)) {
       throw new BadRequestException('FACE_CHECKIN_EXPIRED');
     }
   }
@@ -89,12 +86,20 @@ export class OrderWorkflowService {
           throw new ForbiddenException('WORKER_PROFILE_REQUIRED');
         await tx.$queryRaw`SELECT id FROM worker_profiles WHERE id = ${actor.workerProfile.id} FOR UPDATE`;
       }
+      // Admin start must use the same worker->order lock order as withdrawal/workers.
+      let lockedFaceWorkerId;
+      if (actor.role === 'ADMIN' && target === 'IN_PROGRESS' && this.faceCore?.enabled()) {
+        const assigned = await tx.order.findUnique({ where: { id: orderId }, select: { workerId: true } });
+        lockedFaceWorkerId = assigned?.workerId;
+        if (lockedFaceWorkerId) await tx.$queryRaw`SELECT id FROM worker_profiles WHERE id = ${lockedFaceWorkerId} FOR UPDATE`;
+      }
       await tx.$queryRaw`SELECT id FROM orders WHERE id = ${orderId} FOR UPDATE`;
       const order = await tx.order.findUnique({
         where: { id: orderId },
         include: { images: true, payment: true },
       });
       if (!order) throw new NotFoundException('ORDER_NOT_FOUND');
+      if (lockedFaceWorkerId && lockedFaceWorkerId !== order.workerId) throw new ConflictException('ORDER_STATE_CONFLICT');
       const accepting = target === 'MATCHED';
       if (accepting) {
         if (actor.role !== 'WORKER')
@@ -182,7 +187,8 @@ export class OrderWorkflowService {
         const worker = await tx.workerProfile.findUnique({
           where: { id: actor.workerProfile.id },
         });
-        this.requireFace(worker);
+        if (this.faceCore?.enabled()) await this.faceCore.requireDaily(tx, worker.id);
+        else this.requireFace(worker);
         if (!worker.isOnline || worker.approvalStatus !== 'APPROVED')
           throw new BadRequestException('WORKER_NOT_AVAILABLE');
         const busy = await tx.order.findFirst({
@@ -195,7 +201,11 @@ export class OrderWorkflowService {
         const worker = await tx.workerProfile.findUnique({
           where: { id: order.workerId || '' },
         });
-        this.requireFace(worker);
+        if (this.faceCore?.enabled()) {
+          if (!worker) throw new BadRequestException('ORDER_FACE_PROOF_REQUIRED');
+          await this.faceCore.consumeOrder(tx, worker.id, orderId, actor.id);
+        }
+        else this.requireFace(worker);
         // Legacy customer uploads lack trustworthy worker provenance: require a BEFORE recorded after arrival.
         const arrival = await tx.orderStatusHistory.findFirst({
           where: { orderId, status: 'ARRIVED' },

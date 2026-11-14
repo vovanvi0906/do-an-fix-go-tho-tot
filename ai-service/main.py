@@ -232,35 +232,17 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logger.warning(f"⚠️ [Lifespan] Không thể nạp YOLOv8n detect: {e}")
 
-    # 3. Nạp OpenCV YuNet Face Detector
-    yunet_path = WEIGHTS_DIR / "face_detection_yunet_2023mar.onnx"
-    if HAS_OPENCV and yunet_path.exists():
-        try:
-            logger.info(f"📦 [Lifespan] Nạp OpenCV YuNet Face Detector: {yunet_path}")
-            # Khởi tạo FaceDetectorYN với input size mặc định (320, 320)
-            app.state.face_detector = cv2.FaceDetectorYN.create(
-                str(yunet_path),
-                "",
-                (320, 320),
-                score_threshold=0.6,
-                nms_threshold=0.3,
-                top_k=5000,
-            )
-            app.state.models_status["face_detector"] = True
-            logger.info("✅ [Lifespan] OpenCV YuNet Face Detector đã sẵn sàng")
-        except Exception as e:
-            logger.warning(f"⚠️ [Lifespan] Không thể nạp YuNet Face Detector: {e}")
-
-    # 4. Nạp OpenCV SFace Face Recognizer
-    sface_path = WEIGHTS_DIR / "face_recognition_sface_2021dec.onnx"
-    if HAS_OPENCV and sface_path.exists():
-        try:
-            logger.info(f"📦 [Lifespan] Nạp OpenCV SFace Face Recognizer: {sface_path}")
-            app.state.face_recognizer = cv2.FaceRecognizerSF.create(str(sface_path), "")
-            app.state.models_status["face_recognizer"] = True
-            logger.info("✅ [Lifespan] OpenCV SFace Face Recognizer đã sẵn sàng")
-        except Exception as e:
-            logger.warning(f"⚠️ [Lifespan] Không thể nạp SFace Face Recognizer: {e}")
+    # Face-only loader: pinned local artifacts; no model download or Customer changes.
+    from face_models import load_face_models
+    face_models = load_face_models(os.environ.get("FACE_MODEL_DIR", str(WEIGHTS_DIR)))
+    app.state.face_detector = face_models.detector
+    app.state.face_recognizer = face_models.recognizer
+    app.state.face_model_version = face_models.model_version
+    app.state.face_model_error = face_models.error_code
+    app.state.models_status["face_detector"] = face_models.detector is not None
+    app.state.models_status["face_recognizer"] = face_models.recognizer is not None
+    if face_models.error_code:
+        logger.warning("Face models unavailable: %s", face_models.error_code)
 
     # 5. Nạp CLIP Zero-Shot Incident Classifier
     app.state.models_status["clip"] = False
@@ -302,6 +284,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# AI Recommendation V2 Router (Prefix: /ai/v2)
+from recommendation import recommendation_router
+app.include_router(recommendation_router)
 
 
 # ==========================================
@@ -362,14 +348,6 @@ class CompareBeforeAfterResponse(BaseModel):
     cleanlinessScore: Optional[float] = Field(default=None, description="Độ hoàn thiện & sạch sẽ bề mặt ảnh After")
     diffRatio: Optional[float] = Field(default=None, description="Tỉ lệ diện tích điểm ảnh có thay đổi")
     histScore: Optional[float] = None
-
-
-class FaceVerifyResponse(BaseModel):
-    verified: bool
-    confidence: float
-    workerId: Optional[str] = None
-    message: str
-    engine: str = Field(default="heuristic", description="'model' | 'heuristic'")
 
 
 # Mapping các lớp nhận diện của YOLO (COCO Dataset & đồ gia dụng) sang Danh mục FixGo
@@ -839,109 +817,8 @@ async def compare_before_after(
 # ==========================================
 # ENDPOINT 3: POST /ai/face-verify
 # ==========================================
-@app.post("/ai/face-verify", response_model=FaceVerifyResponse)
-@app.post("/api/v1/ai/verify-face", response_model=FaceVerifyResponse)
-async def face_verify(
-    request: Request,
-    workerId: Optional[str] = Form(None),
-    file: Optional[UploadFile] = File(None),
-    photoUrl: Optional[str] = Form(None),
-    idCardImageUrl: Optional[str] = Form(None),
-):
-    """
-    POST /ai/face-verify
-    Xác thực sinh trắc học khuôn mặt thợ
-    -> Nạp OpenCV YuNet phát hiện khuôn mặt & SFace trích xuất 128-D vector Cosine Embeddings
-    -> Fallback Heuristic khi không có khuôn mặt hoặc ảnh lỗi.
-    """
-    wid = workerId or "unknown-worker"
-    p_input = photoUrl or ""
-    id_card_input = idCardImageUrl or ""
-
-    if file:
-        p_input = await file.read()
-    else:
-        try:
-            body_json = await request.json()
-            wid = body_json.get("workerId") or wid
-            p_input = body_json.get("photoUrl") or body_json.get("faceImageUrl") or p_input
-            id_card_input = body_json.get("idCardImageUrl") or id_card_input
-        except Exception:
-            pass
-
-    p_url_str = str(p_input) if isinstance(p_input, str) else ""
-
-    # 1. Kiểm tra trường hợp kiểm thử cờ giả lập độ khớp thấp
-    if "unmatched" in p_url_str or "fake" in p_url_str or "low_confidence" in p_url_str:
-        return FaceVerifyResponse(
-            verified=False,
-            confidence=0.45,
-            workerId=wid,
-            message="Độ khớp khuôn mặt thấp (< 60%). Yêu cầu kiểm duyệt thủ công bởi Admin.",
-            engine="heuristic",
-        )
-
-    # 2. THỬ CHẠY MÔ HÌNH NHẬN DIỆN THỰC (OPENCV YUNET + SFACE)
-    face_detector = getattr(request.app.state, "face_detector", None)
-    face_recognizer = getattr(request.app.state, "face_recognizer", None)
-    img_selfie = decode_image_to_cv2(p_input)
-
-    if face_detector is not None and img_selfie is not None:
-        try:
-            h, w, _ = img_selfie.shape
-            face_detector.setInputSize((w, h))
-            _, faces = face_detector.detect(img_selfie)
-
-            if faces is not None and len(faces) > 0:
-                best_face = faces[0]
-                det_score = float(best_face[-1])
-
-                # Nếu có thêm ảnh CCCD/Avatar để so sánh 2 khuôn mặt (Face Matching)
-                img_idcard = decode_image_to_cv2(id_card_input)
-                if face_recognizer is not None and img_idcard is not None:
-                    h2, w2, _ = img_idcard.shape
-                    face_detector.setInputSize((w2, h2))
-                    _, faces2 = face_detector.detect(img_idcard)
-
-                    if faces2 is not None and len(faces2) > 0:
-                        aligned1 = face_recognizer.alignCrop(img_selfie, best_face)
-                        aligned2 = face_recognizer.alignCrop(img_idcard, faces2[0])
-                        feature1 = face_recognizer.feature(aligned1)
-                        feature2 = face_recognizer.feature(aligned2)
-                        cosine_score = float(face_recognizer.match(feature1, feature2, cv2.FaceRecognizerSF_FR_COSINE))
-
-                        matched = cosine_score >= 0.60
-                        confidence = round(min(0.98, max(0.40, cosine_score)), 2)
-
-                        return FaceVerifyResponse(
-                            verified=matched,
-                            confidence=confidence,
-                            workerId=wid,
-                            message=f"Xác thực khuôn mặt qua OpenCV SFace (Độ khớp Cosine: {confidence * 100:.1f}%).",
-                            engine="model",
-                        )
-
-                # Nếu chỉ gửi 1 ảnh selfie: Xác thực khuôn mặt người thật hợp lệ (Liveness / Face Detected)
-                confidence = round(min(0.97, max(0.80, det_score)), 2)
-                return FaceVerifyResponse(
-                    verified=True,
-                    confidence=confidence,
-                    workerId=wid,
-                    message=f"Phát hiện khuôn mặt kỹ thuật viên hợp lệ qua OpenCV YuNet (Confidence: {confidence * 100:.1f}%).",
-                    engine="model",
-                )
-
-        except Exception as e:
-            logger.warning(f"⚠️ [Face Verification Error]: {e}, fallback sang heuristic...")
-
-    # 3. HEURISTIC FALLBACK
-    return FaceVerifyResponse(
-        verified=True,
-        confidence=0.95,
-        workerId=wid,
-        message="Xác thực sinh trắc học khuôn mặt thợ thành công (Chế độ Heuristic).",
-        engine="heuristic",
-    )
+from face_router import router as face_router
+app.include_router(face_router)
 
 
 # ==========================================

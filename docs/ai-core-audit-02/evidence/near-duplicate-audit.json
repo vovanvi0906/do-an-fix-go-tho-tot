@@ -1,0 +1,99 @@
+{
+  "method": "64-bit horizontal dHash on grayscale resize 9x8; Hamming <=4; different splits; exclude equal SHA256",
+  "counts": {
+    "test": {
+      "dien_lanh": 20,
+      "lam_vuon": 20,
+      "other_unclear": 20,
+      "sua_dien": 20,
+      "sua_nuoc": 20,
+      "thiet_bi": 20
+    },
+    "train": {
+      "dien_lanh": 140,
+      "lam_vuon": 140,
+      "other_unclear": 140,
+      "sua_dien": 140,
+      "sua_nuoc": 140,
+      "thiet_bi": 140
+    },
+    "val": {
+      "dien_lanh": 40,
+      "lam_vuon": 40,
+      "other_unclear": 40,
+      "sua_dien": 40,
+      "sua_nuoc": 40,
+      "thiet_bi": 40
+    }
+  },
+  "nearDuplicateCandidatePairs": {
+    "test/train": 9447,
+    "test/val": 2670,
+    "train/val": 18701
+  },
+  "crossClassNearCandidates": 0,
+  "exactHashesWithMultipleClassLabels": 0,
+  "samples": [
+    {
+      "a": "ai-service/dataset/test/dien_lanh/dien_lanh_0001.jpg",
+      "b": "ai-service/dataset/train/dien_lanh/dien_lanh_0001.jpg",
+      "hamming": 0,
+      "sameClass": true
+    },
+    {
+      "a": "ai-service/dataset/test/dien_lanh/dien_lanh_0001.jpg",
+      "b": "ai-service/dataset/train/dien_lanh/dien_lanh_0002.jpg",
+      "hamming": 0,
+      "sameClass": true
+    },
+    {
+      "a": "ai-service/dataset/test/dien_lanh/dien_lanh_0001.jpg",
+      "b": "ai-service/dataset/train/dien_lanh/dien_lanh_0003.jpg",
+      "hamming": 0,
+      "sameClass": true
+    },
+    {
+      "a": "ai-service/dataset/test/dien_lanh/dien_lanh_0001.jpg",
+      "b": "ai-service/dataset/train/dien_lanh/dien_lanh_0004.jpg",
+      "hamming": 0,
+      "sameClass": true
+    },
+    {
+      "a": "ai-service/dataset/test/dien_lanh/dien_lanh_0001.jpg",
+      "b": "ai-service/dataset/train/dien_lanh/dien_lanh_0005.jpg",
+      "hamming": 0,
+      "sameClass": true
+    },
+    {
+      "a": "ai-service/dataset/test/dien_lanh/dien_lanh_0001.jpg",
+      "b": "ai-service/dataset/train/dien_lanh/dien_lanh_0006.jpg",
+      "hamming": 0,
+      "sameClass": true
+    },
+    {
+      "a": "ai-service/dataset/test/dien_lanh/dien_lanh_0001.jpg",
+      "b": "ai-service/dataset/train/dien_lanh/dien_lanh_0007.jpg",
+      "hamming": 0,
+      "sameClass": true
+    },
+    {
+      "a": "ai-service/dataset/test/dien_lanh/dien_lanh_0001.jpg",
+      "b": "ai-service/dataset/train/dien_lanh/dien_lanh_0008.jpg",
+      "hamming": 0,
+      "sameClass": true
+    },
+    {
+      "a": "ai-service/dataset/test/dien_lanh/dien_lanh_0001.jpg",
+      "b": "ai-service/dataset/train/dien_lanh/dien_lanh_0009.jpg",
+      "hamming": 0,
+      "sameClass": true
+    },
+    {
+      "a": "ai-service/dataset/test/dien_lanh/dien_lanh_0001.jpg",
+      "b": "ai-service/dataset/train/dien_lanh/dien_lanh_0010.jpg",
+      "hamming": 0,
+      "sameClass": true
+    }
+  ],
+  "limitations": "Candidates only, not verified duplicates or label errors; no real biometric images inspected"
+}

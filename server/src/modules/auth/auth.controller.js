@@ -102,12 +102,13 @@ export class AuthController {
   })
   @Bind(Body())
   async googleLogin(body) {
-    return this.authService.googleLogin(body.idToken);
+    return this.authService.googleLogin(body.idToken, body);
   }
 
   @Post(['firebase-google-login', 'v1/auth/firebase-google-login'])
   @ApiOperation({
-    summary: 'Đăng nhập hoặc đăng ký nhanh bằng Google qua Firebase Authentication',
+    summary:
+      'Đăng nhập hoặc đăng ký nhanh bằng Google qua Firebase Authentication',
   })
   @ApiBody({ type: FirebaseLoginDto })
   @ApiResponse({
@@ -121,14 +122,15 @@ export class AuthController {
   })
   @Bind(Body())
   async firebaseGoogleLogin(body) {
-    return this.authService.firebaseGoogleLogin(body.idToken);
+    return this.authService.firebaseGoogleLogin(body.idToken, body);
   }
 
   @Post(['refresh', 'refresh-token'])
   @ApiOperation({ summary: 'Làm mới accessToken bằng refreshToken' })
   @ApiResponse({
     status: 200,
-    description: 'Làm mới token thành công, trả về accessToken và refreshToken mới',
+    description:
+      'Làm mới token thành công, trả về accessToken và refreshToken mới',
   })
   @ApiResponse({
     status: 401,

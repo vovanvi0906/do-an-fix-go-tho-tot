@@ -14,6 +14,7 @@ export interface BackendServiceCategory {
 }
 
 export interface BackendService {
+  targetId?: string | null;
   id: string;
   name: string;
   description?: string;
@@ -43,6 +44,13 @@ export const catalogService = {
     const query = params.length > 0 ? `?${params.join('&')}` : '';
     const res = await apiClient.get(`/services${query}`);
     return Array.isArray(res) ? res : (res as any)?.data || [];
+  },
+
+  async getServicesPage(categoryId: string, targetId: string, options: { page?: number; limit?: number; search?: string } = {}) {
+    const params = new URLSearchParams({ categoryId, targetId, page: String(options.page || 1), limit: String(options.limit || 20), search: options.search || '' });
+    const res: any = await apiClient.get(`/services?${params.toString()}`);
+    if (!res || !Array.isArray(res.items)) throw new Error('Danh sách dịch vụ không hợp lệ. Vui lòng thử lại.');
+    return res as { items: BackendService[]; hasMore: boolean; total: number; page: number };
   },
 
   /**

@@ -1,7 +1,32 @@
-import React from 'react';
-import { Stack } from 'expo-router';
+import React, { useEffect } from 'react';
+import { Stack, useRouter } from 'expo-router';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { useAuth } from '../../src/features/auth';
 
 export default function UserLayout() {
+  const { isAuthenticated, user, isLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (!isAuthenticated || user?.role !== 'CUSTOMER') {
+        router.replace('/(auth)/login');
+      }
+    }
+  }, [isLoading, isAuthenticated, user, router]);
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0084FF" />
+      </View>
+    );
+  }
+
+  if (!isAuthenticated || user?.role !== 'CUSTOMER') {
+    return null;
+  }
+
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -20,3 +45,11 @@ export default function UserLayout() {
   );
 }
 
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+});

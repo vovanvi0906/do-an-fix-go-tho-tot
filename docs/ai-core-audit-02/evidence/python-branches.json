@@ -1,0 +1,85 @@
+{
+  "checks": 11,
+  "assertions": "PASS_CURRENT_BEHAVIOR_NOT_SECURITY_PASS",
+  "network": "none",
+  "biometricInput": "none",
+  "results": [
+    {
+      "case": "model_missing",
+      "verified": true,
+      "confidence": 0.95,
+      "engine": "heuristic",
+      "evidenceType": "OFFLINE_STUBBED_BRANCH_NOT_MODEL_ACCURACY"
+    },
+    {
+      "case": "decode_failure",
+      "verified": true,
+      "confidence": 0.95,
+      "engine": "heuristic",
+      "evidenceType": "OFFLINE_STUBBED_BRANCH_NOT_MODEL_ACCURACY"
+    },
+    {
+      "case": "zero_faces",
+      "verified": true,
+      "confidence": 0.95,
+      "engine": "heuristic",
+      "evidenceType": "OFFLINE_STUBBED_BRANCH_NOT_MODEL_ACCURACY"
+    },
+    {
+      "case": "two_faces_first_is_used",
+      "verified": true,
+      "confidence": 0.8,
+      "engine": "model",
+      "evidenceType": "OFFLINE_STUBBED_BRANCH_NOT_MODEL_ACCURACY"
+    },
+    {
+      "case": "reference_absent",
+      "verified": true,
+      "confidence": 0.9,
+      "engine": "model",
+      "evidenceType": "OFFLINE_STUBBED_BRANCH_NOT_MODEL_ACCURACY"
+    },
+    {
+      "case": "reference_undecodable",
+      "verified": true,
+      "confidence": 0.9,
+      "engine": "model",
+      "evidenceType": "OFFLINE_STUBBED_BRANCH_NOT_MODEL_ACCURACY"
+    },
+    {
+      "case": "recognizer_missing",
+      "verified": true,
+      "confidence": 0.9,
+      "engine": "model",
+      "evidenceType": "OFFLINE_STUBBED_BRANCH_NOT_MODEL_ACCURACY"
+    },
+    {
+      "case": "embedding_error",
+      "verified": true,
+      "confidence": 0.95,
+      "engine": "heuristic",
+      "evidenceType": "OFFLINE_STUBBED_BRANCH_NOT_MODEL_ACCURACY"
+    },
+    {
+      "case": "low_similarity",
+      "verified": false,
+      "confidence": 0.4,
+      "engine": "model",
+      "evidenceType": "OFFLINE_STUBBED_BRANCH_NOT_MODEL_ACCURACY"
+    },
+    {
+      "case": "above_threshold_control",
+      "verified": true,
+      "confidence": 0.8,
+      "engine": "model",
+      "evidenceType": "OFFLINE_STUBBED_BRANCH_NOT_MODEL_ACCURACY"
+    },
+    {
+      "case": "compare_no_opencv",
+      "passed": true,
+      "matchScore": 0.92,
+      "engine": "heuristic",
+      "evidenceType": "OFFLINE_STUBBED_BRANCH_NOT_MODEL_ACCURACY"
+    }
+  ]
+}

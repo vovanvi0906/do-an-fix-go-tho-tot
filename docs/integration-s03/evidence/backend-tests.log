@@ -1,0 +1,71 @@
+
+> backend@0.0.1 test
+> jest --runInBand
+
+PASS src/infrastructure/external/ai/face-security.spec.js
+  ● Console
+
+    console.warn
+      Face AI transport unavailable
+
+      81 |       }
+      82 |     } catch (err) {
+    > 83 |       console.warn('Face AI transport unavailable');
+         |               ^
+      84 |     }
+      85 |     return getFallbackFaceVerify(workerId, selfieUrl);
+      86 |   }
+
+      at FastApiAiClient.warn [as verifyFace] (infrastructure/external/ai/fastapi-ai.client.js:83:15)
+      at infrastructure/external/ai/face-security.spec.js:32:12
+
+    console.warn
+      Face AI transport unavailable
+
+      81 |       }
+      82 |     } catch (err) {
+    > 83 |       console.warn('Face AI transport unavailable');
+         |               ^
+      84 |     }
+      85 |     return getFallbackFaceVerify(workerId, selfieUrl);
+      86 |   }
+
+      at FastApiAiClient.warn [as verifyFace] (infrastructure/external/ai/fastapi-ai.client.js:83:15)
+      at infrastructure/external/ai/face-security.spec.js:32:12
+
+    console.warn
+      Face AI transport unavailable
+
+      81 |       }
+      82 |     } catch (err) {
+    > 83 |       console.warn('Face AI transport unavailable');
+         |               ^
+      84 |     }
+      85 |     return getFallbackFaceVerify(workerId, selfieUrl);
+      86 |   }
+
+      at FastApiAiClient.warn [as verifyFace] (infrastructure/external/ai/fastapi-ai.client.js:83:15)
+      at Object.<anonymous> (infrastructure/external/ai/face-security.spec.js:41:12)
+
+PASS src/modules/orders/diagnosis/diagnosis-target-service.spec.js
+PASS src/modules/orders/diagnosis/diagnosis-resolver.spec.js
+PASS src/modules/workers/face/face-proof-policy.spec.js
+PASS src/modules/workers/face/face-capture-blocked.spec.js
+PASS src/modules/workers/face/face-identity.spec.js
+PASS src/modules/orders/diagnosis/create-order-validation.spec.js
+PASS src/infrastructure/external/ai/face-live-contract.spec.js
+PASS src/modules/orders/diagnosis/catalog-sync-validation.spec.js
+PASS src/modules/orders/orders.service.spec.js
+PASS src/infrastructure/external/ai/face-template.spec.js
+PASS src/modules/workers/workers.service.spec.js
+PASS src/face-research/research.spec.js
+PASS src/modules/orders/validators/order-transition.validator.spec.js
+PASS src/modules/auth/registration-proof.service.spec.js
+PASS src/common/middleware/request-logging.spec.js
+PASS src/modules/workers/dto/update-availability.dto.spec.js
+
+Test Suites: 17 passed, 17 total
+Tests:       177 passed, 177 total
+Snapshots:   0 total
+Time:        4.457 s
+Ran all test suites.

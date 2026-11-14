@@ -1,0 +1,47 @@
+{
+  "checks": 24,
+  "syntheticOnly": true,
+  "realModelsLoaded": true,
+  "realPositiveFaceTest": false,
+  "androidClientModuleTest": true,
+  "androidDeviceTest": false,
+  "projectDatabaseUsed": false,
+  "measurement": {
+    "researchOnly": true,
+    "verified": false,
+    "enrolled": false,
+    "proof": null,
+    "sessionId": "a82c721d-6832-4985-8f5e-b24092f82f43",
+    "purpose": "ENROLLMENT",
+    "orderId": null,
+    "identityDecision": "INCONCLUSIVE",
+    "identityScore": null,
+    "padDecision": "NOT_EVALUATED",
+    "padRealScore": null,
+    "padSpoofScore": null,
+    "referencePadRealScore": null,
+    "referencePadSpoofScore": null,
+    "quality": {
+      "decision": "FAIL",
+      "faceCount": 0,
+      "brightness": null,
+      "sharpness": null
+    },
+    "referenceQuality": null,
+    "modelVersion": "yunet-sface:8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4:0ba9fbfa01b5270c96627c4ef784da859931e02f04419c829e83484087c34e79",
+    "padModelVersion": "experimental:anti-spoof-mn3:c4c99af04603b62d7e44f6f4daeb33e0daeccc696008c0b1d62f6f5cebbb3262",
+    "cropVersion": "yunet-tight-bbox-floor-ceil-clamped-linear-128-v1",
+    "preprocessingVersion": "bgr-u8-128-to-rgb-nchw-normalized-v1",
+    "policyVersion": "research-no-decision-v1",
+    "identityErrorCode": "NO_FACE",
+    "padErrorCode": null,
+    "referenceIdentityErrorCode": null,
+    "referencePadErrorCode": null,
+    "errorCode": "NO_FACE",
+    "latencyMs": {
+      "decodeMs": 15.95903799898224,
+      "probeDetectionMs": 7.61691100342432,
+      "totalMs": 23.617961000127252
+    }
+  }
+}

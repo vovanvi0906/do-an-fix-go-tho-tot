@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { WorkerApprovalForm } from '../../../src/features/auth/components/WorkerApprovalForm';
+import { hasShiftVerification, profileRestriction } from '../../../src/features/auth/services/workerEligibility';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -11,12 +13,12 @@ import {
   Alert,
 } from 'react-native';
 import * as Location from 'expo-location';
-import * as ImagePicker from 'expo-image-picker';
 import { apiClient } from '../../../src/services/api/apiClient';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { orderService } from '../../../src/services/api/orderService';
 import { socketService } from '../../../src/services/socket/socketService';
+import { useOrderRecovery } from '../../../src/features/orders/hooks/useOrderRecovery';
 import { useAuth } from '../../../src/features/auth';
 
 export default function WorkerDashboardScreen() {
@@ -25,23 +27,45 @@ export default function WorkerDashboardScreen() {
 
   // State
   const [isOnline, setIsOnline] = useState(false);
+  const statusLock = useRef(false);
+  const loadProfile = useCallback(async () => {
+    const response = await apiClient.get('/workers/me');
+    const profile = response.data || response;
+    try {
+      const statusResponse = await apiClient.get('/workers/me/face/status');
+      const status = statusResponse.data || statusResponse;
+      return { ...profile, dailyProof: status.dailyProof || null };
+    } catch (_) { return { ...profile, dailyProof: null }; }
+  }, []);
+  const { data: profile, error: profileError, loading: profileLoading, reload: reloadProfile } = useOrderRecovery(loadProfile, user?.id);
+  useEffect(() => { setIsOnline(profile?.isOnline === true); }, [profile]);
   const [incomingOrder, setIncomingOrder] = useState(null);
   const [countdown, setCountdown] = useState(30);
   const [isAccepting, setIsAccepting] = useState(false);
   const [conflictMessage, setConflictMessage] = useState('');
-  const [activeOrder, setActiveOrder] = useState(null);
+  const loadActive = useCallback(() => orderService.getCurrentWorkerOrder(), []);
+  const { data: activeOrder, loading: activeLoading, error: activeError, reload: reloadActive } = useOrderRecovery(loadActive, user?.id);
+
+  useFocusEffect(useCallback(() => {
+    if (!activeOrder?.id) return;
+    socketService.joinOrderRoom(activeOrder.id);
+    return () => socketService.leaveOrderRoom(activeOrder.id);
+  }, [activeOrder?.id]));
 
   const [isChangingStatus, setIsChangingStatus] = useState(false);
   const [showDailyCheckIn, setShowDailyCheckIn] = useState(false);
 
-  const changeAvailability = async (online, verified = false) => {
-    if (isChangingStatus) return;
+  const changeAvailability = async (online) => {
+    if (statusLock.current) return;
+    statusLock.current = true;
     setIsChangingStatus(true);
     try {
-      if (online && !verified) {
-        const response = await apiClient.get('/workers/me');
-        const profile = response.data || response;
-        if (!profile.faceVerifiedAt || Date.now() - new Date(profile.faceVerifiedAt).getTime() >= 86400000) {
+      if (online) {
+        if (activeLoading || activeError || activeOrder) throw new Error('Cần hoàn tất hoặc kiểm tra công việc hiện tại trước khi nhận đơn mới');
+        const profile = await loadProfile();
+        const restriction = profileRestriction(profile);
+        if (restriction) throw new Error(restriction);
+        if (!hasShiftVerification(profile)) {
           setShowDailyCheckIn(true);
           return;
         }
@@ -54,41 +78,23 @@ export default function WorkerDashboardScreen() {
         coords = { lat: position.coords.latitude, lng: position.coords.longitude };
         socketService.connect();
       }
-      await apiClient.patch('/workers/status', { isOnline: online, ...coords });
-      setIsOnline(online);
+      const response = await apiClient.patch('/workers/status', { isOnline: online, ...coords });
+      const ack = response.data || response;
+      if (ack.isOnline !== online) throw new Error('Máy chủ chưa xác nhận trạng thái nhận đơn');
+      setIsOnline(ack.isOnline);
+      await reloadProfile();
       if (!online) setIncomingOrder(null);
     } catch (error) {
       Alert.alert('Chưa cập nhật trạng thái', error.message);
     } finally {
+      statusLock.current = false;
       setIsChangingStatus(false);
     }
   };
 
-  const dailyCheckIn = async () => {
-    if (isChangingStatus) return;
-    setIsChangingStatus(true);
-    let verified = false;
-    try {
-      const permission = await ImagePicker.requestCameraPermissionsAsync();
-      if (permission.status !== 'granted') throw new Error('Cần quyền camera để chụp selfie');
-      const result = await ImagePicker.launchCameraAsync({ cameraType: ImagePicker.CameraType.front, quality: 0.7 });
-      if (result.canceled || !result.assets?.[0]) return;
-      const asset = result.assets[0];
-      const form = new FormData();
-      if (asset.uri.startsWith('data:') || asset.uri.startsWith('blob:')) {
-        form.append('image', await (await fetch(asset.uri)).blob(), 'selfie.jpg');
-      } else {
-        form.append('image', { uri: asset.uri, name: 'selfie.jpg', type: 'image/jpeg' });
-      }
-      await apiClient.post('/workers/verify-face-daily', form, { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 60000 });
-      verified = true;
-      setShowDailyCheckIn(false);
-    } catch (error) {
-      Alert.alert('Check-in chưa thành công', error.message);
-    } finally {
-      setIsChangingStatus(false);
-    }
-    if (verified) await changeAvailability(true, true);
+  const dailyCheckIn = () => {
+    setShowDailyCheckIn(false);
+    router.push('/(worker)/verification/face');
   };
 
   useEffect(() => {
@@ -98,7 +104,7 @@ export default function WorkerDashboardScreen() {
     // 2. Lắng nghe đơn hàng mới được broadcast tới thợ (order.new)
     const handleNewOrder = (orderData) => {
       console.log('🔔 [Worker Socket] Có đơn hàng mới phát sóng:', orderData);
-      if (isOnline) {
+      if (isOnline && !activeLoading && !activeError && !activeOrder) {
         setIncomingOrder(orderData);
         setCountdown(orderData.countdownSeconds || 30);
         setConflictMessage('');
@@ -124,7 +130,7 @@ export default function WorkerDashboardScreen() {
       socketService.off('order.new', handleNewOrder);
       socketService.off('order.taken', handleOrderTaken);
     };
-  }, [isOnline, incomingOrder]);
+  }, [isOnline, incomingOrder, activeLoading, activeError, activeOrder]);
 
   // Bộ đếm ngược 30 giây cho đơn hàng đến
   useEffect(() => {
@@ -145,7 +151,7 @@ export default function WorkerDashboardScreen() {
 
   // Xử lý sự kiện Thợ bấm Nhận đơn
   const handleAcceptOrder = async () => {
-    if (!incomingOrder) return;
+    if (!incomingOrder || isAccepting || activeOrder || activeLoading || activeError) return;
     setIsAccepting(true);
     setConflictMessage('');
 
@@ -154,7 +160,7 @@ export default function WorkerDashboardScreen() {
       const res = await orderService.acceptOrder(incomingOrder.orderId);
 
       console.log('🎉 [Worker] Nhận đơn thành công 200 OK:', res);
-      setActiveOrder(res.order || incomingOrder);
+      await reloadActive();
       setIncomingOrder(null);
     } catch (error) {
       console.error('❌ [Worker Accept Error]:', error.message);
@@ -181,8 +187,8 @@ export default function WorkerDashboardScreen() {
         <View style={{ flex: 1, justifyContent: 'center', padding: 24, backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <View style={{ padding: 24, backgroundColor: 'white', borderRadius: 16, gap: 16 }}>
             <Text style={{ fontSize: 18, fontWeight: '700' }}>Check-in khuôn mặt hằng ngày</Text>
-            <Text>Chụp selfie trực diện để bật nhận đơn trong 24 giờ tới.</Text>
-            <TouchableOpacity disabled={isChangingStatus} onPress={dailyCheckIn}><Text>Chụp selfie và xác thực</Text></TouchableOpacity>
+            <Text>Cần đăng ký khuôn mặt đáng tin cậy trước khi check-in. Kiểm tra trạng thái và hướng dẫn trước khi chụp ảnh.</Text>
+            <TouchableOpacity nativeID="worker-face-status-button" accessibilityRole="button" disabled={isChangingStatus} onPress={dailyCheckIn}><Text>Kiểm tra xác thực khuôn mặt</Text></TouchableOpacity>
             {isChangingStatus && <ActivityIndicator />}
             <TouchableOpacity disabled={isChangingStatus} onPress={() => setShowDailyCheckIn(false)}><Text>Để sau</Text></TouchableOpacity>
           </View>
@@ -203,7 +209,7 @@ export default function WorkerDashboardScreen() {
           <Switch
             value={isOnline}
             onValueChange={changeAvailability}
-            disabled={isChangingStatus}
+            disabled={isChangingStatus || profileLoading || (!isOnline && (!!profileRestriction(profile) || !!activeOrder || activeLoading || !!activeError))}
             trackColor={{ false: '#CBD5E1', true: '#86EFAC' }}
             thumbColor={isOnline ? '#16A34A' : '#94A3B8'}
           />
@@ -215,6 +221,10 @@ export default function WorkerDashboardScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {profileError ? <TouchableOpacity onPress={reloadProfile}><Text>{profileError} — Thử lại</Text></TouchableOpacity> : null}
+        {profileRestriction(profile) ? <Text accessibilityRole="alert">{profileRestriction(profile)}</Text> : null}
+        {['DRAFT', 'REJECTED'].includes(profile?.approvalStatus) ? <WorkerApprovalForm key={`${user?.id}:${profile.approvalStatus}`} profile={profile} onSaved={reloadProfile} /> : null}
+        {!showDailyCheckIn && hasShiftVerification(profile) ? <Text>Check-in đầu ca còn hiệu lực. Bật công tắc để nhận đơn.</Text> : null}
         {/* Banner Trạng thái */}
         <View nativeID="worker-online-status-banner" style={isOnline ? styles.bannerOnline : styles.bannerOffline}>
           <Ionicons
@@ -235,6 +245,9 @@ export default function WorkerDashboardScreen() {
         </View>
 
         {/* Đơn hàng đang thực hiện (nếu có) */}
+        {activeLoading ? <ActivityIndicator accessibilityLabel="Đang khôi phục công việc" /> : null}
+        {activeError ? <TouchableOpacity nativeID="worker-active-order-retry" onPress={reloadActive}><Text>{activeError} — Thử lại</Text></TouchableOpacity> : null}
+        {!activeLoading && !activeError && !activeOrder ? <Text>Không có công việc đang thực hiện.</Text> : null}
         {activeOrder ? (
           <View nativeID="worker-active-order-card" style={styles.activeOrderCard}>
             <View style={styles.activeOrderHeader}>
@@ -242,19 +255,20 @@ export default function WorkerDashboardScreen() {
                 <Text style={styles.activeBadgeText}>ĐƠN ĐANG THỰC HIỆN</Text>
               </View>
               <Text style={styles.activeOrderPrice}>
-                {Number(activeOrder.totalPrice || 150000).toLocaleString('vi-VN')} đ
+                {Number(activeOrder.finalPrice ?? activeOrder.estimatedPrice).toLocaleString('vi-VN')} đ
               </Text>
             </View>
 
+            <Text>{activeOrder.status}</Text>
             <Text style={styles.activeServiceName}>
-              {activeOrder.service?.name || 'Sửa chữa điện gia dụng'}
+              {activeOrder.service?.name || activeOrder.category?.name || 'Chưa có tên dịch vụ'}
             </Text>
-            <Text style={styles.activeAddress}>📍 {activeOrder.pickupAddress || 'Địa chỉ khách hàng'}</Text>
+            <Text style={styles.activeAddress}>📍 {activeOrder.addressText || 'Chưa có địa chỉ'}</Text>
 
             <TouchableOpacity
               nativeID="btn-worker-view-active-order"
               style={styles.viewOrderDetailBtn}
-              onPress={() => router.push(`/job/${activeOrder.id || activeOrder.orderId}`)}
+              onPress={() => router.push(`/(worker)/job/${activeOrder.id}`)}
             >
               <Text style={styles.viewOrderDetailText}>XEM CHI TIẾT & TIẾP NHẬN CÔNG VIỆC</Text>
             </TouchableOpacity>

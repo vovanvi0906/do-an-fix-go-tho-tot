@@ -1,3 +1,4 @@
+import { validFaceResult, hasTrustedFaceProof } from '../../infrastructure/external/ai/face-result';
 import { ORDER_STATUS } from './constants/order-status';
 import { resolveDiagnosis } from './diagnosis/diagnosis-resolver';
 import {
@@ -438,78 +439,19 @@ export class OrdersService {
     const access = await this.orderWorkflowService.access(orderId, workerUserId, ['WORKER']);
     if (!['MATCHED', 'ASSIGNED', 'WORKER_EN_ROUTE', 'WORKER_ARRIVING', 'ARRIVED', 'IN_PROGRESS'].includes(access.order.status)) throw new ConflictException('FACE_STAGE_NOT_ALLOWED');
     const { photoUrl } = faceVerifyDto;
-    const threshold = this.fastApiAiClient.confidenceThreshold || 0.6;
-
+    if (!photoUrl) throw new BadRequestException('SELFIE_REQUIRED');
     const worker = await this.prisma.workerProfile.findUnique({
-      where: { userId: workerUserId },
-      include: {
-        faceProfile: true,
-        user: { select: { avatarUrl: true } },
-      },
+      where: { userId: workerUserId }, include: { faceProfile: true },
     });
-
-    if (!worker) {
-      throw new BadRequestException('Không tìm thấy hồ sơ kỹ thuật viên');
+    if (!worker) throw new BadRequestException('WORKER_NOT_FOUND');
+    const reference = worker.faceProfile?.facePhotoUrl;
+    if (!reference) throw new BadRequestException('REFERENCE_MISSING');
+    const result = await this.fastApiAiClient.verifyFace(worker.id, photoUrl, reference);
+    if (!validFaceResult(result) || result.status !== 'MATCH') {
+      throw new BadRequestException('FACE_NOT_VERIFIED');
     }
-
-    // Lay anh the goc (tu faceProfile, avatarUrl hoac CCCD cua tho) de truyen sang OpenCV SFace so sanh
-    const referenceFaceUrl =
-      worker.faceProfile?.facePhotoUrl ||
-      worker.avatarUrl ||
-      worker.user?.avatarUrl ||
-      '';
-
-    // Gọi FastAPI AI Service so khớp khuôn mặt giữa ảnh selfie và ảnh thẻ gốc
-    const aiResult = await this.fastApiAiClient.verifyFace(
-      worker.id,
-      photoUrl,
-      referenceFaceUrl,
-    );
-    const confidence = parseFloat(aiResult.confidence ?? 0.95);
-    const verifiedAt = new Date();
-
-    // FALLBACK RULE: Nếu confidence < ngưỡng cấu hình (0.6) -> Chuyển sang hàng đợi xác minh thủ công bởi admin, KHÔNG CHẶN CỨNG
-    if (confidence < threshold || !aiResult.verified) {
-      console.warn(
-        `⚠️ [ADMIN AUDIT QUEUE] Thợ ${worker.fullName || worker.id} xác thực khuôn mặt độ khớp thấp (${(confidence * 100).toFixed(0)}% < ${threshold * 100}%). Chuyển vào hàng đợi kiểm duyệt thủ công.`,
-      );
-
-      // Cập nhật trạng thái chờ duyệt thủ công và cấp mốc faceVerifiedAt để thợ không bị đứng luồng
-      await this.prisma.workerProfile.update({
-        where: { userId: workerUserId },
-        data: {
-          kycStatus: 'PENDING',
-        },
-      });
-
-      return {
-        success: true,
-        verified: false,
-        needsManualReview: true,
-        confidence,
-        verifiedAt,
-        message: `Độ khớp khuôn mặt (${(confidence * 100).toFixed(0)}%) dưới ngưỡng ${threshold * 100}%. Hồ sơ đã được chuyển vào hàng đợi xác minh thủ công bởi Quản trị viên, vui lòng chờ xác minh thành công trước khi nhận đơn.`,
-      };
-    }
-
-    // Khi confidence >= threshold: Xác thực thành công
-    await this.prisma.workerProfile.update({
-      where: { userId: workerUserId },
-      data: {
-        faceVerifiedAt: verifiedAt,
-        kycStatus: 'APPROVED',
-      },
-    });
-
-    return {
-      success: true,
-      verified: true,
-      needsManualReview: false,
-      confidence,
-      verifiedAt,
-      message:
-        'Xác thực sinh trắc học khuôn mặt thành công! Bạn có thể nhận đơn trong vòng 24 giờ tới.',
-    };
+    // Matching an existing photo does not establish trusted enrollment or scoped proof.
+    throw new BadRequestException('FACE_PROOF_UNAVAILABLE');
   }
 
   /**

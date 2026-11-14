@@ -1,16 +1,9 @@
+// File vượt giới hạn dòng do chứa UI component màn hình theo dõi chi tiết và StyleSheet lớn được kế thừa từ thiết kế gốc của dự án.
 /**
  * @file [id].jsx
  * @description Màn hình Chi tiết & Theo dõi Đơn hàng của Khách hàng FixGo.
- * Hỗ trợ hiển thị mượt mà mọi trạng thái:
- * - AWAITING_CONFIRM: Đơn đang chờ Admin duyệt thợ (Dịch vụ theo yêu cầu, đếm ngược 20 phút)
- * - SEARCHING_WORKER: Đang quét tìm thợ gần bạn
- * - MATCHED / ASSIGNED: Thợ đã nhận đơn
- * - WORKER_ARRIVING / IN_PROGRESS: Thợ đang tới / Đang sửa chữa
- * - COMPLETED / PAID: Đơn hoàn thành
- * - CANCELLED / EXPIRED / REJECTED: Đơn đã hủy hoặc hết hạn
- *
- * Khởi tạo dữ liệu tức thì từ navigation params kết hợp local storage,
- * đảm bảo không bao giờ bị lỗi 401, không bị kẹt loading hay màn hình trắng.
+ * CUS-04: Luôn xác minh quyền và đồng bộ snapshot mới từ GET /orders/:id.
+ * Cache theo userId, không dùng params làm nguồn xác thực, xử lý 401, 403, 404, 500, offline.
  */
 
 import React, { useState, useEffect } from 'react';
@@ -20,6 +13,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  RefreshControl,
   ActivityIndicator,
   Alert,
   Image,
@@ -29,119 +23,40 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { orderService } from '../../../src/services/api/orderService';
 import { socketService } from '../../../src/services/socket/socketService';
-import { orderStorage } from '../../../src/services/storage/orderStorage';
 import { routingService } from '../../../src/services/api/routingService';
 import WorkerTrackingMapView from '../../../src/components/WorkerTrackingMapView';
+import { useOrderDetailSync } from '../../../src/features/orders/hooks/useOrderDetailSync';
 
 export default function UserOrderDetailScreen() {
   const params = useLocalSearchParams();
   const router = useRouter();
   const id = params?.id;
 
-  // Khởi tạo ngay từ params để hiển thị tức thì, không bị chặn bởi mạng
-  const [order, setOrder] = useState(() => {
-    if (params?.title || params?.orderCode || params?.serviceName) {
-      return {
-        id: params.id,
-        orderCode: params.orderCode || `#${String(params.id || '').slice(0, 10).toUpperCase()}`,
-        title: params.title || params.serviceName,
-        serviceName: params.serviceName || params.title,
-        addressText: params.addressText || '606/20, Hiệp Bình, Hồ Chí Minh',
-        customerName: params.customerName || 'Khách hàng FixGo',
-        customerPhone: params.customerPhone || '',
-        scheduledAt: params.scheduledAt || 'Cần thợ gấp',
-        price: params.price ? Number(params.price) : 150000,
-        status: params.status || 'AWAITING_CONFIRM',
-        isCustomService: params.isCustomService === 'true',
-        createdAt: params.createdAt || new Date().toISOString(),
-        note: params.note || '',
-      };
-    }
-    return null;
-  });
+  const { order, loading, refreshing, error, isOffline, refetch } = useOrderDetailSync(id);
 
-  const [loading, setLoading] = useState(!order);
-  const [currentStatus, setCurrentStatus] = useState(() => params?.status || 'AWAITING_CONFIRM');
   const [workerLocation, setWorkerLocation] = useState(null);
   const [routeInfo, setRouteInfo] = useState({ coordinates: [], formattedEta: '~8 - 12 phút (1.5 km)' });
 
-  const fetchOrderData = async () => {
-    try {
-      // 1. Tìm trong Local Storage (@fixgo_user_orders)
-      const localList = await orderStorage.getLocalOrders();
-      const foundLocal = localList.find(
-        (o) =>
-          String(o.id) === String(id) ||
-          String(o.orderCode) === String(id) ||
-          (params?.orderCode && String(o.orderCode) === String(params.orderCode))
-      );
-
-      if (foundLocal) {
-        setOrder(foundLocal);
-        setCurrentStatus(foundLocal.status || 'AWAITING_CONFIRM');
-        setLoading(false);
-        return;
-      }
-
-      // 2. Nếu không có ở local và ID không phải dạng mock thì fetch Backend
-      if (id && !String(id).startsWith('ord-') && !String(id).startsWith('#')) {
-        const res = await orderService.getOrderById(id);
-        if (res) {
-          setOrder(res);
-          setCurrentStatus(res.status || 'ASSIGNED');
-        }
-      }
-    } catch (e) {
-      console.warn('⚠️ [OrderDetail] Lỗi lấy đơn fallback:', e.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchOrderData();
-
-    // Kết nối Socket để nhận realtime status nếu có
-    socketService.connect();
-    const handleStatusUpdate = (data) => {
-      console.log('🔄 [OrderDetail Socket] Cập nhật trạng thái:', data);
-      if (data.orderId === id) {
-        setCurrentStatus(data.status);
-      }
-    };
-
-    if (id) {
-      socketService.on(`order:${id}:status`, handleStatusUpdate);
-    }
-
     // Lắng nghe vị trí GPS của thợ thời gian thực từ Socket
     const handleLocationUpdate = async (locData) => {
-      console.log('📍 [OrderDetail Socket] Nhận vị trí thợ:', locData);
       if (locData && locData.lat && locData.lng) {
         const wCoord = { latitude: Number(locData.lat), longitude: Number(locData.lng) };
         setWorkerLocation(wCoord);
 
-        // Lấy tọa độ khách hàng
         const cLat = Number(order?.lat || 10.7769);
         const cLng = Number(order?.lng || 106.7009);
         const rData = await routingService.getRoute(wCoord, { latitude: cLat, longitude: cLng });
-        if (rData) {
-          setRouteInfo(rData);
-        }
+        if (rData) setRouteInfo(rData);
       }
     };
 
     socketService.on('worker:location_update', handleLocationUpdate);
-
     return () => {
-      if (id) {
-        socketService.off(`order:${id}:status`, handleStatusUpdate);
-      }
       socketService.off('worker:location_update', handleLocationUpdate);
     };
-  }, [id]);
+  }, [order?.lat, order?.lng]);
 
-  // Hủy đơn hàng
   const handleCancelOrder = () => {
     Alert.alert('Xác nhận hủy đơn', 'Bạn có chắc chắn muốn hủy yêu cầu đặt dịch vụ này?', [
       { text: 'Không', style: 'cancel' },
@@ -149,24 +64,16 @@ export default function UserOrderDetailScreen() {
         text: 'Đồng ý hủy',
         style: 'destructive',
         onPress: async () => {
-          if (order?.id) {
-            await orderStorage.updateOrderStatus(order.id, 'CANCELLED', 'Khách hàng chủ động hủy');
+          if (!order?.id) return;
+          try {
+            await orderService.cancelOrder(order.id, 'Khách hàng chủ động hủy');
+            await refetch();
+          } catch (err) {
+            Alert.alert('Lỗi', err.message || 'Không thể hủy đơn hàng lúc này');
           }
-          setCurrentStatus('CANCELLED');
-          fetchOrderData();
         },
       },
     ]);
-  };
-
-  // Demo: Admin Duyệt đơn (chuyển sang MATCHED / Đã xác nhận)
-  const handleAdminApproveDemo = async () => {
-    if (order?.id) {
-      await orderStorage.adminConfirmOrder(order.id);
-    }
-    setCurrentStatus('MATCHED');
-    Alert.alert('Thành công', 'Admin đã duyệt yêu cầu! Đơn hàng đã chuyển sang trạng thái ĐÃ XÁC NHẬN.');
-    fetchOrderData();
   };
 
   if (loading && !order) {
@@ -178,16 +85,119 @@ export default function UserOrderDetailScreen() {
     );
   }
 
-  const isAwaitingConfirm = currentStatus === 'AWAITING_CONFIRM' || currentStatus === 'PENDING_ADMIN';
-  const isCancelled = currentStatus === 'CANCELLED' || currentStatus === 'EXPIRED' || currentStatus === 'REJECTED';
-  const isMatched = currentStatus === 'MATCHED' || currentStatus === 'ASSIGNED' || currentStatus === 'WORKER_ARRIVING';
-  const isInProgress = currentStatus === 'IN_PROGRESS';
-  const isCompleted = currentStatus === 'COMPLETED' || currentStatus === 'PAID';
+  if (error && !order) {
+    const isForbidden = error.status === 403;
+    const isNotFound = error.status === 404;
+    const isAuth = error.status === 401;
+    const isOfflineErr = error.type === 'OFFLINE';
 
-  // Tính số phút còn lại của giới hạn 20 phút duyệt
+    return (
+      <SafeAreaView nativeID="order-detail-error-container" style={styles.centerContainer} edges={['top']}>
+        <View style={styles.errorCard}>
+          <View style={[styles.errorIconCircle, (isForbidden || isNotFound) && { backgroundColor: '#FEE2E2' }]}>
+            <Ionicons
+              name={isForbidden ? 'shield-outline' : isNotFound ? 'alert-circle-outline' : isAuth ? 'log-in-outline' : isOfflineErr ? 'cloud-offline-outline' : 'warning-outline'}
+              size={36}
+              color={isForbidden || isNotFound ? '#DC2626' : '#0284C7'}
+            />
+          </View>
+          <Text style={styles.errorTitle}>
+            {isForbidden ? 'Không có quyền truy cập' : isNotFound ? 'Không tìm thấy đơn hàng' : isAuth ? 'Phiên đăng nhập hết hạn' : isOfflineErr ? 'Mất kết nối mạng' : 'Có lỗi xảy ra'}
+          </Text>
+          <Text style={styles.errorSub}>{error.message || 'Không thể tải thông tin đơn hàng.'}</Text>
+          <View style={styles.errorBtnRow}>
+            {isAuth ? (
+              <TouchableOpacity style={styles.primaryBtn} onPress={() => router.replace('/(auth)/login')}>
+                <Text style={styles.primaryBtnText}>Đăng nhập lại</Text>
+              </TouchableOpacity>
+            ) : (
+              <>
+                {!isForbidden && !isNotFound && (
+                  <TouchableOpacity style={styles.primaryBtn} onPress={() => refetch()}>
+                    <Text style={styles.primaryBtnText}>Thử lại</Text>
+                  </TouchableOpacity>
+                )}
+                <TouchableOpacity style={styles.secondaryBtn} onPress={() => router.back()}>
+                  <Text style={styles.secondaryBtnText}>Quay lại</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (!order) {
+    return (
+      <View nativeID="order-detail-empty-container" style={styles.centerContainer}>
+        <Text style={styles.loadingText}>Không có dữ liệu đơn hàng.</Text>
+        <TouchableOpacity style={styles.secondaryBtn} onPress={() => router.back()}>
+          <Text style={styles.secondaryBtnText}>Quay lại</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  const status = String(order?.status || '').toUpperCase();
+  const isAwaitingConfirm = status === 'AWAITING_CONFIRM' || status === 'PENDING_ADMIN';
+  const isCancelled = status === 'CANCELLED' || status === 'EXPIRED' || status === 'REJECTED';
+  const isMatched = status === 'MATCHED' || status === 'ASSIGNED';
+  const isEnRoute = status === 'WORKER_EN_ROUTE' || status === 'WORKER_ARRIVING';
+  const isArrived = status === 'ARRIVED';
+  const isInProgress = status === 'IN_PROGRESS';
+  const isAwaitingAcceptance = status === 'AWAITING_ACCEPTANCE' || status === 'AWAITING_CONFIRMATION';
+  const isAwaitingPayment = status === 'AWAITING_PAYMENT';
+  const isCompleted = status === 'COMPLETED' || status === 'PAID';
+  const isDisputed = status === 'DISPUTED';
+
   const createdTime = new Date(order?.createdAt || order?.submittedAt || Date.now()).getTime();
   const elapsedMins = Math.floor((Date.now() - createdTime) / 60000);
   const remainingMins = Math.max(0, 20 - elapsedMins);
+
+  const getStatusText = (st) => {
+    switch (st) {
+      case 'SEARCHING_WORKER':
+      case 'SEARCHING':
+        return 'Đang tìm thợ';
+      case 'AWAITING_CONFIRM':
+      case 'PENDING_ADMIN':
+        return `Chờ duyệt (${remainingMins}p)`;
+      case 'MATCHED':
+      case 'ASSIGNED':
+        return 'Đã xác nhận';
+      case 'WORKER_EN_ROUTE':
+      case 'WORKER_ARRIVING':
+        return 'Thợ đang đến';
+      case 'ARRIVED':
+        return 'Thợ đã đến';
+      case 'IN_PROGRESS':
+        return 'Đang thực hiện';
+      case 'AWAITING_ACCEPTANCE':
+      case 'AWAITING_CONFIRMATION':
+        return 'Chờ nghiệm thu';
+      case 'AWAITING_PAYMENT':
+        return 'Chờ thanh toán';
+      case 'COMPLETED':
+      case 'PAID':
+        return 'Hoàn thành';
+      case 'CANCELLED':
+        return 'Đã hủy';
+      case 'EXPIRED':
+        return 'Quá hạn';
+      case 'REJECTED':
+        return 'Từ chối';
+      case 'DISPUTED':
+        return 'Khiếu nại';
+      default:
+        return st || 'Đang xử lý';
+    }
+  };
+
+  const isAmber = isAwaitingConfirm || isAwaitingAcceptance || isAwaitingPayment;
+  const isGreen = isMatched || isCompleted;
+  const isRed = isCancelled || isDisputed;
+  const isBlue = !isAmber && !isGreen && !isRed;
 
   return (
     <SafeAreaView nativeID="order-detail-screen-container" style={styles.container} edges={['top']}>
@@ -209,7 +219,20 @@ export default function UserOrderDetailScreen() {
         nativeID="order-detail-scroll-container"
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => refetch(true)} />}
       >
+        {isOffline && (
+          <View nativeID="order-detail-offline-banner" style={styles.offlineBanner}>
+            <Ionicons name="cloud-offline" size={18} color="#D97706" />
+            <Text style={styles.offlineBannerText}>
+              Đang ngoại tuyến — hiển thị dữ liệu lưu tạm thời trên máy.
+            </Text>
+            <TouchableOpacity onPress={() => refetch()} style={styles.offlineRetryBtn}>
+              <Text style={styles.offlineRetryText}>Thử lại</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* ── 1. BANNER TRẠNG THÁI: CHỜ ADMIN DUYỆT ──────────────────── */}
         {isAwaitingConfirm && (
           <View nativeID="order-detail-awaiting-banner" style={styles.awaitingBanner}>
@@ -255,50 +278,40 @@ export default function UserOrderDetailScreen() {
               nativeID="order-detail-status-pill"
               style={[
                 styles.statusPill,
-                isAwaitingConfirm && styles.pillAmber,
-                isMatched && styles.pillGreen,
-                isInProgress && styles.pillBlue,
-                isCompleted && styles.pillGreen,
-                isCancelled && styles.pillRed,
+                isAmber && styles.pillAmber,
+                isGreen && styles.pillGreen,
+                isRed && styles.pillRed,
+                isBlue && styles.pillBlue,
               ]}
             >
               <Text
                 style={[
                   styles.statusPillText,
-                  isAwaitingConfirm && styles.textAmber,
-                  isMatched && styles.textGreen,
-                  isInProgress && styles.textBlue,
-                  isCompleted && styles.textGreen,
-                  isCancelled && styles.textRed,
+                  isAmber && styles.textAmber,
+                  isGreen && styles.textGreen,
+                  isRed && styles.textRed,
+                  isBlue && styles.textBlue,
                 ]}
               >
-                {isAwaitingConfirm
-                  ? `Chờ duyệt (${remainingMins}p)`
-                  : isMatched
-                  ? 'Đã xác nhận'
-                  : isInProgress
-                  ? 'Đang thực hiện'
-                  : isCompleted
-                  ? 'Hoàn thành'
-                  : 'Đã hủy'}
+                {getStatusText(status)}
               </Text>
             </View>
           </View>
 
           <Text style={styles.serviceMainTitle}>
-            {order?.title || order?.serviceName || 'Dịch vụ sửa chữa'}
+            {order?.title || order?.service?.name || order?.category?.name || 'Dịch vụ sửa chữa'}
           </Text>
 
           {/* Huy hieu chan doan AI kem anh su co */}
-          {(order?.imageUrl || params?.imageUrl) && (
+          {order?.imageUrl && (
             <View style={styles.aiIncidentCard}>
               <View style={styles.aiIncidentBadge}>
                 <Ionicons name="sparkles" size={14} color="#0284C7" />
                 <Text style={styles.aiIncidentBadgeText}>
-                  AI Chẩn đoán sự cố • Điểm nhận diện nhóm: {params?.confidence ? `${Math.round(Number(params.confidence) * 100)}%` : 'Chưa xác định'}
+                  AI Chẩn đoán sự cố • Điểm nhận diện nhóm: {order?.aiConfidence ? `${Math.round(Number(order.aiConfidence) * 100)}%` : 'Chưa xác định'}
                 </Text>
               </View>
-              <Image source={{ uri: order?.imageUrl || params?.imageUrl }} style={styles.aiIncidentImg} />
+              <Image source={{ uri: order.imageUrl }} style={styles.aiIncidentImg} />
             </View>
           )}
 
@@ -316,7 +329,7 @@ export default function UserOrderDetailScreen() {
             <Ionicons name="location-outline" size={17} color="#0284C7" style={styles.infoIcon} />
             <Text style={styles.infoLabel}>Địa chỉ:</Text>
             <Text style={styles.infoValue} numberOfLines={2}>
-              {order?.addressText || '606/20, Hiệp Bình, Hồ Chí Minh'}
+              {order?.addressText || 'Địa chỉ khách hàng'}
             </Text>
           </View>
 
@@ -324,7 +337,7 @@ export default function UserOrderDetailScreen() {
             <Ionicons name="person-outline" size={17} color="#0284C7" style={styles.infoIcon} />
             <Text style={styles.infoLabel}>Người đặt:</Text>
             <Text style={styles.infoValue}>
-              {order?.customerName || 'Khách hàng'}{order?.customerPhone ? ` • ${order.customerPhone}` : ''}
+              {order?.customer?.name || order?.customerName || 'Khách hàng'}{order?.customer?.phone || order?.customerPhone ? ` • ${order?.customer?.phone || order?.customerPhone}` : ''}
             </Text>
           </View>
 
@@ -341,13 +354,15 @@ export default function UserOrderDetailScreen() {
           <View style={styles.priceRow}>
             <Text style={styles.priceLabel}>Dự toán chi phí:</Text>
             <Text style={styles.priceValue}>
-              {order?.price ? `${Number(order.price).toLocaleString('vi-VN')} đ` : 'Khảo sát báo giá'}
+              {order?.finalPrice || order?.estimatedPrice || order?.price
+                ? `${Number(order.finalPrice || order.estimatedPrice || order.price).toLocaleString('vi-VN')} đ`
+                : 'Khảo sát báo giá'}
             </Text>
           </View>
         </View>
 
-        {/* ── 3. THÔNG TIN THỢ PHỤ TRÁCH (Khi đã xác nhận thợ) ─────── */}
-        {!isAwaitingConfirm && !isCancelled && (
+        {/* ── 3. THÔNG TIN THỢ PHỤ TRÁCH (Khi đã có thợ hoặc đang tiến hành) ─────── */}
+        {!isAwaitingConfirm && !isCancelled && (order?.worker || isMatched || isEnRoute || isArrived || isInProgress || isAwaitingAcceptance || isAwaitingPayment) && (
           <>
             {/* Bản đồ định vị và lộ trình thời gian thực OSRM */}
             <WorkerTrackingMapView
@@ -361,27 +376,27 @@ export default function UserOrderDetailScreen() {
             />
 
             <View nativeID="order-detail-worker-card" style={styles.workerCard}>
-            <View style={styles.workerAvatarCircle}>
-              <Text style={styles.workerAvatarText}>👨‍🔧</Text>
+              <View style={styles.workerAvatarCircle}>
+                <Text style={styles.workerAvatarText}>👨‍🔧</Text>
+              </View>
+              <View style={{ flex: 1, marginLeft: 14 }}>
+                <Text style={styles.workerName}>
+                  {order?.worker?.fullName || order?.worker?.user?.name || order?.assignedWorker?.fullName || 'Kỹ thuật viên FixGo'}
+                </Text>
+                <Text style={styles.workerPhone}>
+                  📞 SĐT: {order?.worker?.phone || order?.worker?.user?.phone || order?.assignedWorker?.phone || 'Chưa có số điện thoại'}
+                </Text>
+                <Text style={styles.workerRating}>⭐ 4.9 (128 đánh giá) • Thợ chuyên nghiệp</Text>
+              </View>
+              <TouchableOpacity
+                nativeID="btn-call-assigned-worker"
+                style={styles.callBtn}
+                activeOpacity={0.8}
+              >
+                <Ionicons name="call" size={18} color="#FFFFFF" />
+              </TouchableOpacity>
             </View>
-            <View style={{ flex: 1, marginLeft: 14 }}>
-              <Text style={styles.workerName}>
-                {order?.worker?.fullName || 'Nguyễn Văn Thợ (FixGo Pro)'}
-              </Text>
-              <Text style={styles.workerPhone}>
-                📞 SĐT: {order?.worker?.phone || order?.worker?.user?.phone || 'Chưa có số điện thoại'}
-              </Text>
-              <Text style={styles.workerRating}>⭐ 4.9 (128 đánh giá) • Thợ chuyên nghiệp</Text>
-            </View>
-            <TouchableOpacity
-              nativeID="btn-call-assigned-worker"
-              style={styles.callBtn}
-              activeOpacity={0.8}
-            >
-              <Ionicons name="call" size={18} color="#FFFFFF" />
-            </TouchableOpacity>
-          </View>
-        </>
+          </>
         )}
 
         {/* ── 4. TIẾN TRÌNH THỰC HIỆN ĐƠN HÀNG ───────────────────────── */}
@@ -411,9 +426,9 @@ export default function UserOrderDetailScreen() {
           </View>
 
           <View style={styles.timelineItem}>
-            <View style={isInProgress || isCompleted ? styles.dotCompleted : styles.dotPending} />
+            <View style={isInProgress || isCompleted || isAwaitingAcceptance || isAwaitingPayment ? styles.dotCompleted : styles.dotPending} />
             <View style={styles.timelineContent}>
-              <Text style={isInProgress || isCompleted ? styles.stepTitleActive : styles.stepTitle}>
+              <Text style={isInProgress || isCompleted || isAwaitingAcceptance || isAwaitingPayment ? styles.stepTitleActive : styles.stepTitle}>
                 3. Thợ đến làm việc
               </Text>
               <Text style={styles.stepSub}>Kiểm tra sự cố, khảo sát và sửa chữa tận nơi</Text>
@@ -432,19 +447,8 @@ export default function UserOrderDetailScreen() {
         </View>
 
         {/* ── 5. CÁC NÚT THAO TÁC ───────────────────────────────────── */}
-        {isAwaitingConfirm && (
+        {(isAwaitingConfirm || status === 'SEARCHING_WORKER' || status === 'SEARCHING') && (
           <View nativeID="order-detail-actions-container" style={styles.actionsContainer}>
-            {/* Nút Demo Duyệt cho tester / admin */}
-            <TouchableOpacity
-              nativeID="btn-demo-admin-approve-order"
-              style={styles.demoApproveBtn}
-              onPress={handleAdminApproveDemo}
-              activeOpacity={0.85}
-            >
-              <Ionicons name="checkmark-done-circle" size={20} color="#FFFFFF" style={{ marginRight: 6 }} />
-              <Text style={styles.demoApproveBtnText}>Demo: Admin duyệt đơn</Text>
-            </TouchableOpacity>
-
             <TouchableOpacity
               nativeID="btn-cancel-order"
               style={styles.cancelOrderBtn}
@@ -873,5 +877,102 @@ const styles = StyleSheet.create({
     height: 140,
     borderRadius: 8,
     backgroundColor: '#E2E8F0',
+  },
+  errorCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+    marginHorizontal: 24,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    width: '88%',
+  },
+  errorIconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#E0F2FE',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  errorTitle: {
+    fontSize: 17,
+    fontFamily: 'Inter_700Bold',
+    fontWeight: '700',
+    color: '#0F172A',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  errorSub: {
+    fontSize: 13.5,
+    fontFamily: 'Inter_400Regular',
+    color: '#64748B',
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 20,
+  },
+  errorBtnRow: {
+    flexDirection: 'row',
+    gap: 12,
+    width: '100%',
+    justifyContent: 'center',
+  },
+  primaryBtn: {
+    flex: 1,
+    backgroundColor: '#0284C7',
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  primaryBtnText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontFamily: 'Inter_600SemiBold',
+    fontWeight: '600',
+  },
+  secondaryBtn: {
+    flex: 1,
+    backgroundColor: '#F1F5F9',
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  secondaryBtnText: {
+    color: '#334155',
+    fontSize: 14,
+    fontFamily: 'Inter_600SemiBold',
+    fontWeight: '600',
+  },
+  offlineBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  offlineBannerText: {
+    flex: 1,
+    fontSize: 12,
+    color: '#92400E',
+    fontFamily: 'Inter_500Medium',
+  },
+  offlineRetryBtn: {
+    backgroundColor: '#D97706',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  offlineRetryText: {
+    color: '#FFFFFF',
+    fontSize: 11.5,
+    fontWeight: '600',
   },
 });

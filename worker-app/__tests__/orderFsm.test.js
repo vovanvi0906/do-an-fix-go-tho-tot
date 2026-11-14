@@ -48,6 +48,7 @@ it('loads order by ID and waits for REST acknowledgement before showing travel s
   fireEvent.press(ui.getByText('BẮT ĐẦU DI CHUYỂN ĐẾN KHÁCH'));
   expect(apiClient.patch).toHaveBeenCalledWith('/orders/order-1/status', { status: 'WORKER_EN_ROUTE' });
   expect(ui.queryByText('ĐÃ ĐẾN NƠI')).toBeNull();
+  orderService.getOrderById.mockResolvedValue(snapshot('WORKER_EN_ROUTE'));
   await act(async () => resolve({ order: snapshot('WORKER_EN_ROUTE') }));
   expect(ui.getByText('ĐÃ ĐẾN NƠI')).toBeTruthy();
   expect(socketService.emit).not.toHaveBeenCalled();
@@ -55,7 +56,9 @@ it('loads order by ID and waits for REST acknowledgement before showing travel s
 it('restores ARRIVED without silently starting work', async () => {
   orderService.getOrderById.mockResolvedValue(snapshot('ARRIVED'));
   const ui = render(<WorkerJobDetailScreen />);
-  await waitFor(() => expect(ui.getByText('BẮT ĐẦU CÔNG VIỆC')).toBeTruthy());
+  await waitFor(() => expect(ui.getByText('CHỜ XÁC THỰC THEO ĐƠN')).toBeTruthy());
+  fireEvent.press(ui.getByText('CHỜ XÁC THỰC THEO ĐƠN'));
+  expect(apiClient.patch).not.toHaveBeenCalled();
   expect(apiClient.patch).not.toHaveBeenCalled();
   expect(ui.queryByText('BẮT ĐẦU DI CHUYỂN ĐẾN KHÁCH')).toBeNull();
 });
@@ -76,4 +79,49 @@ it('order event triggers a backend reload rather than trusting event status', as
   await act(async () => handler({ orderId: 'order-1', status: 'COMPLETED' }));
   expect(orderService.getOrderById).toHaveBeenCalledTimes(2);
   expect(apiClient.patch).not.toHaveBeenCalled();
+});
+
+it.each(['MATCHED', 'WORKER_EN_ROUTE', 'ARRIVED', 'IN_PROGRESS', 'AWAITING_ACCEPTANCE', 'AWAITING_PAYMENT', 'COMPLETED'])('renders backend %s and its history on reopening', async status => {
+  orderService.getOrderById.mockResolvedValue({ ...snapshot(status), statusHistory: [{ id: 'h1', status, createdAt: '2026-11-12T00:00:00Z' }] });
+  const ui = render(<WorkerJobDetailScreen />);
+  await waitFor(() => expect(ui.getByText(`Trạng thái: ${status}`)).toBeTruthy());
+  expect(ui.getByText(new RegExp(`^${status} ·`))).toBeTruthy();
+  if (['AWAITING_ACCEPTANCE', 'AWAITING_PAYMENT', 'COMPLETED'].includes(status)) {
+    expect(ui.queryByText('BẮT ĐẦU CÔNG VIỆC')).toBeNull();
+    expect(ui.queryByText('BẮT ĐẦU DI CHUYỂN ĐẾN KHÁCH')).toBeNull();
+  }
+  expect(apiClient.patch).not.toHaveBeenCalled();
+});
+it.each([401, 403, 404, 500])('detail clears customer and actions after HTTP %s, then retries', async status => {
+  const ui = render(<WorkerJobDetailScreen />);
+  await waitFor(() => expect(ui.getByText('Khách từ server')).toBeTruthy());
+  orderService.getOrderById.mockRejectedValueOnce(new Error(`HTTP ${status}`));
+  const reconnect = socketService.on.mock.calls.find(([event]) => event === 'connect')[1];
+  await act(async () => reconnect());
+  expect(ui.queryByText('Khách từ server')).toBeNull();
+  expect(ui.queryByText('BẮT ĐẦU DI CHUYỂN ĐẾN KHÁCH')).toBeNull();
+  fireEvent.press(ui.getByText(`HTTP ${status} — Thử lại`));
+  await waitFor(() => expect(ui.getByText('Khách từ server')).toBeTruthy());
+});
+it('current order proof enables start, then waits for authoritative order reload', async () => {
+  orderService.getOrderById.mockResolvedValue(snapshot('ARRIVED'));
+  apiClient.get.mockResolvedValue({ orderProof: { id: 'proof-1', purpose: 'ORDER', orderId: 'order-1', templateVersion: 1, consumedAt: null,
+    issuedAt: new Date(Date.now()-1000).toISOString(), expiresAt: new Date(Date.now()+300000).toISOString() } });
+  let finish; apiClient.patch.mockImplementation(() => new Promise(resolve => { finish = resolve; }));
+  const ui = render(<WorkerJobDetailScreen />);
+  await waitFor(() => expect(ui.getByText('BẮT ĐẦU CÔNG VIỆC')).toBeTruthy());
+  fireEvent.press(ui.getByText('BẮT ĐẦU CÔNG VIỆC'));
+  expect(apiClient.patch).toHaveBeenCalledWith('/orders/order-1/status', { status: 'IN_PROGRESS' });
+  expect(ui.queryByText('Đang thực hiện công việc.')).toBeNull();
+  orderService.getOrderById.mockResolvedValue(snapshot('IN_PROGRESS'));
+  await act(async () => finish({ success: true }));
+  expect(ui.getByText('Đang thực hiện công việc.')).toBeTruthy();
+});
+it('another order proof never enables the start button', async () => {
+  orderService.getOrderById.mockResolvedValue(snapshot('ARRIVED'));
+  apiClient.get.mockResolvedValue({ orderProof: { id: 'proof-other', purpose: 'ORDER', orderId: 'order-other', templateVersion: 1, consumedAt: null,
+    issuedAt: new Date(Date.now()-1000).toISOString(), expiresAt: new Date(Date.now()+300000).toISOString() } });
+  const ui = render(<WorkerJobDetailScreen />);
+  await waitFor(() => expect(ui.getByText('CHỜ XÁC THỰC THEO ĐƠN')).toBeTruthy());
+  fireEvent.press(ui.getByText('CHỜ XÁC THỰC THEO ĐƠN')); expect(apiClient.patch).not.toHaveBeenCalled();
 });

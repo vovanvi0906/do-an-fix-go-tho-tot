@@ -1,0 +1,3 @@
+Database: localhost:5432/ondemand_db; schema=public; preflight=READ ONLY
+Face Core enabled=true; capture approved=false; missing Face columns=72
+USB database/config preflight FAILED: FACE_SCHEMA_INCOMPATIBLE_NO_AUTOMATIC_MIGRATION. Kiểm tra URL/schema/Face flags; không tự chạy migration hoặc seed.

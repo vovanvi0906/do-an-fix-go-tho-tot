@@ -1,3 +1,11 @@
+import { FaceCoreService } from '../src/modules/workers/face/face-core.service';
+import { FaceEvidenceGateway } from '../src/modules/workers/face/face-evidence.gateway';
+import { faceCoreConfig } from '../src/modules/workers/face/face-core.config';
+import {
+  assertArc01Disposable,
+  persistedIdentity,
+  persistedProof,
+} from './face/arc01-persisted-fixture';
 import { ConfigModule } from '@nestjs/config';
 import { AdminModule } from '../src/modules/admin/admin.module';
 import { OrderQueueService } from '../src/modules/orders/order-queue.service';
@@ -26,7 +34,18 @@ const run = url ? describe : describe.skip;
 run(
   'ARC-01 real PostgreSQL + HTTP + Socket.IO (Redis pubsub not exercised)',
   () => {
-    let db, app, gateway, workflow, category, customer, stranger, w1, w2, admin;
+    let db,
+      app,
+      gateway,
+      workflow,
+      core,
+      category,
+      customer,
+      stranger,
+      w1,
+      w2,
+      admin;
+    const identities = new Map();
     const orders = [],
       users = [],
       sockets = [];
@@ -88,6 +107,13 @@ run(
         );
       }
       db = new PrismaClient({ datasources: { db: { url } } });
+      await assertArc01Disposable(db);
+      // Exercise the real durable-proof gate. Capture/inference remains unapproved.
+      core = new FaceCoreService(db, new FaceEvidenceGateway({}), {
+        ...faceCoreConfig(),
+        enabled: true,
+        captureApproved: false,
+      });
       const module = await Test.createTestingModule({
         imports: [PassportModule.register({ defaultStrategy: 'jwt' })],
         controllers: [OrdersController, AdminController],
@@ -105,7 +131,7 @@ run(
           {
             provide: OrderWorkflowService,
             inject: [OrderGateway],
-            useFactory: (gw) => new OrderWorkflowService(db, gw),
+            useFactory: (gw) => new OrderWorkflowService(db, gw, core),
           },
           {
             provide: OrdersService,
@@ -160,17 +186,88 @@ run(
       w1 = await createUser('WORKER');
       w2 = await createUser('WORKER');
       admin = await createUser('ADMIN');
+      for (const worker of [w1, w2])
+        identities.set(
+          worker.id,
+          await persistedIdentity(
+            db,
+            worker,
+            admin,
+            core.options.consentVersion,
+          ),
+        );
     }, 20000);
     afterAll(async () => {
       sockets.forEach((socket) => socket.disconnect());
       if (app) await app.close();
       if (db) {
+        // Respect RESTRICT lineage: delete only this suite's synthetic records, children first.
+        const workerIds = [w1, w2]
+          .filter(Boolean)
+          .map((u) => u.workerProfile.id);
+        await db.biometricAudit.deleteMany({
+          where: { workerId: { in: workerIds } },
+        });
+        await db.biometricProof.deleteMany({
+          where: { workerId: { in: workerIds } },
+        });
+        await db.biometricSession.deleteMany({
+          where: { workerId: { in: workerIds } },
+        });
+        await db.biometricTemplate.deleteMany({
+          where: { workerId: { in: workerIds } },
+        });
+        await db.biometricReview.deleteMany({
+          where: { workerId: { in: workerIds } },
+        });
+        await db.biometricState.deleteMany({
+          where: { workerId: { in: workerIds } },
+        });
         await db.order.deleteMany({ where: { id: { in: orders } } });
         await db.user.deleteMany({ where: { id: { in: users } } });
         if (category)
           await db.serviceCategory.delete({ where: { id: category.id } });
         await db.$disconnect();
       }
+    });
+    it('legacy timestamp cannot replace daily proof, and missing FaceCore wiring remains closed', async () => {
+      const order = await makeOrder('SEARCHING_WORKER', null);
+      const response = await call(w1, `/orders/${order.id}/accept`, {}, 'post');
+      expect(response.status).toBe(400);
+      expect(response.body.message).toBe('DAILY_PROOF_REQUIRED');
+      const legacy = new OrderWorkflowService(db, gateway);
+      try {
+        await legacy.transition(order.id, w1.id, 'MATCHED');
+        throw new Error('Legacy gate unexpectedly permitted acceptance');
+      } catch (error) {
+        expect(error.message).toBe('FACE_CHECKIN_EXPIRED');
+        console.info('Unwired workflow rejection stack:', error.stack);
+      }
+      expect(
+        (await db.order.findUnique({ where: { id: order.id } })).workerId,
+      ).toBeNull();
+      console.info(
+        'ARC01 negative control: real wired gate=DAILY_PROOF_REQUIRED; missing wiring=FACE_CHECKIN_EXPIRED',
+      );
+    });
+    it('daily proof cannot replace ORDER proof and production capture readiness remains closed', async () => {
+      const daily = await persistedProof(db, identities.get(w2.id), 'DAILY');
+      const order = await makeOrder('ARRIVED', w2.workerProfile.id);
+      const response = await call(w2, `/orders/${order.id}/start`);
+      expect(response.status).toBe(400);
+      expect(response.body.message).toBe('ORDER_FACE_PROOF_REQUIRED');
+      expect(
+        (await db.biometricProof.findUnique({ where: { id: daily.id } }))
+          .consumedAt,
+      ).toBeNull();
+      await expect(core.ready()).rejects.toThrow(
+        'BIOMETRIC_DATA_POLICY_NOT_APPROVED',
+      );
+      expect((await core.gateway.capabilities()).padEvaluated).toBe(false);
+      await db.biometricProof.update({
+        where: { id: daily.id },
+        data: { revokedAt: new Date() },
+      });
     });
     it('valid legacy alias persists canonical travel state and history', async () => {
       const order = await makeOrder('ASSIGNED');
@@ -221,6 +318,8 @@ run(
         data: { status: 'CANCELLED' },
       });
       const order = await makeOrder('SEARCHING_WORKER', null);
+      for (const worker of [w1, w2])
+        await persistedProof(db, identities.get(worker.id), 'DAILY');
       const responses = await Promise.all(
         [w1, w2].map((user) =>
           call(user, `/orders/${order.id}/accept`, {}, 'post'),
@@ -273,7 +372,19 @@ run(
     });
     it('BEFORE, pending quote, AFTER and settlement are server preconditions', async () => {
       const order = await makeOrder('ARRIVED');
-      expect((await call(w1, `/orders/${order.id}/start`)).status).toBe(400);
+      const proof = await persistedProof(
+        db,
+        identities.get(w1.id),
+        'ORDER',
+        order.id,
+      );
+      expect((await call(w1, `/orders/${order.id}/start`)).body.message).toBe(
+        'MISSING_BEFORE_PHOTO',
+      );
+      expect(
+        (await db.biometricProof.findUnique({ where: { id: proof.id } }))
+          .consumedAt,
+      ).toBeNull();
       await db.orderStatusHistory.create({
         data: { orderId: order.id, status: 'ARRIVED' },
       });
@@ -305,6 +416,15 @@ run(
         },
       });
       expect((await call(w1, `/orders/${order.id}/start`)).status).toBe(200);
+      expect(
+        (await db.biometricProof.findUnique({ where: { id: proof.id } }))
+          .consumedAt,
+      ).not.toBeNull();
+      expect(
+        await db.biometricAudit.count({
+          where: { targetId: proof.id, action: 'ORDER_PROOF_CONSUMED' },
+        }),
+      ).toBe(1);
       expect((await call(w1, `/orders/${order.id}/finish`)).body.message).toBe(
         'MISSING_AFTER_PHOTO',
       );
@@ -511,6 +631,7 @@ run(
         where: { id: { in: orders } },
         data: { status: 'CANCELLED' },
       });
+      await persistedProof(db, identities.get(w1.id), 'DAILY');
       const a = await makeOrder('SEARCHING_WORKER', null);
       const b = await makeOrder('SEARCHING_WORKER', null);
       const responses = await Promise.all(
@@ -633,14 +754,30 @@ run(
     });
     it('dispute evidence and history are persisted once with the state change', async () => {
       const order = await makeOrder('AWAITING_ACCEPTANCE');
-      const body = { reason: 'ARC01 customer evidence', evidenceImages: ['https://example.test/evidence.jpg'] };
-      const first = await call(customer, `/orders/${order.id}/dispute`, body, 'post');
-      const second = await call(customer, `/orders/${order.id}/dispute`, body, 'post');
+      const body = {
+        reason: 'ARC01 customer evidence',
+        evidenceImages: ['https://example.test/evidence.jpg'],
+      };
+      const first = await call(
+        customer,
+        `/orders/${order.id}/dispute`,
+        body,
+        'post',
+      );
+      const second = await call(
+        customer,
+        `/orders/${order.id}/dispute`,
+        body,
+        'post',
+      );
       expect(first.body.order.status).toBe('DISPUTED');
       expect(second.body.changed).toBe(false);
-      expect(await db.orderStatusHistory.count({ where: { orderId: order.id } })).toBe(1);
-      expect(await db.orderImage.count({ where: { orderId: order.id } })).toBe(1);
+      expect(
+        await db.orderStatusHistory.count({ where: { orderId: order.id } }),
+      ).toBe(1);
+      expect(await db.orderImage.count({ where: { orderId: order.id } })).toBe(
+        1,
+      );
     });
-
   },
 );

@@ -1,0 +1,2 @@
+List of devices attached
+10AG3G1KS800336        device usb:3-1 product:PD2536 model:V2536A device:PD2536 transport_id:2

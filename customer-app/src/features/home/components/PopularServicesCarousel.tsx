@@ -2,7 +2,7 @@
  * @file PopularServicesCarousel.tsx
  * @description Carousel dịch vụ phổ biến vuốt ngang (Horizontal Snap Scroll).
  * Bố cục hiển thị trọn vẹn thông tin (Giá niêm yết, Thời gian có mặt sau 15p, Đánh giá),
- * Nút Đặt ngay và nút "Xem tất cả 40+ dịch vụ" đạt chuẩn Touch Target 44x44px WCAG AA.
+ * Nút Đặt ngay và nút "Xem tất cả dịch vụ" đạt chuẩn Touch Target 44x44px WCAG AA.
  */
 
 import React from 'react';
@@ -37,7 +37,7 @@ export default function PopularServicesCarousel({
       <View nativeID="home-popular-services-header" style={styles.headerRow}>
         <View>
           <Text style={styles.title}>Dịch vụ phổ biến</Text>
-          <Text style={styles.subtitle}>Giá niêm yết minh bạch • Đặt nhiều nhất tuần</Text>
+          <Text style={styles.subtitle}>Giá tham khảo từ danh mục dịch vụ</Text>
         </View>
 
         {onViewAll && (
@@ -50,12 +50,13 @@ export default function PopularServicesCarousel({
             style={({ pressed }) => [styles.viewAllBtn, pressed && styles.pressedEffect]}
             onPress={onViewAll}
           >
-            <Text style={styles.viewAllText}>Xem tất cả 40+</Text>
+            <Text style={styles.viewAllText}>Xem tất cả</Text>
             <Ionicons name="arrow-forward" size={13} color="#0284C7" />
           </Pressable>
         )}
       </View>
 
+      {services.length === 0 && <Text>Chưa có dữ liệu dịch vụ. Vui lòng tải lại.</Text>}
       {/* ── 2. Horizontal Scroll Cards (Tránh cắt cụt nội dung) ─ */}
       <ScrollView
         nativeID="home-popular-services-scroll"
@@ -70,7 +71,7 @@ export default function PopularServicesCarousel({
             nativeID={`popular-service-card-${service.id || index}`}
             accessible={true}
             accessibilityRole="button"
-            accessibilityLabel={`Dịch vụ ${service.name}, giá ${service.basePrice.toLocaleString('vi-VN')} đồng, đánh giá ${service.rating} sao`}
+            accessibilityLabel={`Dịch vụ ${service.name}, giá ${service.basePrice.toLocaleString('vi-VN')} đồng`}
             style={({ pressed }) => [
               styles.serviceCard,
               pressed && styles.cardPressedEffect,
@@ -87,7 +88,7 @@ export default function PopularServicesCarousel({
               )}
               <View style={styles.arrivalChip}>
                 <Ionicons name="flash" size={10} color="#0284C7" style={{ marginRight: 3 }} />
-                <Text style={styles.arrivalText}>Có mặt sau 15p</Text>
+                <Text style={styles.arrivalText}>Thời gian tùy vị trí</Text>
               </View>
             </View>
 
@@ -96,8 +97,8 @@ export default function PopularServicesCarousel({
               {/* Category & Rating */}
               <View style={styles.ratingRow}>
                 <Ionicons name="star" size={11} color="#F59E0B" />
-                <Text style={styles.ratingText}>{service.rating.toFixed(1)}</Text>
-                <Text style={styles.reviewsText}>({service.reviewsCount})</Text>
+                <Text style={styles.ratingText}>{service.reviewsCount > 0 ? service.rating.toFixed(1) : 'Chưa có đánh giá'}</Text>
+                {service.reviewsCount > 0 && <Text style={styles.reviewsText}>({service.reviewsCount})</Text>}
                 <Text style={styles.dotSeparator}>•</Text>
                 <Text style={styles.categoryName} numberOfLines={1}>
                   {service.categoryName}

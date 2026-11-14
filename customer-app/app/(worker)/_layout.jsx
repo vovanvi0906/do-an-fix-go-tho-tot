@@ -1,12 +1,26 @@
-import React from 'react';
-import { Stack } from 'expo-router';
+import React, { useEffect } from 'react';
+import { useRouter } from 'expo-router';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
 
 export default function WorkerLayout() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace('/(auth)/login');
+  }, [router]);
+
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="job/[id]" options={{ headerShown: true, title: 'Chi tiết việc làm' }} />
-      <Stack.Screen name="verification/face" options={{ headerShown: true, title: 'Xác thực khuôn mặt AI' }} />
-    </Stack>
+    <View style={styles.container}>
+      <ActivityIndicator size="large" color="#0084FF" />
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+});

@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from '../features/auth/pages/LoginPage';
 import RegisterPage from '../features/auth/pages/RegisterPage';
+import SymptomManagementPage from '../features/symptoms/pages/SymptomManagementPage';
 import DashboardPage from '../features/dashboard/pages/DashboardPage';
 import UsersPage from '../features/users/pages/UsersPage';
 import WorkersManagementPage from '../features/workers/pages/WorkersManagementPage';
@@ -52,6 +53,7 @@ export default function AppRoutes() {
         <Route path="users" element={<UsersPage />} />
         <Route path="workers" element={<WorkersManagementPage />} />
         <Route path="categories" element={<CategoryManagementPage />} />
+        <Route path="symptoms" element={<SymptomManagementPage />} />
         <Route path="services" element={<ServiceManagementPage />} />
         <Route path="orders" element={<OrdersManagementPage />} />
         <Route path="payments" element={<div className="p-4 text-slate-500">Chức năng Thanh toán & Ví tiền đang hoàn thiện.</div>} />

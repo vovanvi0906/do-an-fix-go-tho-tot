@@ -58,3 +58,10 @@ weights/
 eval/results/
 */eval/results/
 
+
+# Private Android QA environment (credentials, logs, PID files)
+.android-qa/
+
+# Native build artifacts stay local even if old branches tracked them.
+*.apk
+*.aab

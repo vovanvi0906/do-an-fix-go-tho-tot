@@ -1,0 +1,15 @@
+{
+  "applicationId": "com.fixgo.faceresearch",
+  "scheme": "fixgoresearch",
+  "entrypoint": "expo-router/entry",
+  "routerRoot": "research-app",
+  "introspectedManifestPackage": "com.fixgo.faceresearch",
+  "androidHermesExport": true,
+  "nativeApkBuilt": false,
+  "physicalDeviceTest": false,
+  "sourceCount": 916,
+  "forbiddenWorkerModules": [],
+  "bundleBytes": 1557104,
+  "bundleSha256": "ca2c172f251917352bc136020acc3b282f08d9f2fe6772b9874ec81302e8548a",
+  "sourceMapSha256": "8bcf4d346945541159018805dbde751599fb3ffebc9b3af38699300ddd500d04"
+}

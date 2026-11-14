@@ -1,0 +1,22 @@
+{
+  "splits": {
+    "train": {
+      "files": 840,
+      "unique": 646
+    },
+    "val": {
+      "files": 240,
+      "unique": 213
+    },
+    "test": {
+      "files": 120,
+      "unique": 114
+    }
+  },
+  "overlaps": {
+    "train/val": 210,
+    "train/test": 109,
+    "val/test": 109
+  },
+  "valid": false
+}

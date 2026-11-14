@@ -1,0 +1,662 @@
+[
+  {
+    "image": "ai-service/dataset/test/dien_lanh/dien_lanh_0001.jpg",
+    "data_kind": "synthetic_existing_dataset_not_independent",
+    "http": 200,
+    "latency_ms": 206.37,
+    "response": {
+      "suggestedCategoryId": "dien-lanh",
+      "suggestedCategoryName": "Điện lạnh",
+      "confidence": 0.9968,
+      "detectedLabels": [
+        "dien_lanh"
+      ],
+      "notes": "Chẩn đoán sự cố và đề xuất đối tượng, dịch vụ thành công.",
+      "engine": "model",
+      "boxes": null,
+      "all_probs": {
+        "dien_lanh": 0.9968155026435852,
+        "lam_vuon": 0.0003374959633219987,
+        "other_unclear": 0.0004700243880506605,
+        "sua_dien": 0.0008079350227490067,
+        "sua_nuoc": 0.0010539032518863678,
+        "thiet_bi": 0.0005152631783857942
+      },
+      "clip_probs": {
+        "giup_viec": 0.1434,
+        "sua_dien": 0.0833,
+        "sua_nuoc": 0.0279,
+        "dien_lanh": 0.257,
+        "thiet_bi": 0.3875,
+        "lam_vuon": 0.0404,
+        "other_unclear": 0.0605
+      },
+      "clip_label": "thiet_bi",
+      "clip_confidence": 0.3875,
+      "decision_source": "yolo (clip low confidence override)",
+      "suggestedTargetId": "may-giat-may-giat-say",
+      "suggestedTargetName": "Máy giặt / Máy giặt sấy",
+      "suggestedServiceId": "sua-tu-lanh-khong-lanh",
+      "suggestedServiceName": "Sửa tủ lạnh không lạnh",
+      "suggestedService": "Sửa tủ lạnh không lạnh",
+      "suggestedServiceConfidence": 0.6823,
+      "unit": "máy",
+      "estimatedPriceRange": {
+        "min": 200000,
+        "max": 550000,
+        "unit": "máy",
+        "formatted": "200.000đ - 550.000đ / máy"
+      },
+      "allServiceProbs": {
+        "kiem-tra-may-lanh-khong-lanh-hoac-lanh-yeu": 0.1725,
+        "sua-may-lanh-chay-nuoc": 0.0118,
+        "sua-tu-lanh-khong-lanh": 0.6823,
+        "sua-may-giat-khong-vat": 0.1334
+      }
+    }
+  },
+  {
+    "image": "ai-service/dataset/test/dien_lanh/dien_lanh_0002.jpg",
+    "data_kind": "synthetic_existing_dataset_not_independent",
+    "http": 200,
+    "latency_ms": 113.3,
+    "response": {
+      "suggestedCategoryId": "dien-lanh",
+      "suggestedCategoryName": "Điện lạnh",
+      "confidence": 0.9968,
+      "detectedLabels": [
+        "dien_lanh"
+      ],
+      "notes": "Chẩn đoán sự cố và đề xuất đối tượng, dịch vụ thành công.",
+      "engine": "model",
+      "boxes": null,
+      "all_probs": {
+        "dien_lanh": 0.9968474507331848,
+        "lam_vuon": 0.0003492601972538978,
+        "other_unclear": 0.0004634780634660274,
+        "sua_dien": 0.0008002174436114728,
+        "sua_nuoc": 0.0010335056576877832,
+        "thiet_bi": 0.0005061397096142173
+      },
+      "clip_probs": {
+        "giup_viec": 0.12,
+        "sua_dien": 0.0836,
+        "sua_nuoc": 0.022,
+        "dien_lanh": 0.2753,
+        "thiet_bi": 0.395,
+        "lam_vuon": 0.0342,
+        "other_unclear": 0.0701
+      },
+      "clip_label": "thiet_bi",
+      "clip_confidence": 0.395,
+      "decision_source": "yolo (clip low confidence override)",
+      "suggestedTargetId": "may-giat-may-giat-say",
+      "suggestedTargetName": "Máy giặt / Máy giặt sấy",
+      "suggestedServiceId": "sua-tu-lanh-khong-lanh",
+      "suggestedServiceName": "Sửa tủ lạnh không lạnh",
+      "suggestedService": "Sửa tủ lạnh không lạnh",
+      "suggestedServiceConfidence": 0.6754,
+      "unit": "máy",
+      "estimatedPriceRange": {
+        "min": 200000,
+        "max": 550000,
+        "unit": "máy",
+        "formatted": "200.000đ - 550.000đ / máy"
+      },
+      "allServiceProbs": {
+        "kiem-tra-may-lanh-khong-lanh-hoac-lanh-yeu": 0.1944,
+        "sua-may-lanh-chay-nuoc": 0.0125,
+        "sua-tu-lanh-khong-lanh": 0.6754,
+        "sua-may-giat-khong-vat": 0.1177
+      }
+    }
+  },
+  {
+    "image": "ai-service/dataset/test/lam_vuon/lam_vuon_0001.jpg",
+    "data_kind": "synthetic_existing_dataset_not_independent",
+    "http": 200,
+    "latency_ms": 99.48,
+    "response": {
+      "suggestedCategoryId": "lam-vuon",
+      "suggestedCategoryName": "Làm vườn",
+      "confidence": 0.9812,
+      "detectedLabels": [
+        "lam_vuon"
+      ],
+      "notes": "Chẩn đoán sự cố và đề xuất đối tượng, dịch vụ thành công.",
+      "engine": "model",
+      "boxes": null,
+      "all_probs": {
+        "dien_lanh": 4.3605283281067386e-05,
+        "lam_vuon": 0.999731719493866,
+        "other_unclear": 2.224003037554212e-05,
+        "sua_dien": 1.3406693142314907e-05,
+        "sua_nuoc": 0.00017514305363874882,
+        "thiet_bi": 1.3849057722836733e-05
+      },
+      "clip_probs": {
+        "giup_viec": 0.0063,
+        "sua_dien": 0.0073,
+        "sua_nuoc": 0.0052,
+        "dien_lanh": 0.0009,
+        "thiet_bi": 0.0019,
+        "lam_vuon": 0.9612,
+        "other_unclear": 0.0173
+      },
+      "clip_label": "lam_vuon",
+      "clip_confidence": 0.9612,
+      "decision_source": "ensemble",
+      "suggestedTargetId": "cay-bong-mat-cay-lon",
+      "suggestedTargetName": "Cây bóng mát / Cây lớn",
+      "suggestedServiceId": "cat-co-dinh-ky",
+      "suggestedServiceName": "Cắt cỏ định kỳ",
+      "suggestedService": "Cắt cỏ định kỳ",
+      "suggestedServiceConfidence": 0.6454,
+      "unit": "lần",
+      "estimatedPriceRange": {
+        "min": 150000,
+        "max": 350000,
+        "unit": "lần",
+        "formatted": "150.000đ - 350.000đ / lần"
+      },
+      "allServiceProbs": {
+        "cat-co-dinh-ky": 0.6454,
+        "cat-tia-cay-canh": 0.1607,
+        "nho-don-co-dai": 0.1622,
+        "cat-tia-hang-rao-cay": 0.0257,
+        "lap-he-thong-tuoi-tu-dong": 0.006
+      }
+    }
+  },
+  {
+    "image": "ai-service/dataset/test/lam_vuon/lam_vuon_0002.jpg",
+    "data_kind": "synthetic_existing_dataset_not_independent",
+    "http": 200,
+    "latency_ms": 103.6,
+    "response": {
+      "suggestedCategoryId": "lam-vuon",
+      "suggestedCategoryName": "Làm vườn",
+      "confidence": 0.9887,
+      "detectedLabels": [
+        "lam_vuon"
+      ],
+      "notes": "Chẩn đoán sự cố và đề xuất đối tượng, dịch vụ thành công.",
+      "engine": "model",
+      "boxes": null,
+      "all_probs": {
+        "dien_lanh": 4.71052153443452e-05,
+        "lam_vuon": 0.9995836615562439,
+        "other_unclear": 3.5888802813133225e-05,
+        "sua_dien": 3.505506902001798e-05,
+        "sua_nuoc": 0.00025949510745704174,
+        "thiet_bi": 3.884974285028875e-05
+      },
+      "clip_probs": {
+        "giup_viec": 0.0049,
+        "sua_dien": 0.005,
+        "sua_nuoc": 0.004,
+        "dien_lanh": 0.0007,
+        "thiet_bi": 0.0014,
+        "lam_vuon": 0.9772,
+        "other_unclear": 0.0068
+      },
+      "clip_label": "lam_vuon",
+      "clip_confidence": 0.9772,
+      "decision_source": "ensemble",
+      "suggestedTargetId": "tham-co-bai-co",
+      "suggestedTargetName": "Thảm cỏ / Bãi cỏ",
+      "suggestedServiceId": "cat-co-dinh-ky",
+      "suggestedServiceName": "Cắt cỏ định kỳ",
+      "suggestedService": "Cắt cỏ định kỳ",
+      "suggestedServiceConfidence": 0.6738,
+      "unit": "lần",
+      "estimatedPriceRange": {
+        "min": 150000,
+        "max": 350000,
+        "unit": "lần",
+        "formatted": "150.000đ - 350.000đ / lần"
+      },
+      "allServiceProbs": {
+        "cat-co-dinh-ky": 0.6738,
+        "cat-tia-cay-canh": 0.1224,
+        "nho-don-co-dai": 0.1687,
+        "cat-tia-hang-rao-cay": 0.0311,
+        "lap-he-thong-tuoi-tu-dong": 0.0039
+      }
+    }
+  },
+  {
+    "image": "ai-service/dataset/test/other_unclear/other_unclear_0001.jpg",
+    "data_kind": "synthetic_existing_dataset_not_independent",
+    "http": 200,
+    "latency_ms": 86.73,
+    "response": {
+      "suggestedCategoryId": null,
+      "suggestedCategoryName": null,
+      "confidence": 0.2949,
+      "detectedLabels": [],
+      "notes": "Ảnh chưa đủ rõ để phân loại.",
+      "engine": "model",
+      "boxes": null,
+      "all_probs": {
+        "dien_lanh": 3.3500712106615538e-06,
+        "lam_vuon": 7.897829163994174e-07,
+        "other_unclear": 0.9999897480010986,
+        "sua_dien": 7.450103112205397e-07,
+        "sua_nuoc": 3.6358574106998276e-06,
+        "thiet_bi": 1.6973043557300116e-06
+      },
+      "clip_probs": {
+        "giup_viec": 0.1039,
+        "sua_dien": 0.0572,
+        "sua_nuoc": 0.023,
+        "dien_lanh": 0.1163,
+        "thiet_bi": 0.1991,
+        "lam_vuon": 0.0273,
+        "other_unclear": 0.4732
+      },
+      "clip_label": "other_unclear",
+      "clip_confidence": 0.4732,
+      "decision_source": "ensemble",
+      "suggestedTargetId": null,
+      "suggestedTargetName": null,
+      "suggestedServiceId": null,
+      "suggestedServiceName": null,
+      "suggestedService": null,
+      "suggestedServiceConfidence": null,
+      "unit": null,
+      "estimatedPriceRange": null,
+      "allServiceProbs": null
+    }
+  },
+  {
+    "image": "ai-service/dataset/test/other_unclear/other_unclear_0002.jpg",
+    "data_kind": "synthetic_existing_dataset_not_independent",
+    "http": 200,
+    "latency_ms": 90.82,
+    "response": {
+      "suggestedCategoryId": "dien-lanh",
+      "suggestedCategoryName": "Điện lạnh",
+      "confidence": 0.519,
+      "detectedLabels": [
+        "dien_lanh"
+      ],
+      "notes": "Chẩn đoán sự cố và đề xuất đối tượng, dịch vụ thành công.",
+      "engine": "model",
+      "boxes": null,
+      "all_probs": {
+        "dien_lanh": 9.079033770831302e-05,
+        "lam_vuon": 1.3052585018158425e-05,
+        "other_unclear": 0.9998364448547363,
+        "sua_dien": 1.330692793999333e-05,
+        "sua_nuoc": 3.5773959098150954e-05,
+        "thiet_bi": 1.0647358976711985e-05
+      },
+      "clip_probs": {
+        "giup_viec": 0.1799,
+        "sua_dien": 0.073,
+        "sua_nuoc": 0.0232,
+        "dien_lanh": 0.0827,
+        "thiet_bi": 0.2876,
+        "lam_vuon": 0.139,
+        "other_unclear": 0.2146
+      },
+      "clip_label": "thiet_bi",
+      "clip_confidence": 0.2876,
+      "decision_source": "ensemble",
+      "suggestedTargetId": "may-lam-mat-quat-dieu-hoa",
+      "suggestedTargetName": "Máy làm mát / Quạt điều hòa",
+      "suggestedServiceId": "sua-may-giat-khong-vat",
+      "suggestedServiceName": "Sửa máy giặt không vắt",
+      "suggestedService": "Sửa máy giặt không vắt",
+      "suggestedServiceConfidence": 0.4703,
+      "unit": "máy",
+      "estimatedPriceRange": {
+        "min": 180000,
+        "max": 450000,
+        "unit": "máy",
+        "formatted": "180.000đ - 450.000đ / máy"
+      },
+      "allServiceProbs": {
+        "kiem-tra-may-lanh-khong-lanh-hoac-lanh-yeu": 0.056,
+        "sua-may-lanh-chay-nuoc": 0.0169,
+        "sua-tu-lanh-khong-lanh": 0.4568,
+        "sua-may-giat-khong-vat": 0.4703
+      }
+    }
+  },
+  {
+    "image": "ai-service/dataset/test/sua_dien/sua_dien_0001.jpg",
+    "data_kind": "synthetic_existing_dataset_not_independent",
+    "http": 200,
+    "latency_ms": 87.07,
+    "response": {
+      "suggestedCategoryId": "sua-dien",
+      "suggestedCategoryName": "Sửa điện",
+      "confidence": 0.9999,
+      "detectedLabels": [
+        "sua_dien"
+      ],
+      "notes": "Chẩn đoán sự cố và đề xuất đối tượng, dịch vụ thành công.",
+      "engine": "model",
+      "boxes": null,
+      "all_probs": {
+        "dien_lanh": 1.6510830391780473e-05,
+        "lam_vuon": 5.0554128392832354e-05,
+        "other_unclear": 8.565182724851184e-06,
+        "sua_dien": 0.9998832941055298,
+        "sua_nuoc": 1.547863030282315e-05,
+        "thiet_bi": 2.5501603886368684e-05
+      },
+      "clip_probs": {
+        "giup_viec": 0.0349,
+        "sua_dien": 0.1232,
+        "sua_nuoc": 0.0246,
+        "dien_lanh": 0.06,
+        "thiet_bi": 0.5779,
+        "lam_vuon": 0.0062,
+        "other_unclear": 0.1732
+      },
+      "clip_label": "thiet_bi",
+      "clip_confidence": 0.5779,
+      "decision_source": "yolo",
+      "suggestedTargetId": "den-su-co-den-thoat-hiem",
+      "suggestedTargetName": "Đèn sự cố / Đèn thoát hiểm",
+      "suggestedServiceId": "sua-cong-tac-khong-hoat-dong",
+      "suggestedServiceName": "Sửa công tắc không hoạt động",
+      "suggestedService": "Sửa công tắc không hoạt động",
+      "suggestedServiceConfidence": 0.9738,
+      "unit": "điểm",
+      "estimatedPriceRange": {
+        "min": 100000,
+        "max": 180000,
+        "unit": "điểm",
+        "formatted": "100.000đ - 180.000đ / điểm"
+      },
+      "allServiceProbs": {
+        "sua-cong-tac-khong-hoat-dong": 0.9738,
+        "lap-tu-dien-dan-dung": 0.0201,
+        "thay-day-cu-xuong-cap": 0.0061
+      }
+    }
+  },
+  {
+    "image": "ai-service/dataset/test/sua_dien/sua_dien_0002.jpg",
+    "data_kind": "synthetic_existing_dataset_not_independent",
+    "http": 200,
+    "latency_ms": 103.27,
+    "response": {
+      "suggestedCategoryId": "sua-dien",
+      "suggestedCategoryName": "Sửa điện",
+      "confidence": 0.9999,
+      "detectedLabels": [
+        "sua_dien"
+      ],
+      "notes": "Chẩn đoán sự cố và đề xuất đối tượng, dịch vụ thành công.",
+      "engine": "model",
+      "boxes": null,
+      "all_probs": {
+        "dien_lanh": 1.8335376807954162e-05,
+        "lam_vuon": 6.220888462848961e-05,
+        "other_unclear": 1.1155820175190456e-05,
+        "sua_dien": 0.9998617172241211,
+        "sua_nuoc": 1.8180497136199847e-05,
+        "thiet_bi": 2.8354330424917862e-05
+      },
+      "clip_probs": {
+        "giup_viec": 0.0192,
+        "sua_dien": 0.2239,
+        "sua_nuoc": 0.0146,
+        "dien_lanh": 0.0302,
+        "thiet_bi": 0.3118,
+        "lam_vuon": 0.005,
+        "other_unclear": 0.3954
+      },
+      "clip_label": "other_unclear",
+      "clip_confidence": 0.3954,
+      "decision_source": "yolo (clip unclear override)",
+      "suggestedTargetId": "o-cam-dien",
+      "suggestedTargetName": "Ổ cắm điện",
+      "suggestedServiceId": "sua-cong-tac-khong-hoat-dong",
+      "suggestedServiceName": "Sửa công tắc không hoạt động",
+      "suggestedService": "Sửa công tắc không hoạt động",
+      "suggestedServiceConfidence": 0.9814,
+      "unit": "điểm",
+      "estimatedPriceRange": {
+        "min": 100000,
+        "max": 180000,
+        "unit": "điểm",
+        "formatted": "100.000đ - 180.000đ / điểm"
+      },
+      "allServiceProbs": {
+        "sua-cong-tac-khong-hoat-dong": 0.9814,
+        "lap-tu-dien-dan-dung": 0.0076,
+        "thay-day-cu-xuong-cap": 0.011
+      }
+    }
+  },
+  {
+    "image": "ai-service/dataset/test/sua_nuoc/sua_nuoc_0001.jpg",
+    "data_kind": "synthetic_existing_dataset_not_independent",
+    "http": 200,
+    "latency_ms": 87.55,
+    "response": {
+      "suggestedCategoryId": "sua-nuoc",
+      "suggestedCategoryName": "Sửa nước",
+      "confidence": 0.9419,
+      "detectedLabels": [
+        "sua_nuoc"
+      ],
+      "notes": "Chẩn đoán sự cố và đề xuất đối tượng, dịch vụ thành công.",
+      "engine": "model",
+      "boxes": null,
+      "all_probs": {
+        "dien_lanh": 8.10238707344979e-05,
+        "lam_vuon": 1.4670162272523157e-05,
+        "other_unclear": 2.1335374185582623e-05,
+        "sua_dien": 2.2879956304677762e-05,
+        "sua_nuoc": 0.999815046787262,
+        "thiet_bi": 4.501716830418445e-05
+      },
+      "clip_probs": {
+        "giup_viec": 0.034,
+        "sua_dien": 0.0115,
+        "sua_nuoc": 0.8644,
+        "dien_lanh": 0.0233,
+        "thiet_bi": 0.0562,
+        "lam_vuon": 0.0041,
+        "other_unclear": 0.0065
+      },
+      "clip_label": "sua_nuoc",
+      "clip_confidence": 0.8644,
+      "decision_source": "ensemble",
+      "suggestedTargetId": "voi-nuoc-voi-sen",
+      "suggestedTargetName": "Vòi nước / Vòi sen",
+      "suggestedServiceId": "sua-bon-cau-xa-yeu",
+      "suggestedServiceName": "Sửa bồn cầu xả yếu",
+      "suggestedService": "Sửa bồn cầu xả yếu",
+      "suggestedServiceConfidence": 0.4218,
+      "unit": "điểm",
+      "estimatedPriceRange": {
+        "min": 150000,
+        "max": 350000,
+        "unit": "điểm",
+        "formatted": "150.000đ - 350.000đ / điểm"
+      },
+      "allServiceProbs": {
+        "lap-dat-voi-moi": 0.1777,
+        "sua-bon-cau-xa-yeu": 0.4218,
+        "xu-ly-mui-hoi-quanh-bon-cau": 0.3943,
+        "sua-bom-khong-chay": 0.0062
+      }
+    }
+  },
+  {
+    "image": "ai-service/dataset/test/sua_nuoc/sua_nuoc_0002.jpg",
+    "data_kind": "synthetic_existing_dataset_not_independent",
+    "http": 200,
+    "latency_ms": 85.52,
+    "response": {
+      "suggestedCategoryId": "sua-nuoc",
+      "suggestedCategoryName": "Sửa nước",
+      "confidence": 0.9078,
+      "detectedLabels": [
+        "sua_nuoc"
+      ],
+      "notes": "Chẩn đoán sự cố và đề xuất đối tượng, dịch vụ thành công.",
+      "engine": "model",
+      "boxes": null,
+      "all_probs": {
+        "dien_lanh": 3.322127304272726e-05,
+        "lam_vuon": 7.294474926311523e-06,
+        "other_unclear": 1.7599688362679444e-05,
+        "sua_dien": 6.11616587775643e-06,
+        "sua_nuoc": 0.9999223947525024,
+        "thiet_bi": 1.334072931058472e-05
+      },
+      "clip_probs": {
+        "giup_viec": 0.0581,
+        "sua_dien": 0.0199,
+        "sua_nuoc": 0.739,
+        "dien_lanh": 0.0418,
+        "thiet_bi": 0.096,
+        "lam_vuon": 0.0163,
+        "other_unclear": 0.0289
+      },
+      "clip_label": "sua_nuoc",
+      "clip_confidence": 0.739,
+      "decision_source": "ensemble",
+      "suggestedTargetId": "voi-nuoc-voi-sen",
+      "suggestedTargetName": "Vòi nước / Vòi sen",
+      "suggestedServiceId": "xu-ly-mui-hoi-quanh-bon-cau",
+      "suggestedServiceName": "Xử lý mùi hôi quanh bồn cầu",
+      "suggestedService": "Xử lý mùi hôi quanh bồn cầu",
+      "suggestedServiceConfidence": 0.4975,
+      "unit": "điểm",
+      "estimatedPriceRange": {
+        "min": 150000,
+        "max": 400000,
+        "unit": "điểm",
+        "formatted": "150.000đ - 400.000đ / điểm"
+      },
+      "allServiceProbs": {
+        "lap-dat-voi-moi": 0.1404,
+        "sua-bon-cau-xa-yeu": 0.3526,
+        "xu-ly-mui-hoi-quanh-bon-cau": 0.4975,
+        "sua-bom-khong-chay": 0.0095
+      }
+    }
+  },
+  {
+    "image": "ai-service/dataset/test/thiet_bi/thiet_bi_0001.jpg",
+    "data_kind": "synthetic_existing_dataset_not_independent",
+    "http": 200,
+    "latency_ms": 96.6,
+    "response": {
+      "suggestedCategoryId": "thiet-bi",
+      "suggestedCategoryName": "Thiết bị gia dụng",
+      "confidence": 0.9316,
+      "detectedLabels": [
+        "thiet_bi"
+      ],
+      "notes": "Chẩn đoán sự cố và đề xuất đối tượng, dịch vụ thành công.",
+      "engine": "model",
+      "boxes": null,
+      "all_probs": {
+        "dien_lanh": 2.9080214517307468e-05,
+        "lam_vuon": 6.570674304384738e-05,
+        "other_unclear": 1.7419290088582784e-05,
+        "sua_dien": 3.144350921502337e-05,
+        "sua_nuoc": 6.505058263428509e-05,
+        "thiet_bi": 0.9997913241386414
+      },
+      "clip_probs": {
+        "giup_viec": 0.0058,
+        "sua_dien": 0.1182,
+        "sua_nuoc": 0.0033,
+        "dien_lanh": 0.0246,
+        "thiet_bi": 0.8333,
+        "lam_vuon": 0.0005,
+        "other_unclear": 0.0144
+      },
+      "clip_label": "thiet_bi",
+      "clip_confidence": 0.8333,
+      "decision_source": "ensemble",
+      "suggestedTargetId": "lo-vi-song",
+      "suggestedTargetName": "Lò vi sóng",
+      "suggestedServiceId": "sua-bep-khong-len-nguon",
+      "suggestedServiceName": "Sửa bếp không lên nguồn",
+      "suggestedService": "Sửa bếp không lên nguồn",
+      "suggestedServiceConfidence": 0.7019,
+      "unit": "máy",
+      "estimatedPriceRange": {
+        "min": 150000,
+        "max": 400000,
+        "unit": "máy",
+        "formatted": "150.000đ - 400.000đ / máy"
+      },
+      "allServiceProbs": {
+        "sua-bep-khong-len-nguon": 0.7019,
+        "sua-bep-khong-nong-nong-yeu": 0.2957,
+        "thay-loi-loc-dinh-ky": 0.0003,
+        "sua-binh-khong-nong": 0.0021
+      }
+    }
+  },
+  {
+    "image": "ai-service/dataset/test/thiet_bi/thiet_bi_0002.jpg",
+    "data_kind": "synthetic_existing_dataset_not_independent",
+    "http": 200,
+    "latency_ms": 109.32,
+    "response": {
+      "suggestedCategoryId": "thiet-bi",
+      "suggestedCategoryName": "Thiết bị gia dụng",
+      "confidence": 0.9344,
+      "detectedLabels": [
+        "thiet_bi"
+      ],
+      "notes": "Chẩn đoán sự cố và đề xuất đối tượng, dịch vụ thành công.",
+      "engine": "model",
+      "boxes": null,
+      "all_probs": {
+        "dien_lanh": 3.190895586158149e-05,
+        "lam_vuon": 7.243185245897621e-05,
+        "other_unclear": 1.9634499039966613e-05,
+        "sua_dien": 3.502458275761455e-05,
+        "sua_nuoc": 7.071429718052968e-05,
+        "thiet_bi": 0.9997703433036804
+      },
+      "clip_probs": {
+        "giup_viec": 0.0064,
+        "sua_dien": 0.1083,
+        "sua_nuoc": 0.0035,
+        "dien_lanh": 0.0257,
+        "thiet_bi": 0.8422,
+        "lam_vuon": 0.0005,
+        "other_unclear": 0.0133
+      },
+      "clip_label": "thiet_bi",
+      "clip_confidence": 0.8422,
+      "decision_source": "ensemble",
+      "suggestedTargetId": "lo-vi-song",
+      "suggestedTargetName": "Lò vi sóng",
+      "suggestedServiceId": "sua-bep-khong-len-nguon",
+      "suggestedServiceName": "Sửa bếp không lên nguồn",
+      "suggestedService": "Sửa bếp không lên nguồn",
+      "suggestedServiceConfidence": 0.735,
+      "unit": "máy",
+      "estimatedPriceRange": {
+        "min": 150000,
+        "max": 400000,
+        "unit": "máy",
+        "formatted": "150.000đ - 400.000đ / máy"
+      },
+      "allServiceProbs": {
+        "sua-bep-khong-len-nguon": 0.735,
+        "sua-bep-khong-nong-nong-yeu": 0.2627,
+        "thay-loi-loc-dinh-ky": 0.0002,
+        "sua-binh-khong-nong": 0.0021
+      }
+    }
+  }
+]

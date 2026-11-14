@@ -1,0 +1,177 @@
+{
+  "sourceRoot": "/home/vanvi/Work/fixgo-integration-s03",
+  "disposableDatabase": true,
+  "disposableRedis": true,
+  "fullUsbScriptExecuted": false,
+  "physicalDeviceTest": false,
+  "listeners": [
+    {
+      "port": 3000,
+      "pid": 454432,
+      "cwd": "/home/vanvi/Work/fixgo-integration-s03/server",
+      "cmdline": [
+        "/home/vanvi/.nvm/versions/node/v20.20.2/bin/node",
+        "/home/vanvi/Work/fixgo-integration-s03/server/node_modules/@babel/node/lib/_babel-node",
+        "src/main.js"
+      ]
+    },
+    {
+      "port": 8000,
+      "pid": 454524,
+      "cwd": "/home/vanvi/Work/fixgo-integration-s03/ai-service",
+      "cmdline": [
+        "/home/vanvi/Work/fixgo-integration-s03/ai-service/.venv/bin/python",
+        "-m",
+        "uvicorn",
+        "main:app",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8000"
+      ]
+    },
+    {
+      "port": 8081,
+      "pid": 454665,
+      "cwd": "/home/vanvi/Work/fixgo-integration-s03/customer-app",
+      "cmdline": [
+        "/home/vanvi/.nvm/versions/node/v20.20.2/bin/node",
+        "node_modules/expo/bin/cli",
+        "start",
+        "--dev-client",
+        "--localhost",
+        "--port",
+        "8081"
+      ]
+    },
+    {
+      "port": 8082,
+      "pid": 454685,
+      "cwd": "/home/vanvi/Work/fixgo-integration-s03/worker-app",
+      "cmdline": [
+        "/home/vanvi/.nvm/versions/node/v20.20.2/bin/node",
+        "node_modules/expo/bin/cli",
+        "start",
+        "--dev-client",
+        "--localhost",
+        "--port",
+        "8082"
+      ]
+    },
+    {
+      "port": 5173,
+      "pid": 454776,
+      "cwd": "/home/vanvi/Work/fixgo-integration-s03/client",
+      "cmdline": [
+        "/home/vanvi/.nvm/versions/node/v20.20.2/bin/node",
+        "node_modules/vite/bin/vite.js",
+        "--host",
+        "127.0.0.1",
+        "--strictPort"
+      ]
+    }
+  ],
+  "diagnose": {
+    "status": 200,
+    "body": {
+      "suggestedCategoryId": "lam-vuon",
+      "suggestedCategoryName": "Làm vườn",
+      "suggestedTargetId": "hang-rao-cay-bon-hoa-vuon-rau",
+      "suggestedTargetName": "Hàng rào cây / Bồn hoa / Vườn rau",
+      "categoryCandidates": [
+        {
+          "id": "lam-vuon",
+          "slug": "lam-vuon",
+          "name": "Làm vườn",
+          "confidence": 0.8009,
+          "provenance": "ensemble+text"
+        },
+        {
+          "id": "giup-viec",
+          "slug": "giup-viec",
+          "name": "Giúp việc",
+          "confidence": 0.0514,
+          "provenance": "ensemble+text"
+        },
+        {
+          "id": "thiet-bi",
+          "slug": "thiet-bi",
+          "name": "Thiết bị gia dụng",
+          "confidence": 0.0396,
+          "provenance": "ensemble+text"
+        }
+      ],
+      "targetCandidates": [
+        {
+          "targetId": "hang-rao-cay-bon-hoa-vuon-rau",
+          "targetName": "Hàng rào cây / Bồn hoa / Vườn rau",
+          "targetCategory": "lam-vuon",
+          "similarity": 0.211,
+          "confidence": 0.6055,
+          "provenance": "clip_target_similarity"
+        },
+        {
+          "targetId": "cay-canh-chau-cay",
+          "targetName": "Cây cảnh / Chậu cây",
+          "targetCategory": "lam-vuon",
+          "similarity": 0.2099,
+          "confidence": 0.605,
+          "provenance": "clip_target_similarity"
+        },
+        {
+          "targetId": "tham-co-bai-co",
+          "targetName": "Thảm cỏ / Bãi cỏ",
+          "targetCategory": "lam-vuon",
+          "similarity": 0.2069,
+          "confidence": 0.6035,
+          "provenance": "clip_target_similarity"
+        }
+      ],
+      "confidence": 0.8009,
+      "detectedLabels": [
+        "lam-vuon"
+      ],
+      "observableSigns": [
+        "Nhận diện danh mục: Làm vườn",
+        "Nhận diện đối tượng: Hàng rào cây / Bồn hoa / Vườn rau"
+      ],
+      "decision_source": "ensemble+text",
+      "engine": "model",
+      "model_version": "fixgo-ai-rec-v1",
+      "notes": "Chẩn đoán danh mục và đối tượng thành công."
+    }
+  },
+  "face": {
+    "status": 200,
+    "body": {
+      "identityDecision": "INCONCLUSIVE",
+      "identityScore": null,
+      "verificationMethod": "none",
+      "modelVersion": null,
+      "templateVersion": null,
+      "qualityDecision": "NOT_EVALUATED",
+      "padDecision": "NOT_EVALUATED",
+      "errorCode": "TRUSTED_TEMPLATE_REQUIRED",
+      "status": "INCONCLUSIVE",
+      "reason": "TRUSTED_TEMPLATE_REQUIRED",
+      "confidence": null,
+      "verified": false,
+      "identityMatched": false,
+      "padModelVersion": null,
+      "padErrorCode": "PAD_PROVIDER_NOT_APPROVED",
+      "method": "none",
+      "engine": "unavailable",
+      "workerId": null,
+      "sessionId": null
+    }
+  },
+  "unauthenticatedFaceStatus": 401,
+  "facePaths": [
+    "/ai/face-verify",
+    "/api/v1/ai/verify-face",
+    "/ai/face-enroll",
+    "/ai/face-capabilities"
+  ],
+  "researchMounted": false,
+  "productionFaceCoreEnabled": false
+}

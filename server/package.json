@@ -22,7 +22,9 @@
     "prisma:migrate": "prisma migrate dev",
     "db:clear-services": "node prisma/clear_services.js",
     "db:import-services": "node prisma/import_services.js",
-    "test:arc01": "jest --config ./test/jest-arc01.config.cjs --runInBand"
+    "test:arc01": "jest --config ./test/jest-arc01.config.cjs --runInBand",
+    "test:symptoms:disposable": "node scripts/test-symptoms-disposable.cjs",
+    "test:symptoms:compat": "node scripts/test-symptoms-compatibility.cjs"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

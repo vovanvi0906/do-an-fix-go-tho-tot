@@ -1,0 +1,30 @@
+import React from 'react';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import ServiceRecommendationSection from './ServiceRecommendationSection';
+import { catalogService } from '../../services/api/catalogService';
+jest.mock('../../services/api/catalogService', () => ({ catalogService: { getServicesPage: jest.fn() } }));
+const rows = Array.from({ length: 8 }, (_, i) => ({ id: `s${i}`, name: `Dịch vụ ${i}`, targetId: 'fridge', categoryId: 'cold', basePrice: 100000, isActive: true }));
+it('caps initial cards at three and loads only the selected target when browsing', async () => {
+  catalogService.getServicesPage.mockResolvedValue({ items: [...rows, { ...rows[0], id: 'foreign', targetId: 'washer', name: 'Máy giặt' }], hasMore: false });
+  const onSelectService = jest.fn();
+  const screen = render(<ServiceRecommendationSection targetId="fridge" categoryId="cold" suggestedServices={rows} onSelectService={onSelectService} />);
+  expect(screen.getAllByText(/^Dịch vụ \d/)).toHaveLength(3);
+  expect(catalogService.getServicesPage).not.toHaveBeenCalled();
+  fireEvent.press(screen.getByText('Xem thêm dịch vụ cho thiết bị này'));
+  await waitFor(() => expect(catalogService.getServicesPage).toHaveBeenCalledWith('cold', 'fridge', { page: 1, search: '' }));
+  await waitFor(() => expect(screen.getByText('Dịch vụ 7')).toBeTruthy());
+  expect(screen.queryByText('Máy giặt')).toBeNull();
+  fireEvent.changeText(screen.getByPlaceholderText('Tìm tên dịch vụ'), 'Dịch vụ 7');
+  await waitFor(() => expect(catalogService.getServicesPage).toHaveBeenLastCalledWith('cold', 'fridge', { page: 1, search: 'Dịch vụ 7' }));
+  await waitFor(() => expect(screen.getByText('Dịch vụ 7')).toBeTruthy());
+  fireEvent.press(screen.getByText('Dịch vụ 7'));
+  expect(onSelectService).toHaveBeenCalledWith('s7', { manual: true });
+});
+it('supports retry after a catalog network failure', async () => {
+  catalogService.getServicesPage.mockRejectedValueOnce(new Error('offline')).mockResolvedValueOnce({ items: [], hasMore: false });
+  const screen = render(<ServiceRecommendationSection targetId="fridge" categoryId="cold" />);
+  fireEvent.press(screen.getByText('Không biết lỗi gì / Chọn dịch vụ thủ công'));
+  await waitFor(() => expect(screen.getByText('Thử lại')).toBeTruthy());
+  fireEvent.press(screen.getByText('Thử lại'));
+  await waitFor(() => expect(screen.getByText('Chưa tìm thấy dịch vụ phù hợp. Thử từ khóa khác hoặc đổi thiết bị.')).toBeTruthy());
+});

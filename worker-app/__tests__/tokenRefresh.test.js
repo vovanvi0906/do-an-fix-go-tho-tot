@@ -22,10 +22,34 @@ it('refreshes once for simultaneous requests and marks both retries', async () =
   expect(client).toHaveBeenCalledTimes(2);
 });
 it('retains refresh failure diagnostics and invalidates the session once', async () => {
-  const cause = new Error('Refresh rejected');
+  const cause = Object.assign(new Error('Refresh rejected'), { response: { status: 401 } });
   jest.spyOn(axios, 'post').mockRejectedValueOnce(cause);
   const unauthorized = jest.fn();
   await expect(handleTokenRefresh(jest.fn(), { headers: {} }, unauthorized)).rejects.toMatchObject({ status: 401, code: 'AUTH_REFRESH_FAILED', cause });
   expect(tokenStorage.clearAll).toHaveBeenCalled();
   expect(unauthorized).toHaveBeenCalledTimes(1);
+});
+it('does not clear the session on transient refresh network failure', async () => {
+  tokenStorage.clearAll.mockClear();
+  jest.spyOn(axios, 'post').mockRejectedValueOnce(new Error('Network Error'));
+  const unauthorized = jest.fn();
+  await expect(handleTokenRefresh(jest.fn(), { headers: {} }, unauthorized)).rejects.toThrow();
+  expect(tokenStorage.clearAll).not.toHaveBeenCalled();
+  expect(unauthorized).not.toHaveBeenCalled();
+});
+it('a refresh finishing after identity change cannot replace tokens or log out the new identity', async () => {
+  const { sessionEpoch } = require('../src/features/auth/services/sessionEpoch');
+  let finish;
+  tokenStorage.saveToken.mockClear();
+  tokenStorage.clearAll.mockClear();
+  jest.spyOn(axios, 'post').mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+  const unauthorized = jest.fn();
+  const pending = handleTokenRefresh(jest.fn(), { headers: {} }, unauthorized);
+  await Promise.resolve();
+  sessionEpoch.begin();
+  finish({ data: { accessToken: 'stale-access' } });
+  await expect(pending).rejects.toThrow();
+  expect(tokenStorage.saveToken).not.toHaveBeenCalled();
+  expect(tokenStorage.clearAll).not.toHaveBeenCalled();
+  expect(unauthorized).not.toHaveBeenCalled();
 });

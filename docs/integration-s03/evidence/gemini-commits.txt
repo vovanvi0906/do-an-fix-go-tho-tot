@@ -1,0 +1,24 @@
+9e77da5 feat(ai-service): mount recommendation_router V2 into production entrypoint
+a008a4e merge: integrate AI Recommendation V2 from agent/gemini-customer into test/integration-s02-ai-rec
+804aaaf docs(ai-recommendation): clarify uncalibrated baseline and mark live traffic latency as NOT MEASURED
+367492f docs(ai-recommendation): refine adb reverse network tracing and codex integration specifics
+927ed1b fix(ai-service): calibrate soft-voting ensemble, enforce OOD abstention and add negative tests
+f212236 feat(ai-recommendation): isolate live inference, decouple confidence from rules, and finalize integration audit
+31f969d docs(ai-recommendation): add comprehensive architecture, data contracts, algorithms and QA documentation
+52ffb56 feat(ai-service): add dataset manifest builder, leakage audit and recommendation benchmark suite
+410ba44 feat(customer-app): implement target candidates, symptom questions, and service recommendation UX
+a61d2aa feat(ai-service): add recommendation package with category ensemble, target matcher, and catalog sync
+3b9e7e7 feat(backend): implement target-scoped diagnosis resolver, active guards and admin sync
+803ec32 fix(security): fail closed on face verification errors
+be082dc chore(dev): add Android USB development launcher
+a173810 docs(ai-audit): document pipeline, dataset leakage and evaluation roadmap
+1a5ef38 fix(customer): repair OTP input, registration errors and scoped booking catalog
+5baac7b Merge branch 'chore/dev-usb-01' into integration/fixgo-sprint-02
+d87fc47 chore(dev): automate Android USB development setup
+3a56586 Merge branch 'agent/gemini-customer' into integration/fixgo-sprint-02
+9740fc3 fix(customer-app): integrate OTP registration proof
+d0ba8ca Merge branch 'agent/backend-auth' into integration/fixgo-sprint-02
+90ea0bb fix(backend): enforce customer OTP registration proof
+bd1b8ee Merge branch 'agent/codex-worker' into integration/fixgo-sprint-02
+785a1a6 Merge branch 'agent/gemini-customer' into integration/fixgo-sprint-02
+cf2bed7 fix(customer-app): separate customer authentication and roles

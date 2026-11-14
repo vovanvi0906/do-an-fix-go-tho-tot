@@ -17,6 +17,7 @@ import {
  * Theo đúng quy chuẩn tách biệt giữa Data Menu và UI Render
  */
 export const adminMenuConfig = [
+  { id: 'symptoms', title: 'Triệu chứng & Dịch vụ', path: '/admin/symptoms', icon: Layers },
   {
     id: 'dashboard',
     title: 'Tổng Quan Hệ Thống',

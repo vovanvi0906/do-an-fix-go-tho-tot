@@ -967,7 +967,8 @@ export class AdminService {
 
   notifyAiServiceSync() {
     const aiBase = process.env.AI_SERVICE_URL || 'http://localhost:8000';
-    fetch(`${aiBase}/ai/sync-targets`, { method: 'POST' }).catch(() => {});
+    fetch(`${aiBase}/ai/v2/catalog/sync`, { method: 'POST', signal: AbortSignal.timeout(5000) })
+      .catch(() => fetch(`${aiBase}/ai/sync-targets`, { method: 'POST' }).catch(() => {}));
   }
 
   async updateServiceTarget(id, data) {
@@ -1124,6 +1125,7 @@ export class AdminService {
       },
     });
 
+    this.notifyAiServiceSync();
     return {
       success: true,
       message: `Tạo mới danh mục "${newCategory.name}" thành công`,
@@ -1194,6 +1196,7 @@ export class AdminService {
       },
     });
 
+    this.notifyAiServiceSync();
     return {
       success: true,
       message: `Cập nhật danh mục "${updated.name}" thành công`,
@@ -1449,6 +1452,7 @@ export class AdminService {
       this.adminGateway?.emitServiceUpdated('create', newService);
     } catch (e) {}
 
+    this.notifyAiServiceSync();
     return {
       success: true,
       message: 'Tạo dịch vụ mới thành công',
@@ -1489,6 +1493,7 @@ export class AdminService {
       this.adminGateway?.emitServiceUpdated('update', updated);
     } catch (e) {}
 
+    this.notifyAiServiceSync();
     return {
       success: true,
       message: 'Cập nhật dịch vụ thành công',
@@ -1516,6 +1521,7 @@ export class AdminService {
       this.adminGateway?.emitServiceUpdated('toggle', updated);
     } catch (e) {}
 
+    this.notifyAiServiceSync();
     return {
       success: true,
       message: `Đã ${updated.isActive ? 'kích hoạt' : 'tạm ngưng'} dịch vụ "${updated.name}"`,
@@ -1579,6 +1585,7 @@ export class AdminService {
       });
 
       await this.prisma.service.delete({ where: { id } });
+      this.notifyAiServiceSync();
 
       return {
         success: true,
@@ -1595,6 +1602,7 @@ export class AdminService {
         data: { isActive: false },
         include: { category: true },
       });
+      this.notifyAiServiceSync();
       return {
         success: true,
         message: `Dịch vụ "${existing.name}" đã có dữ liệu liên kết (${existing._count?.orders || 0} đơn). Đã chuyển sang trạng thái tạm ngưng. Bật "Xóa vĩnh viễn" nếu muốn xóa bỏ hoàn toàn.`,
@@ -1606,6 +1614,7 @@ export class AdminService {
 
     // 3. Nếu không có dữ liệu liên kết -> Xóa vĩnh viễn bình thường
     await this.prisma.service.delete({ where: { id } });
+    this.notifyAiServiceSync();
 
     return {
       success: true,

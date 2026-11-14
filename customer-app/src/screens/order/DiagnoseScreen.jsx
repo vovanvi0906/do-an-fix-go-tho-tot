@@ -1,5 +1,5 @@
 import DiagnosisChoices from '../../components/diagnosis/DiagnosisChoices';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -50,6 +50,12 @@ export default function DiagnoseScreen({ navigation, onNext }) {
   const [description, setDescription] = useState(SAMPLE_ISSUES[0].desc);
   const [diagnoseData, setDiagnoseData] = useState(null);
 
+  const generation = useRef(0);
+  const currentImage = useRef(imageUrl);
+  currentImage.current = imageUrl;
+  const [choiceEpoch, setChoiceEpoch] = useState(0);
+  useEffect(() => () => { generation.current += 1; }, []);
+
   // 1. Tải danh mục dịch vụ từ Backend bằng React Query
   const { data: categories = [], isLoading: isLoadingCategories } = useQuery({
     queryKey: ['service-categories'],
@@ -61,17 +67,19 @@ export default function DiagnoseScreen({ navigation, onNext }) {
 
   // 2. Gọi API POST /orders/diagnose qua React Query Mutation
   const diagnoseMutation = useMutation({
-    mutationFn: async (payload) => {
+    mutationFn: async ({ payload }) => {
       return orderService.diagnose(payload);
     },
     onMutate: () => { setDiagnoseResult(null); setDiagnoseData(null); },
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
+      if (variables.generation !== generation.current || variables.payload.imageUrl !== currentImage.current) return;
       setDiagnoseData(data);
       setDiagnoseResult(data);
     },
   });
 
   const handleSelectSample = (sample) => {
+    generation.current += 1;
     setImageUrl(sample.url);
     setDescription(sample.desc);
     setDiagnoseData(null);
@@ -79,7 +87,9 @@ export default function DiagnoseScreen({ navigation, onNext }) {
   };
 
   const handleRunDiagnose = () => {
-    diagnoseMutation.mutate({ imageUrl, description });
+    if (diagnoseMutation.isPending) return;
+    setChoiceEpoch(value => value + 1);
+    diagnoseMutation.mutate({ payload: { imageUrl, description }, generation: ++generation.current });
   };
 
   const handleProceed = () => {
@@ -91,8 +101,7 @@ export default function DiagnoseScreen({ navigation, onNext }) {
     }
   };
 
-  const confidencePercent = Math.round((diagnoseData?.confidence || 0) * 100);
-  const isHighConfidence = confidencePercent >= 60;
+  const isHighConfidence = !!diagnoseData?.suggestedCategoryId;
 
   return (
     <View style={styles.container}>
@@ -101,9 +110,9 @@ export default function DiagnoseScreen({ navigation, onNext }) {
         <View style={styles.stepBadge}>
           <Text style={styles.stepBadgeText}>BƯỚC 1/6</Text>
         </View>
-        <Text style={styles.headerTitle}>Chẩn Đoán Sự Cố AI</Text>
+        <Text style={styles.headerTitle}>AI gợi ý thiết bị và dấu hiệu</Text>
         <Text style={styles.headerSubtitle}>
-          Chụp hoặc gửi ảnh sự cố, AI Vision sẽ tự động nhận diện thiết bị hỏng và ước tính chi phí.
+          Chụp ảnh, xác nhận thiết bị và triệu chứng để tìm dịch vụ phù hợp.
         </Text>
       </View>
 
@@ -193,21 +202,7 @@ export default function DiagnoseScreen({ navigation, onNext }) {
                   {isHighConfidence ? 'Kết Quả Nhận Diện AI' : 'Độ Tin Cậy Thấp — Chọn Thủ Công'}
                 </Text>
               </View>
-              <View
-                style={[
-                  styles.confidencePill,
-                  { backgroundColor: isHighConfidence ? '#ECFDF5' : '#FFFBEB' },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.confidencePillText,
-                    { color: isHighConfidence ? '#059669' : '#D97706' },
-                  ]}
-                >
-                  {confidencePercent}% Khớp
-                </Text>
-              </View>
+
             </View>
 
             {/* Danh sách vật thể nhận diện (Labels) */}
@@ -232,11 +227,6 @@ export default function DiagnoseScreen({ navigation, onNext }) {
                     <Ionicons name="construct" size={13} color="#15803D" />
                     <Text style={styles.serviceIconPillText}>Dịch vụ đề xuất</Text>
                   </View>
-                  {diagnoseData.suggestedServiceConfidence && (
-                    <Text style={styles.serviceConfidenceText}>
-                      Độ khớp: {Math.round(diagnoseData.suggestedServiceConfidence * 100)}%
-                    </Text>
-                  )}
                 </View>
                 <Text style={styles.suggestedServiceNameText}>
                   {diagnoseData.suggestedServiceName}
@@ -268,9 +258,9 @@ export default function DiagnoseScreen({ navigation, onNext }) {
           </View>
         )}
 
-        <DiagnosisChoices result={diagnoseData || { availableCategories: categories }}
+        <DiagnosisChoices key={`${imageUrl}:${choiceEpoch}`} result={diagnoseData || { availableCategories: categories }}
           imageUrl={imageUrl} description={description}
-          onReset={() => setDiagnoseResult(null)}
+          onReset={() => { generation.current += 1; setDiagnoseResult(null); setDiagnoseData(prev => prev ? { ...prev, status: 'needs_more_info', suggestedServiceId: null, suggestedServiceName: null, suggestedServices: [], estimatedPriceRange: null } : prev); }}
           onResult={(data) => { setDiagnoseData(data); setDiagnoseResult(data); }} />
 
         {/* Nút xác nhận chuyển Bước 2 */}

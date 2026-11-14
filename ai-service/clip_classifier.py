@@ -120,6 +120,10 @@ def is_ready() -> bool:
     return _model is not None and _processor is not None and _text_features is not None
 
 
+def get_target_embeddings() -> Optional[Tuple[List[str], torch.Tensor]]:
+    return _target_embeddings
+
+
 def _encode_image(image_input: Union[np.ndarray, Image.Image]) -> Optional[torch.Tensor]:
     if isinstance(image_input, np.ndarray):
         rgb = image_input[:, :, ::-1] if len(image_input.shape) == 3 and image_input.shape[2] == 3 else image_input
@@ -158,6 +162,8 @@ def predict_target_from_feat(
             best_prob, best_idx = prob, idx
 
     if best_idx is None:
+        if norm_cat:
+            return None
         best_idx = int(torch.argmax(probs).item())
         best_prob = float(probs[best_idx].item())
 
@@ -169,6 +175,35 @@ def predict_target_from_feat(
         "targetCategory": meta.get("category"),
         "confidence": round(best_prob, 4),
     }
+
+
+def predict_target_candidates_from_feat(
+    img_feat: torch.Tensor, category_hint: Optional[str] = None, top_k: int = 3
+) -> List[Dict[str, Any]]:
+    """Trả về top-k đối tượng khả dĩ thuộc danh mục phù hợp."""
+    if not is_ready() or _target_embeddings is None:
+        return []
+    target_keys, target_feats = _target_embeddings
+    with torch.no_grad():
+        cos_sim = (img_feat @ target_feats.T).squeeze(0)
+    active_dict = _dynamic_targets or TARGET_PROMPTS
+    norm_cat = category_hint.replace("_", "-") if category_hint else None
+    candidates = []
+    for idx, key in enumerate(target_keys):
+        meta = active_dict.get(key, {})
+        if norm_cat and meta.get("category") and meta.get("category") != norm_cat:
+            continue
+        sim = float(cos_sim[idx].item())
+        candidates.append({
+            "targetId": key,
+            "targetName": meta.get("name", key),
+            "targetCategory": meta.get("category"),
+            "similarity": round(sim, 4),
+            "confidence": round(max(0.0, min(1.0, (sim + 1.0) / 2.0)), 4),
+            "provenance": "clip_target_similarity",
+        })
+    candidates.sort(key=lambda x: x["similarity"], reverse=True)
+    return candidates[:top_k]
 
 
 def predict_sub_service_from_feat(

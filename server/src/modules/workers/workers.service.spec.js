@@ -9,9 +9,9 @@ describe('Worker daily check-in and availability', () => {
     ai = { confidenceThreshold: 0.6, verifyFace: jest.fn(async () => ({ verified: true, confidence: 0.9 })) };
     service = new WorkersService(prisma, {}, ai);
   });
-  it('persists actual GPS when going online', async () => {
-    await service.updateAvailability('u1', { isOnline: true, lat: 10.8, lng: 106.7 });
-    expect(prisma.workerProfile.update).toHaveBeenCalledWith({ where: { id: 'w1' }, data: { isOnline: true, currentLat: 10.8, currentLng: 106.7 } });
+  it('rejects legacy timestamp for online access', async () => {
+    await expect(service.updateAvailability('u1', { isOnline: true, lat: 10.8, lng: 106.7 })).rejects.toThrow('khuôn mặt');
+    expect(prisma.workerProfile.update).not.toHaveBeenCalled();
   });
   it('requires a fresh check-in but always permits going offline', async () => {
     worker.faceVerifiedAt = new Date(Date.now() - 86400001);
@@ -23,8 +23,8 @@ describe('Worker daily check-in and availability', () => {
     await expect(service.verifyFaceDaily('u1', 'selfie')).rejects.toThrow('Chưa xác thực');
     expect(prisma.workerProfile.update).not.toHaveBeenCalled();
   });
-  it('checks against registered face without fallback before granting 24h access', async () => {
-    await expect(service.verifyFaceDaily('u1', 'selfie')).resolves.toHaveProperty('faceVerifiedAt');
+  it('compares reference without fallback but never grants from legacy response', async () => {
+    await expect(service.verifyFaceDaily('u1', 'selfie')).rejects.toThrow('Chưa xác thực');
     expect(ai.verifyFace).toHaveBeenCalledWith('w1', 'selfie', 'reference', { allowFallback: false });
   });
 });

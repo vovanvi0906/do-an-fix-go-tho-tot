@@ -70,14 +70,14 @@ export const bookingService = {
    * Lấy danh sách dịch vụ khả dụng
    * @returns {Promise<Array>}
    */
-  async getAvailableServices() {
+  async getAvailableServices(categoryId, targetId) {
     console.log('🚀 [BookingService] Tải danh sách dịch vụ...');
     try {
-      const categories = await catalogService.getServices();
+      const categories = await catalogService.getServices(categoryId, targetId);
       console.log('🚀 [BookingService] ✅ Đã tải', categories?.length || 0, 'dịch vụ');
       return categories;
     } catch (error) {
-      console.log('🚀 [BookingService] ⚠️ Dùng mock services fallback');
+      console.log('🚀 [BookingService] ⚠️ Không tải được dịch vụ');
       return [];
     }
   },

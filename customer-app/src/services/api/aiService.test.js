@@ -35,3 +35,39 @@ describe('AI mobile adapter', () => {
     }, { timeout: 30000 });
   });
 });
+
+
+describe('AI upload failures and multipart contract', () => {
+  const originalFormData = global.FormData;
+  beforeAll(() => { global.FormData = require('react-native/Libraries/Network/FormData'); });
+  afterAll(() => { global.FormData = originalFormData; });
+  beforeEach(() => jest.clearAllMocks());
+  it.each(['', '/tmp/photo.jpg', 'file://', 'content://', 'ph://photo'])('rejects unsupported URI %s before network', async uri => {
+    await expect(diagnoseIssueImage(uri)).rejects.toMatchObject({ code: 'IMAGE_URI_INVALID' });
+    expect(post).not.toHaveBeenCalled();
+  });
+  it.each(['file:///cache/photo.png', 'content://media/external/images/12'])('uploads native URI %s without fetch(blob)', async uri => {
+    post.mockResolvedValue({ status: 'needs_more_info' });
+    await diagnoseIssueImage(uri, 'mô tả', { categoryId: 'cat' });
+    const [url, form, options] = post.mock.calls[0];
+    expect(url).toBe('/orders/diagnose-upload');
+    expect(form.getParts()).toEqual(expect.arrayContaining([
+      expect.objectContaining({ fieldName: 'image', uri }),
+      expect.objectContaining({ fieldName: 'description', string: 'mô tả' }),
+      expect.objectContaining({ fieldName: 'answers', string: JSON.stringify({ categoryId: 'cat' }) }),
+    ]));
+    expect(options.timeout).toBe(45000);
+  });
+  it.each([400, 409, 422, 500, 503])('preserves HTTP %s from upload', async status => {
+    post.mockRejectedValue(Object.assign(new Error('server failure'), { status }));
+    await expect(diagnoseIssueImage('file:///cache/photo.jpg')).rejects.toMatchObject({ status });
+  });
+  it('preserves bounded timeout error', async () => {
+    post.mockRejectedValue(Object.assign(new Error('timeout'), { code: 'ECONNABORTED' }));
+    await expect(diagnoseIssueImage('file:///cache/photo.jpg')).rejects.toMatchObject({ code: 'ECONNABORTED' });
+  });
+  it('keeps AI unavailable without fabricated suggestion', async () => {
+    post.mockResolvedValue({ status: 'unavailable', suggestedServiceId: null });
+    expect((await diagnoseIssueImage('file:///cache/photo.jpg')).suggestedServiceId).toBeNull();
+  });
+});

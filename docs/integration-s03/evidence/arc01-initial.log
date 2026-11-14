@@ -1,0 +1,179 @@
+v2 Order hard-delete: SET NULL violates purpose CHECK; delete rolled back (reproduced).
+Invalid v2 lineage rejected, DDL rolled back, source record unchanged: PASS
+Prisma diff empty and custom Order FK/trigger catalog verified: PASS
+PASS test/face/core.integration.js (14.017 s)
+  ✓ enrollment persists encrypted versioned template, reviewed evidence and metadata audit (357 ms)
+  ✓ professional approval alone or consent without review cannot enroll (335 ms)
+  ✓ default gateway and data policy remain closed, with no template or capture sent (217 ms)
+  ✓ duplicate concurrent session request returns same durable session and nonce (162 ms)
+  ✓ concurrent enrollment cannot overwrite first committed version (202 ms)
+  ✓ duplicate successful capture returns same proof, changed payload and other nonce rejected (197 ms)
+  ✓ session owned by another worker and wrong-order creation denied (104 ms)
+  ✓ timeout consumes retry budget and late evidence never creates template (194 ms)
+  ✓ PAD NOT_EVALUATED cannot create template (105 ms)
+  ✓ PAD INCONCLUSIVE cannot create template (119 ms)
+  ✓ PAD FAIL cannot create template (119 ms)
+  ✓ daily proof never substitutes for per-order proof or legacy timestamp (157 ms)
+  ✓ two concurrent start-work requests consume exactly once in ARC-01 transaction (189 ms)
+  ✓ failed FSM prerequisite rolls back consumption, audit, history and order update (164 ms)
+  ✓ expired session and expired proof are rejected using PostgreSQL time (272 ms)
+  ✓ withdrawal deletes ciphertext and revokes sessions/proofs; re-enrollment increments version (291 ms)
+  ✓ withdraw during inference prevents commit even if delayed gateway returns PASS (115 ms)
+  ✓ cross-instance session quota enforced under row locks (176 ms)
+  ✓ real Nest HTTP review -> consent -> enrollment -> daily/order proof -> withdraw, PostgreSQL-backed (842 ms)
+  ✓ multipart preguard rejects unavailable PAD before evidence gateway runs (131 ms)
+  ✓ stored key ID survives rotation; missing retired key cannot grant new proof (207 ms)
+  ✓ invalid result {"identityScore":null} cannot persist proof (138 ms)
+  ✓ invalid result {"verificationMethod":"manual_review"} cannot persist proof (217 ms)
+  ✓ invalid result {"padModelVersion":"unapproved"} cannot persist proof (197 ms)
+  ✓ invalid result {"templateVersion":99} cannot persist proof (213 ms)
+  ✓ invalid result {"qualityDecision":"FAIL"} cannot persist proof (180 ms)
+  ✓ one order proof cannot be consumed for a second assigned order (231 ms)
+  ✓ Admin start retains permission while consuming proof under worker lock with correct audit actor (244 ms)
+  ✓ durable proof with wrong template version is never trusted (240 ms)
+  ✓ blocking worker invalidates authorization from an otherwise current order proof even for Admin start (237 ms)
+  ✓ DB rejects session binding mismatch userId (229 ms)
+  ✓ DB rejects session binding mismatch reviewId (218 ms)
+  ✓ DB rejects session binding mismatch templateVersion (200 ms)
+  ✓ DB rejects session binding mismatch epoch (202 ms)
+  ✓ DB rejects session binding mismatch modelVersion (201 ms)
+  ✓ DB rejects session binding mismatch templateId (205 ms)
+  ✓ DB rejects proof binding mismatch workerId (225 ms)
+  ✓ DB rejects proof binding mismatch purpose (215 ms)
+  ✓ DB rejects proof binding mismatch epoch (229 ms)
+  ✓ DB rejects proof binding mismatch templateVersion (231 ms)
+  ✓ DB rejects proof binding mismatch modelVersion (221 ms)
+  ✓ DB rejects proof binding mismatch orderId (199 ms)
+  ✓ DB forbids proof issuance for pending session (231 ms)
+  ✓ Order hard-delete is explicitly RESTRICTED with session evidence (188 ms)
+  ✓ Order hard-delete is explicitly RESTRICTED with proof evidence (239 ms)
+  ✓ Order without biometric history remains hard-deletable (134 ms)
+  ✓ session scope cannot be rewritten: purpose (134 ms)
+  ✓ session scope cannot be rewritten: nonceHash (132 ms)
+  ✓ session scope cannot be rewritten: expiresAt (147 ms)
+  ✓ session scope cannot be rewritten: epoch (149 ms)
+  ✓ proof cannot extend TTL, retarget scope or undo consumption (260 ms)
+  ✓ epoch fence makes historical template/proof unusable without rewriting their history (250 ms)
+  ✓ ciphertext erasure cannot be reversed or replaced with JSON null (185 ms)
+  ✓ template cannot bind a revoked review (168 ms)
+  ✓ template cannot bind review belonging to another worker (185 ms)
+  ✓ DB rejects malformed encrypted envelope 0 (179 ms)
+  ✓ DB rejects malformed encrypted envelope 1 (161 ms)
+  ✓ DB rejects malformed encrypted envelope 2 (155 ms)
+  ✓ review record cannot name non-Admin as approving reviewer (84 ms)
+  ✓ persisted envelope with old AAD cannot verify as a newer version (190 ms)
+  ✓ historical proof cannot be consumed after order assignment changes (242 ms)
+  ✓ DB session/proof insertion checks current order owner without rewriting historical evidence (224 ms)
+  ✓ duplicate completed submission never reports success for an expired proof (271 ms)
+  ✓ duplicate order result is denied after assignment change (224 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       64 passed, 64 total
+Snapshots:   0 total
+Time:        14.079 s, estimated 15 s
+Ran all test suites.
+FAIL test/arc01.e2e-spec.js
+  ARC-01 real PostgreSQL + HTTP + Socket.IO (Redis pubsub not exercised)
+    ✓ valid legacy alias persists canonical travel state and history (51 ms)
+    ✓ rejects invalid transition, wrong worker, foreign customer, wrong role and unauthenticated request (35 ms)
+    ✕ two real concurrent HTTP accepts have exactly one winner (40 ms)
+    ✓ concurrent duplicate mutations create one history row and one socket event only after commit (176 ms)
+    ✓ competing arrive/finish requests cannot skip start or evidence (38 ms)
+    ✕ BEFORE, pending quote, AFTER and settlement are server preconditions (50 ms)
+    ✓ socket rejects cross-owner order room and forged profile identity (23 ms)
+    ✓ refresh JWT and socket without token are rejected (8 ms)
+    ✓ Admin REST uses the same FSM; generic status cannot fake acceptance or settlement (64 ms)
+    ✓ a rolled-back PostgreSQL transaction sends no event or history (157 ms)
+    ✓ only existing matching payment and payout permit completion; duplicate does not write again (43 ms)
+    ✕ one worker cannot accept two orders concurrently (27 ms)
+    ✓ current/detail reload return persisted canonical states and reject outsider reads/writes (62 ms)
+    ✓ Admin/Orders module graph resolves shared workflow dependencies without starting external workers (10 ms)
+    ✓ socket GPS derives the assigned profile instead of trusting workerId (28 ms)
+    ✓ a stale or forged role claim cannot authorize the Admin order endpoint (6 ms)
+    ✓ dispute evidence and history are persisted once with the state change (30 ms)
+
+  ● ARC-01 real PostgreSQL + HTTP + Socket.IO (Redis pubsub not exercised) › two real concurrent HTTP accepts have exactly one winner
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 2
+
+      Array [
+    -   201,
+    -   409,
+    +   400,
+    +   400,
+      ]
+
+      227 |         ),
+      228 |       );
+    > 229 |       expect(responses.map((r) => r.status).sort()).toEqual([201, 409]);
+          |                                                     ^
+      230 |       expect(
+      231 |         await db.orderStatusHistory.count({
+      232 |           where: { orderId: order.id, status: 'MATCHED' },
+
+      at Object.toEqual (test/arc01.e2e-spec.js:229:53)
+
+  ● ARC-01 real PostgreSQL + HTTP + Socket.IO (Redis pubsub not exercised) › BEFORE, pending quote, AFTER and settlement are server preconditions
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "QUOTE_NOT_APPROVED"
+    Received: "FACE_CHECKIN_EXPIRED"
+
+      295 |         },
+      296 |       });
+    > 297 |       expect((await call(w1, `/orders/${order.id}/start`)).body.message).toBe(
+          |                                                                          ^
+      298 |         'QUOTE_NOT_APPROVED',
+      299 |       );
+      300 |       await db.orderStatusHistory.create({
+
+      at Object.toBe (test/arc01.e2e-spec.js:297:74)
+
+  ● ARC-01 real PostgreSQL + HTTP + Socket.IO (Redis pubsub not exercised) › one worker cannot accept two orders concurrently
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 2
+
+      Array [
+    -   201,
+    -   409,
+    +   400,
+    +   400,
+      ]
+
+      519 |         ),
+      520 |       );
+    > 521 |       expect(responses.map((r) => r.status).sort()).toEqual([201, 409]);
+          |                                                     ^
+      522 |       expect(
+      523 |         await db.order.count({
+      524 |           where: { id: { in: [a.id, b.id] }, workerId: w1.workerProfile.id },
+
+      at Object.toEqual (test/arc01.e2e-spec.js:521:53)
+
+Test Suites: 1 failed, 1 total
+Tests:       3 failed, 14 passed, 17 total
+Snapshots:   0 total
+Time:        3.269 s
+Ran all test suites.
+/home/vanvi/Work/fixgo-integration-s03/server/test/face/run-isolated.cjs:13
+  if (r.status !== 0) throw new Error(`${cmd} failed: ${(r.stderr || r.stdout || '').slice(-5000)}`);
+                      ^
+
+Error: /home/vanvi/.nvm/versions/node/v20.20.2/bin/node failed:
+    at run (/home/vanvi/Work/fixgo-integration-s03/server/test/face/run-isolated.cjs:13:29)
+    at Object.<anonymous> (/home/vanvi/Work/fixgo-integration-s03/server/test/face/run-isolated.cjs:56:3)
+    at Module._compile (node:internal/modules/cjs/loader:1521:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)
+    at Module.load (node:internal/modules/cjs/loader:1266:32)
+    at Module._load (node:internal/modules/cjs/loader:1091:12)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)
+    at node:internal/main/run_main_module:28:49
+
+Node.js v20.20.2
