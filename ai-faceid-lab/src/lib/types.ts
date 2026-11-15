@@ -110,7 +110,9 @@ export interface CoreStatus {
   requiredConsentVersion: string;
   consentVersion: string | null;
   consentRequired: boolean;
-  identityReviewApproved: boolean;
+  enrollmentMethod?: string;
+  /** Legacy responses only; no longer an enrollment prerequisite. */
+  identityReviewApproved?: boolean;
   blockers: string[];
   canEnroll: boolean;
   canVerifyDaily: boolean;

@@ -1,4 +1,3 @@
-import * as eligibility from '../src/features/auth/services/workerEligibility';
 import React from 'react';
 import { Alert } from 'react-native';
 import { apiClient } from '../src/services/api/apiClient';
@@ -31,11 +30,11 @@ beforeEach(() => {
 it('restores backend active card on launch, navigates by ID only, clears completed work after reconnect', async () => {
   orderService.getCurrentWorkerOrder.mockResolvedValueOnce({ id: 'order-1', status: 'AWAITING_PAYMENT', service: { name: 'Dịch vụ backend' }, estimatedPrice: 123000, addressText: 'Địa chỉ backend' }).mockResolvedValue(null);
   const ui = render(<WorkerDashboardScreen />);
-  await waitFor(() => expect(ui.getByText('AWAITING_PAYMENT')).toBeTruthy());
+  await waitFor(() => expect(ui.getByText('Chờ thanh toán')).toBeTruthy());
   expect(ui.getByText('Dịch vụ backend')).toBeTruthy();
   expect(ui.getByText('📍 Địa chỉ backend')).toBeTruthy();
   expect(socketService.joinOrderRoom).toHaveBeenCalledWith('order-1');
-  fireEvent.press(ui.getByText('XEM CHI TIẾT & TIẾP NHẬN CÔNG VIỆC'));
+  fireEvent.press(ui.getByText('Xem chi tiết công việc'));
   expect(mockPush).toHaveBeenCalledWith('/(worker)/job/order-1');
   const reconnects = socketService.on.mock.calls.filter(([event]) => event === 'connect').map(([, handler]) => handler);
   await act(async () => Promise.all(reconnects.map(handler => handler())));
@@ -48,7 +47,7 @@ it('shows loading then recoverable error without an active card', async () => {
   const ui = render(<WorkerDashboardScreen />);
   expect(ui.getByLabelText('Đang khôi phục công việc')).toBeTruthy();
   await act(async () => reject(new Error('Không có mạng')));
-  expect(ui.queryByText('XEM CHI TIẾT & TIẾP NHẬN CÔNG VIỆC')).toBeNull();
+  expect(ui.queryByText('Xem chi tiết công việc')).toBeNull();
   fireEvent.press(ui.getByText('Không có mạng — Thử lại'));
   await waitFor(() => expect(ui.getByText('Không có công việc đang thực hiện.')).toBeTruthy());
 });
@@ -57,7 +56,6 @@ afterEach(() => jest.restoreAllMocks());
 it('online waits for backend ACK and never flips after permission denial', async () => {
   orderService.getCurrentWorkerOrder.mockResolvedValue(null);
   // Isolate availability permission behavior; actual face gate is covered below.
-  jest.spyOn(eligibility, 'hasShiftVerification').mockReturnValue(true);
   Location.requestForegroundPermissionsAsync.mockResolvedValueOnce({ status: 'denied' });
   const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
   const ui = render(<WorkerDashboardScreen />);
@@ -69,7 +67,6 @@ it('online waits for backend ACK and never flips after permission denial', async
   alert.mockRestore();
 });
 it('requires a matching availability ACK', async () => {
-  jest.spyOn(eligibility, 'hasShiftVerification').mockReturnValue(true);
   orderService.getCurrentWorkerOrder.mockResolvedValue(null);
   apiClient.patch.mockResolvedValue({ isOnline: false });
   const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
@@ -82,12 +79,16 @@ it('requires a matching availability ACK', async () => {
   alert.mockRestore();
 });
 
-it('legacy check-in opens verification screen without capturing or going online', async () => {
+it('AC-03 goes online without Daily proof and without starting any face session', async () => {
   orderService.getCurrentWorkerOrder.mockResolvedValue(null);
+  apiClient.patch.mockImplementation(async () => {
+    apiClient.get.mockResolvedValue({ ...eligible, isOnline: true });
+    return { isOnline: true };
+  });
   const ui = render(<WorkerDashboardScreen />);
   await waitFor(() => expect(ui.getByText('Không có công việc đang thực hiện.')).toBeTruthy());
   fireEvent(ui.getByRole('switch'), 'valueChange', true);
-  await waitFor(() => expect(ui.getByText('Kiểm tra xác thực khuôn mặt')).toBeTruthy());
-  expect(apiClient.patch).not.toHaveBeenCalled();
-  expect(Location.requestForegroundPermissionsAsync).not.toHaveBeenCalled();
+  await waitFor(() => expect(ui.getByText('ĐANG BẬT NHẬN ĐƠN')).toBeTruthy());
+  expect(apiClient.get).not.toHaveBeenCalledWith('/workers/me/face/status');
+  expect(apiClient.patch).toHaveBeenCalledWith('/workers/status', { isOnline: true, lat: 10, lng: 106 });
 });

@@ -22,7 +22,7 @@ class EvaluatedMn3Pad:
 
     def assess(self, capture):
         caps = self.capabilities()
-        if not caps['padEvaluated']:
+        if not (caps['padEvaluated'] or caps.get('padExperimentalReady')):
             return PadEvidence('NOT_EVALUATED', error_code=caps['padErrorCode'])
         try:
             image, detector = capture
@@ -36,7 +36,48 @@ class EvaluatedMn3Pad:
                 return PadEvidence('INCONCLUSIVE', VERSION, 'PAD_CROP_INVALID')
             crop = image[max(0, math.floor(y)):min(h, math.ceil(y + fh)), max(0, math.floor(x)):min(w, math.ceil(x + fw))]
             measured = self.model.measure(cv2.resize(crop, (128, 128), interpolation=cv2.INTER_LINEAR))
-            decision = self.gate.decide(measured)
-            return PadEvidence(decision.decision, VERSION, None if decision.decision == 'PASS' else decision.reason)
+            return self.decide_measurement(measured)
         except Exception:
             return PadEvidence('INCONCLUSIVE', VERSION, 'PAD_PROCESSING_FAILED')
+
+
+    def decide_measurement(self, measured):
+        decision = self.gate.decide(measured)
+        return PadEvidence(decision.decision, VERSION, None if decision.decision == 'PASS' else decision.reason)
+
+
+class ThresholdMn3Pad(EvaluatedMn3Pad):
+    """Real model inference with a provisional threshold, never an evaluation approval."""
+    def __init__(self, path, threshold, model=None):
+        if type(threshold) not in (int, float) or not math.isfinite(threshold) or not 0 < threshold < 1:
+            raise ValueError('PAD_THRESHOLD_INVALID')
+        super().__init__(path, model=model)
+        self.threshold = threshold
+
+    def capabilities(self):
+        ready = self.model.error is None
+        return dict(padEvaluated=False, padExperimentalReady=ready,
+                    padMode='experimental', padThreshold=self.threshold,
+                    padModelVersion=VERSION if ready else None,
+                    padEvaluationReference=None, padErrorCode=self.model.error)
+
+    def decide_measurement(self, measured):
+        real, spoof = measured.real_score, measured.spoof_score
+        if not all(type(x) in (int, float) and math.isfinite(x) and 0 <= x <= 1 for x in (real, spoof)) or abs(real + spoof - 1) > 1e-4:
+            return PadEvidence('INCONCLUSIVE', VERSION, 'PAD_OUTPUT_INVALID')
+        passed = real >= self.threshold
+        return PadEvidence('PASS' if passed else 'FAIL', VERSION, None if passed else 'PAD_BELOW_EXPERIMENTAL_THRESHOLD')
+
+
+def configured_pad(environ):
+    path = environ.get('FACE_PAD_MODEL_PATH')
+    if not path:
+        return None
+    mode = environ.get('FACE_PAD_MODE', 'evaluated')
+    if mode == 'experimental':
+        if environ.get('NODE_ENV') == 'production' or environ.get('APP_ENV') == 'production':
+            raise ValueError('EXPERIMENTAL_PAD_NOT_ALLOWED_IN_PRODUCTION')
+        return ThresholdMn3Pad(path, float(environ.get('FACE_PAD_THRESHOLD', '.85')))
+    if mode != 'evaluated':
+        raise ValueError('PAD_MODE_INVALID')
+    return EvaluatedMn3Pad(path)

@@ -91,14 +91,49 @@ it('embedded capture creates scoped session before opening, no external camera i
   expect(h.result.current.imageUri).toBeNull();
   expect(h.result.current.status).toBeNull();
 });
-it('review request is persisted explicitly and does not enroll or overwrite a template', async () => {
-  apiClient.get.mockResolvedValue({ data: { ...ready, reviewKind: 'REENROLLMENT', canRequestReview: true } });
-  const h = await hook(undefined,'reset');
-  apiClient.post.mockResolvedValueOnce({ submitted: true, request: { id: 'request-1', kind: 'REENROLLMENT' } });
-  await act(async () => h.result.current.requestReview(true));
-  expect(apiClient.post).toHaveBeenCalledWith('/workers/me/face/review-requests', { consent: true, kind: 'REENROLLMENT' }, expect.any(Object));
-  expect(h.result.current.status.reviewRequestSubmitted).toBe(true);
-  expect(h.result.current.result).toMatchObject({ requested:true, verified:false });
-  expect(h.result.current.status.templateVersion).toBe(1);
+it('self enrollment exposes no manual review request action', async () => {
+  const h = await hook(undefined,'enrollment');
+  expect(h.result.current.requestReview).toBeUndefined();
+  expect(apiClient.post).not.toHaveBeenCalled();
+  expect(ImagePicker.launchCameraAsync).not.toHaveBeenCalled();
+});
+
+it('one enrollment tap saves consent and confirms readiness before opening the camera', async () => {
+  const pending={enrollmentStatus:'NOT_ENROLLED',consentRequired:true,requiredConsentVersion:'v1',canEnroll:false,blockers:['CONSENT_REQUIRED']};
+  apiClient.get.mockResolvedValueOnce({data:pending}).mockResolvedValueOnce({data:{...pending,consentRequired:false,canEnroll:true,blockers:[]}});
+  apiClient.post.mockResolvedValueOnce({data:{consentVersion:'v1'}}).mockResolvedValueOnce({data:makeSession('ENROLLMENT')});
+  const h=await hook(undefined,'enrollment');
+  expect(apiClient.post).not.toHaveBeenCalled();
+  await act(async()=>h.result.current.takeSelfie(true));
+  expect(apiClient.post.mock.calls[0][0]).toBe('/workers/me/face/consent');
+  expect(apiClient.post.mock.calls[0][1]).toEqual({consent:true,version:'v1'});
+  expect(apiClient.post.mock.calls[1][0]).toBe('/workers/me/face/sessions');
+  expect(ImagePicker.launchCameraAsync).toHaveBeenCalledTimes(1);
+});
+it('declining consent or failure to save it never opens enrollment camera', async () => {
+  apiClient.get.mockResolvedValue({data:{enrollmentStatus:'NOT_ENROLLED',consentRequired:true,requiredConsentVersion:'v1',canEnroll:false,blockers:['CONSENT_REQUIRED']}});
+  const h=await hook(undefined,'enrollment');
+  await act(async()=>h.result.current.takeSelfie(false));
+  expect(apiClient.post).not.toHaveBeenCalled();
+  apiClient.post.mockRejectedValueOnce(Error('offline'));
+  await act(async()=>h.result.current.takeSelfie(true));
+  expect(ImagePicker.launchCameraAsync).not.toHaveBeenCalled();
+  expect(apiClient.post).toHaveBeenCalledTimes(1);
+});
+
+it('embedded camera survives the Android camera permission dialog and opens after approval', async () => {
+  let grant;
+  ImagePicker.requestCameraPermissionsAsync.mockImplementation(()=>new Promise(resolve=>{grant=resolve;}));
+  apiClient.post.mockResolvedValue({data:makeSession('ENROLLMENT')});
+  apiClient.get.mockResolvedValue({data:{...ready,enrollmentStatus:'NOT_ENROLLED',canEnroll:true}});
+  const h=renderHook(()=>useFaceVerification(undefined,undefined,'enrollment',{embeddedCamera:true}));
+  await waitFor(()=>expect(h.result.current.loadingStatus).toBe(false));
+  let opening;
+  act(()=>{opening=h.result.current.takeSelfie(true);});
+  const listener=AppState.addEventListener.mock.calls.at(-1)[1];
+  act(()=>listener('background'));
+  act(()=>listener('active'));
+  await act(async()=>{grant({granted:true});await opening;});
+  expect(h.result.current.cameraVisible).toBe(true);
   expect(ImagePicker.launchCameraAsync).not.toHaveBeenCalled();
 });

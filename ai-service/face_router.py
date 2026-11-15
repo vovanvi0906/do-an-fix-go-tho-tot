@@ -1,4 +1,4 @@
-"""Internal Face ID router; PAD remains explicitly unevaluated."""
+"""Internal Face ID router; capabilities distinguish evaluated and experimental PAD."""
 import hmac
 import json
 import os

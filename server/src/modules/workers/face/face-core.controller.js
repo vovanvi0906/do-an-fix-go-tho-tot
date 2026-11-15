@@ -159,7 +159,8 @@ export class FaceCoreController {
   @Post('review-requests')
   @ApiOperation({
     summary:
-      'Gửi yêu cầu kiểm tra danh tính/cấp lại, chưa thu nhận ảnh hoặc thay mẫu',
+      'Đã bỏ duyệt thủ công; trả MANUAL_IDENTITY_REVIEW_REMOVED',
+    deprecated: true,
   })
   @ApiBody({ type: FaceReviewRequestDto })
   @ApiResponse({ status: 201 })
@@ -194,7 +195,7 @@ export class FaceReviewController {
     this.core = core;
   }
   @Get(':id/face/review-request')
-  @ApiOperation({ summary: 'Yêu cầu FaceID đang chờ của thợ' })
+  @ApiOperation({ summary: 'Đã bỏ duyệt thủ công', deprecated: true })
   @ApiResponse({ status: 200 })
   @Bind(Req(), Param('id'))
   async pending(req, id) {
@@ -204,7 +205,7 @@ export class FaceReviewController {
     };
   }
   @Post(':id/face/review-request/reject')
-  @ApiOperation({ summary: 'Từ chối yêu cầu FaceID, không thay mẫu hiện có' })
+  @ApiOperation({ summary: 'Đã bỏ duyệt thủ công', deprecated: true })
   @ApiBody({ type: FaceReviewRejectDto })
   @ApiResponse({ status: 201 })
   @Bind(Req(), Param('id'), Body())
@@ -221,7 +222,8 @@ export class FaceReviewController {
   @Post(':id/face/identity-reviews')
   @ApiOperation({
     summary:
-      'Admin ghi bằng chứng đã kiểm tra danh tính; cấp lại cần review mới',
+      'Đã bỏ duyệt thủ công; trả MANUAL_IDENTITY_REVIEW_REMOVED',
+    deprecated: true,
   })
   @ApiBody({ type: FaceReviewDto })
   @ApiResponse({ status: 201 })

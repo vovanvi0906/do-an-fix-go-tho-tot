@@ -31,6 +31,8 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] [%(n
 logger = logging.getLogger("ai-service")
 
 BASE_DIR = Path(__file__).resolve().parent
+from dotenv import load_dotenv
+load_dotenv(BASE_DIR / '.env', override=False)
 WEIGHTS_DIR = BASE_DIR / "weights"
 
 # Kiểm tra thư viện OpenCV & Numpy
@@ -244,10 +246,8 @@ async def lifespan(app: FastAPI):
     if face_models.error_code:
         logger.warning("Face models unavailable: %s", face_models.error_code)
 
-    app.state.face_pad = None
-    if os.environ.get('FACE_PAD_MODEL_PATH'):
-        from face_pad import EvaluatedMn3Pad
-        app.state.face_pad = EvaluatedMn3Pad(os.environ['FACE_PAD_MODEL_PATH'])
+    from face_pad import configured_pad
+    app.state.face_pad = configured_pad(os.environ)
 
     # 5. Nạp CLIP Zero-Shot Incident Classifier
     app.state.models_status["clip"] = False

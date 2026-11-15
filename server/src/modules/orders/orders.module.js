@@ -1,3 +1,5 @@
+import { OrderBeforeMediaService } from './order-before-media.service';
+import { OrderBeforeMediaGuard } from './order-before-media.guard';
 import { FaceCoreModule } from '../workers/face/face-core.module';
 import { FaceCaptureBlockedGuard } from '../workers/face/face-capture-blocked.guard';
 import { OrderAccessGuard } from './order-access.guard';
@@ -17,6 +19,8 @@ import { RedisModule } from '../../infrastructure/redis/redis.module';
   imports: [PrismaModule, UsersModule, RedisModule, AiModule, FaceCoreModule],
   controllers: [OrdersController],
   providers: [
+    OrderBeforeMediaService,
+    OrderBeforeMediaGuard,
     OrderAccessGuard,
     FaceCaptureBlockedGuard,
     OrdersService,

@@ -8,3 +8,7 @@ ultralytics>=8.0.0
 requests>=2.31.0
 transformers>=4.30.0
 pillow>=9.5.0
+
+# CPU PAD runtime used by face_pad.py (exact version tested locally).
+openvino==2026.4.1
+python-dotenv>=1.0.0

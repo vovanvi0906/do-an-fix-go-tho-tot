@@ -1,61 +1,60 @@
-import React from 'react';
-import { Tabs } from 'expo-router';
-import { Pressable } from 'react-native';
-
+import React from "react";
+import { Tabs } from "expo-router";
+import { Pressable } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Home, Briefcase, Wallet, Bell, User } from "lucide-react-native";
+import { StatusBar } from "expo-status-bar";
+const screens = [
+  ["index", "Bàn làm việc", "Trang chủ", Home, "workbench"],
+  ["jobs", "Công việc", "Việc làm", Briefcase, "jobs"],
+  ["earnings", "Thu nhập", "Thu nhập", Wallet, "earnings"],
+  ["notifications", "Thông báo", "Thông báo", Bell, "notifications"],
+  ["profile", "Hồ sơ", "Cá nhân", User, "profile"],
+];
 export default function WorkerTabsLayout() {
+  const insets = useSafeAreaInsets();
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: true,
-        tabBarActiveTintColor: '#059669',
-        tabBarInactiveTintColor: '#64748B',
-        tabBarStyle: {
-          backgroundColor: '#FFFFFF',
-          borderTopWidth: 1,
-          borderTopColor: '#E2E8F0',
-        },
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Bàn làm việc',
-          tabBarLabel: 'Trực tuyến',
-          tabBarButton: (props) => <Pressable {...props} nativeID="worker-bottom-tab-workbench" />,
+    <>
+      <StatusBar style="dark" />
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarActiveTintColor: "#087F68",
+          tabBarInactiveTintColor: "#8C9A9D",
+          tabBarHideOnKeyboard: true,
+          tabBarLabelStyle: { fontSize: 10, fontWeight: "600", marginTop: 3 },
+          tabBarItemStyle: { paddingTop: 9 },
+          tabBarStyle: {
+            height: 66 + insets.bottom,
+            paddingBottom: Math.max(insets.bottom, 8),
+            backgroundColor: "#FFFFFF",
+            borderTopWidth: 1,
+            borderTopColor: "#E5EBEC",
+            elevation: 0,
+          },
         }}
-      />
-      <Tabs.Screen
-        name="jobs"
-        options={{
-          title: 'Nhận việc',
-          tabBarLabel: 'Việc mới',
-          tabBarButton: (props) => <Pressable {...props} nativeID="worker-bottom-tab-jobs" />,
-        }}
-      />
-      <Tabs.Screen
-        name="earnings"
-        options={{
-          title: 'Thu nhập',
-          tabBarLabel: 'Thu nhập',
-          tabBarButton: (props) => <Pressable {...props} nativeID="worker-bottom-tab-earnings" />,
-        }}
-      />
-      <Tabs.Screen
-        name="notifications"
-        options={{
-          title: 'Thông báo',
-          tabBarLabel: 'Thông báo',
-          tabBarButton: (props) => <Pressable {...props} nativeID="worker-bottom-tab-notifications" />,
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Hồ sơ Thợ',
-          tabBarLabel: 'Cá nhân',
-          tabBarButton: (props) => <Pressable {...props} nativeID="worker-bottom-tab-profile" />,
-        }}
-      />
-    </Tabs>
+      >
+        {screens.map(([name, title, label, Icon, id]) => (
+          <Tabs.Screen
+            key={name}
+            name={name}
+            options={{
+              title,
+              tabBarLabel: label,
+              tabBarIcon: ({ color, focused }) => (
+                <Icon
+                  color={color}
+                  size={22}
+                  strokeWidth={focused ? 2.4 : 1.7}
+                />
+              ),
+              tabBarButton: (props) => (
+                <Pressable {...props} nativeID={`worker-bottom-tab-${id}`} />
+              ),
+            }}
+          />
+        ))}
+      </Tabs>
+    </>
   );
 }

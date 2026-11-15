@@ -4,6 +4,8 @@ export function faceCoreConfig() {
   const number = (name, fallback) => Number(process.env[name] ?? fallback);
   return {
     enabled: process.env.FACE_CORE_ENABLED === 'true',
+    experimentalPad: process.env.FACE_PAD_MODE === 'experimental' && process.env.NODE_ENV !== 'production' && process.env.APP_ENV !== 'production',
+    padThreshold: number('FACE_PAD_THRESHOLD', .85),
     captureApproved: process.env.FACE_BIOMETRIC_CAPTURE_APPROVED === 'true',
     consentVersion: process.env.FACE_CONSENT_VERSION || 'experimental-v1',
     keys, currentKeyId: process.env.FACE_TEMPLATE_KEY_ID,

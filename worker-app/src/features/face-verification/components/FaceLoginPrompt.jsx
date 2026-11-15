@@ -7,7 +7,7 @@ import { faceIdentityService } from "../services/faceIdentityService";
 import { facePrompt } from "../utils/faceStatus";
 
 /** One advisory prompt per authenticated session, shared by all login methods.
- * Skipping never grants online/start rights; server proof gates remain authoritative.
+ * Enrollment guidance is advisory; per-order proof authorization remains server-side.
  */
 export function FaceLoginPrompt() {
   const { user, token } = useAuth();
@@ -85,8 +85,8 @@ export function FaceLoginPrompt() {
           </Text>
           <Text style={s.message}>{prompt?.message}</Text>
           <Text style={s.note}>
-            Bạn có thể tiếp tục xem hồ sơ. Bật nhận đơn cần xác thực đầu ca; bắt
-            đầu công việc cần bằng chứng riêng theo đơn.
+            Bạn có thể tiếp tục vào ứng dụng. Khi đã đến nơi, xác thực riêng theo đơn
+            trước khi chụp ảnh BEFORE và bắt đầu công việc.
           </Text>
           <TouchableOpacity
             nativeID="worker-face-login-open"

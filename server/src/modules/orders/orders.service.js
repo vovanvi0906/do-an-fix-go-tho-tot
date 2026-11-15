@@ -1,5 +1,6 @@
+import { OrderBeforeMediaService } from './order-before-media.service';
 import { catalogRead } from '../symptoms/symptom-catalog';
-import { validFaceResult, hasTrustedFaceProof } from '../../infrastructure/external/ai/face-result';
+import { validFaceResult } from '../../infrastructure/external/ai/face-result';
 import { ORDER_STATUS } from './constants/order-status';
 import { resolveDiagnosis } from './diagnosis/diagnosis-resolver';
 import {
@@ -41,6 +42,7 @@ import { OrderQueueService } from './order-queue.service';
   RedisService,
   FastApiAiClient,
   OrderQueueService,
+  OrderBeforeMediaService,
 )
 export class OrdersService {
   constructor(
@@ -52,6 +54,7 @@ export class OrdersService {
     redisService,
     fastApiAiClient,
     orderQueueService,
+    beforeMedia,
   ) {
     this.ordersRepository = ordersRepository;
     this.orderWorkflowService = orderWorkflowService;
@@ -61,6 +64,7 @@ export class OrdersService {
     this.redisService = redisService;
     this.fastApiAiClient = fastApiAiClient;
     this.orderQueueService = orderQueueService;
+    this.beforeMedia = beforeMedia;
 
     // Kết nối gateway vào queue service để broadcast khi mở rộng bán kính
     if (
@@ -463,6 +467,19 @@ export class OrdersService {
   }
 
   async uploadImage(orderId, uploadDto, userId) {
+    if (uploadDto.type === 'BEFORE') {
+      // No client URL is trusted just because it uses HTTPS. Verify a real, scoped storage resource.
+      const context = await this.beforeMedia.authorize(userId, orderId);
+      await this.beforeMedia.verify(uploadDto.url, context);
+      const image = await this.beforeMedia.authorize(userId, orderId, async (tx, fresh) => {
+        if (this.beforeMedia.prefix(fresh) !== this.beforeMedia.prefix(context)) throw new BadRequestException('BEFORE_MEDIA_NOT_VERIFIED');
+        const existing = await tx.orderImage.findFirst({ where: { orderId, type: 'BEFORE', url: uploadDto.url } });
+        if (existing) return existing;
+        return tx.orderImage.create({ data: { orderId, type: 'BEFORE', url: uploadDto.url,
+          imageUrl: uploadDto.url, imageType: 'BEFORE', uploadedAt: await this.beforeMedia.core.now(tx) } });
+      });
+      return { success: true, image };
+    }
     const image = await this.prisma.$transaction(async tx => {
       await tx.$queryRaw`SELECT id FROM orders WHERE id = ${orderId} FOR UPDATE`;
       const actor = await this.orderWorkflowService.actor(tx, userId);

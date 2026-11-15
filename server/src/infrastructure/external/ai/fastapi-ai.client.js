@@ -125,6 +125,9 @@ export class FastApiAiClient {
             /^yunet-sface:[a-f0-9]{64}:[a-f0-9]{64}$/.test(r.modelVersion) && r.verificationMethod === 'yunet_sface_cosine') {
           // Readiness for identity inference is independent of evaluated PAD approval.
           return { ...unavailable, identityModelReady: true, modelVersion: r.modelVersion,
+            padExperimentalReady: r.padExperimentalReady === true,
+            padMode: r.padMode === 'experimental' ? 'experimental' : 'evaluated',
+            padThreshold: typeof r.padThreshold === 'number' && Number.isFinite(r.padThreshold) ? r.padThreshold : null,
             padEvaluated: r.padEvaluated === true, padModelVersion: typeof r.padModelVersion === 'string' ? r.padModelVersion : null,
             padEvaluationReference: typeof r.padEvaluationReference === 'string' ? r.padEvaluationReference : null };
         }

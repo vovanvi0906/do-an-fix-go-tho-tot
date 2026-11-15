@@ -1,60 +1,88 @@
 import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  RefreshControl,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, Alert } from "react-native";
 import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import {
+  User,
+  Settings,
+  LifeBuoy,
+  LogOut,
+  ShieldCheck,
+  ChevronRight,
+} from "lucide-react-native";
 import { useAuth } from "../../../src/features/auth";
 import { useWorkerFaceStatus } from "../../../src/features/face-verification/hooks/useWorkerFaceStatus";
 import { FaceIdentityCard } from "../../../src/features/face-verification/components/FaceIdentityCard";
+import {
+  Page,
+  Heading,
+  Card,
+  Badge,
+  Row,
+  Section,
+  C,
+  u,
+} from "../../../src/features/workbench/WorkerUI";
 const APPROVAL = {
-  APPROVED: "Hồ sơ đã duyệt",
+  APPROVED: "Đối tác đã duyệt",
   DRAFT: "Hồ sơ nháp",
-  PENDING: "Đang chờ duyệt hồ sơ",
+  PENDING: "Hồ sơ chờ duyệt",
   REJECTED: "Cần bổ sung hồ sơ",
 };
 export default function WorkerProfileScreen() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const router = useRouter();
   const { status, profile, loading, error, reload } = useWorkerFaceStatus();
+  const name =
+    profile?.fullName || user?.fullName || user?.name || "Đối tác FixGo";
   return (
-    <ScrollView
+    <Page
       nativeID="worker-profile-screen"
-      style={s.screen}
-      contentContainerStyle={s.content}
-      refreshControl={
-        <RefreshControl
-          refreshing={loading}
-          onRefresh={reload}
-          tintColor="#6EE7B7"
-        />
-      }
+      refreshing={loading}
+      onRefresh={reload}
     >
-      <View nativeID="worker-profile-identity" style={s.identity}>
-        <View style={s.avatar}>
-          <Ionicons name="person-outline" size={30} color="#6EE7B7" />
+      <Heading
+        eyebrow="TÀI KHOẢN ĐỐI TÁC"
+        title="Góc của bạn"
+        subtitle="Một hồ sơ chỉn chu, nhiều cơ hội hơn."
+      />
+      <Card nativeID="worker-profile-identity" style={{ gap: 18 }}>
+        <View style={{ flexDirection: "row", gap: 16, alignItems: "center" }}>
+          <View
+            style={{
+              width: 65,
+              height: 65,
+              borderRadius: 23,
+              backgroundColor: C.mint,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Text style={{ fontSize: 28, fontWeight: "700", color: C.green }}>
+              {name.trim().slice(0, 1)}
+            </Text>
+          </View>
+          <View style={{ flex: 1, gap: 7 }}>
+            <Text
+              nativeID="worker-profile-name"
+              accessibilityRole="header"
+              style={[u.section, { fontSize: 21 }]}
+            >
+              {name}
+            </Text>
+            <Text style={u.body}>
+              {user?.phone || user?.email || "Tài khoản thợ"}
+            </Text>
+          </View>
         </View>
-        <Text
-          nativeID="worker-profile-name"
-          accessibilityRole="header"
-          style={s.name}
+        <Badge
+          tone={profile?.approvalStatus === "APPROVED" ? "green" : "amber"}
         >
-          {profile?.fullName || user?.fullName || user?.name || "Đối tác FixGo"}
-        </Text>
-        <Text style={s.contact}>
-          {user?.phone || user?.email || "Tài khoản thợ"}
-        </Text>
-        <Text style={s.badge}>
           {loading
             ? "Đang tải hồ sơ…"
             : APPROVAL[profile?.approvalStatus] || "Chưa tải được hồ sơ"}
-        </Text>
-      </View>
+        </Badge>
+      </Card>
+      <Section title="Bảo mật & xác thực" />
       <FaceIdentityCard
         status={status}
         profile={profile}
@@ -68,77 +96,68 @@ export default function WorkerProfileScreen() {
           })
         }
       />
-      <View nativeID="worker-profile-guidance" style={s.info}>
-        <Text accessibilityRole="header" style={s.infoTitle}>
-          Bắt đầu ca làm việc
-        </Text>
-        <Text style={s.infoText}>1. Hoàn thiện và duyệt hồ sơ danh tính.</Text>
-        <Text style={s.infoText}>2. Đăng ký mẫu khuôn mặt một lần.</Text>
-        <Text style={s.infoText}>
-          3. Quét đầu ca khi bằng chứng hết hiệu lực.
-        </Text>
-        <Text style={s.infoText}>
-          4. Xác thực riêng khi đã đến nơi thực hiện đơn.
-        </Text>
-      </View>
-      <TouchableOpacity
-        nativeID="worker-profile-support"
-        accessibilityRole="button"
-        style={s.support}
-        onPress={() => router.push("/common/help")}
+      <Card
+        nativeID="worker-profile-guidance"
+        style={{ backgroundColor: C.mint, borderWidth: 0, gap: 12 }}
       >
-        <Ionicons name="help-circle-outline" size={22} color="#ACC0CF" />
-        <Text style={s.infoText}>Trợ giúp & hỗ trợ</Text>
-        <Ionicons name="chevron-forward" size={18} color="#ACC0CF" />
-      </TouchableOpacity>
-    </ScrollView>
+        <View style={u.heading}>
+          <Text style={u.section}>Sẵn sàng cho mỗi công việc</Text>
+          <ShieldCheck size={22} color={C.green} />
+        </View>
+        {[
+          "Bật nhận đơn khi bạn sẵn sàng làm việc.",
+          "Đăng ký khuôn mặt một lần cho tài khoản.",
+          "Xác thực theo đơn sau khi đã đến nơi.",
+        ].map((text, i) => (
+          <View
+            key={text}
+            style={{ flexDirection: "row", gap: 10, alignItems: "flex-start" }}
+          >
+            <Text style={{ color: C.green, fontWeight: "700", fontSize: 13 }}>
+              {String(i + 1).padStart(2, "0")}
+            </Text>
+            <Text style={[u.body, { flex: 1, color: "#456D62" }]}>{text}</Text>
+          </View>
+        ))}
+      </Card>
+      <Section title="Tiện ích tài khoản" />
+      <Card style={{ paddingVertical: 3 }}>
+        <Row
+          icon={Settings}
+          title="Cài đặt"
+          subtitle="Tùy chọn ứng dụng"
+          onPress={() => router.push("/common/settings")}
+        />
+        <View style={{ height: 1, backgroundColor: C.line }} />
+        <Row
+          icon={LifeBuoy}
+          title="Trợ giúp & hỗ trợ"
+          subtitle="FixGo luôn sẵn sàng đồng hành"
+          onPress={() => router.push("/common/help")}
+        />
+        <View style={{ height: 1, backgroundColor: C.line }} />
+        <Row
+          icon={LogOut}
+          title="Đăng xuất"
+          onPress={() =>
+            Alert.alert(
+              "Đăng xuất?",
+              "Bạn có thể đăng nhập lại bất cứ lúc nào.",
+              [
+                { text: "Ở lại", style: "cancel" },
+                {
+                  text: "Đăng xuất",
+                  style: "destructive",
+                  onPress: () => logout(),
+                },
+              ],
+            )
+          }
+        />
+      </Card>
+      <Text style={[u.eyebrow, { textAlign: "center", marginVertical: 5 }]}>
+        FIXGO PARTNER · LÀM VIỆC TỬ TẾ
+      </Text>
+    </Page>
   );
 }
-const s = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: "#090F17" },
-  content: { padding: 20, gap: 22, paddingBottom: 40 },
-  identity: { alignItems: "center", paddingVertical: 14, gap: 8 },
-  avatar: {
-    height: 72,
-    width: 72,
-    borderRadius: 24,
-    backgroundColor: "#16322B",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  name: { color: "#EEF6F8", fontSize: 23, fontWeight: "700" },
-  contact: { color: "#94A8B8", fontSize: 13 },
-  badge: {
-    color: "#6EE7B7",
-    fontSize: 12,
-    backgroundColor: "#15342A",
-    borderRadius: 8,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    marginTop: 5,
-  },
-  info: {
-    padding: 20,
-    gap: 10,
-    backgroundColor: "#111C28",
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: "#243444",
-  },
-  infoTitle: {
-    color: "#E8F1F6",
-    fontWeight: "600",
-    fontSize: 15,
-    marginBottom: 3,
-  },
-  infoText: { color: "#A9BCCB", fontSize: 13, lineHeight: 21 },
-  support: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 18,
-    borderRadius: 16,
-    borderColor: "#243444",
-    borderWidth: 1,
-  },
-});

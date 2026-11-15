@@ -1,3 +1,4 @@
+import { OrderBeforeMediaService } from '../src/modules/orders/order-before-media.service';
 import { FaceCoreService } from '../src/modules/workers/face/face-core.service';
 import { FaceEvidenceGateway } from '../src/modules/workers/face/face-evidence.gateway';
 import { faceCoreConfig } from '../src/modules/workers/face/face-core.config';
@@ -114,11 +115,15 @@ run(
         enabled: true,
         captureApproved: false,
       });
+      const media = new OrderBeforeMediaService(core);
+      // Storage-only stub inside the disposable HTTP fixture; proof authorization remains real DB logic.
+      jest.spyOn(media, 'verify').mockImplementation(async value => value);
       const module = await Test.createTestingModule({
         imports: [PassportModule.register({ defaultStrategy: 'jwt' })],
         controllers: [OrdersController, AdminController],
         providers: [
           JwtStrategy,
+          { provide: OrderBeforeMediaService, useValue: media },
           OrderAccessGuard,
           OrderGateway,
           {
@@ -146,6 +151,7 @@ run(
                 {},
                 {},
                 {},
+                media,
               ),
           },
         ],
@@ -186,6 +192,8 @@ run(
       w1 = await createUser('WORKER');
       w2 = await createUser('WORKER');
       admin = await createUser('ADMIN');
+      const offeredService = await db.service.create({ data: {categoryId: category.id, name:'ARC01 offered service',basePrice:100000} });
+      for (const worker of [w1,w2]) await db.workerService.create({data:{workerId:worker.workerProfile.id,serviceId:offeredService.id}});
       for (const worker of [w1, w2])
         identities.set(
           worker.id,
@@ -225,30 +233,20 @@ run(
         });
         await db.order.deleteMany({ where: { id: { in: orders } } });
         await db.user.deleteMany({ where: { id: { in: users } } });
+        if (category) await db.service.deleteMany({where:{categoryId:category.id}});
         if (category)
           await db.serviceCategory.delete({ where: { id: category.id } });
         await db.$disconnect();
       }
     });
-    it('legacy timestamp cannot replace daily proof, and missing FaceCore wiring remains closed', async () => {
+    it('AC-04 accepts an eligible online worker without Daily proof and retains busy protection', async () => {
       const order = await makeOrder('SEARCHING_WORKER', null);
       const response = await call(w1, `/orders/${order.id}/accept`, {}, 'post');
-      expect(response.status).toBe(400);
-      expect(response.body.message).toBe('DAILY_PROOF_REQUIRED');
-      const legacy = new OrderWorkflowService(db, gateway);
-      try {
-        await legacy.transition(order.id, w1.id, 'MATCHED');
-        throw new Error('Legacy gate unexpectedly permitted acceptance');
-      } catch (error) {
-        expect(error.message).toBe('FACE_CHECKIN_EXPIRED');
-        console.info('Unwired workflow rejection stack:', error.stack);
-      }
-      expect(
-        (await db.order.findUnique({ where: { id: order.id } })).workerId,
-      ).toBeNull();
-      console.info(
-        'ARC01 negative control: real wired gate=DAILY_PROOF_REQUIRED; missing wiring=FACE_CHECKIN_EXPIRED',
-      );
+      expect(response.status).toBe(201);
+      expect(response.body.order.workerId).toBe(w1.workerProfile.id);
+      const other = await makeOrder('SEARCHING_WORKER', null);
+      expect((await call(w1, `/orders/${other.id}/accept`, {}, 'post')).body.message).toBe('WORKER_HAS_ACTIVE_ORDER');
+      await db.order.update({ where: { id: order.id }, data: { status: 'CANCELLED' } });
     });
     it('daily proof cannot replace ORDER proof and production capture readiness remains closed', async () => {
       const daily = await persistedProof(db, identities.get(w2.id), 'DAILY');
@@ -408,6 +406,8 @@ run(
       expect((await call(w1, `/orders/${order.id}/start`)).body.message).toBe(
         'QUOTE_NOT_APPROVED',
       );
+      expect((await db.biometricProof.findUnique({ where: { id: proof.id } })).consumedAt).toBeNull();
+      expect(await db.orderImage.count({ where: { orderId: order.id, type: 'BEFORE' } })).toBe(1);
       await db.orderStatusHistory.create({
         data: {
           orderId: order.id,

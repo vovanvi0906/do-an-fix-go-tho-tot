@@ -113,85 +113,35 @@ function harness() {
     },
   };
 }
-it('persists one pending request per epoch and does not create a template or proof', async () => {
-  const { core, tx, events } = harness();
-  const first = await core.requestReview('u', {
-    consent: true,
-    kind: 'ENROLLMENT',
-  });
-  const retry = await core.requestReview('u', {
-    consent: true,
-    kind: 'ENROLLMENT',
-  });
-  expect(retry.request.id).toBe(first.request.id);
-  expect(events).toHaveLength(1);
-  expect(tx.biometricTemplate.findFirst).not.toHaveBeenCalled();
-  expect((await core.status('u')).reviewRequestSubmitted).toBe(true);
-  expect((await core.status('u')).canEnroll).toBe(false);
-});
-it('request requires consent, approved worker and correct first/reset kind', async () => {
+it('self enrollment needs no identity review or pending admin request', async () => {
   const h = harness();
-  await expect(
-    h.core.requestReview('u', { consent: false, kind: 'ENROLLMENT' }),
-  ).rejects.toThrow('CONSENT');
-  await expect(
-    h.core.requestReview('u', { consent: true, kind: 'REENROLLMENT' }),
-  ).rejects.toThrow('KIND');
-  h.worker.approvalStatus = 'PENDING';
-  await expect(
-    h.core.requestReview('u', { consent: true, kind: 'ENROLLMENT' }),
-  ).rejects.toThrow('APPROVAL');
+  expect(await h.core.status('u')).toMatchObject({
+    enrollmentStatus: 'NOT_ENROLLED', enrollmentMethod: 'SELF_ENROLLMENT',
+    canEnroll: true, canRequestReview: false, blockers: [],
+  });
+  expect(h.tx.biometricReview.findFirst).not.toHaveBeenCalled();
+  expect(h.tx.biometricReview.findUnique).not.toHaveBeenCalled();
+  expect(h.tx.biometricAudit.findMany).not.toHaveBeenCalled();
+});
+it('manual enrollment and reset approval endpoints no longer authorize enrollment', async () => {
+  const h = harness();
+  await expect(h.core.requestReview('u', {consent:true,kind:'ENROLLMENT'}))
+    .rejects.toThrow('MANUAL_IDENTITY_REVIEW_REMOVED');
+  await expect(h.core.review('admin', 'w', {}))
+    .rejects.toThrow('MANUAL_IDENTITY_REVIEW_REMOVED');
   expect(h.events).toHaveLength(0);
+  expect(h.tx.biometricReview.create).not.toHaveBeenCalled();
 });
-it('reset request keeps active template, admin rejection closes only that request', async () => {
+it('self enrollment still requires professional approval, consent and evaluated PAD', async () => {
   const h = harness();
-  h.state.lastVersion = 1;
-  h.template({ id: 'template', version: 1, modelVersion: 'model' });
-  const submitted = await h.core.requestReview('u', {
-    consent: true,
-    kind: 'REENROLLMENT',
-  });
-  expect((await h.core.status('u')).templateVersion).toBe(1);
-  await expect(
-    h.core.rejectReviewRequest('u', 'w', {
-      requestId: submitted.request.id,
-      reason: 'no',
-    }),
-  ).rejects.toThrow('ADMIN');
-  await h.core.rejectReviewRequest('admin', 'w', {
-    requestId: submitted.request.id,
-    reason: 'Need identity evidence',
-  });
-  expect((await h.core.status('u')).reviewRequestSubmitted).toBe(false);
-  expect((await h.core.status('u')).templateVersion).toBe(1);
-  await expect(
-    h.core.rejectReviewRequest('admin', 'w', {
-      requestId: submitted.request.id,
-      reason: 'again',
-    }),
-  ).rejects.toThrow('NOT_PENDING');
-});
-it('approval binds to pending request and resolves it atomically', async () => {
-  const h = harness();
-  const { request } = await h.core.requestReview('u', {
-    consent: true,
-    kind: 'ENROLLMENT',
-  });
-  const data = {
-    requestId: request.id,
-    kind: 'ENROLLMENT',
-    reviewedIdentity: true,
-    evidenceReference: 'review:unit',
-    evidenceDigest: 'a'.repeat(64),
-    reason: 'Synthetic review only',
-    expiresAt: new Date(Date.now() + 86400000).toISOString(),
-  };
-  await expect(
-    h.core.review('admin', 'w', { ...data, requestId: 'wrong' }),
-  ).rejects.toThrow('NOT_PENDING');
-  await h.core.review('admin', 'w', data);
-  expect(await h.core.pendingReview(h.tx, 'w', 0)).toBeNull();
-  expect(h.tx.biometricReview.create).toHaveBeenCalledTimes(1);
+  h.worker.approvalStatus = 'PENDING';
+  expect((await h.core.status('u')).blockers).toContain('WORKER_APPROVAL_REQUIRED');
+  h.worker.approvalStatus = 'APPROVED'; h.state.consentedAt = null;
+  expect((await h.core.status('u')).blockers).toContain('CONSENT_REQUIRED');
+  h.state.consentedAt = new Date();
+  h.gateway.capabilities.mockResolvedValue({ identityModelReady:true,modelVersion:'model',padEvaluated:false });
+  expect((await h.core.status('u')).canEnroll).toBe(false);
+  await expect(h.core.ready()).rejects.toThrow('PAD_NOT_EVALUATED');
 });
 it('capabilities reflect model mismatch and order stage, not template existence alone', async () => {
   const h = harness();
@@ -242,4 +192,38 @@ it('PAD gateway requires both reviewed server allowlist and matching AI evaluati
     (await new FaceEvidenceGateway(client, { pad: 'other' }).capabilities())
       .padEvaluated,
   ).toBe(false);
+});
+
+it.each(['MATCHED', 'WORKER_EN_ROUTE', 'IN_PROGRESS'])('AC-05 ORDER session rejects %s before any session insertion', async status => {
+  const h = harness(); h.order({ workerId: 'w', status });
+  await expect(h.core.createSession('u', { purpose: 'ORDER', orderId: 'o', requestKey: 'request' }))
+    .rejects.toThrow('FACE_STAGE_NOT_ALLOWED');
+  expect(h.events).toHaveLength(0);
+});
+it('AC-05 ORDER session rejects a different assigned worker', async () => {
+  const h = harness(); h.order({ workerId: 'other', status: 'ARRIVED' });
+  await expect(h.core.createSession('u', { purpose: 'ORDER', orderId: 'o', requestKey: 'request' }))
+    .rejects.toThrow('ORDER_ACCESS_DENIED');
+  expect(h.events).toHaveLength(0);
+});
+
+it('experimental PAD requires explicit opt-in, exact model and matching threshold without claiming evaluation', async () => {
+  const version='experimental:anti-spoof-mn3:c4c99af04603b62d7e44f6f4daeb33e0daeccc696008c0b1d62f6f5cebbb3262';
+  const identity={identityModelReady:true,modelVersion:'identity',padEvaluated:false,padExperimentalReady:true,padMode:'experimental',padThreshold:.85,padModelVersion:version};
+  const client={faceCapabilities:jest.fn(async()=>identity)};
+  expect((await new FaceEvidenceGateway(client,{},{}).capabilities()).padExperimentalReady).toBe(false);
+  const gateway=new FaceEvidenceGateway(client,{}, {experimentalPad:true,padThreshold:.85});
+  expect(await gateway.capabilities()).toMatchObject({padEvaluated:false,padExperimentalReady:true,padModelVersion:version});
+  identity.padThreshold=.5;
+  expect((await gateway.capabilities()).padExperimentalReady).toBe(false);
+  identity.padThreshold=.85;identity.padModelVersion='unknown';
+  expect((await gateway.capabilities()).padExperimentalReady).toBe(false);
+});
+it('experimental core accepts real threshold readiness only with opt-in and labels status', async () => {
+  const h=harness();
+  h.gateway.capabilities.mockResolvedValue({identityModelReady:true,modelVersion:'model',padEvaluated:false,padExperimentalReady:true,padMode:'experimental',padThreshold:.85,padModelVersion:'pad'});
+  await expect(h.core.ready()).rejects.toThrow('PAD_NOT_EVALUATED');
+  h.core.options.experimentalPad=true;
+  await expect(h.core.ready()).resolves.toMatchObject({padExperimentalReady:true});
+  expect(await h.core.status('u')).toMatchObject({canEnroll:true,padEvaluated:false,padMode:'experimental'});
 });

@@ -1,3 +1,4 @@
+import { WorkersService } from '../../src/modules/workers/workers.service';
 // Synthetic protocol fixtures ONLY. Gateway assertions are not biometric/PAD measurements.
 import { PrismaClient, Prisma } from '@prisma/client';
 import { randomBytes, randomUUID } from 'crypto';
@@ -20,10 +21,6 @@ function evidence(input, enrollment = false) {
     verificationMethod: enrollment ? 'yunet_sface_embedding' : 'yunet_sface_cosine',
     ...(enrollment ? { embedding } : { identityDecision: 'MATCH', identityScore: .8 }) };
 }
-async function review(kind = 'ENROLLMENT') {
-  return core.review(admin.id, worker.id, { kind, reviewedIdentity: true, evidenceReference: 'synthetic:review:1', evidenceDigest: 'a'.repeat(64),
-    reason: 'Synthetic fixture identity review', expiresAt: new Date(Date.now() + 86400000).toISOString() });
-}
 async function session(purpose, requestKey = randomUUID()) { return core.createSession(user.id, { purpose, requestKey, ...(purpose === 'ORDER' ? { orderId: order.id } : {}) }); }
 async function submit(s, capture = photo) { return core.submit(user.id, s.id, { nonce: s.nonce, photo: capture }); }
 async function enroll() { return submit(await session('ENROLLMENT')); }
@@ -45,31 +42,35 @@ beforeEach(async () => {
   await db.orderStatusHistory.create({ data: { orderId: order.id, status: 'ARRIVED', createdAt: new Date(Date.now() - 1000) } });
   await db.orderImage.create({ data: { orderId: order.id, type: 'BEFORE', url: 'https://synthetic.invalid/before' } });
   options = { ...faceCoreConfig(), enabled: true, captureApproved: true, keys: { k1: randomBytes(32) }, currentKeyId: 'k1', nonceKey: randomBytes(32), timeoutMs: 1000 };
-  gateway = { capabilities: jest.fn(async () => ({ modelVersion: 'synthetic-model', padEvaluated: true, padModelVersion: 'synthetic-test-provider' })),
+  gateway = { capabilities: jest.fn(async () => ({ identityModelReady: true, modelVersion: 'synthetic-model', padEvaluated: true, padModelVersion: 'synthetic-test-provider' })),
     enroll: jest.fn(async input => evidence(input, true)), verify: jest.fn(async input => { expect(input.templateEmbedding).toEqual(embedding); return evidence(input); }) };
   core = new FaceCoreService(db, gateway, options);
-  await review(); await core.consent(user.id, options.consentVersion);
+  await core.consent(user.id, options.consentVersion);
 });
 
-test('enrollment persists encrypted versioned template, reviewed evidence and metadata audit', async () => {
+test('self enrollment persists encrypted versioned template without any reviewer', async () => {
   const result = await enroll(); expect(result.enrolled).toBe(true);
   const stored = await db.biometricTemplate.findFirst();
   expect(stored.encrypted.ciphertext).toBeDefined(); expect(stored.encrypted).not.toEqual(embedding);
   expect(openTemplate(stored.encrypted, { workerId: worker.id, templateVersion: 1, modelVersion: stored.modelVersion }, options.keys.k1)).toEqual(embedding);
-  expect((await db.biometricReview.findUnique({ where: { id: stored.reviewId } })).reviewerId).toBe(admin.id);
+  expect(stored.reviewId).toBeNull();
+  expect(await db.biometricReview.count()).toBe(0);
   const audit = await db.biometricAudit.findMany();
   expect(JSON.stringify(audit)).not.toContain('ciphertext'); expect(JSON.stringify(audit)).not.toContain('base64');
   await expect(session('ENROLLMENT')).rejects.toThrow('TEMPLATE_ALREADY_ENROLLED');
   await expect(db.biometricTemplate.update({ where: { id: stored.id }, data: { modelVersion: 'overwrite' } })).rejects.toThrow();
 });
-test('professional approval alone or consent without review cannot enroll', async () => {
-  await db.biometricReview.updateMany({ data: { revokedAt: new Date() } });
-  await expect(session('ENROLLMENT')).rejects.toThrow('IDENTITY_REVIEW_REQUIRED');
-  await expect(core.review(user.id, worker.id, {})).rejects.toThrow('ACTIVE_ADMIN_REQUIRED');
+test('self enrollment requires consent but no review', async () => {
+  await db.biometricState.update({where:{workerId:worker.id},data:{consentedAt:null}});
+  await expect(session('ENROLLMENT')).rejects.toThrow('CONSENT_REQUIRED');
+  await core.consent(user.id, options.consentVersion);
+  expect((await core.status(user.id)).canEnroll).toBe(true);
+  expect((await enroll()).enrolled).toBe(true);
+  await expect(core.review(user.id,worker.id,{})).rejects.toThrow('MANUAL_IDENTITY_REVIEW_REMOVED');
 });
 test('default gateway and data policy remain closed, with no template or capture sent', async () => {
   const actual = new FaceCoreService(db, new FaceEvidenceGateway({}), options);
-  await expect(actual.createSession(user.id, { purpose: 'ENROLLMENT', requestKey: randomUUID() })).rejects.toThrow('PAD_NOT_EVALUATED');
+  await expect(actual.createSession(user.id, { purpose: 'ENROLLMENT', requestKey: randomUUID() })).rejects.toThrow('IDENTITY_MODEL_NOT_READY');
   options.captureApproved = false;
   await expect(session('ENROLLMENT')).rejects.toThrow('BIOMETRIC_DATA_POLICY_NOT_APPROVED');
   expect(await db.biometricTemplate.count()).toBe(0); expect(gateway.enroll).not.toHaveBeenCalled();
@@ -115,7 +116,7 @@ test('timeout consumes retry budget and late evidence never creates template', a
 });
 test.each(['NOT_EVALUATED','INCONCLUSIVE','FAIL'])('PAD %s cannot create template', async padDecision => {
   gateway.enroll.mockImplementation(async input => ({ ...evidence(input, true), padDecision }));
-  await expect(enroll()).rejects.toThrow('FACE_EVIDENCE_REJECTED'); expect(await db.biometricTemplate.count()).toBe(0);
+  await expect(enroll()).rejects.toThrow('FACE_PAD_REJECTED'); expect(await db.biometricTemplate.count()).toBe(0);
 });
 test('daily proof never substitutes for per-order proof or legacy timestamp', async () => {
   await enroll(); await issue('DAILY');
@@ -156,7 +157,7 @@ test('withdrawal deletes ciphertext and revokes sessions/proofs; re-enrollment i
   expect((await db.biometricTemplate.findFirst()).deletedAt).not.toBeNull();
   await expect(submit(stale)).rejects.toThrow('SESSION_EXPIRED_OR_REVOKED');
   await expect(core.workerTx(user.id, (tx,w) => core.requireDaily(tx,w.id))).rejects.toThrow('DAILY_PROOF_REQUIRED');
-  await review('REENROLLMENT'); await core.consent(user.id, options.consentVersion);
+  await core.consent(user.id, options.consentVersion);
   expect((await enroll()).template.version).toBe(2);
 });
 test('withdraw during inference prevents commit even if delayed gateway returns PASS', async () => {
@@ -165,7 +166,7 @@ test('withdraw during inference prevents commit even if delayed gateway returns 
   gateway.enroll.mockImplementation(input => new Promise(resolve => { complete = () => resolve(evidence(input,true)); started(); }));
   const s = await session('ENROLLMENT'), pending = submit(s);
   await ready; await core.withdraw(user.id); complete();
-  await expect(pending).rejects.toThrow('FACE_EVIDENCE_REJECTED'); expect(await db.biometricTemplate.count()).toBe(0);
+  await expect(pending).rejects.toThrow('SESSION_EXPIRED_OR_REVOKED'); expect(await db.biometricTemplate.count()).toBe(0);
 });
 test('cross-instance session quota enforced under row locks', async () => {
   const otherInstance = new FaceCoreService(db, gateway, options);
@@ -174,7 +175,7 @@ test('cross-instance session quota enforced under row locks', async () => {
   expect(await db.biometricSession.count()).toBe(5);
 });
 
-test('real Nest HTTP review -> consent -> enrollment -> daily/order proof -> withdraw, PostgreSQL-backed', async () => {
+test('real Nest HTTP self enrollment: consent -> enrollment -> daily/order proof -> withdraw, PostgreSQL-backed', async () => {
   const { Test } = require('@nestjs/testing');
   const request = require('supertest');
   const { FaceCoreController, FaceReviewController } = require('../../src/modules/workers/face/face-core.controller');
@@ -196,7 +197,7 @@ test('real Nest HTTP review -> consent -> enrollment -> daily/order proof -> wit
     await db.biometricReview.deleteMany(); await db.biometricState.deleteMany();
     const reviewBody = { reviewedIdentity: true, kind: 'ENROLLMENT', evidenceReference: 'synthetic:doc', evidenceDigest: 'b'.repeat(64), reason: 'synthetic review', expiresAt: new Date(Date.now()+86400000).toISOString() };
     expect((await http.post(`/admin/workers/${worker.id}/face/identity-reviews`).set('x-test-user', user.id).send(reviewBody)).status).toBe(403);
-    expect((await http.post(`/admin/workers/${worker.id}/face/identity-reviews`).set('x-test-user', admin.id).send(reviewBody)).status).toBe(201);
+    expect((await http.post(`/admin/workers/${worker.id}/face/identity-reviews`).set('x-test-user', admin.id).send(reviewBody)).status).toBe(400);
     expect((await http.post('/workers/me/face/consent').set('x-test-user', user.id).send({ consent: true, version: options.consentVersion })).status).toBe(201);
     for (const purpose of ['ENROLLMENT','DAILY','ORDER']) {
       const s = await http.post('/workers/me/face/sessions').set('x-test-user', user.id).send({ purpose, requestKey: randomUUID(), ...(purpose === 'ORDER' ? { orderId: order.id } : {}) });
@@ -217,7 +218,7 @@ test('real Nest HTTP review -> consent -> enrollment -> daily/order proof -> wit
 
 test('multipart preguard rejects unavailable PAD before evidence gateway runs', async () => {
   const { FaceReadyGuard } = require('../../src/modules/workers/face/face-ready.guard');
-  const actual = new FaceCoreService(db, new FaceEvidenceGateway({}), options);
+  const actual = new FaceCoreService(db, new FaceEvidenceGateway({ faceCapabilities: async () => ({ identityModelReady: true, modelVersion: 'synthetic-model', padEvaluated: false }) }), options);
   const guard = new FaceReadyGuard(actual);
   await expect(guard.canActivate({ switchToHttp: () => ({ getRequest: () => ({ user: { userId: user.id }, params: { id: randomUUID() } }) }) })).rejects.toThrow('PAD_NOT_EVALUATED');
   expect(gateway.enroll).not.toHaveBeenCalled();
@@ -233,7 +234,9 @@ test('stored key ID survives rotation; missing retired key cannot grant new proo
 test.each([{ identityScore: NaN }, { verificationMethod: 'manual_review' }, { padModelVersion: 'unapproved' },
   { templateVersion: 99 }, { qualityDecision: 'FAIL' }])('invalid result %j cannot persist proof', async change => {
   await enroll(); gateway.verify.mockImplementation(async input => ({ ...evidence(input), ...change }));
-  await expect(issue('DAILY')).rejects.toThrow('FACE_EVIDENCE_REJECTED'); expect(await db.biometricProof.count()).toBe(0);
+  const code = change.qualityDecision === 'FAIL' ? 'FACE_QUALITY_REJECTED'
+    : 'identityScore' in change || 'verificationMethod' in change ? 'IDENTITY_NOT_VERIFIED' : 'FACE_EVIDENCE_REJECTED';
+  await expect(issue('DAILY')).rejects.toThrow(code); expect(await db.biometricProof.count()).toBe(0);
 });
 
 test('one order proof cannot be consumed for a second assigned order', async () => {
@@ -269,9 +272,7 @@ test.each(['userId','reviewId','templateVersion','epoch','modelVersion','templat
   await enroll(); const s = await session('DAILY');
   const saved = await db.biometricSession.findUnique({ where: { id: s.id } });
   const other = await db.user.create({ data: { role: 'WORKER', workerProfile: { create: { approvalStatus: 'APPROVED' } } }, include: { workerProfile: true } });
-  const otherCore = new FaceCoreService(db,gateway,options);
-  const otherReview = await otherCore.review(admin.id,other.workerProfile.id,{kind:'ENROLLMENT',reviewedIdentity:true,evidenceReference:'synthetic:other',evidenceDigest:'c'.repeat(64),reason:'synthetic',expiresAt:new Date(Date.now()+86400000).toISOString()});
-  const changes = { userId: other.id, reviewId: otherReview.id, templateVersion: 999, epoch: 999, modelVersion: 'other-model', templateId: null };
+  const changes = { userId: other.id, reviewId: randomUUID(), templateVersion: 999, epoch: 999, modelVersion: 'other-model', templateId: null };
   await expect(db.biometricSession.create({ data: { ...saved, id: randomUUID(), requestKey: randomUUID(), [field]: changes[field] } })).rejects.toThrow();
   expect(await db.biometricSession.count()).toBe(2);
 });
@@ -325,31 +326,31 @@ test('ciphertext erasure cannot be reversed or replaced with JSON null', async (
   await expect(db.biometricTemplate.update({where:{id:t.id},data:{encrypted:t.encrypted,deletedAt:null,revokedAt:null}})).rejects.toThrow();
   expect((await db.biometricTemplate.findUnique({where:{id:t.id}})).encrypted).toBeNull();
 });
-test('template cannot bind a revoked review', async () => {
+test('DB forbids overwriting an active self-enrolled template', async () => {
   await enroll(); const t=await db.biometricTemplate.findFirst();
-  await db.biometricReview.update({where:{id:t.reviewId},data:{revokedAt:new Date()}});
-  await expect(db.biometricTemplate.create({data:{...t,id:randomUUID(),version:2}})).rejects.toThrow('BIOMETRIC_TEMPLATE_AUTHORITY_INVALID');
+  await expect(db.biometricTemplate.create({data:{...t,id:randomUUID(),version:2}}))
+    .rejects.toThrow('BIOMETRIC_TEMPLATE_AUTHORITY_INVALID');
 });
-
-test('template cannot bind review belonging to another worker', async () => {
+test('new templates cannot use a manual review binding', async () => {
   await enroll(); const t=await db.biometricTemplate.findFirst();
-  const other=await db.user.create({data:{role:'WORKER',workerProfile:{create:{approvalStatus:'APPROVED'}}},include:{workerProfile:true}});
-  const review=await core.review(admin.id,other.workerProfile.id,{kind:'ENROLLMENT',reviewedIdentity:true,evidenceReference:'synthetic:other',evidenceDigest:'d'.repeat(64),reason:'synthetic',expiresAt:new Date(Date.now()+86400000).toISOString()});
-  await expect(db.biometricTemplate.create({data:{...t,id:randomUUID(),version:2,reviewId:review.id}})).rejects.toThrow('BIOMETRIC_TEMPLATE_AUTHORITY_INVALID');
+  await expect(db.biometricTemplate.create({data:{...t,id:randomUUID(),version:2,reviewId:randomUUID()}}))
+    .rejects.toThrow('BIOMETRIC_TEMPLATE_AUTHORITY_INVALID');
 });
 test.each([Prisma.JsonNull,{format:null,iv:'a',tag:'a',ciphertext:'a'},{format:'sface-aes256gcm-v1',iv:123,tag:'a',ciphertext:'a'}])('DB rejects malformed encrypted envelope %#', async encrypted => {
   await enroll(); const t=await db.biometricTemplate.findFirst();
   await expect(db.biometricTemplate.create({data:{...t,id:randomUUID(),version:2,encrypted}})).rejects.toThrow();
   expect(await db.biometricTemplate.count()).toBe(1);
 });
-test('review record cannot name non-Admin as approving reviewer', async () => {
-  const r=await db.biometricReview.findFirst();
-  await expect(db.biometricReview.create({data:{...r,id:randomUUID(),reviewerId:user.id}})).rejects.toThrow('BIOMETRIC_REVIEW_AUTHORITY_INVALID');
+test('manual review cannot create authorization or reset a self-enrolled template', async () => {
+  await enroll(); const old=await db.biometricTemplate.findFirst();
+  await expect(core.review(admin.id,worker.id,{})).rejects.toThrow('MANUAL_IDENTITY_REVIEW_REMOVED');
+  expect((await db.biometricTemplate.findFirst()).encrypted).toEqual(old.encrypted);
 });
 test('persisted envelope with old AAD cannot verify as a newer version', async () => {
   await enroll(); const old=await db.biometricTemplate.findFirst();
-  const r=await review('REENROLLMENT');
-  await db.biometricTemplate.create({data:{...old,id:randomUUID(),version:2,epoch:1,reviewId:r.id,revokedAt:null,deletedAt:null,createdAt:new Date()}});
+  await core.withdraw(user.id);
+  await core.consent(user.id,options.consentVersion);
+  await db.biometricTemplate.create({data:{...old,id:randomUUID(),version:2,epoch:1,reviewId:null,revokedAt:null,deletedAt:null,createdAt:new Date()}});
   await db.biometricState.update({where:{workerId:worker.id},data:{lastVersion:2}});
   await expect(issue('DAILY')).rejects.toThrow('FACE_EVIDENCE_REJECTED');
   expect(await db.biometricProof.count()).toBe(0);
@@ -387,4 +388,73 @@ test('duplicate order result is denied after assignment change', async () => {
   await db.order.update({where:{id:order.id},data:{workerId:other.workerProfile.id}});
   await expect(submit(s)).rejects.toThrow('ORDER_ACCESS_DENIED');
   expect(await db.biometricProof.count()).toBe(1);
+});
+
+// Synthetic, disposable PostgreSQL ONLY: this is proof protocol coverage, not PAD evaluation.
+test('AC-06/07 BEFORE authorization reads a valid proof repeatedly without consuming it', async () => {
+  await enroll();
+  await expect(core.workerTx(user.id, (tx, w) => core.requireOrderProof(tx, w.id, order.id)))
+    .rejects.toThrow('ORDER_FACE_PROOF_REQUIRED');
+  const proof = (await issue('ORDER')).proof;
+  for (let i = 0; i < 2; i++)
+    await core.workerTx(user.id, (tx, w) => core.requireOrderProof(tx, w.id, order.id));
+  expect((await db.biometricProof.findUnique({ where: { id: proof.id } })).consumedAt).toBeNull();
+  expect(await db.biometricAudit.count({ where: { action: 'ORDER_PROOF_CONSUMED' } })).toBe(0);
+});
+test('verification does not require a manual review or review expiration window', async () => {
+  await enroll();
+  expect(await db.biometricReview.count()).toBe(0);
+  expect((await core.status(user.id)).canVerifyDaily).toBe(true);
+  expect((await issue('ORDER')).verified).toBe(true);
+});
+
+test('AC-03 enabled Face Core permits professional availability without template or Daily proof', async () => {
+  const offered = await db.service.create({ data: { categoryId: order.categoryId, name: 'Synthetic offered service', basePrice: 100000 } });
+  await db.workerService.create({ data: { workerId: worker.id, serviceId: offered.id } });
+  const availability = new WorkersService(db, {}, {}, core);
+  await expect(availability.updateAvailability(user.id, { isOnline: true, lat: 10, lng: 106 })).resolves.toMatchObject({ isOnline: true });
+  expect(await db.biometricTemplate.count()).toBe(0);
+  expect(await db.biometricProof.count()).toBe(0);
+  await db.workerService.deleteMany({ where: { workerId: worker.id } });
+  await expect(availability.updateAvailability(user.id, { isOnline: true, lat: 10, lng: 106 })).rejects.toThrow();
+});
+
+
+test('repeated successful verification compares to the first template without replacing it', async () => {
+  await enroll();
+  const original = await db.biometricTemplate.findFirst();
+  for (const purpose of ['DAILY', 'ORDER', 'DAILY']) {
+    expect((await issue(purpose)).verified).toBe(true);
+    expect(await db.biometricTemplate.findFirst()).toEqual(original);
+  }
+  expect(await db.biometricTemplate.count()).toBe(1);
+  expect(gateway.enroll).toHaveBeenCalledTimes(1);
+  expect(gateway.verify).toHaveBeenCalledTimes(3);
+  expect(await db.biometricReview.count()).toBe(0);
+});
+
+test('a different face cannot replace the first enrollment or receive a verification proof', async () => {
+  await enroll(); const original=await db.biometricTemplate.findFirst();
+  gateway.verify.mockImplementation(async input => ({...evidence(input),identityDecision:'NO_MATCH',identityScore:0.1}));
+  await expect(issue('ORDER')).rejects.toThrow('IDENTITY_NOT_VERIFIED');
+  expect(await db.biometricProof.count()).toBe(0);
+  expect((await db.biometricTemplate.findFirst()).encrypted).toEqual(original.encrypted);
+});
+
+test('experimental threshold mode enrolls and compares without claiming reviewed PAD', async () => {
+  options.experimentalPad=true;
+  gateway.capabilities.mockResolvedValue({identityModelReady:true,modelVersion:'synthetic-model',padEvaluated:false,padExperimentalReady:true,padMode:'experimental',padThreshold:.85,padModelVersion:'synthetic-test-provider'});
+  expect((await enroll()).enrolled).toBe(true);
+  const original=await db.biometricTemplate.findFirst();
+  const verified=await issue('ORDER');
+  expect(verified.verified).toBe(true);
+  expect((await db.biometricProof.findUnique({where:{id:verified.proof.id}})).policyVersion).toContain('pad-threshold-experimental:0.85');
+  expect(await core.status(user.id)).toMatchObject({padEvaluated:false,padMode:'experimental',enrollmentStatus:'ENROLLED'});
+  expect(await db.biometricTemplate.findFirst()).toEqual(original);
+});
+
+test.each(['NO_FACE','MULTIPLE_FACES','FACE_SIZE_OR_CROP','LIGHTING','BLUR'])('quality failure %s returns actionable reason without persisting a template',async errorCode=>{
+  gateway.enroll.mockImplementation(async input=>({...evidence(input,true),qualityDecision:'FAIL',errorCode}));
+  await expect(enroll()).rejects.toThrow(`FACE_QUALITY_REJECTED_${errorCode}`);
+  expect(await db.biometricTemplate.count()).toBe(0);
 });

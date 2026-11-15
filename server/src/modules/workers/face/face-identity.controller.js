@@ -22,14 +22,14 @@ export class FaceIdentityController {
   @Post('enrollment/preflight')
   @ApiOperation({ summary: 'Kiểm tra điều kiện đăng ký, chưa thu nhận khuôn mặt' })
   @ApiBody({ type: FacePreflightDto })
-  @ApiResponse({ status: 201, description: 'accepted=false; chưa gửi yêu cầu duyệt' })
+  @ApiResponse({ status: 201, description: 'Kiểm tra canEnroll; chưa thu nhận khuôn mặt' })
   @ApiResponse({ status: 400, description: 'Thiếu đồng ý hoặc gửi trường không được phép' })
   @Bind(Req(), Body())
   async enrollment(req, body) { return { success: true, data: await this.service.preflight(req.user.userId, body) }; }
   @Post('reset/preflight')
   @ApiOperation({ summary: 'Kiểm tra điều kiện cấp lại, không thay đổi template' })
   @ApiBody({ type: FacePreflightDto })
-  @ApiResponse({ status: 201, description: 'accepted=false; workflow cấp lại đang khóa' })
+  @ApiResponse({ status: 201, description: 'Không ghi đè mẫu; cần thu hồi mẫu cũ trước khi đăng ký lại' })
   @ApiResponse({ status: 400, description: 'Thiếu đồng ý hoặc gửi trường không được phép' })
   @Bind(Req(), Body())
   async reset(req, body) { return { success: true, data: await this.service.preflight(req.user.userId, body, true) }; }

@@ -1,5 +1,5 @@
 import { FaceCoreService } from './face/face-core.service';
-import { validFaceResult, hasTrustedFaceProof } from '../../infrastructure/external/ai/face-result';
+import { validFaceResult } from '../../infrastructure/external/ai/face-result';
 import {
   Injectable,
   Dependencies,
@@ -211,9 +211,6 @@ export class WorkersService {
     if (isOnline && (!Number.isFinite(lat) || Math.abs(lat) > 90 || !Number.isFinite(lng) || Math.abs(lng) > 180)) {
       throw new BadRequestException('Vui lòng gửi tọa độ GPS hợp lệ');
     }
-    if (isOnline && !this.faceCore?.enabled() && (!hasTrustedFaceProof(worker))) {
-      throw new BadRequestException('Vui lòng xác thực khuôn mặt hằng ngày trước khi bật nhận đơn');
-    }
 
     if (isOnline === true) {
       // 1. User phai ACTIVE
@@ -245,7 +242,6 @@ export class WorkersService {
       ? await this.faceCore.workerTx(userId, async (tx, current) => {
           if (isOnline) {
             if (current.approvalStatus !== 'APPROVED' || !await tx.workerService.count({ where: { workerId: current.id } })) throw new BadRequestException('WORKER_NOT_AVAILABLE');
-            await this.faceCore.requireDaily(tx, current.id);
           }
           return tx.workerProfile.update({ where: { id: current.id }, data });
         })
