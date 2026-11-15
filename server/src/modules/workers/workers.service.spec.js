@@ -1,6 +1,6 @@
 import { WorkersService } from './workers.service';
 
-describe('Worker daily check-in and availability', () => {
+describe('Worker one-scan availability and legacy check-in', () => {
   let prisma, ai, service, worker;
   beforeEach(() => {
     worker = { id: 'w1', userId: 'u1', faceProfile: { facePhotoUrl: 'reference' },
@@ -9,14 +9,22 @@ describe('Worker daily check-in and availability', () => {
     ai = { confidenceThreshold: 0.6, verifyFace: jest.fn(async () => ({ verified: true, confidence: 0.9 })) };
     service = new WorkersService(prisma, {}, ai);
   });
-  it('rejects legacy timestamp for online access', async () => {
-    await expect(service.updateAvailability('u1', { isOnline: true, lat: 10.8, lng: 106.7 })).rejects.toThrow('khuôn mặt');
-    expect(prisma.workerProfile.update).not.toHaveBeenCalled();
+  it('AC-03 permits online without a Daily proof or legacy timestamp', async () => {
+    worker.faceVerifiedAt = null;
+    await expect(service.updateAvailability('u1', { isOnline: true, lat: 10.8, lng: 106.7 })).resolves.toMatchObject({ isOnline: true });
   });
-  it('requires a fresh check-in but always permits going offline', async () => {
-    worker.faceVerifiedAt = new Date(Date.now() - 86400001);
-    await expect(service.updateAvailability('u1', { isOnline: true, lat: 10, lng: 106 })).rejects.toThrow('khuôn mặt');
+  it('permits going offline without a Daily proof', async () => {
     await expect(service.updateAvailability('u1', { isOnline: false })).resolves.toMatchObject({ isOnline: false });
+  });
+  it.each([
+    ['GPS', () => {}, { isOnline: true }],
+    ['active', () => { worker.user.status = 'BLOCKED'; }, { isOnline: true, lat: 10, lng: 106 }],
+    ['approved', () => { worker.approvalStatus = 'PENDING'; }, { isOnline: true, lat: 10, lng: 106 }],
+    ['services', () => { worker.workerServices = []; }, { isOnline: true, lat: 10, lng: 106 }],
+  ])('AC-03 retains %s gate', async (_name, change, input) => {
+    change();
+    await expect(service.updateAvailability('u1', input)).rejects.toThrow();
+    expect(prisma.workerProfile.update).not.toHaveBeenCalled();
   });
   it('does not grant check-in when AI fails', async () => {
     ai.verifyFace.mockResolvedValue({ verified: false, confidence: 0 });

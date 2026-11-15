@@ -181,7 +181,7 @@ export function App() {
                         <Kv rows={[
                           ['Required', status.requiredConsentVersion],
                           ['Recorded', <>{status.consentVersion ?? '—'} <Badge status={status.consentRequired ? 'BLOCKED' : 'VALID'}>{status.consentRequired ? 'CONSENT_REQUIRED' : 'VALID'}</Badge></>],
-                          ['Identity review', String(status.identityReviewApproved)],
+                          ['Enrollment', status.enrollmentMethod ?? 'SELF_ENROLLMENT'],
                         ]} />
                       ) : <Empty>Tải Face Core status (Connection Settings → Kết nối &amp; kiểm tra).</Empty>) : <p className="small">Research: consent người tham gia do operator cấu hình (participants + protocolReference); Lab không thể tự tạo. Trạng thái: <b>{String(caps?.participantConsentReady ?? false)}</b>.</p>}
                       {backend === 'core' && (

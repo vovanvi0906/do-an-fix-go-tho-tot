@@ -1,3 +1,4 @@
+import { OrderBeforeMediaService } from './order-before-media.service';
 import { OrdersGateway } from './orders.gateway';
 import { RedisService } from '../../infrastructure/redis/redis.service';
 import { FastApiAiClient } from '../../infrastructure/external/ai/fastapi-ai.client';
@@ -16,7 +17,7 @@ describe('OrdersService', () => {
     const module = await Test.createTestingModule({
       providers: [
         OrdersService,
-        ...[OrdersGateway, RedisService, FastApiAiClient, OrderQueueService].map((provide) => ({ provide, useValue: {} })),
+        ...[OrdersGateway, RedisService, FastApiAiClient, OrderQueueService, OrderBeforeMediaService].map((provide) => ({ provide, useValue: {} })),
         {
           provide: OrdersRepository,
           useValue: {

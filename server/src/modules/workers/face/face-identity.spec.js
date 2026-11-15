@@ -7,10 +7,13 @@ describe('enrollment capability, never an approval', () => {
   const worker = { user: { role: 'WORKER', status: 'ACTIVE' }, approvalStatus: 'APPROVED' };
   test('approved professional profile is not approved biometric identity', async () => {
     const service = make(worker);
-    expect(await service.status('jwt-user')).toMatchObject({ enrollmentStatus: 'PENDING_REVIEW', canEnroll: false, dailyProof: null });
+    expect(await service.status('jwt-user')).toMatchObject({ enrollmentStatus: 'NOT_ENROLLED', canEnroll: false, dailyProof: null });
+    const status = await service.status('jwt-user');
+    expect(status.blockers).toEqual(['FACE_CORE_DISABLED']);
+    expect(status.message).toContain('chưa được mở trên máy chủ');
     expect(service.prisma.workerProfile.findUnique.mock.calls[0][0].where).toEqual({ userId: 'jwt-user' });
     expect(await service.preflight('jwt-user', { consent: true })).toMatchObject({ accepted: false, reviewRequestSubmitted: false });
-    expect(await service.preflight('jwt-user', { consent: true }, true)).toMatchObject({ accepted: false, errorCode: 'RESET_REVIEW_WORKFLOW_UNAVAILABLE' });
+    expect(await service.preflight('jwt-user', { consent: true }, true)).toMatchObject({ accepted: false, errorCode: 'RESET_REQUIRES_WITHDRAWAL' });
   });
   test.each([null, { user: { role: 'CUSTOMER', status: 'ACTIVE' } }, { user: { role: 'WORKER', status: 'BLOCKED' } }])('reject missing or unauthorized worker %#', async value => {
     await expect(make(value).status('u')).rejects.toThrow();

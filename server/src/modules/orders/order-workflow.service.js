@@ -187,9 +187,8 @@ export class OrderWorkflowService {
         const worker = await tx.workerProfile.findUnique({
           where: { id: actor.workerProfile.id },
         });
-        if (this.faceCore?.enabled()) await this.faceCore.requireDaily(tx, worker.id);
-        else this.requireFace(worker);
-        if (!worker.isOnline || worker.approvalStatus !== 'APPROVED')
+        if (!worker.isOnline || worker.approvalStatus !== 'APPROVED' ||
+            !await tx.workerService.count({ where: { workerId: worker.id } }))
           throw new BadRequestException('WORKER_NOT_AVAILABLE');
         const busy = await tx.order.findFirst({
           where: { workerId: worker.id, status: { in: ACTIVE_STATUSES } },

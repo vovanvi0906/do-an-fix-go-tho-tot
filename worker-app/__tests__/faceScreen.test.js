@@ -6,17 +6,17 @@ import { apiClient } from '../src/services/api/apiClient';
 const mockBack = jest.fn();
 const mockReplace = jest.fn();
 let mockParams = {};
-jest.mock('expo-router', () => ({ useLocalSearchParams: () => mockParams, useRouter: () => ({ back: mockBack, replace: mockReplace }) }));
+jest.mock('expo-router', () => ({ useNavigation: () => ({ getState: () => ({routes:[],index:0}) }), useLocalSearchParams: () => mockParams, useRouter: () => ({ back: mockBack, replace: mockReplace }) }));
 jest.mock('@expo/vector-icons', () => ({ Ionicons: 'Ionicons' }));
 jest.mock('../src/services/api/apiClient', () => ({ apiClient: { get: jest.fn(), post: jest.fn() } }));
 jest.mock('expo-image-picker', () => ({ requestCameraPermissionsAsync: jest.fn(), launchCameraAsync: jest.fn(), CameraType: { front: 'front' } }));
 const blocked = { enrollmentStatus: 'PENDING_REVIEW', canEnroll: false, canVerifyDaily: false, canVerifyOrder: false };
 beforeEach(() => { jest.useFakeTimers(); jest.clearAllMocks(); mockParams = {}; apiClient.get.mockResolvedValue(blocked); jest.spyOn(AppState, 'addEventListener').mockReturnValue({ remove: jest.fn() }); });
 afterEach(() => { act(() => jest.runOnlyPendingTimers()); jest.useRealTimers(); });
-it('daily shows pending state with capture disabled and no gallery option', async () => {
+it('AC-01 default enrollment shows pending state with capture disabled and no gallery option', async () => {
   const ui = render(<FaceScreen />);
   await waitFor(() => expect(ui.getByText('Chụp ảnh — chưa sẵn sàng')).toBeDisabled());
-  expect(ui.getByText('Check-in đầu ca')).toBeTruthy();
+  expect(ui.getByText('Đăng ký khuôn mặt')).toBeTruthy();
   expect(ui.queryByText('Chọn ảnh')).toBeNull();
   expect(apiClient.post).not.toHaveBeenCalled();
   fireEvent.press(ui.getByText('Đăng ký lần đầu'));
@@ -26,10 +26,13 @@ it('enrollment requires consent, reports no queued request', async () => {
   mockParams = { mode: 'enrollment' };
   apiClient.post.mockResolvedValue({ ...blocked, accepted: false });
   const ui = render(<FaceScreen />);
-  await waitFor(() => expect(ui.getByText('Kiểm tra điều kiện đăng ký')).toBeDisabled());
+  await waitFor(() => expect(ui.getByText('Kiểm tra điều kiện đăng ký')).toBeEnabled());
+  expect(ui.getByRole('checkbox')).toHaveAccessibilityState({checked:true});
+  fireEvent.press(ui.getByRole('checkbox'));
+  expect(ui.getByText('Kiểm tra điều kiện đăng ký')).toBeDisabled();
   fireEvent.press(ui.getByRole('checkbox'));
   fireEvent.press(ui.getByText('Kiểm tra điều kiện đăng ký'));
-  await waitFor(() => expect(ui.getByText(/Chưa tiếp nhận đăng ký/)).toBeTruthy());
+  await waitFor(() => expect(ui.getByText(/Chưa thể đăng ký/)).toBeTruthy());
   expect(ui.queryByText('Xác thực thành công')).toBeNull();
 });
 it('order context stays distinct and returning cancels state', async () => {

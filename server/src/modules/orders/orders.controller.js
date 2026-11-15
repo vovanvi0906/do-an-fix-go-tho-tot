@@ -1,3 +1,5 @@
+import { memoryStorage } from 'multer';
+import { OrderBeforeMediaGuard } from './order-before-media.guard';
 import { DiagnosisUploadInterceptor } from './diagnosis/diagnosis-upload.interceptor';
 import { FaceCaptureBlockedGuard } from '../workers/face/face-capture-blocked.guard';
 import { OrderAccessGuard } from './order-access.guard';
@@ -20,6 +22,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { workerFaceStorage } from '../../config/cloudinary.config';
 import {
+  ApiConsumes,
   ApiTags,
   ApiBearerAuth,
   ApiOperation,
@@ -338,6 +341,22 @@ export class OrdersController {
   /**
    * 10. POST /orders/:id/images: Upload ảnh BEFORE/AFTER lên S3, lưu OrderImage
    */
+  @Post(':id/before-media')
+  @Roles('WORKER')
+  @UseGuards(OrderBeforeMediaGuard)
+  @UseInterceptors(FileInterceptor('image', { storage: memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024, files: 1, fields: 0 } }))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Lưu bytes ảnh BEFORE sau khi kiểm proof theo đơn; chưa ghi OrderImage' })
+  @ApiBody({ schema: { type: 'object', required: ['image'], properties: {
+    image: { type: 'string', format: 'binary' },
+  } } })
+  @ApiResponse({ status: 201, description: 'URL HTTPS do storage xác nhận' })
+  @Bind(Req(), Param('id'), UploadedFile())
+  async uploadBeforeMedia(req, id, file) {
+    return { success: true, data: await this.ordersService.beforeMedia.upload(req.user.userId, id, file) };
+  }
+
   @Post(':id/images')
   @ApiOperation({
     summary:

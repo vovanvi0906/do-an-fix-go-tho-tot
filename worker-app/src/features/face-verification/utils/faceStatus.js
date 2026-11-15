@@ -1,9 +1,8 @@
-import { isCurrentFaceProof } from "../services/proof";
 export const FACE_BLOCKERS = {
+  FACE_CORE_DISABLED:
+    'Chức năng xác thực khuôn mặt chưa được mở trên máy chủ. Vui lòng liên hệ quản trị viên.',
   WORKER_APPROVAL_REQUIRED:
     "Hồ sơ thợ cần được duyệt trước khi đăng ký khuôn mặt.",
-  IDENTITY_REVIEW_REQUIRED:
-    "Cần quản trị viên kiểm tra danh tính để đăng ký khuôn mặt.",
   CONSENT_REQUIRED: "Cần lưu đồng ý sử dụng khuôn mặt theo phiên bản hiện tại.",
   FACE_KEYS_NOT_CONFIGURED: "Hệ thống đang hoàn thiện lưu trữ mẫu an toàn.",
   BIOMETRIC_DATA_POLICY_NOT_APPROVED:
@@ -16,10 +15,9 @@ export const FACE_BLOCKERS = {
   TEMPLATE_STORAGE_POLICY_REQUIRED: "Hệ thống chưa sẵn sàng lưu mẫu.",
   DURABLE_PROOF_STORAGE_REQUIRED:
     "Hệ thống chưa sẵn sàng lưu bằng chứng xác thực.",
-  IDENTITY_EVIDENCE_REVIEW_REQUIRED:
-    "Cần kiểm tra danh tính trước khi đăng ký.",
+
 };
-export function faceSummary(status, profile, now = Date.now()) {
+export function faceSummary(status, profile) {
   if (!status)
     return {
       title: "Chưa tải được FaceID",
@@ -37,28 +35,11 @@ export function faceSummary(status, profile, now = Date.now()) {
       tone: "warning",
     };
   const enrolled = status.enrollmentStatus === "ENROLLED";
-  if (
-    enrolled &&
-    status.canVerifyDaily &&
-    isCurrentFaceProof(status.dailyProof, "DAILY", null, now)
-  )
+  if (enrolled && !status.consentRequired && !(status.blockers || []).includes('TEMPLATE_MODEL_CHANGED'))
     return {
-      title: "Đã xác thực đầu ca",
-      message:
-        "Bằng chứng xác thực còn hiệu lực. Không cần quét lại khi mở app.",
-      action: "Quản lý FaceID",
-      mode: "daily",
-      tone: "success",
-      valid: true,
-    };
-  if (status.reviewRequestSubmitted)
-    return {
-      title: "Đang chờ kiểm tra danh tính",
-      message:
-        "Yêu cầu đã được gửi. Bạn vẫn có thể xem hồ sơ và liên hệ hỗ trợ.",
-      action: "Xem FaceID",
-      mode: enrolled ? "daily" : "enrollment",
-      tone: "warning",
+      title: 'Đã đăng ký khuôn mặt',
+      message: 'Xác thực riêng theo đơn khi đã đến nơi. Không cần check-in đầu ca.',
+      action: 'Quản lý FaceID', mode: 'enrollment', tone: 'success', valid: true,
     };
   if (!enrolled)
     return {
@@ -67,23 +48,17 @@ export function faceSummary(status, profile, now = Date.now()) {
           ? "Cần đăng ký lại khuôn mặt"
           : "Chưa đăng ký khuôn mặt",
       message: status.canEnroll
-        ? "Đăng ký một mẫu khuôn mặt trước khi xác thực đầu ca."
-        : "Mở FaceID để xem điều kiện và gửi yêu cầu kiểm tra danh tính.",
+        ? "Đăng ký một mẫu khuôn mặt để xác thực theo từng đơn."
+        : "Mở FaceID để lưu đồng ý và xem điều kiện đăng ký mẫu khuôn mặt.",
       action: status.canEnroll ? "Đăng ký khuôn mặt" : "Thiết lập FaceID",
       mode: "enrollment",
       tone: "warning",
     };
   return {
-    title: "Cần xác thực đầu ca",
-    message: status.canVerifyDaily
-      ? "Quét khuôn mặt trước khi bật nhận đơn. Mẫu đăng ký được giữ nguyên."
-      : (status.blockers || [])
-          .map((code) => FACE_BLOCKERS[code])
-          .filter(Boolean)
-          .join("\n") || "Dịch vụ chưa sẵn sàng. Vui lòng kiểm tra lại.",
-    action: "Xác thực đầu ca",
-    mode: "daily",
-    tone: "warning",
+    title: 'Cần kiểm tra đăng ký khuôn mặt',
+    message: (status.blockers || []).map(code => FACE_BLOCKERS[code]).filter(Boolean).join('\n')
+      || 'Mở FaceID để kiểm tra consent và đăng ký khuôn mặt.',
+    action: 'Quản lý FaceID', mode: 'enrollment', tone: 'warning',
   };
 }
 export function facePrompt(status, profile, now) {

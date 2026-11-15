@@ -8,7 +8,7 @@ import {
   StyleSheet,
   AppState,
 } from "react-native";
-import { captureStability, assessNativeFaces } from "../utils/captureQuality";
+import { captureStability, assessNativeFaces, assessFaceLighting } from "../utils/captureQuality";
 
 export function LiveFaceCamera({ visible, onCapture, onClose }) {
   const video = useRef(null),
@@ -150,13 +150,25 @@ export function LiveFaceCamera({ visible, onCapture, onClose }) {
                   rotationY: yaw,
                 };
               });
-            const q = assessNativeFaces(faces, v.videoWidth, v.videoHeight);
+            let q = assessNativeFaces(faces, v.videoWidth, v.videoHeight);
+            if (q.ok) {
+              const canvas = document.createElement('canvas');
+              const scale = Math.min(1,640 / Math.max(v.videoWidth,v.videoHeight));
+              canvas.width = Math.max(1,Math.round(v.videoWidth*scale));
+              canvas.height = Math.max(1,Math.round(v.videoHeight*scale));
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(v,0,0,canvas.width,canvas.height);
+              const box=faces[0].frame;
+              const light=assessFaceLighting(ctx.getImageData(0,0,canvas.width,canvas.height),{frame:{left:box.left*scale,top:box.top*scale,width:box.width*scale,height:box.height*scale}});
+              if (!light.ok) q={...q,...light};
+            }
             stability.current = captureStability(
               stability.current,
               q,
               Date.now(),
+              3000,
             );
-            setQuality({ ...q, progress: stability.current.progress });
+            setQuality({ ...q, progress: stability.current.progress, countdown: q.ok ? Math.max(1,3-Math.floor((Date.now()-stability.current.since)/1000)) : null });
             if (automaticRef.current && stability.current.progress >= 1)
               void take(current);
           } catch {
@@ -242,7 +254,7 @@ export function LiveFaceCamera({ visible, onCapture, onClose }) {
           accessibilityLiveRegion="polite"
           style={s.message}
         >
-          {quality.message}
+          {automatic && quality.ok && quality.countdown ? `${quality.message} — ${quality.countdown}` : quality.message}
         </Text>
         <View style={s.track}>
           <View style={[s.progress, { width: `${quality.progress * 100}%` }]} />
@@ -253,13 +265,15 @@ export function LiveFaceCamera({ visible, onCapture, onClose }) {
           </Text>
         ) : null}
         <View nativeID="face-live-camera-auto-row" style={s.row}>
-          <Text style={s.message}>Tự chụp sau 1,3 giây ổn định</Text>
+          <Text style={s.message}>Tự chụp sau khi giữ ổn định và đếm 3–2–1</Text>
           <Switch
             nativeID="face-live-camera-auto"
             value={automatic}
             onValueChange={(value) => {
               automaticRef.current = value;
               setAutomatic(value);
+              stability.current = null;
+              setQuality(previous => ({...previous,progress:0,countdown:null}));
             }}
           />
         </View>

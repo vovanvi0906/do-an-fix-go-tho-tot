@@ -27,24 +27,11 @@ export async function persistedIdentity(db, user, admin, consentVersion) {
     await tx.biometricState.create({
       data: { workerId, consentVersion, consentedAt: now },
     });
-    const review = await tx.biometricReview.create({
-      data: {
-        workerId,
-        reviewerId: admin.id,
-        kind: 'ENROLLMENT',
-        evidenceReference: 'synthetic:arc01:persisted-state',
-        evidenceDigest: 'a'.repeat(64),
-        reason: 'FSM fixture only; no human identity or PAD verification',
-        approvedAt: now,
-        expiresAt: new Date(+now + 3600000),
-        epoch: 0,
-      },
-    });
     const modelVersion = 'arc01-synthetic-fixture-not-a-real-model';
     const template = await tx.biometricTemplate.create({
       data: {
         workerId,
-        reviewId: review.id,
+        reviewId: null,
         version: 1,
         epoch: 0,
         modelVersion,
@@ -64,7 +51,7 @@ export async function persistedIdentity(db, user, admin, consentVersion) {
     return {
       userId: user.id,
       workerId,
-      reviewId: review.id,
+      reviewId: null,
       templateId: template.id,
       modelVersion,
     };

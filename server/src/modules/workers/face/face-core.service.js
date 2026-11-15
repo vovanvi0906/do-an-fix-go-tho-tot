@@ -127,31 +127,6 @@ export class FaceCoreService {
       },
     });
   }
-  async identityReview(tx, workerId, state, template, now) {
-    if (!state) return null;
-    if (template) {
-      // expiresAt is the window for taking the enrollment sample, not template TTL.
-      // Verification remains bound to the immutable review that authorized this template.
-      const review = await tx.biometricReview.findUnique({
-        where: { id: template.reviewId },
-      });
-      return review &&
-        review.workerId === workerId &&
-        review.epoch === state.epoch &&
-        !review.revokedAt
-        ? review
-        : null;
-    }
-    return tx.biometricReview.findFirst({
-      where: {
-        workerId,
-        epoch: state.epoch,
-        revokedAt: null,
-        expiresAt: { gt: now },
-      },
-      orderBy: { approvedAt: 'desc' },
-    });
-  }
   consentValid(state) {
     return (
       state &&
@@ -174,7 +149,7 @@ export class FaceCoreService {
     if (!this.cryptoReady()) fail('FACE_KEYS_NOT_CONFIGURED');
     if (caps?.identityModelReady !== true) fail('IDENTITY_MODEL_NOT_READY');
     if (
-      !caps?.padEvaluated ||
+      !(caps?.padEvaluated || (this.options.experimentalPad === true && caps?.padExperimentalReady === true)) ||
       !text(caps.padModelVersion, 256) ||
       !text(caps.modelVersion, 256)
     )
@@ -199,27 +174,14 @@ export class FaceCoreService {
         where: { workerId: worker.id },
       });
       const template = await this.current(tx, worker.id);
-      const review = await this.identityReview(
-        tx,
-        worker.id,
-        state,
-        template,
-        now,
-      );
-      const request = await this.pendingReview(
-        tx,
-        worker.id,
-        state?.epoch ?? 0,
-      );
       const blockers = [];
       if (worker.approvalStatus !== 'APPROVED')
         blockers.push('WORKER_APPROVAL_REQUIRED');
-      if (!review) blockers.push('IDENTITY_REVIEW_REQUIRED');
       if (!this.consentValid(state)) blockers.push('CONSENT_REQUIRED');
       if (!this.cryptoReady()) blockers.push('FACE_KEYS_NOT_CONFIGURED');
       if (!this.options.captureApproved)
         blockers.push('BIOMETRIC_DATA_POLICY_NOT_APPROVED');
-      if (!caps?.padEvaluated) blockers.push('PAD_NOT_EVALUATED');
+      if (!(caps?.padEvaluated || (this.options.experimentalPad === true && caps?.padExperimentalReady === true))) blockers.push('PAD_NOT_EVALUATED');
       if (caps?.identityModelReady !== true || !text(caps.modelVersion, 256))
         blockers.push('IDENTITY_MODEL_NOT_READY');
       if (template && template.modelVersion !== caps?.modelVersion)
@@ -272,143 +234,38 @@ export class FaceCoreService {
           ? 'ENROLLED'
           : state?.withdrawnAt
             ? 'WITHDRAWN'
-            : 'PENDING_REVIEW',
+            : 'NOT_ENROLLED',
         template: metaTemplate(template),
         templateVersion: template?.version ?? null,
         requiredConsentVersion: this.options.consentVersion,
         consentVersion: state?.consentVersion ?? null,
         consentRequired: !this.consentValid(state),
-        identityReviewApproved: !!review,
-        reviewRequestSubmitted: !!request,
-        reviewRequest: request,
-        reviewKind: state?.lastVersion > 0 ? 'REENROLLMENT' : 'ENROLLMENT',
-        canRequestReview:
-          worker.approvalStatus === 'APPROVED' &&
-          !request &&
-          (!review || !!template),
+        enrollmentMethod: 'SELF_ENROLLMENT',
+        canRequestReview: false,
+        canRequestReset: false,
         blockers,
         canEnroll: !template && blockers.length === 0,
-        canRequestReset: !!template,
         canVerifyDaily: !!template && blockers.length === 0,
         canVerifyOrder:
           !!template && blockers.length === 0 && orderStageAllowed,
-        padDecision: caps?.padEvaluated ? 'INCONCLUSIVE' : 'NOT_EVALUATED',
+        // Existing proof use follows requireOrderProof, not new-inference readiness.
+        // Issuance still requires ready()/evaluated PAD; this flag never issues proof.
+        canUseOrderProof:
+          worker.approvalStatus === 'APPROVED' && orderStageAllowed && !!orderProof,
+        padMode: caps?.padMode || 'evaluated',
+        padEvaluated: caps?.padEvaluated === true,
+        padThreshold: caps?.padThreshold ?? null,
+        padNotice: caps?.padExperimentalReady ? 'PAD dùng ngưỡng thử nghiệm, chưa được kiểm chứng riêng trên FixGo.' : null,
+        padDecision: caps?.padEvaluated || caps?.padExperimentalReady ? 'INCONCLUSIVE' : 'NOT_EVALUATED',
         dailyProof: metaProof(proof) || null,
         orderProof: metaProof(orderProof) || null,
       };
     });
   }
-  // Durable review requests use the existing append-only audit log. Every writer
-  // holds the same worker row lock as enrollment/review/reset; no schema change.
-  async pendingReview(tx, workerId, epoch) {
-    const requests = await tx.biometricAudit.findMany({
-      where: {
-        workerId,
-        action: 'IDENTITY_REVIEW_REQUESTED',
-        reason: JSON.stringify({ epoch }),
-      },
-      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
-      take: 50,
-    });
-    // createdAt has millisecond precision in JS. Resolve by request ID, so equal
-    // timestamps cannot make a rejected request hide a newly submitted one.
-    for (const request of requests) {
-      const resolution = await tx.biometricAudit.findFirst({
-        where: {
-          workerId,
-          action: 'IDENTITY_REVIEW_REQUEST_RESOLVED',
-          targetId: request.id,
-        },
-      });
-      if (!resolution)
-        return {
-          id: request.id,
-          submittedAt: request.createdAt,
-          kind: request.targetId,
-          status: 'PENDING',
-        };
-    }
-    return null;
-  }
-  async requestReview(userId, { consent, kind }) {
-    if (consent !== true || !['ENROLLMENT', 'REENROLLMENT'].includes(kind))
-      fail('EXPLICIT_REVIEW_CONSENT_REQUIRED');
-    return this.workerTx(userId, async (tx, worker, now) => {
-      if (worker.approvalStatus !== 'APPROVED')
-        fail('WORKER_APPROVAL_REQUIRED');
-      const state = await this.state(tx, worker.id);
-      const expected = state.lastVersion > 0 ? 'REENROLLMENT' : 'ENROLLMENT';
-      if (kind !== expected) fail('REVIEW_KIND_INVALID');
-      const pending = await this.pendingReview(tx, worker.id, state.epoch);
-      if (pending) return { submitted: true, request: pending };
-      const review = await tx.biometricReview.findFirst({
-        where: {
-          workerId: worker.id,
-          epoch: state.epoch,
-          revokedAt: null,
-          expiresAt: { gt: now },
-        },
-      });
-      if (review && !(await this.current(tx, worker.id)))
-        fail('IDENTITY_ALREADY_REVIEWED');
-      const request = await tx.biometricAudit.create({
-        data: {
-          actorId: userId,
-          workerId: worker.id,
-          action: 'IDENTITY_REVIEW_REQUESTED',
-          reason: JSON.stringify({ epoch: state.epoch }),
-          targetId: kind,
-          createdAt: now,
-        },
-      });
-      return {
-        submitted: true,
-        request: { id: request.id, submittedAt: now, kind, status: 'PENDING' },
-      };
-    });
-  }
-  async adminReviewRequest(adminId, workerId) {
-    this.policy();
-    const admin = await this.prisma.user.findUnique({ where: { id: adminId } });
-    if (admin?.role !== 'ADMIN' || admin.status !== 'ACTIVE')
-      throw new ForbiddenException('ACTIVE_ADMIN_REQUIRED');
-    const worker = await this.prisma.workerProfile.findUnique({
-      where: { id: workerId },
-    });
-    if (!worker) fail('WORKER_NOT_FOUND');
-    const state = await this.prisma.biometricState.findUnique({
-      where: { workerId },
-    });
-    return {
-      request: await this.pendingReview(
-        this.prisma,
-        workerId,
-        state?.epoch ?? 0,
-      ),
-    };
-  }
-  async rejectReviewRequest(adminId, workerId, { requestId, reason }) {
-    this.policy();
-    return this.prisma.$transaction(async (tx) => {
-      const admin = await tx.user.findUnique({ where: { id: adminId } });
-      if (admin?.role !== 'ADMIN' || admin.status !== 'ACTIVE')
-        throw new ForbiddenException('ACTIVE_ADMIN_REQUIRED');
-      await tx.$queryRaw`SELECT id FROM worker_profiles WHERE id = ${workerId} FOR UPDATE`;
-      const state = await tx.biometricState.findUnique({ where: { workerId } });
-      const request = await this.pendingReview(tx, workerId, state?.epoch ?? 0);
-      if (!request || request.id !== requestId)
-        fail('REVIEW_REQUEST_NOT_PENDING');
-      await this.audit(
-        tx,
-        adminId,
-        workerId,
-        'IDENTITY_REVIEW_REQUEST_RESOLVED',
-        `REJECTED:${reason}`,
-        requestId,
-      );
-      return { rejected: true, requestId };
-    });
-  }
+  // Compatibility tombstones: old clients cannot create manual enrollment authorizations.
+  async requestReview() { fail('MANUAL_IDENTITY_REVIEW_REMOVED'); }
+  async adminReviewRequest() { fail('MANUAL_IDENTITY_REVIEW_REMOVED'); }
+  async rejectReviewRequest() { fail('MANUAL_IDENTITY_REVIEW_REMOVED'); }
   async consent(userId, version) {
     if (version !== this.options.consentVersion)
       fail('CONSENT_VERSION_REQUIRED');
@@ -422,92 +279,8 @@ export class FaceCoreService {
       return { consentVersion: version, consentedAt: now };
     });
   }
-  async review(adminId, workerId, body) {
-    this.policy();
-    return this.prisma.$transaction(async (tx) => {
-      const admin = await tx.user.findUnique({ where: { id: adminId } });
-      if (admin?.role !== 'ADMIN' || admin.status !== 'ACTIVE')
-        throw new ForbiddenException('ACTIVE_ADMIN_REQUIRED');
-      await tx.$queryRaw`SELECT id FROM worker_profiles WHERE id = ${workerId} FOR UPDATE`;
-      const worker = await tx.workerProfile.findUnique({
-        where: { id: workerId },
-        include: { user: true },
-      });
-      if (
-        worker?.approvalStatus !== 'APPROVED' ||
-        worker.user.status !== 'ACTIVE' ||
-        worker.user.role !== 'WORKER'
-      )
-        fail('APPROVED_ACTIVE_WORKER_REQUIRED');
-      const now = await this.now(tx),
-        expiresAt = new Date(body.expiresAt);
-      if (
-        body.reviewedIdentity !== true ||
-        !['ENROLLMENT', 'REENROLLMENT'].includes(body.kind) ||
-        !/^[a-zA-Z0-9:_-]{1,128}$/.test(body.evidenceReference || '') ||
-        !/^[a-f0-9]{64}$/.test(body.evidenceDigest || '') ||
-        !text(body.reason, 160) ||
-        !Number.isFinite(+expiresAt) ||
-        expiresAt <= now ||
-        +expiresAt - now > 30 * 86400000
-      )
-        fail('IDENTITY_REVIEW_EVIDENCE_REQUIRED');
-      const state = await this.state(tx, worker.id);
-      const pendingRequest = await this.pendingReview(
-        tx,
-        workerId,
-        state.epoch,
-      );
-      if (
-        body.requestId &&
-        (pendingRequest?.id !== body.requestId ||
-          pendingRequest.kind !== body.kind)
-      )
-        fail('REVIEW_REQUEST_NOT_PENDING');
-      if (state.lastVersion > 0 && body.kind !== 'REENROLLMENT')
-        fail('REENROLLMENT_REVIEW_REQUIRED');
-      if (body.kind === 'REENROLLMENT') {
-        await this.revoke(tx, worker.id, adminId, now, false);
-      }
-      const fresh = await this.state(tx, worker.id);
-      const review = await tx.biometricReview.create({
-        data: {
-          workerId,
-          reviewerId: adminId,
-          kind: body.kind,
-          evidenceReference: body.evidenceReference,
-          evidenceDigest: body.evidenceDigest,
-          reason: body.reason,
-          approvedAt: now,
-          expiresAt,
-          epoch: fresh.epoch,
-        },
-      });
-      await this.audit(
-        tx,
-        adminId,
-        workerId,
-        'IDENTITY_REVIEW_APPROVED',
-        body.kind,
-        review.id,
-      );
-      if (pendingRequest)
-        await this.audit(
-          tx,
-          adminId,
-          workerId,
-          'IDENTITY_REVIEW_REQUEST_RESOLVED',
-          `APPROVED:${review.id}`,
-          pendingRequest.id,
-        );
-      return {
-        id: review.id,
-        kind: review.kind,
-        approvedAt: now,
-        expiresAt,
-        reviewerId: adminId,
-      };
-    });
+  async review() {
+    fail('MANUAL_IDENTITY_REVIEW_REMOVED');
   }
   async revoke(tx, workerId, actorId, now, withdraw) {
     await this.state(tx, workerId);
@@ -603,14 +376,6 @@ export class FaceCoreService {
       });
       if (count >= this.options.windowAttempts) fail('FACE_RATE_LIMITED');
       const template = await this.current(tx, worker.id);
-      const review = await this.identityReview(
-        tx,
-        worker.id,
-        state,
-        purpose === 'ENROLLMENT' ? null : template,
-        now,
-      );
-      if (!review) fail('IDENTITY_REVIEW_REQUIRED');
       if (purpose === 'ENROLLMENT' && template)
         throw new ConflictException('TEMPLATE_ALREADY_ENROLLED');
       if (
@@ -630,7 +395,7 @@ export class FaceCoreService {
         templateId: template?.id ?? null,
         templateVersion: template?.version ?? state.lastVersion + 1,
         modelVersion: caps.modelVersion,
-        reviewId: review.id,
+        reviewId: null,
         createdAt: now,
         expiresAt: new Date(+now + this.options.sessionMs),
       };
@@ -824,7 +589,7 @@ export class FaceCoreService {
         'FACE_PAD_REJECTED',
         'IDENTITY_NOT_VERIFIED',
         'SESSION_EXPIRED_OR_REVOKED',
-      ].includes(error?.message)
+      ].includes(error?.message) || /^FACE_QUALITY_REJECTED_(NO_FACE|MULTIPLE_FACES|INVALID_DETECTION|FACE_SIZE_OR_CROP|LIGHTING|BLUR)$/.test(error?.message || '')
         ? error.message
         : 'FACE_EVIDENCE_REJECTED';
       fail(safeCode);
@@ -884,17 +649,6 @@ export class FaceCoreService {
       if (worker.approvalStatus !== 'APPROVED')
         fail('WORKER_APPROVAL_REQUIRED');
       await this.orderAccess(tx, worker, s.purpose, s.orderId);
-      const review = await tx.biometricReview.findUnique({
-        where: { id: s.reviewId },
-      });
-      if (
-        !review ||
-        review.workerId !== worker.id ||
-        review.revokedAt ||
-        (s.purpose === 'ENROLLMENT' && review.expiresAt <= now) ||
-        review.epoch !== state.epoch
-      )
-        fail('IDENTITY_REVIEW_REQUIRED');
       if (
         evidence?.workerId !== worker.id ||
         evidence.sessionId !== id ||
@@ -902,7 +656,11 @@ export class FaceCoreService {
         evidence.templateVersion !== s.templateVersion
       )
         fail('INVALID_FACE_EVIDENCE');
-      if (evidence.qualityDecision !== 'PASS') fail('FACE_QUALITY_REJECTED');
+      if (evidence.qualityDecision !== 'PASS') {
+        const reason = ['NO_FACE', 'MULTIPLE_FACES', 'INVALID_DETECTION', 'FACE_SIZE_OR_CROP', 'LIGHTING', 'BLUR'].includes(evidence.errorCode)
+          ? evidence.errorCode : null;
+        fail(reason ? `FACE_QUALITY_REJECTED_${reason}` : 'FACE_QUALITY_REJECTED');
+      }
       if (evidence.padDecision !== 'PASS') fail('FACE_PAD_REJECTED');
       if (evidence.padModelVersion !== caps.padModelVersion)
         fail('INVALID_FACE_EVIDENCE');
@@ -928,7 +686,7 @@ export class FaceCoreService {
             workerId: worker.id,
             version: s.templateVersion,
             epoch: state.epoch,
-            reviewId: review.id,
+            reviewId: null,
             modelVersion: s.modelVersion,
             keyId: this.options.currentKeyId,
             encrypted,
@@ -949,7 +707,7 @@ export class FaceCoreService {
           userId,
           worker.id,
           'ENROLLED',
-          'REVIEW_QUALITY_PAD_VALIDATED',
+          'SELF_ENROLLMENT_QUALITY_PAD_VALIDATED',
           template.id,
         );
         return {
@@ -986,7 +744,7 @@ export class FaceCoreService {
           orderId: s.orderId,
           modelVersion: s.modelVersion,
           padModelVersion: caps.padModelVersion,
-          policyVersion: `experimental-v1:cosine:${this.options.threshold}`,
+          policyVersion: caps.padExperimentalReady ? `pad-threshold-experimental:${caps.padThreshold}:cosine:${this.options.threshold}` : `experimental-v1:cosine:${this.options.threshold}`,
           identityScore: evidence.identityScore,
           issuedAt: now,
           expiresAt: new Date(
@@ -1046,7 +804,7 @@ export class FaceCoreService {
     if (!proof) fail('DAILY_PROOF_REQUIRED');
     return metaProof(proof);
   }
-  async consumeOrder(tx, workerId, orderId, actorId) {
+  async requireOrderProof(tx, workerId, orderId) {
     this.policy();
     const worker = await this.eligibleWorker(tx, workerId);
     const state = await tx.biometricState.findUnique({ where: { workerId } }),
@@ -1073,6 +831,10 @@ export class FaceCoreService {
     if (!proof) fail('ORDER_FACE_PROOF_REQUIRED');
     // Keep historical order lineage, but never consume for a changed current assignee/stage.
     await this.orderAccess(tx, worker, 'ORDER', orderId);
+    return { proof, now };
+  }
+  async consumeOrder(tx, workerId, orderId, actorId) {
+    const { proof, now } = await this.requireOrderProof(tx, workerId, orderId);
     const changed = await tx.biometricProof.updateMany({
       where: {
         id: proof.id,

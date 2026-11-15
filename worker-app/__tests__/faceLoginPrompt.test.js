@@ -24,8 +24,8 @@ it('opens enrollment explicitly, never starts camera on login',async()=>{
   fireEvent.press(ui.getByText('Đăng ký khuôn mặt'));
   expect(mockPush).toHaveBeenCalledWith({pathname:'/(worker)/verification/face',params:{mode:'enrollment'}});
 });
-it('does not prompt when daily proof remains valid',async()=>{
-  const now=Date.now();faceIdentityService.status.mockResolvedValue({enrollmentStatus:'ENROLLED',canVerifyDaily:true,dailyProof:{id:'p',purpose:'DAILY',orderId:null,templateVersion:1,consumedAt:null,issuedAt:new Date(now-1000).toISOString(),expiresAt:new Date(now+60000).toISOString()}});
+it('does not prompt enrolled workers when no Daily proof exists',async()=>{
+  const now=Date.now();faceIdentityService.status.mockResolvedValue({enrollmentStatus:'ENROLLED',dailyProof:null});
   const ui=render(<FaceLoginPrompt/>);
   await waitFor(()=>expect(faceIdentityService.status).toHaveBeenCalled());
   expect(ui.queryByText('Để sau, vào ứng dụng')).toBeNull();

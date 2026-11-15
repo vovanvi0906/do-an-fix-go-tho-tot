@@ -23,17 +23,16 @@ export class FaceIdentityService {
     }
     const blockers = [
       ...(worker.approvalStatus === 'APPROVED' ? [] : ['WORKER_APPROVAL_REQUIRED']),
-      'IDENTITY_EVIDENCE_REVIEW_REQUIRED', 'PAD_NOT_EVALUATED',
-      'TEMPLATE_STORAGE_POLICY_REQUIRED', 'DURABLE_PROOF_STORAGE_REQUIRED',
+      'FACE_CORE_DISABLED',
     ];
     return {
-      enrollmentStatus: worker.faceProfile ? 'LEGACY_UNTRUSTED' : 'PENDING_REVIEW',
+      enrollmentStatus: worker.faceProfile ? 'LEGACY_UNTRUSTED' : 'NOT_ENROLLED',
       reviewRequestSubmitted: false,
-      canEnroll: false, canVerifyDaily: false, canVerifyOrder: false,
+      canEnroll: false, canVerifyDaily: false, canVerifyOrder: false, canUseOrderProof: false,
       canRequestReset: false,
       templateVersion: null, padDecision: 'NOT_EVALUATED',
       dailyProof: null, orderProof: null, blockers,
-      message: 'Đăng ký khuôn mặt đang chờ quy trình duyệt danh tính, PAD và lưu trữ an toàn. Chưa gửi yêu cầu duyệt.',
+      message: 'Chức năng xác thực khuôn mặt chưa được mở trên máy chủ. Cập nhật hồ sơ danh tính không mở được camera. Vui lòng liên hệ quản trị viên.',
     };
   }
 
@@ -43,7 +42,7 @@ export class FaceIdentityService {
       throw new BadRequestException('EXPLICIT_CONSENT_REQUIRED_NO_BIOMETRIC_INPUT: Vui lòng đồng ý; không gửi dữ liệu khuôn mặt ở bước này');
     }
     const status = await this.status(userId);
-    return { ...status, action: reset ? 'RESET' : 'ENROLLMENT', accepted: false,
-      errorCode: reset ? 'RESET_REVIEW_WORKFLOW_UNAVAILABLE' : 'ENROLLMENT_POLICY_UNAVAILABLE' };
+    return { ...status, action: reset ? 'RESET' : 'ENROLLMENT', accepted: !reset && status.canEnroll === true,
+      errorCode: !reset && status.canEnroll ? null : reset ? 'RESET_REQUIRES_WITHDRAWAL' : 'ENROLLMENT_POLICY_UNAVAILABLE' };
   }
 }

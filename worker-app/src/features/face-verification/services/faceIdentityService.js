@@ -7,13 +7,4 @@ export const faceIdentityService = {
   async profile(signal) {
     return unwrap(await apiClient.get("/workers/me", { signal }));
   },
-  async requestReview(kind, signal) {
-    return unwrap(
-      await apiClient.post(
-        "/workers/me/face/review-requests",
-        { consent: true, kind },
-        { signal },
-      ),
-    );
-  },
 };

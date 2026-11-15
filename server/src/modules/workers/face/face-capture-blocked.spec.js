@@ -1,3 +1,4 @@
+import { OrderBeforeMediaGuard } from '../../orders/order-before-media.guard';
 import { FaceIdentityController } from './face-identity.controller';
 import { FaceIdentityService } from './face-identity.service';
 import { Test } from '@nestjs/testing';
@@ -20,7 +21,7 @@ describe('Nest capture gate before multipart persistence', () => {
     const module = await Test.createTestingModule({
       controllers: [WorkersController, OrdersController, FaceIdentityController],
       providers: [{ provide: FaceIdentityService, useValue: new FaceIdentityService({ workerProfile: { findUnique: async () => ({ user: { role: 'WORKER', status: 'ACTIVE' }, approvalStatus: 'APPROVED' }) } }) }, FaceCaptureBlockedGuard, { provide: WorkersService, useValue: {} }, { provide: OrdersService, useValue: {} }],
-    }).overrideGuard(JwtAuthGuard).useValue({ canActivate: ctx => { ctx.switchToHttp().getRequest().user = { userId: 'synthetic-u' }; return true; } })
+    }).overrideGuard(OrderBeforeMediaGuard).useValue({ canActivate: () => false }).overrideGuard(JwtAuthGuard).useValue({ canActivate: ctx => { ctx.switchToHttp().getRequest().user = { userId: 'synthetic-u' }; return true; } })
       .overrideGuard(RolesGuard).useValue({ canActivate: () => true })
       .overrideGuard(OrderAccessGuard).useValue({ canActivate: () => true })
       .compile();

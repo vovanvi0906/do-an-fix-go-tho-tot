@@ -12,12 +12,12 @@ export default function WorkerLayout() {
   }
   return (
     <>
-    <Stack key={user.id} screenOptions={{ headerShown: false }}>
+    <Stack key={`worker-stack:${user.id}`} screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="job/[id]" options={{ headerShown: true, title: 'Chi tiết việc làm' }} />
       <Stack.Screen name="verification/face" options={{ headerShown: true, title: 'Xác thực khuôn mặt AI' }} />
     </Stack>
-    <FaceLoginPrompt key={user.id} />
+    <FaceLoginPrompt key={`face-login-prompt:${user.id}`} />
     </>
   );
 }

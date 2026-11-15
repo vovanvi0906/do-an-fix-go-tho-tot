@@ -75,8 +75,18 @@ export const orderService = {
   /**
    * 7. Upload ảnh BEFORE / AFTER (POST /orders/:id/images)
    */
-  async uploadImage(orderId, payload) {
-    return apiClient.post(`/orders/${orderId}/images`, payload);
+  async uploadBeforeMedia(orderId, uri, signal) {
+    const body = new FormData();
+    if (uri.startsWith('blob:') || uri.startsWith('data:'))
+      body.append('image', await (await fetch(uri)).blob(), 'before.jpg');
+    else if (/^(file|content):/.test(uri))
+      body.append('image', { uri, name: 'before.jpg', type: 'image/jpeg' });
+    else throw new Error('LOCAL_CAPTURE_REQUIRED');
+    return apiClient.post(`/orders/${encodeURIComponent(orderId)}/before-media`, body,
+      { signal, timeout: 30000, headers: { 'Content-Type': 'multipart/form-data' } });
+  },
+  async uploadImage(orderId, payload, signal) {
+    return apiClient.post(`/orders/${orderId}/images`, payload, { signal });
   },
 
   /**

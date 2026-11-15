@@ -103,14 +103,18 @@ it.each([401, 403, 404, 500])('detail clears customer and actions after HTTP %s,
   fireEvent.press(ui.getByText(`HTTP ${status} — Thử lại`));
   await waitFor(() => expect(ui.getByText('Khách từ server')).toBeTruthy());
 });
-it('current order proof enables start, then waits for authoritative order reload', async () => {
-  orderService.getOrderById.mockResolvedValue(snapshot('ARRIVED'));
-  apiClient.get.mockResolvedValue({ orderProof: { id: 'proof-1', purpose: 'ORDER', orderId: 'order-1', templateVersion: 1, consumedAt: null,
+it('AC-08 current proof plus persisted BEFORE enables start once and waits for backend reload', async () => {
+  orderService.getOrderById.mockResolvedValue({ ...snapshot('ARRIVED'),
+    images: [{ type: 'BEFORE', uploadedAt: new Date().toISOString() }],
+    statusHistory: [{ status: 'ARRIVED', createdAt: new Date(Date.now()-10000).toISOString() }] });
+  apiClient.get.mockResolvedValue({ canVerifyOrder: true, canUseOrderProof: true, orderProof: { id: 'proof-1', purpose: 'ORDER', orderId: 'order-1', templateVersion: 1, consumedAt: null,
     issuedAt: new Date(Date.now()-1000).toISOString(), expiresAt: new Date(Date.now()+300000).toISOString() } });
   let finish; apiClient.patch.mockImplementation(() => new Promise(resolve => { finish = resolve; }));
   const ui = render(<WorkerJobDetailScreen />);
   await waitFor(() => expect(ui.getByText('BẮT ĐẦU CÔNG VIỆC')).toBeTruthy());
   fireEvent.press(ui.getByText('BẮT ĐẦU CÔNG VIỆC'));
+  fireEvent.press(ui.getByText('BẮT ĐẦU CÔNG VIỆC'));
+  expect(apiClient.patch).toHaveBeenCalledTimes(1);
   expect(apiClient.patch).toHaveBeenCalledWith('/orders/order-1/status', { status: 'IN_PROGRESS' });
   expect(ui.queryByText('Đang thực hiện công việc.')).toBeNull();
   orderService.getOrderById.mockResolvedValue(snapshot('IN_PROGRESS'));
@@ -124,4 +128,35 @@ it('another order proof never enables the start button', async () => {
   const ui = render(<WorkerJobDetailScreen />);
   await waitFor(() => expect(ui.getByText('CHỜ XÁC THỰC THEO ĐƠN')).toBeTruthy());
   fireEvent.press(ui.getByText('CHỜ XÁC THỰC THEO ĐƠN')); expect(apiClient.patch).not.toHaveBeenCalled();
+});
+
+it('AC-07 valid proof without BEFORE enables camera but never Start or a second face scan', async () => {
+  orderService.getOrderById.mockResolvedValue(snapshot('ARRIVED'));
+  apiClient.get.mockResolvedValue({ canVerifyOrder: true, canUseOrderProof: true, orderProof: {
+    id: 'p', purpose: 'ORDER', orderId: 'order-1', templateVersion: 1, consumedAt: null,
+    issuedAt: new Date(Date.now()-1000).toISOString(), expiresAt: new Date(Date.now()+3000).toISOString(),
+  } });
+  const ui = render(<WorkerJobDetailScreen />);
+  await waitFor(() => expect(ui.getByText('Chụp ảnh trước khi làm')).toBeTruthy());
+  expect(ui.getByText('CHỜ ẢNH BEFORE')).toBeDisabled();
+  expect(ui.queryByText('CHECK-IN KHUÔN MẶT THỢ (AI FACE)')).toBeNull();
+  act(() => jest.advanceTimersByTime(4000));
+  expect(ui.queryByText('Chụp ảnh trước khi làm')).toBeNull();
+  expect(ui.getByText('CHECK-IN KHUÔN MẶT THỢ (AI FACE)')).toBeTruthy();
+});
+it('AC-10 start failure refetches persisted BEFORE and never fabricates IN_PROGRESS', async () => {
+  orderService.getOrderById.mockResolvedValue({ ...snapshot('ARRIVED'),
+    images: [{ type: 'BEFORE', uploadedAt: new Date().toISOString() }],
+    statusHistory: [{ status: 'ARRIVED', createdAt: new Date(Date.now()-10000).toISOString() }] });
+  apiClient.get.mockResolvedValue({ canVerifyOrder: true, canUseOrderProof: true, orderProof: {
+    id: 'p', purpose: 'ORDER', orderId: 'order-1', templateVersion: 1, consumedAt: null,
+    issuedAt: new Date(Date.now()-1000).toISOString(), expiresAt: new Date(Date.now()+60000).toISOString(),
+  } });
+  apiClient.patch.mockRejectedValueOnce(Error('QUOTE_NOT_APPROVED'));
+  const ui = render(<WorkerJobDetailScreen />);
+  await waitFor(() => expect(ui.getByText('BẮT ĐẦU CÔNG VIỆC')).toBeTruthy());
+  await act(async () => fireEvent.press(ui.getByText('BẮT ĐẦU CÔNG VIỆC')));
+  expect(ui.getByText('Máy chủ đã lưu ảnh BEFORE.')).toBeTruthy();
+  expect(ui.queryByText('Đang thực hiện công việc.')).toBeNull();
+  expect(Alert.alert).toHaveBeenCalledWith('Chưa cập nhật trạng thái', 'Báo giá điều chỉnh chưa được khách duyệt. Ảnh BEFORE đã lưu vẫn được giữ.');
 });
