@@ -1,13 +1,15 @@
 import path from 'node:path';
-import { Injectable, BadRequestException, ForbiddenException, ServiceUnavailableException } from '@nestjs/common';
+import { Injectable, Dependencies, BadRequestException, ForbiddenException, ServiceUnavailableException } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { validateSync } from 'class-validator';
 import { readPolicy, principalFor, requireOperation, soloPrincipalFor } from './ai01-policy';
+import { PrismaService } from '../../infrastructure/database/prisma.service';
+import { LabelBrowserQueryDto } from './dto/label-browser-query.dto';
 import { ReviewEngine } from './review-engine';
 import { ReviewActionDto } from './dto/review-action.dto';
 const SERVER = path.resolve(__dirname, '../../..');
 const MUTATIONS = new Set(['mapping', 'annotate', 'adjudicate', 'save_provenance', 'export', 'solo_mapping', 'solo_annotate', 'solo_confirm', 'solo_save_provenance', 'solo_export', 'fast_save', 'fast_check', 'fast_export', 'fast_quality_save', 'fast_quality_export']);
-const READS = new Set(['overview', 'items', 'catalog', 'mappings', 'adjudication', 'provenance', 'related', 'readiness', 'history', 'solo_catalog', 'solo_items', 'solo_mappings', 'solo_detail', 'solo_related', 'solo_readiness', 'fast_catalog', 'fast_items', 'fast_detail', 'fast_mappings', 'fast_readiness', 'fast_preparation', 'fast_quality_overview', 'fast_quality_detail', 'management_status']);
+const READS = new Set(['overview', 'items', 'catalog', 'mappings', 'adjudication', 'provenance', 'related', 'readiness', 'history', 'solo_catalog', 'solo_items', 'solo_mappings', 'solo_detail', 'solo_related', 'solo_readiness', 'fast_catalog', 'fast_items', 'fast_label_options', 'fast_label_items', 'fast_label_queue', 'fast_detail', 'fast_mappings', 'fast_readiness', 'fast_preparation', 'fast_quality_overview', 'fast_quality_detail', 'management_status']);
 function rejectIdentity(value) {
   if (!value || typeof value !== 'object') return;
   for (const [key, item] of Object.entries(value)) {
@@ -16,8 +18,10 @@ function rejectIdentity(value) {
   }
 }
 @Injectable()
+@Dependencies(PrismaService)
 export class Ai01ReviewService {
-  constructor() {
+  constructor(prisma) {
+    this.prisma = prisma;
     this.config = { enabled: process.env.AI01_REVIEW_ENABLED === 'true', policyFile: process.env.AI01_REVIEW_POLICY_FILE || path.join(SERVER, 'config/ai01-review.example.json'), python: process.env.AI01_REVIEW_PYTHON || path.resolve(SERVER, '../ai-service/.venv/bin/python'), script: path.join(SERVER, 'scripts/ai01/review_bridge.py'), pilotDir: process.env.AI01_PILOT_DIR, stateDir: process.env.AI01_REVIEW_STATE_DIR };
     this.engine = new ReviewEngine(this.config);
   }
@@ -59,6 +63,18 @@ export class Ai01ReviewService {
       deployment: { supported: false, status: 'not_integrated',
         reason: 'Chưa có model registry, API thử inference cách ly, activation hoặc rollback. Production model được giữ nguyên.' },
     };
+    if (operation.startsWith('fast_label_')) {
+      const dto = plainToInstance(LabelBrowserQueryDto, query);
+      if (validateSync(dto, {whitelist:true, forbidNonWhitelisted:true}).length) throw new BadRequestException('Bộ lọc hoặc phân trang không hợp lệ.');
+      let categories, targets;
+      try {
+        [categories, targets] = await Promise.all([
+          this.prisma.serviceCategory.findMany({where:{isActive:true},select:{id:true,name:true,isActive:true},orderBy:{name:'asc'}}),
+          this.prisma.serviceTarget.findMany({where:{isActive:true,category:{isActive:true}},select:{id:true,name:true,categoryId:true,isActive:true},orderBy:{name:'asc'}}),
+        ]);
+      } catch { throw new ServiceUnavailableException('Chưa đọc được taxonomy FixGo từ database. Hãy thử lại.'); }
+      return this.engine.call(principal, operation, {...dto, catalog:{categories,targets}});
+    }
     const payload = {};
     if (['adjudication', 'provenance', 'related', 'solo_detail', 'solo_related', 'fast_detail', 'fast_quality_detail'].includes(operation)) { if (!/^img-\d{5}$/.test(query.imageId || '')) throw new BadRequestException('ID ảnh không hợp lệ.'); payload.imageId = query.imageId; }
     return this.engine.call(principal, operation, payload);

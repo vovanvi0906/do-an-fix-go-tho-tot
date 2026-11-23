@@ -1,7 +1,8 @@
 import React,{useEffect,useRef,useState} from 'react';
 import {buttonClass,fieldClass,ReviewPanel} from './ReviewPanel';
-export default function ImageReview({items,item,imageUrl,onSelect,children,datasetNames={},navigationLimit=null,disabled=false,reviewTitle='Quyết định review'}) {
- const canvas=useRef(null),[overlay,setOverlay]=useState(true);
+export default function ImageReview({items,item,imageUrl,onSelect,children,datasetNames={},navigationLimit=null,disabled=false,reviewTitle='Quyết định review',compact=false,hideNavigation=false}) {
+ const canvas=useRef(null),[overlay,setOverlay]=useState(true),[zoom,setZoom]=useState(1);
+ useEffect(()=>{setZoom(1);},[item?.id]);
  useEffect(()=>{
   if(!imageUrl||!item)return;let alive=true;const im=new Image();
   im.onload=()=>{
@@ -27,11 +28,12 @@ export default function ImageReview({items,item,imageUrl,onSelect,children,datas
  const pos=items.findIndex(r=>r.id===item.id),start=navigationLimit?Math.max(0,pos-Math.floor(navigationLimit/2)):0;
  const navigationItems=navigationLimit?items.slice(start,start+navigationLimit):items;
  return <div className="space-y-4">
-  <div className="flex flex-wrap gap-2"><button className={buttonClass} disabled={disabled||pos<1} onClick={()=>onSelect(items[pos-1].id)}>Trước</button><select aria-label="Chọn ảnh pilot" disabled={disabled} className={`${fieldClass} max-w-sm`} value={item.id} onChange={e=>onSelect(e.target.value)}>{navigationItems.map((r,i)=><option key={r.id} value={r.id}>{start+i+1}/{items.length} · {r.id} · {datasetNames[r.dataset]||r.dataset}{r.sourceLabelsVi?.length?` · ${r.sourceLabelsVi.join(", ")}`:""}</option>)}</select><button className={buttonClass} disabled={disabled||pos===items.length-1} onClick={()=>onSelect(items[pos+1].id)}>Tiếp</button></div>
+  {!hideNavigation&&<div className="flex flex-wrap gap-2"><button className={buttonClass} disabled={disabled||pos<1} onClick={()=>onSelect(items[pos-1].id)}>Trước</button><select aria-label="Chọn ảnh pilot" disabled={disabled} className={`${fieldClass} max-w-sm`} value={item.id} onChange={e=>onSelect(e.target.value)}>{navigationItems.map((r,i)=><option key={r.id} value={r.id}>{start+i+1}/{items.length} · {r.id} · {datasetNames[r.dataset]||r.dataset}{r.sourceLabelsVi?.length?` · ${r.sourceLabelsVi.join(", ")}`:""}</option>)}</select><button className={buttonClass} disabled={disabled||pos===items.length-1} onClick={()=>onSelect(items[pos+1].id)}>Tiếp</button></div>}
   <div className="grid items-start gap-4 lg:grid-cols-2">
    <div className="lg:sticky lg:top-4"><ReviewPanel title={`${item.id} · ${datasetNames[item.dataset]||item.dataset}`}>
     <label className="flex gap-2 text-sm"><input type="checkbox" checked={overlay} onChange={e=>setOverlay(e.target.checked)}/>Hiện khung/vùng nhãn nguồn</label>
-    <canvas ref={canvas} aria-label="Ảnh nguồn và vùng nhãn Roboflow" className="w-full max-h-[55vh] object-contain bg-slate-100 dark:bg-slate-800 rounded-lg"/>
+    {compact&&<div className="flex items-center gap-2"><button className={buttonClass} disabled={zoom<=1} onClick={()=>setZoom(v=>Math.max(1,v-.25))} aria-label="Thu nhỏ ảnh">−</button><button className={buttonClass} onClick={()=>setZoom(1)}>{Math.round(zoom*100)}%</button><button className={buttonClass} disabled={zoom>=3} onClick={()=>setZoom(v=>Math.min(3,v+.25))} aria-label="Phóng to ảnh">+</button></div>}
+    <div className="overflow-auto max-h-[65vh]"><div style={compact?{width:`${zoom*100}%`}:undefined}><canvas ref={canvas} aria-label="Ảnh nguồn và vùng nhãn Roboflow" className={`${compact?'w-full':'w-full max-h-[55vh]'} object-contain bg-slate-100 dark:bg-slate-800 rounded-lg`}/></div></div>
     <div><p className="text-xs text-slate-500 mb-2">Nhãn nguồn Roboflow · chưa được người xác nhận</p><div className="flex flex-wrap gap-2">{(item.sourceLabelsVi||item.sourceLabels).length?(item.sourceLabelsVi||item.sourceLabels).map((v,i)=><span key={i} className="rounded-lg border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/20 px-2 py-1 text-sm font-medium text-rose-800 dark:text-rose-200">{v}</span>):<span className="text-sm">Chưa có nhãn nguồn — không có nghĩa là bình thường</span>}</div></div>
     <details className="text-xs text-slate-500"><summary className="cursor-pointer">Thông tin nguồn và mã gốc</summary><div className="mt-2 space-y-1 break-all"><p>Mã nhãn gốc: {item.sourceLabels.join(', ')||'Rỗng'}</p><p>SHA256: {item.sha256}</p><p>Nguồn: {item.source.url}</p><p>Giấy phép khai: {item.source.licenseDeclared} — cần xác minh riêng.</p></div></details>
    </ReviewPanel></div>

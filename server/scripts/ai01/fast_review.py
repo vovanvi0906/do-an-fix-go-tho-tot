@@ -150,6 +150,11 @@ class FastReview:
 
     def handle(self, uid, op, p):
         self.check_audit()
+        if op.startswith('fast_label_'):
+            if not hasattr(self, 'label_browser'):
+                from label_browser import LabelBrowser
+                self.label_browser = LabelBrowser(self)
+            return self.label_browser.handle(uid, op, p)
         if op.startswith('fast_quality_'): return self.quality.handle(uid,op,p)
         if op == 'fast_preparation': return self.prepared.overview(self.latest)
         if op == 'fast_catalog': return self.tax

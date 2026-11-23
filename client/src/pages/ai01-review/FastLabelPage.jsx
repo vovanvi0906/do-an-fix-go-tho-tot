@@ -11,14 +11,14 @@ import {message} from './constants';
 
 const EVIDENCE_HINTS={rightsEvidence:'Ví dụ: liên kết license, tên tác giả và yêu cầu ghi nguồn đã kiểm tra.',sourceEvidence:'Ví dụ: liên kết bộ ảnh gốc và nội dung bạn đã đối chiếu.',groupEvidence:'Ví dụ: đã so sánh các ảnh cùng cảnh; ghi ID nhóm hoặc ảnh cần giữ cùng split.',reason:'Ví dụ: đã đọc lại nhãn đối tượng và dấu hiệu, đủ bằng chứng dùng cho dữ liệu phát triển.'};
 
-function DevelopmentCheck({detail, busy, onSave}) {
+export function DevelopmentCheck({detail, busy, onSave, onDirtyChange}) {
   const [form,setForm]=useState({rightsEvidence:'',sourceEvidence:'',groupEvidence:'',reason:''});
   const own = detail.annotation?.decision === 'confirmed';
   return <ReviewPanel title="Kiểm tra trước khi xuất SOLO">
     <p className="text-sm">Nhãn vừa lưu vẫn cách ly khỏi bản xuất cho đến khi bạn kiểm tra nguồn, quyền sử dụng và nhóm ảnh trùng. Thiếu bằng chứng thì để trống và xem lại sau.</p>
     {detail.blockers.length ? <ul className="text-sm text-amber-700 dark:text-amber-300 list-disc pl-5">{detail.blockers.map(b=><li key={b}>{b}</li>)}</ul> : <p className="text-emerald-700 dark:text-emerald-300">Đủ điều kiện xuất solo-development; không đủ điều kiện benchmark độc lập.</p>}
     <form className="space-y-3" onSubmit={e=>{e.preventDefault();onSave(form);}}>
-      {Object.entries({rightsEvidence:'Bằng chứng quyền ảnh / license / attribution',sourceEvidence:'Bằng chứng đã kiểm nguồn ảnh',groupEvidence:'Bằng chứng đã kiểm nhóm trùng / cùng cảnh',reason:'Kết luận kiểm tra nhãn và điều kiện xuất'}).map(([k,label])=><Field key={k} label={label}><textarea required placeholder={EVIDENCE_HINTS[k]} disabled={busy||!own} className={fieldClass} value={form[k]} onChange={e=>setForm(v=>({...v,[k]:e.target.value}))}/></Field>)}
+      {Object.entries({rightsEvidence:'Bằng chứng quyền ảnh / license / attribution',sourceEvidence:'Bằng chứng đã kiểm nguồn ảnh',groupEvidence:'Bằng chứng đã kiểm nhóm trùng / cùng cảnh',reason:'Kết luận kiểm tra nhãn và điều kiện xuất'}).map(([k,label])=><Field key={k} label={label}><textarea required placeholder={EVIDENCE_HINTS[k]} disabled={busy||!own} className={fieldClass} value={form[k]} onChange={e=>{setForm(v=>({...v,[k]:e.target.value}));onDirtyChange?.(true);}}/></Field>)}
       <button className={buttonClass} disabled={busy||!own}>Đã kiểm tra — cho phép xuất SOLO</button>
     </form>
   </ReviewPanel>;

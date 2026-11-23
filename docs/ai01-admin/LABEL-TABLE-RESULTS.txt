@@ -1,0 +1,58 @@
+FIXGO AI-01 — Bảng gán nhãn và bộ lọc nâng cao
+
+KẾT QUẢ
+- Tab Gán nhãn dùng bảng 6 cột, 12 ảnh/trang, lọc và sắp xếp phía server.
+- Không gọi fast_items hoặc tải toàn bộ 21.437 bản ghi về trình duyệt.
+- Thumbnail chỉ tải cho 12 ID của trang hiện tại; React StrictMode ở môi trường dev có thể gọi lặp cùng ID.
+- Nhấn dòng hoặc Xem / Chỉnh sửa mở modal hai cột, tái sử dụng editor nhãn và bbox hiện có.
+- Giữ bộ lọc, trang và vị trí cuộn khi mở/đóng modal. Bộ lọc/trang/sắp xếp/ảnh gần nhất được nhớ trong sessionStorage.
+- Modal giữ cảnh báo bản nháp, zoom, nhãn nguồn, nhiều đối tượng/dấu hiệu, audit và kiểm tra điều kiện xuất.
+- Escape trên vùng sửa bbox dành cho công cụ chọn; dùng Đóng để rời modal khi sửa bbox.
+
+BỘ LỌC
+- Danh mục/đối tượng được đọc từ Prisma ServiceCategory và ServiceTarget đang active; không hard-code danh mục.
+- Trạng thái Đã sửa lấy từ reviewAction=correct hoặc bản sửa bbox đã xác nhận mới hơn quyết định cấp ảnh.
+- Bộ lọc nâng cao dựa trên mapping, annotations, các journal SOLO/bbox, hàng đợi quality/preparation và duplicate lookup hiện có.
+- Nhãn dấu hiệu nguồn được ghi rõ là đề xuất; nhãn dấu hiệu Admin đã lưu được phân biệt riêng.
+- P0/P1/P2/P3 giữ đúng giá trị của hàng đợi. Ưu tiên TASK 04B nếu có, nếu không lấy ưu tiên preparation.
+- Không tạo trạng thái “Ảnh thực tế”, “Rõ ràng”, “Có thể dùng thử nghiệm” khi chưa có dữ liệu xác nhận tương ứng.
+- Điều kiện xuất trên bảng dựa trên blockers hiện có; kiểm hash/quyền ảnh cuối cùng vẫn thực hiện bởi export gate cũ.
+
+CHUYỂN ẢNH
+- API đọc fast_label_queue giữ một snapshot thứ tự ID trên server tại lúc mở modal.
+- Sau khi lưu, tra lại bộ lọc trên dữ liệu mới và chuyển tới ID tiếp theo trong snapshot; không dùng offset vừa bị xê dịch.
+- Không lặp lại ảnh đã chuyển xuống cuối do sắp xếp trạng thái thay đổi, và bỏ qua ảnh không còn khớp bộ lọc.
+- Cuối danh sách hiện thông báo, không tự quay đầu hoặc đổi bộ lọc.
+- Phiên duyệt tạm thời chỉ thuộc Admin mở phiên, hết hạn sau 1 giờ; khi hết hạn cần đóng/mở lại modal. Không ghi dataset/audit khi tạo phiên đọc.
+- API chỉ hỗ trợ chỉnh bbox cho ảnh thuộc hàng đợi sửa bbox hiện có; không mở rộng write API.
+
+FILE THAY ĐỔI TRONG YÊU CẦU NÀY
+1. client/src/pages/ai01-review/components/LabelTab.jsx
+2. client/src/pages/ai01-review/components/LabelDetailEditor.jsx
+3. client/src/pages/ai01-review/components/ImageReview.jsx
+4. client/src/pages/ai01-review/components/LabelTab.test.jsx
+5. server/scripts/ai01/label_browser.py
+6. server/scripts/ai01/fast_review.py
+7. server/src/modules/ai01-review/ai01-review.service.js
+8. server/src/modules/ai01-review/dto/label-browser-query.dto.js
+9. server/test/ai01-admin-harness.cjs
+10. server/test/ai01-label-browser.e2e-spec.js
+11. server/test/check-ai01-label-table-ui.cjs
+12. docs/ai01-admin/LABEL-TABLE-RESULTS.txt
+
+KIỂM THỬ
+PASS npm test --prefix client: 5 test files, 18/18 tests.
+PASS cd server && npx jest --config test/jest-ai01-admin.config.cjs --runInBand --runTestsByPath test/ai01-label-browser.e2e-spec.js test/ai01-fast.e2e-spec.js test/ai01-quality.e2e-spec.js: 3 suites, 27/27 tests.
+- 8 test API mới: giới hạn trang, bộ lọc kết hợp, auth/validation, nhãn nguồn, thứ tự phiên duyệt, owner, cuối danh sách và taxonomy nhãn đã sửa.
+- Các test SOLO/bbox cũ kiểm audit, concurrency, checksum, quarantine, quyền ảnh và điều kiện xuất tiếp tục đạt.
+PASS node server/test/check-ai01-label-table-ui.cjs (Vite chạy ở 127.0.0.1:5182).
+- Bộ lọc Sửa nước → Vòi nước → Chưa kiểm tra → Bbox nghi sai → P0 có kết quả thực tế.
+- 12 ID thumbnail ban đầu; không gọi API inventory đầy đủ.
+- Giữ trang/vị trí cuộn, cảnh báo chưa lưu, lưu/chuyển ảnh theo bộ lọc, nhiều bbox vật thể/dấu hiệu và lưu qua write API cũ.
+- Desktop 1440px, mobile 390px, dark mode; không có lỗi JavaScript hoặc tràn ngang modal/trang.
+- Evidence: /tmp/fixgo-ai01-label-table/results.json và 01–04 PNG cùng thư mục.
+- Tất cả thay đổi nhãn trong kiểm thử chỉ nằm trong journal tạm của harness; danh tính và truy vấn Prisma được giả lập cô lập theo snapshot taxonomy từ database. Không dùng DB/session người dùng để ghi thử.
+PASS npm run build --prefix client: có cảnh báo chunk >500 kB của Vite.
+PASS npm run build --prefix server: Babel compile thành công.
+
+Không sửa raw dataset, model, inference, schema DB, write API hay export gate. Không commit/push.
