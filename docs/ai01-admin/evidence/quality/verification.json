@@ -1,0 +1,18 @@
+{
+  "http": {
+    "suites": 5,
+    "passed": 52
+  },
+  "qualityHttpRepeatedAfterFinalBackendChanges": 6,
+  "pythonPassed": 6,
+  "managementBrowser": "passed",
+  "qualityBrowser": "passed",
+  "clientBuild": "passed with existing >500kB chunk warning",
+  "serverBuild": "passed",
+  "rawAndArtifacts": "final-data-audit.json",
+  "trained": false,
+  "deployed": false,
+  "committed": false,
+  "pushed": false,
+  "ownerStateSyntheticAnnotations": 0
+}

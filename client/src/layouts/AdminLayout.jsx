@@ -10,7 +10,7 @@ import {
   Sun,
   Moon,
 } from 'lucide-react';
-import { adminMenuConfig } from '../routers/menuConfig';
+import { adminMenuConfig, aiMenuConfig } from '../routers/menuConfig';
 import { useAuth } from '../store/authStore';
 import { useTheme } from '../store/themeStore';
 import Sidebar from '../components/layout/Sidebar';
@@ -30,7 +30,7 @@ export default function AdminLayout() {
   };
 
   // Tìm tiêu đề của trang hiện tại từ menuConfig
-  const currentMenuItem = adminMenuConfig.find((item) =>
+  const currentMenuItem = [...adminMenuConfig, ...aiMenuConfig].find((item) =>
     location.pathname.startsWith(item.path)
   );
 

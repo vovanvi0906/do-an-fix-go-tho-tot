@@ -1,0 +1,82 @@
+FIXGO — GÁN NHÃN TIẾNG VIỆT TẠI ẢNH ĐANG XEM
+
+Mở http://localhost:5173/admin/ai01
+Dùng tab Dữ liệu hoặc Gán nhãn. Giữ 5 tab quản lý AI hiện có.
+
+BẮT ĐẦU NHANH
+1. Chọn bộ dữ liệu hoặc ảnh trong danh sách. Tên bộ dữ liệu và nhãn nguồn đều
+   hiển thị tiếng Việt; khung/vùng nhãn trên ảnh cũng có tên tiếng Việt.
+2. Đọc “Mapping FixGo đề xuất” cạnh ảnh theo chuỗi:
+   Danh mục → Đối tượng → Dấu hiệu quan sát được.
+   Ví dụ: Sửa nước → Vòi nước → Nước nhỏ giọt.
+   Đây là đề xuất; khi chưa có dấu hiệu được xác nhận, trang nói rõ điều đó.
+3. Tại tab Dữ liệu bấm “Gán nhãn ngay tại ảnh này”. Phần sửa mở ngay cạnh ảnh,
+   không chuyển tab, không ghi nhãn chỉ vì mở phần này. Tab Gán nhãn mở sẵn.
+4. Chọn một trong 4 quyết định:
+   - Xác nhận nhãn: đối tượng đề xuất phù hợp với ảnh.
+   - Sửa nhãn: đổi đối tượng hoặc nhãn; ghi ngắn gọn lý do.
+   - Chưa chắc chắn: ảnh khó đọc, thiếu góc chụp hoặc không biết nhãn đúng.
+   - Loại ảnh: không sử dụng ảnh này trong bản nhãn phát triển.
+5. Chọn tình trạng quan sát. Nếu có dấu hiệu thì đánh dấu những gì thực sự thấy.
+   Nếu không thấy lỗi thì chọn “Không thấy dấu hiệu lỗi”; điều này KHÔNG đồng
+   nghĩa thiết bị tốt. “Chưa xem” khác với “Không thấy dấu hiệu lỗi”.
+6. Nếu cần, đánh dấu Ảnh quảng cáo và/hoặc Ảnh tổng hợp / ghép nhiều ảnh.
+   Hai đánh dấu có thể cùng bật. Chúng không tự loại ảnh; bạn vẫn chọn quyết định.
+7. Bấm “Lưu & ảnh tiếp theo” để ghi lịch sử và tiếp tục, hoặc “Lưu tại ảnh này”
+   để xem lại nhãn vừa lưu. Mỗi lần lưu là event mới, không sửa log cũ.
+
+GIẢI THÍCH CÁC TRƯỜNG
+- Bộ dữ liệu: nhóm ảnh nguồn, ví dụ Sửa nước hoặc Điện lạnh.
+- Tìm ID ảnh: nhập mã như img-19228 để mở nhanh một ảnh.
+- Lọc ảnh: xem chưa duyệt, chờ kiểm tra, khó, trùng hoặc ngoài phạm vi.
+- Danh mục: lọc danh sách đối tượng theo nghề, ví dụ Sửa nước.
+  Bộ lọc không tự xóa đối tượng đã chọn ở danh mục khác.
+- Tìm đối tượng: gõ tên tiếng Việt, ví dụ “vòi nước”.
+- Đối tượng FixGo: đánh dấu vật thực sự xuất hiện, có thể chọn nhiều; không cần
+  giữ Ctrl/Cmd. Bấm tên đối tượng đã chọn kèm dấu × để bỏ chọn.
+  Đổi đối tượng tự chuyển lựa chọn xử lý sang “Sửa nhãn”.
+- Dấu hiệu quan sát được: Chưa xem / Có dấu hiệu nhìn thấy /
+  Không thấy dấu hiệu lỗi / Chưa chắc về dấu hiệu.
+- Dấu hiệu cụ thể: nước nhỏ giọt, nước đọng, bề mặt ướt, vết nứt, vết ố,
+  bụi bẩn, dây điện hở… Chỉ xuất hiện khi chọn “Có dấu hiệu nhìn thấy”.
+- Đặc điểm ảnh: chữ bán hàng/giá/logo có thể là quảng cáo; nhiều ảnh ghép là
+  tổng hợp. Không suy ra quyền ảnh hoặc chất lượng ảnh từ các đánh dấu này.
+- Ghi chú/lý do: ví dụ “Nguồn ghi rò ống nhưng ảnh chỉ thấy vòi nước; chưa thấy
+  nước rò”. Bắt buộc với Sửa nhãn. Mỗi trường có ví dụ/hướng dẫn ngay trên trang.
+
+PHÍM TẮT MỚI
+C = chọn Xác nhận nhãn; E = chọn Sửa nhãn;
+U = chọn Chưa chắc chắn; R = chọn Loại ảnh;
+Enter = Lưu & ảnh tiếp theo.
+Chọn quyết định chưa lưu. Chỉ nút Lưu hoặc Enter mới ghi dữ liệu.
+Không kích hoạt shortcut khi nhập input/textarea/select/button, khi đang lưu,
+hoặc khi chưa mở phần gán nhãn trong tab Dữ liệu.
+Nút Trước/Tiếp chỉ chuyển ảnh, không tự lưu nội dung đang sửa.
+
+THÔNG TIN CHI TIẾT VÀ LỊCH SỬ
+Nhãn gốc tiếng Anh, class/mapping key, SHA256, URL nguồn và license vẫn giữ,
+nhưng nằm trong phần chi tiết. Không dịch hoặc sửa file YOLO/data.yaml nguồn.
+Mapping 54 lớp dùng bản hiển thị tiếng Việt TASK03C; phần trình bày không đổi
+mapping proposal hoặc checksum dữ liệu. Các subtype chưa rõ vẫn được ghi là
+cần xác minh. Tên bệnh do nguồn gán không được coi là chẩn đoán đã xác nhận.
+
+Lịch sử ảnh hiển thị quyết định, dấu hiệu, đặc điểm ảnh, lý do, user, thời gian
+và hash audit. Nhãn cũ không bị bổ sung dấu hiệu/đặc điểm giả. Các event mới có
+reviewAction, categoryIds (suy ra từ đối tượng thật trong taxonomy),
+visualCondition, visibleSigns và imageFlags. Chưa xem/chưa chắc dùng null cho
+dấu hiệu; chỉ lựa chọn “Không thấy dấu hiệu lỗi” mới ghi tập rỗng đã xem.
+
+XUẤT VÀ BẢO VỆ GROUND TRUTH
+Luồng kiểm tra nguồn/quyền ảnh/nhóm trùng trước xuất vẫn giữ nguyên, đặt trong
+mục thu gọn “Kiểm tra điều kiện xuất (sau khi lưu nhãn)”. Mở mục này để nhập
+bằng chứng thật; mỗi trường có ví dụ, không tự điền bằng chứng.
+Nhãn đã sửa cần kiểm tra lại trước xuất. Chưa chắc/Loại ảnh không được xuất.
+
+Xuất trong tab Huấn luyện vẫn là solo-development, không phải GT độc lập.
+Các dấu hiệu và đặc điểm ảnh được người chọn đi kèm bản xuất; bbox/polygon
+nguồn vẫn sourceGeometryHumanVerified=false. Nhãn Roboflow/mapping/AI không
+tự trở thành Ground Truth; không suy đoán nguyên nhân hoặc dịch vụ sửa.
+Không sửa raw dataset, model, inference, schema DB hoặc lịch sử gán nhãn cũ.
+
+Luồng quản lý từ xuất đến đánh giá/triển khai và giới hạn backend:
+AI-MANAGEMENT-GUIDE.txt

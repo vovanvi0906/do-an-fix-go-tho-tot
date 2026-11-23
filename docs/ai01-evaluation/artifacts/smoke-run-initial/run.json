@@ -1,0 +1,103 @@
+{
+  "startedAt": "2026-11-20T17:41:11.588698+00:00",
+  "config": {
+    "split": "smoke",
+    "resolverThreshold": 0.6,
+    "modalities": [
+      "image-only",
+      "text-only",
+      "image+text"
+    ]
+  },
+  "smokeOnly": true,
+  "datasetSha256": "9522d7720a0267ea481d1da97b98666c332fd3a239ff3b709e20c1a525ab7083",
+  "catalogSha256": "8c313835df42b917f09ddbd66506ea2d4869f5d3347caa40a1c7c630f3565511",
+  "yoloSha256": "959d3e9823c55ae0948ce08d75261dca630678d22228404ae03dd4ee7dc7532d",
+  "platform": "Linux-7.0.0-43-generic-x86_64-with-glibc2.43",
+  "python": "3.14.4 (main, Aug 20 2026, 10:41:58) [GCC 15.2.0]",
+  "argv": [
+    "ai-service/eval/ai01/runner.py",
+    "--dataset",
+    "docs/ai01-evaluation/artifacts/smoke-manifest.jsonl",
+    "--image-root",
+    "ai-service",
+    "--catalog",
+    "docs/ai01-evaluation/artifacts/taxonomy.json",
+    "--smoke",
+    "--out",
+    "docs/ai01-evaluation/artifacts/smoke-run"
+  ],
+  "gitHead": "1432f67264f4d67bd5718b50642f6b4c9d5289ce",
+  "packages": {
+    "torch": "2.14.1",
+    "ultralytics": "8.4.188",
+    "transformers": "5.20.2",
+    "opencv-python-headless": "5.0.0.93",
+    "fastapi": "0.162.0",
+    "httpx": "0.28.1"
+  },
+  "sourceHashes": {
+    "ai-service/recommendation/__init__.py": "14219961f7cec9fdca6a85d0d89e4889b4a8146580cc4b644bfc3f3ff2aa6ce3",
+    "ai-service/recommendation/catalog_manager.py": "9a7a0cc7d66082cd7fa35068b3df056201d0c0997e9af77b1f49848ca52bf903",
+    "ai-service/recommendation/category_classifier.py": "e81163bdf6fe97b414253ab890f59c34a1ad039bc2bd15e617c4a90c7bc06865",
+    "ai-service/recommendation/image_utils.py": "314062dd327690c2690f8ec0c7462d19ce5aa48f88752371122fe97a37b63d5c",
+    "ai-service/recommendation/router.py": "ed0501144fe5a0dad0ab7a85774a246d58cb985832a64a259d4471a291096eed",
+    "ai-service/recommendation/schemas.py": "3bce8fef05afdfb2005a495a32f95fdd4802529421a1f6642283d619fa845fdd",
+    "ai-service/recommendation/target_matcher.py": "342f502dac152bf6e4d2a67b14d4b72dc4fe27d07f43abf14945b321e6ad85a7",
+    "ai-service/eval/ai01/annotation.py": "3864c4f2dc2709f9273b79eb6109b0be1d31d1ef5ee7f1ca8ac915849e906bae",
+    "ai-service/eval/ai01/inventory.py": "8431cb8e47432eb54c8113690a2e8cf3fd3f2c9851edd6671a99504449e8c7c0",
+    "ai-service/eval/ai01/metrics.py": "13bfdf79a1116413412824ac9355ad48543c8d4831f756242dfeea35decd077f",
+    "ai-service/eval/ai01/protocol.py": "27ca65c8031840fd230de7db337122de7b57a4619e8c4616c561c8287adb063e",
+    "ai-service/eval/ai01/runner.py": "9103238705a1c8bed2345a0781b26a7601634c771bae7ae90eb6e0d1d64c52c3",
+    "ai-service/eval/ai01/split.py": "6ec90774363b5887b7b1c48bfcea73dd7052cf2eaa1001ce7a2b6626f1667b6d",
+    "ai-service/eval/ai01/taxonomy.py": "b89a989c6b568494a6b51c121818e45b476537ac3a05321e645a631816112dd6",
+    "ai-service/eval/ai01/test_tools.py": "2f47e53a05c8db8a3d3425f208a1f160c1898bc2c671daa8cbfbebae7e49c111",
+    "server/src/modules/orders/diagnosis/catalog-sync-validation.spec.js": "eef8584556f8a2b95c82d61f40e6c013549e6451677d032b4921794bf67c472b",
+    "server/src/modules/orders/diagnosis/create-order-validation.spec.js": "f6fb00aaafcbcc8567768228fd06cb1e6e04e8c49aefef10f6b096603049dce5",
+    "server/src/modules/orders/diagnosis/diagnosis-constants.js": "4117afc7a241dbb9853aa5c1b99bfe184a3b72f8e73890d02da7d701e20a8431",
+    "server/src/modules/orders/diagnosis/diagnosis-input-validator.js": "6a06eee72cb1ceefa5d24994694a5d4b3dc5004b4a421742f37e6cc04410c28e",
+    "server/src/modules/orders/diagnosis/diagnosis-payload-builder.js": "df98e90fa52bd751623cd6c608442d448ea7a8ecba35c57f7cf8479e94a1a4b7",
+    "server/src/modules/orders/diagnosis/diagnosis-resolver.js": "c66b3a75d1dc707088aa5f01637a25490c3847bffd46183fe56323b43ed2a62a",
+    "server/src/modules/orders/diagnosis/diagnosis-resolver.spec.js": "0b83b96856db416052f4aa5ca32ea91a449b444acac4cc9071d2aff3c0f84f8c",
+    "server/src/modules/orders/diagnosis/diagnosis-target-service.spec.js": "342c9f42ae7e6fb071384f56409c7d2682fbaed858980065842a22ba5d33d6ab",
+    "server/src/modules/orders/diagnosis/diagnosis-upload.interceptor.js": "b8ba2bdbd365ddeaf32eb594f91d92ebac076ae621d5c430301f6917b10cdd26",
+    "server/src/modules/orders/diagnosis/diagnosis-upload.spec.js": "cbd449f56aa6b76f53bd30fb57b11bb0e137737f44867545b6b62f97b00cf88c",
+    "server/src/modules/orders/diagnosis/recommendation-debug.js": "595d7264579df38f0c9e46519a26fccbd3a41d83adb2a9179c1651293474a1c5",
+    "server/src/modules/orders/diagnosis/recommendation-debug.spec.js": "6980c4723d67b800999f79a851c9ad0424070d117388b1a31a4e45388292c261",
+    "server/src/modules/orders/diagnosis/service-ranker.js": "7080eebd8d142486b9a61787865447bdf8573d3c467188e97ccbe750a5376c88",
+    "server/src/modules/orders/diagnosis/symptom-taxonomy.js": "b81664d89075366ccea24259c2af8ac87afa58938eff3ed2596b16c193f18799",
+    "server/src/modules/symptoms/symptom-catalog.js": "c71c84c3b265596583a997d23f795d8ec910af28523e730eccb1b3687cab48c3",
+    "server/src/modules/symptoms/symptom-swagger.spec.js": "ee3bcf965d31bc64118e89ba6586bb62d3bf3d56dda9bf07ca7b417e85e6c024",
+    "server/src/modules/symptoms/symptoms.controller.js": "d95a48783b4b5a59524f75809237b74916337a82520799940463c7b932f1686c",
+    "server/src/modules/symptoms/symptoms.module.js": "ba8b2fa2cec8859ee3c7ba1f5f86d9bb483cc509d9889d7b7bb44b0566aab19f",
+    "server/src/modules/symptoms/symptoms.service.js": "5f011d7f545c706ac4186ada47262e80ee7e59494eb7a9340bc9389c27b99281",
+    "ai-service/clip_classifier.py": "f83b189d8ee8ffdc2205c47ec069e2bbaca68de9ec03665b8d5421026f6fd638",
+    "ai-service/category_helper.py": "b6c40e2fe1e2be2de6c64d993dc0f33f26d8011143a99be987066ebd882b495a",
+    "ai-service/service_catalog.py": "988230261b70eda69d175767fe2ee64683da822ba67c7b1186a9f35c7c4a8dca",
+    "ai-service/target_catalog.py": "1e62a9788a98a3832ee8fe95247430a8b5177d991b7c659241cd456cc4b101e2",
+    "server/scripts/ai01-resolver-offline.cjs": "a153bf029386aa423a5e7d0cd1d8dab2e6c91a2038a4fcf64f8214eebd4d4005",
+    "server/package-lock.json": "9b45a656a1c7a0b8d3a185a00d4fd16b72146909a289b69645f0d774477b6e47"
+  },
+  "catalogEvidence": {
+    "source": "docs/ai-core-audit-02/evidence/catalog-snapshot.json",
+    "sha256": "1925a9b3f7a0e5baf4e0a8205f28c3bd3bf8efcab63254ccc85b04f42f902355",
+    "sourceStatus": "VERIFIED_LOCAL_API_GET_NOT_DIRECT_SQL",
+    "verification": "historical_API_snapshot_NOT_verified_current_database",
+    "activityAssumption": "isActive=true reconstructed; not present in flattened snapshot",
+    "missing": [
+      "current DB verification",
+      "maxPrice if absent",
+      "symptoms",
+      "symptomServices"
+    ]
+  },
+  "scope": "ASGI in-process v2 + real resolver / in-memory historical catalog; not DB/mobile E2E",
+  "clipArtifact": {
+    "clipArtifactSha256": "a63082132ba4f97a80bea76823f544493bffa8082296d62d71581a4feff1576f",
+    "clipRevision": "3d74acf9a28c67741b2f4f2ea7635f0aaf6f0268",
+    "clipArtifactFile": "pytorch_model.bin"
+  },
+  "modelSetupMs": 10421.066569000686,
+  "status": "completed",
+  "endedAt": "2026-11-20T17:41:22.987048+00:00"
+}

@@ -1,0 +1,116 @@
+FIXGO AI-01 — DATASET NGUỒN CHUẨN HÓA, CHƯA TRAIN
+
+BẢN XUẤT
+/home/vanvi/Work/datasetai/02-development/ai01-prepared-v1/
+Snapshot phát triển bất biến, tách khỏi raw và lịch sử người gán nhãn.
+Không được gọi là approved Ground Truth hoặc tập đánh giá độc lập.
+
+ĐÃ TÁI SỬ DỤNG
+- 21.437 ảnh nguồn được đọc/giải mã/hash và đọc lại nhãn YOLO.
+- 18.901 ảnh dùng được cho ít nhất một tác vụ; 2.536 ảnh không vào tác vụ nào.
+- object_detection/: 13.086 ảnh, 8 đối tượng DB; 10.418 train / 2.668 val.
+- visible_sign_detection/: 964 ảnh, 3 dấu hiệu trực tiếp; 784 train / 180 val.
+- category_classification/: 17.937 ảnh, 4 danh mục DB; 14.294 train / 3.643 val.
+Số ảnh giữa các tác vụ có thể chồng nhau. Đây là nguồn giám sát yếu, chưa được
+người xác minh. Không tự suy trạng thái bình thường/hỏng hay nguyên nhân.
+
+ĐỐI CHIẾU DB VÀ SEMANTICS
+catalog-db.json được tạo bằng transaction PostgreSQL READ ONLY, RepeatableRead:
+6 danh mục và 70 đối tượng hiện tại. Không có lệnh sửa DB/schema.
+normalized-mapping.json giữ cả mapping TASK03B, tham chiếu DB mới và trạng thái:
+13 lớp nguồn ánh xạ vật thể rõ, 40 lớp cần ngữ cảnh, 1 lớp ngoài taxonomy (TV).
+Tất cả humanReview=pending; không có mapping được tự phê duyệt.
+
+Phân biệt object / visibleSignCandidates / sourceFaultOrDiseaseClaim;
+confirmedCause và recommendedServices không được suy từ nhãn nguồn.
+water_leak không tự thành rò ống; toilet_issue dùng làm candidate vật thể bồn
+cầu nhưng không suy lỗi gì. Tên bệnh lá không được biến thành chẩn đoán.
+Lá cận cảnh có thể góp dữ liệu phân loại danh mục Làm vườn, nhưng không tự
+chọn target cây chậu/vườn rau/cây lớn. Bụi/bẩn/lá trên bề mặt không tự xác
+nhận vật thể solar panel hoặc dịch vụ vệ sinh/sửa điện.
+
+NGƯỠNG THỬ NGHIỆM
+Đặt trước khi chạy: >=20 ảnh train, >=5 val, >=3 nhóm độc lập theo thuật toán
+(>=2 nhóm train và >=1 val). Đây là ngưỡng kỹ thuật tối thiểu, không phải đủ
+mẫu thống kê hoặc bảo đảm nhãn đúng/độ chính xác.
+
+Đủ ngưỡng: Máy lạnh/Điều hòa, Vòi nước/Vòi sen, Tủ lạnh, Bồn cầu/Két nước,
+Ổ cắm điện, Máy giặt, Đường ống cấp/thoát nước.
+Chậu rửa: 27 train / 4 val (31 ảnh), chưa đạt ngưỡng val 5. Không tự nhân ảnh
+hoặc rải augmentation qua split để vượt ngưỡng. Pipeline mặc định chặn chạy
+cả tác vụ object nếu chưa xử lý/công khai chấp nhận lớp ít dữ liệu.
+
+Dấu hiệu đủ ngưỡng giám sát nguồn: vết giống phân chim, bụi/bẩn bám, lá/rác lá.
+Chưa tự tạo lớp fault như tắc/rò điện/nguyên nhân rò nước. Các claim đó chờ
+người xác nhận dấu hiệu nhìn thấy. Không yêu cầu gán lại 21.437 ảnh từ đầu.
+
+CẤU TRÚC
+- summary.json: tiến độ, tổng số ảnh, mapping, lớp/tác vụ, giới hạn.
+- records.jsonl: toàn bộ ảnh, SHA/pixel SHA/pHash/source family, annotations gốc,
+  bbox dẫn xuất, nguồn/claims, task eligibility và lý do loại.
+- source-class-counts.json: số ảnh từng 54 lớp nguồn và số cần kiểm tra.
+- normalized-mapping.json / catalog-db.json: taxonomy thực tế và provenance.
+- manual-review.jsonl / review-index.json: hàng đợi cờ cần kiểm tra, có ưu tiên.
+- near-pairs.csv.gz: đầy đủ 2.757 cặp pHash gần trùng.
+- <task>/class-map.json: class index → UUID DB hoặc mã dấu hiệu + counts.
+- <detection task>/data.yaml: cấu hình YOLO detect, ghi rõ unverified source.
+- <task>/experiment.json: epoch/imgsz/batch/seed, không được tự kích hoạt.
+- SHA256SUMS.json / preparation-audit.json: hash artifact và mã pipeline.
+Ảnh xuất là bản COPY đã kiểm SHA, không symlink/hardlink vào raw. Polygon
+được chuyển thành bbox bao ngoài ở nhãn dẫn xuất; file Roboflow giữ nguyên.
+Classifier dùng thứ tự folder slug theo bảng chữ cái, class map đã đối chiếu.
+
+KIỂM TRA VÀ CHỐNG LEAKAGE
+- 24 nhóm SHA trùng (48 ảnh); 12 bản thừa có nhãn nhất quán bị bỏ.
+  24 ảnh cùng pixel nhưng nhãn không nhất quán bị giữ ngoài để kiểm tra.
+- 2.757 cặp gần trùng, liên quan 3.131 ảnh; chỉ là candidate tương đồng.
+- 148 nhãn rỗng chưa được xác minh là negative; 0 ảnh decode lỗi,
+  0 ảnh thiếu file label, 0 ảnh có dòng nhãn sai định dạng.
+- 246 ảnh có vùng rất nhỏ hoặc gần phủ toàn ảnh cần xem lại; không đưa vùng
+  đáng ngờ vào detection, dù ảnh có thể dùng cho tác vụ category phù hợp.
+- 163 nghi quảng cáo / 285 nghi ảnh ghép, có thể chồng nhau; phát hiện qua
+  tên file, text-like components/nền trắng/đường chia bố cục. Không có OCR hoặc
+  model quảng cáo được chứng minh chính xác, không khẳng định sạch quảng cáo.
+- Các candidate quảng cáo/ghép bị giữ ngoài các tác vụ cho đến khi xem lại.
+- Nối nhóm theo SHA, pixel SHA, pHash Hamming<=6 và họ tên Roboflow trước .rf.
+  Chia cả nhóm bằng hash prefix fixgo-source-v1, val 20% theo nhóm; không dùng
+  split Roboflow. Training RNG seed riêng là 23.
+- Trình validator độc lập đã kiểm mọi artifact/source và xác nhận 0 giao nhau
+  SHA/pixel/family/group, 0 cặp pHash đi qua train-val. Tổng 6.969 nhóm; nhóm
+  lớn nhất 390 ảnh. Không coi họ tên file là camera/session đã xác minh.
+- Chỉ có train và validation PHÁT TRIỂN. Không tạo tập test độc lập.
+
+ADMIN WEB — TỐI ĐA 5 BƯỚC
+1. Quản lý AI > Dữ liệu > Xem ảnh cần duyệt chuẩn hóa.
+2. Xem cờ ưu tiên lỗi/quảng cáo/ảnh ghép/mapping mơ hồ bên cạnh ảnh.
+3. Gán nhãn ngay tại ảnh này: xác nhận/sửa đối tượng và dấu hiệu thực sự thấy;
+   chưa rõ thì Chưa chắc chắn, ảnh không dùng thì Loại ảnh.
+4. Lưu & ảnh tiếp theo. Chỉ cần kiểm nhóm rủi ro và 65 mẫu nguồn rõ đã gợi ý,
+   không gán lại toàn bộ ảnh. 11.750 ảnh có cờ; cờ về target/disease không nhất
+   thiết chặn dùng ảnh cho category hoặc tác vụ nguồn khác phù hợp.
+5. Tab Huấn luyện xem counts/lớp. Bản nhãn người xác nhận có kiểm bằng chứng
+   vẫn xuất SOLO riêng như trước. Admin chưa có nút chạy training/deployment.
+
+Nguồn chuẩn hóa v1 không tự bị sửa khi Admin lưu nhãn. Quyết định người thật
+được lưu ở audit SOLO riêng, không bị ghi đè hay tự ghép vào nhãn Roboflow.
+Trước một thí nghiệm curated cần chốt phiên bản mới từ những quyết định đã
+kiểm nguồn/quyền ảnh. Không dùng snapshot nguồn để lách gate benchmark.
+
+KIỂM LẠI KHÔNG TRAIN (từ repo FixGo)
+ai-service/.venv/bin/python -B server/scripts/ai01/train_prepared.py \
+  --prepared /home/vanvi/Work/datasetai/02-development/ai01-prepared-v1 \
+  --raw /home/vanvi/Work/datasetai/01-raw
+Mặc định chỉ validate; không import model, không train, không download weights.
+Bằng chứng cuối: ../ai01-prepared-v1-VERIFIED.json cạnh thư mục dataset.
+
+TẠO PHIÊN BẢN MỚI
+1. snapshot_catalog.cjs <new-output>/catalog-db.json: chỉ đọc taxonomy DB.
+2. prepare_dataset.py --raw ... --source .../ai01-label-review-v1 --out <new-output>:
+   không ghi đè run cũ, kiểm SHA TASK03B/YAML, xuất riêng.
+3. train_prepared.py: validate. Training tương lai chỉ có thể chạy khi người
+   dùng gọi riêng --execute-train, xác nhận nguồn chưa kiểm, chọn weights local
+   đúng detect/classify, output MỚI dưới ~/Work/datasetai/03-experiments/.
+   Lớp ít dữ liệu cần chấp nhận riêng --allow-low-support-classes.
+Không chạy training trong task này. Không nối CLI cũ ghi weights production.
+Object detector 8 lớp/category classifier 4 lớp không phải model thay thế trực
+ tiếp cho toàn bộ 70 target / 6 category production. Không có bước deploy.

@@ -1,0 +1,1 @@
+module.exports={rootDir:'..',testEnvironment:'node',testMatch:['<rootDir>/test/ai01-*.e2e-spec.js'],transform:{'^.+\\.js$':['babel-jest',{configFile:require('path').resolve(__dirname,'../.babelrc')}]},testTimeout:45000};

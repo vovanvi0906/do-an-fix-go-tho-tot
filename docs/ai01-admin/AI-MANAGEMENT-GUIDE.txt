@@ -1,0 +1,143 @@
+FIXGO — QUẢN LÝ AI THỐNG NHẤT (SOLO_THESIS)
+
+Cập nhật thao tác hai tab Dữ liệu/Gán nhãn: xem VIETNAMESE-LABELING-GUIDE.txt.
+
+ĐIỂM VÀO
+Admin > Quản lý AI
+http://localhost:5173/admin/ai01
+Một trang, 5 tab: Dữ liệu / Gán nhãn / Huấn luyện / Đánh giá / Triển khai.
+
+Tài khoản ACTIVE / ADMIN đăng nhập bằng JWT hiện có được quản lý SOLO.
+Backend đọc status và role hiện tại từ DB qua JwtStrategy. Token có role giả,
+user bị khóa hoặc role DB đã đổi không được vượt quyền. SOLO không phụ thuộc
+bootstrap, danh sách nhân sự, reviewer A/B, phân xử hoặc legacy policy file.
+Không tự cấp chứng nhận chuyên môn nghiệp vụ cho Admin.
+
+1. DỮ LIỆU
+- Xem đủ 21.437 ảnh nguồn và 54 mapping TASK03B.
+- Chọn dataset, tìm ID, lọc trùng/gần trùng SHA/pixel/pHash, ảnh khó, chưa chắc,
+  ngoài phạm vi, chưa duyệt hoặc đã lưu nhưng chờ kiểm tra.
+- Đọc nhãn Roboflow, overlay bbox/polygon, mapping đối tượng FixGo đề xuất;
+  có thể tắt overlay. Mở bảng toàn bộ mapping ở cuối tab.
+- Tab mặc định chỉ xem. Bấm “Gán nhãn ngay tại ảnh này” để mở phần xác nhận/
+  sửa ngay cạnh ảnh, không chuyển tab. Chỉ nút Lưu/Enter mới lưu annotation.
+- Mapping và nhãn nguồn vẫn là đề xuất. Không có nút approve hàng loạt.
+- Khó: annotationIssues hoặc >5 vùng; chưa chắc: thiếu target AI hoặc người
+  đánh dấu uncertain. Trùng/gần trùng là ứng viên cần người kiểm tra.
+- Dropdown chỉ dựng tối đa 100 lựa chọn quanh vị trí hiện tại; bộ lọc và tìm ID
+  giúp đi nhanh đến ảnh bất kỳ trong inventory.
+
+2. GÁN NHÃN
+- Xem nhãn tiếng Việt và chuỗi Danh mục → Đối tượng → Dấu hiệu. Chọn/sửa
+  Đối tượng FixGo bằng checkbox; có thể chọn nhiều mà không cần Ctrl/Cmd.
+- Mở “YOLO + CLIP đã lưu” để xem cache khớp hash ảnh. Hiện có 60 ảnh có cache;
+  ảnh khác dùng mapping nguồn. Không tự chạy inference production hoặc model.
+- C: chọn Xác nhận; E: chọn Sửa; U: chọn Chưa chắc; R: chọn Loại ảnh.
+  Enter hoặc “Lưu & ảnh tiếp theo” mới ghi nhãn và chuyển ảnh.
+  Chọn tình trạng quan sát; đánh dấu quảng cáo/ảnh tổng hợp nếu cần.
+- Phím tắt tạm dừng trong input/select/textarea/button, khi đang lưu và ở tab Dữ liệu.
+- Mọi quyết định có user ID, timestamp, lý do, targetIds và hash audit.
+- Để kiểm một nhãn vừa lưu: chọn bộ lọc “Nhãn đã lưu — chờ kiểm tra”, hoặc sang
+  Huấn luyện > Kiểm tra ảnh. Đọc lại ảnh và nhãn, nhập bằng chứng quyền ảnh,
+  nguồn ảnh, kiểm nhóm trùng/cùng cảnh và kết luận kiểm tra.
+- Bấm “Đã kiểm tra — cho phép xuất SOLO”. Không có bằng chứng thật thì giữ
+  quarantine, không điền metadata giả để vượt gate.
+- Mở “Lịch sử ảnh” để xem các lần lưu/sửa và kiểm tra. Sửa nhãn sau kiểm tra
+  làm lần kiểm trước hết hiệu lực; phải kiểm lại bản mới.
+
+3. HUẤN LUYỆN
+Có backend thực tế cho kiểm điều kiện, xuất và tải dataset có checksum/audit.
+Chỉ xuất các bản nhãn mới nhất thuộc chính Admin hiện tại, confirmed và đã
+kiểm tra nguồn/quyền/nhóm trùng, binding đúng hash nhãn và mapping snapshot.
+Quarantine, nhãn chưa chắc, từ chối, bỏ qua, ngoài phạm vi không được xuất.
+
+Bấm “Xuất solo-development đủ điều kiện”. File JSONL bất biến được lưu server,
+tải qua endpoint kiểm chủ sở hữu, checksum và audit; không chỉ dựng blob từ
+prediction trên browser. Sau xuất UI hiển thị số ảnh, SHA256 và audit hash.
+
+Hợp đồng bản xuất mới: fixgo.ai01.solo-targets.v2
+- datasetType=solo-development, split=development, partition=development
+- mode=SOLO_THESIS, aiExposed=true, blindTest=false
+- independentlyReviewed=false, approvedGroundTruth=false
+- labelScope=image_targets, sourceGeometryHumanVerified=false
+- image: đường dẫn tương đối dưới ~/Work/datasetai/01-raw
+- sha256, annotationSha256, targetIds, mappingKeys, mappingSnapshotSha256,
+  duplicateGroup, sourceFamilyCandidate, nearCandidateGroup, phash, pixelSha256,
+  userId, timestamp, eventHash, developmentCheck có bằng chứng.
+
+Dùng JSONL cho multi-label classifier; với classifier một nhãn chỉ chọn dòng
+có đúng một targetId. Lưu taxonomy đi kèm; không nhân ảnh đa nhãn thành các
+class loại trừ nhau. Bbox/polygon nguồn chỉ để đối chiếu, chưa phải detection GT.
+Copy ảnh sang thư mục phát triển mới ngoài raw, kiểm SHA256 trước khi copy.
+Giữ nhóm trùng/cùng cảnh/nguồn và pHash candidate cùng phía khi chia train/dev-val.
+Không dùng split test gốc của Roboflow như bảo đảm “độc lập”.
+
+Training/fine-tuning từ Admin Web: CHƯA HỖ TRỢ, không có nút chạy giả.
+Repo có ai-service/training/train.py nhưng script này chép trọng số vào
+ai-service/weights/yolov8n-cls-fixgo.pt. Không nối script này vào Admin và
+không chạy nó trong workflow hiện tại. Muốn mở chức năng cần job backend
+riêng với dataset hash, base model hash, epochs/batch/seed, split groups,
+log/status/cancel và output registry cách ly khỏi production. Chưa train model.
+
+4. ĐÁNH GIÁ
+Quản lý test set / chạy đánh giá / so sánh model từ Admin: CHƯA HỖ TRỢ.
+Precision, Recall, F1 hiển thị “—”, không giả bằng 0, số minh họa hay smoke score.
+Chưa có official run đã xác minh được kết nối vào trang này.
+
+Tái sử dụng bộ CLI đã có:
+- ai-service/eval/ai01/annotation.py: hợp đồng nhãn/nguồn/review độc lập.
+- ai-service/eval/ai01/protocol.py: đóng băng dataset/catalog/weights/source/CLIP.
+- ai-service/eval/ai01/runner.py: kiểm hợp đồng/hash/protocol trước khi chạy.
+- ai-service/eval/ai01/metrics.py: tính metrics từ output mới, không dùng cache.
+Không sửa các gate hoặc chuyển nhãn SOLO thành double_reviewed/adjudicated.
+Không nhập quarantine, nhãn chưa có bằng chứng hoặc AI-exposed development
+vào benchmark chính thức. Smoke chỉ kiểm kết nối, không phải chất lượng model.
+
+Trước khi kỹ thuật viên chạy CLI riêng cần: tập test độc lập thật đáp ứng
+contract hiện có, nguồn/quyền ảnh/metadata thật, chống giao nhóm với train,
+protocol đóng băng và model candidate nằm ngoài production. Chạy ra output
+mới ngoài raw. Không tối ưu threshold/model dựa trên test rồi gọi đó là test độc lập.
+Tab chưa có upload test hoặc API admission, vì vậy không có đường tắt để đưa
+SOLO/quarantine vào benchmark chính thức từ trang quản trị.
+
+5. TRIỂN KHAI
+Chọn model / thử inference cách ly / kích hoạt / rollback: CHƯA HỖ TRỢ.
+Không có model registry và API lifecycle thực tế trong Admin hiện tại.
+Không có nút activate/deploy/rollback giả, không có thay đổi model đang phục vụ.
+
+Để mở chức năng cần: artifact bất biến có checksum, model version/lineage,
+kết quả đánh giá trên protocol đã khóa, ngưỡng đạt được quy định trước,
+inference smoke cách ly, quyền kích hoạt, audit và bản rollback đã kiểm tra.
+Chỉ sau khi các backend này có thật mới nối thao tác trong tab Triển khai.
+Workflow hiện tại dừng ở xuất dữ liệu phát triển; không train/deploy tự động.
+
+AUDIT, CHECKSUM VÀ TƯƠNG THÍCH
+- Tái sử dụng ReviewEngine bridge, authenticated principal và writer lock,
+  ImageReview canvas, inventory/mapping/duplicate lookup TASK03B.
+- Kiểm SHA256SUMS của images.jsonl, mapping proposal, duplicate lookup khi nạp.
+  Mỗi lần mở/lưu/xuất kiểm raw ảnh, YOLO labels, data.yaml với snapshot.
+- State mới vẫn ở $AI01_REVIEW_STATE_DIR/fast-label-development/events.jsonl;
+  checks bổ sung event kind=development_check, không sửa annotation lịch sử.
+  Exports nằm cùng state dưới exports/; kiểm hash và audit khi tải.
+- Hash chain replay, kiểm audit trước thao tác, expectedHash chống sửa từ bản cũ.
+  Chỉ một writer local, không tự sửa log hỏng. Sao lưu toàn bộ state và exports.
+- Nhãn Fast cũ vẫn giữ nguyên, nhưng chưa có development_check thì phải kiểm
+  bằng chứng trước khi xuất theo luồng mới; không tự migrate thành đủ điều kiện.
+- Store TASK03C, SOLO pilot cũ, nhãn độc lập, permission history và export gate
+  vẫn được giữ; không đưa chúng vào luồng SOLO chính hoặc giả ghép các audit.
+- Link /admin/ai01/solo, fast-label, annotation chuyển về tab Gán nhãn;
+  export chuyển tab Huấn luyện; overview/mapping/sources/permissions/adjudication
+  chuyển tab Dữ liệu. Sidebar chỉ có một mục AI.
+- Workspace độc lập /ai01/:section và backend ACL lịch sử vẫn giữ riêng.
+  Admin SOLO không cần mở các workspace hoặc phân công người khác.
+- Giữ cấu hình AI01_REVIEW_* / AI01_PILOT_DIR và venv Python có PyYAML hiện có.
+  Nodemon/Vite dev tải lại code; sau reboot khởi động theo quy trình local cũ.
+
+KIỂM THỬ
+npm --prefix server test -- --config test/jest-ai01-admin.config.cjs --runInBand --silent
+node server/test/check-ai01-management-ui.cjs  (cần Vite :5173)
+npm --prefix client run build
+npm --prefix server run build
+Ba tên script UI cũ là compatibility entrypoint gọi kiểm thử trang thống nhất.
+Auth fixture/state test tạm riêng; không dùng token/session của chủ dự án,
+không tạo nhãn thật, không gọi training hoặc deploy.

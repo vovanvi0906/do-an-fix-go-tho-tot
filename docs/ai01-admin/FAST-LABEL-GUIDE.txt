@@ -1,0 +1,82 @@
+CẬP NHẬT GIAO DIỆN: xem AI-MANAGEMENT-GUIDE.txt và AI-MANAGEMENT-RESULTS.txt. Trang Admin cũ đã chuyển về một trang /admin/ai01 với 5 tab. Nội dung bên dưới giữ làm hồ sơ phiên bản trước; luồng xuất hiện tại yêu cầu development_check và bằng chứng.
+
+FIXGO AI-01 — GÁN NHÃN NHANH BẰNG AI
+
+Mở Admin > Quản lý AI > Gán nhãn nhanh bằng AI
+URL local: http://localhost:5173/admin/ai01/fast-label
+Dùng tài khoản ADMIN ACTIVE của chính bạn. Không cần phân công A/B.
+
+Thao tác
+1. Chọn bộ dữ liệu, bộ lọc hoặc tìm ID ảnh.
+2. Xem ảnh và khung/vùng YOLO nguồn. Có thể tắt overlay để xem ảnh sạch.
+3. Đọc nhãn nguồn, đối tượng FixGo đề xuất từ 54 mapping TASK03B.
+   Mở mục YOLO + CLIP để xem pre-label đã lưu khi hash ảnh khớp.
+   Không có pre-label thì không giả lập kết quả AI hoặc tự chạy production.
+4. Sửa danh sách đối tượng FixGo (Ctrl/Cmd chọn nhiều); có thể ghi lý do.
+5. C xác nhận và tiếp; R từ chối; S bỏ qua; U chưa chắc; O ngoài phạm vi.
+   Mũi tên phải chuyển ảnh không lưu. Khi nhập liệu, phím tắt tạm ngưng.
+   Mọi quyết định lưu thành lịch sử mới, không ghi đè nhãn raw.
+6. Chọn Tất cả để xem/sửa lại quyết định. Danh sách chọn ảnh hiển thị tối đa
+   100 ảnh quanh vị trí hiện tại; dùng bộ dữ liệu và tìm ID để đi xa nhanh.
+
+Dữ liệu và cách ly
+- Đọc inventory TASK03B đủ 21.437 ảnh, loại reference, kèm 54 mapping.
+- Mỗi lần mở/lưu/xuất: đọc data.yaml và YOLO label thực tế, kiểm hash YAML,
+  ảnh, label với snapshot. Nếu nguồn đã thay đổi thì chặn, cần inventory mới.
+- Phân biệt bbox 4 tọa độ và polygon YOLO; hiển thị nguyên vùng nguồn.
+- Bộ lọc khó: annotationIssues hoặc trên 5 vùng. Chưa chắc: AI thiếu target
+  hoặc người đánh dấu uncertain. Trùng: pixel SHA và nhóm ứng viên pHash/SHA
+  TASK03B. Ứng viên gần trùng cần người xem, không tự kết luận trùng.
+- Nhãn người xác nhận nằm tại:
+  $AI01_REVIEW_STATE_DIR/fast-label-development/events.jsonl
+- Có userId thật từ JWT/DB, UTC timestamp, expectedHash chống sửa từ bản cũ,
+  SHA256 hash chain; kiểm audit trước khi ghi/xuất và khi nạp lại tiến trình.
+  Writer dùng lock của bridge hiện có; chỉ hỗ trợ một backend writer local.
+- SOLO_THESIS, ai-assisted-development, aiExposed=true,
+  independentlyReviewed=false, approvedGroundTruth=false, split=development.
+- Không ghi vào Store review độc lập, không tạo approved Ground Truth.
+  Màn reviewer A/B không có API đọc nhãn nhanh; chỉ Admin được đọc/ghi.
+- Các tên train/valid/test của Roboflow là split nguồn, KHÔNG phải đảm bảo
+  đánh giá độc lập. Toàn bộ nhãn từ màn hình này chỉ dành cho development.
+
+Xuất để huấn luyện
+Bấm “Xuất nhãn đã xác nhận của tôi”. JSONL chỉ gồm quyết định confirmed mới
+nhất của tài khoản hiện tại; không xuất uncertain/rejected/skipped/out_of_scope.
+Backend kiểm lại hash raw và ghi audit xuất. Không cần giả tạo metadata nguồn
+hoặc tự xác nhận quyền ảnh để vượt một approval gate độc lập.
+Quyền sử dụng ảnh vẫn phải được chủ dữ liệu xác minh trước khi sử dụng.
+
+Mỗi dòng gồm image (đường dẫn tương đối dưới ~/Work/datasetai/01-raw), sha256,
+annotationSha256, targetIds, mappingKeys, duplicateGroup, userId, timestamp,
+eventHash và các cờ cách ly development.
+
+Nhãn xác nhận ở đây là đối tượng CẤP ẢNH (labelScope=image_targets).
+Bounding box/polygon chỉ là nhãn nguồn để đối chiếu; sourceGeometryHumanVerified
+luôn false. Không đổi các box này thành detection ground truth đã xác minh.
+Không suy ra bệnh, nguyên nhân, triệu chứng hoặc dịch vụ sửa từ đối tượng.
+
+Dùng JSONL trực tiếp cho huấn luyện multi-label classifier với targetIds làm
+nhãn. Có thể tạo bản sao ảnh ngoài raw cho framework huấn luyện; kiểm sha256
+trước khi copy. Với classifier một nhãn, chỉ chọn dòng có đúng 1 targetId,
+dùng target UUID làm class và lưu tên hiển thị từ fast_catalog. Không nhân
+một ảnh đa nhãn thành các class loại trừ nhau.
+
+Tách train/dev-validation theo nhóm cùng cảnh/nguồn; giữ duplicateGroup,
+sourceFamilyCandidate và nearCandidateGroup của TASK03B cùng phía. Kiểm tra
+pHash ứng viên và nhóm thủ công trước khi chốt split; duplicateGroup đơn lẻ
+chưa đủ loại toàn bộ rò rỉ cùng cảnh. KHÔNG trộn các ảnh/nhãn này vào tập đánh
+giá độc lập. Tập đánh giá độc lập phải giữ quy trình mù và gate riêng.
+
+Vận hành
+Giữ cấu hình AI01_REVIEW_ENABLED, AI01_PILOT_DIR, AI01_REVIEW_STATE_DIR,
+AI01_REVIEW_POLICY_FILE, AI01_REVIEW_PYTHON hiện có. Python cần PyYAML (venv AI
+hiện tại đã có). Không có migration hoặc DB schema mới. Backend dev nodemon
+và Vite hiện có tự tải lại mã; sau reboot khởi động bằng quy trình local cũ.
+Snapshot TASK03B phải giữ cùng cấu trúc sibling ai01-label-review-v1 / ai01-pilot-v1.
+
+Kiểm thử
+cd server && npx jest --config test/jest-ai01-admin.config.cjs --runInBand --silent
+node server/test/check-ai01-fast-ui.cjs  (cần Vite local :5173 đang chạy)
+npm --prefix client run build
+npm --prefix server run build
+Test dùng auth fixture và state tạm, không ghi nhãn thật hoặc dùng session chủ dự án.

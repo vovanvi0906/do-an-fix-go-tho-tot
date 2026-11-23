@@ -1,0 +1,14 @@
+
+> backend@0.0.1 test
+> jest --config test/jest-ai01-admin.config.cjs --runInBand --silent
+
+PASS test/ai01-fast.e2e-spec.js (7.819 s)
+PASS test/ai01-quality.e2e-spec.js
+PASS test/ai01-labeling-ux.e2e-spec.js
+PASS test/ai01-solo.e2e-spec.js
+PASS test/ai01-admin.e2e-spec.js
+
+Test Suites: 5 passed, 5 total
+Tests:       52 passed, 52 total
+Snapshots:   0 total
+Time:        17.957 s

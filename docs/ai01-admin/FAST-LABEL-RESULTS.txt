@@ -1,0 +1,39 @@
+CẬP NHẬT GIAO DIỆN: xem AI-MANAGEMENT-GUIDE.txt và AI-MANAGEMENT-RESULTS.txt. Trang Admin cũ đã chuyển về một trang /admin/ai01 với 5 tab. Nội dung bên dưới giữ làm hồ sơ phiên bản trước; luồng xuất hiện tại yêu cầu development_check và bằng chứng.
+
+FIXGO AI-01 — FAST AI-ASSISTED LABELING
+
+Đã bổ sung /admin/ai01/fast-label và menu Gán nhãn nhanh bằng AI.
+Đọc đủ inventory 21.437 ảnh Roboflow, 54 mapping TASK03B; kiểm và đọc lại
+raw data.yaml/YOLO/ảnh khi mở, lưu, xuất. Nhãn nguồn không phải ground truth.
+
+Có canvas bbox/polygon nguồn, bật/tắt overlay, nhãn nguồn, đối tượng FixGo
+đề xuất, sửa nhiều target, ghi chú; C/R/S/U/O và phím phải; lưu rồi chuyển ảnh.
+Lọc pending, khó, chưa chắc, trùng/gần trùng, ngoài phạm vi; chọn dataset/tìm ID.
+Select chỉ render 100 ảnh quanh vị trí hiện tại để giảm DOM với 21.437 ảnh.
+
+YOLO + CLIP: tái sử dụng 60 prediction cache hiện có khớp SHA ảnh, không gọi
+production inference, không sửa/chạy lại model. Các ảnh khác dùng mapping nguồn
+để đề xuất; UI nói rõ chưa có prediction. Không tự xác nhận bất cứ đề xuất nào.
+
+SOLO_THESIS mới dùng vùng fast-label-development riêng; lịch sử append-only
+có userId, UTC timestamp, hash chain, expectedHash. Auth lấy user DB qua JWT
+hiện có. Admin-only ở service và bridge. Kiểm audit khi khởi động, trước lưu/xuất.
+Xuất confirmed mới nhất của chính Admin thành JSONL phát triển, có export audit.
+Không ghi Store độc lập, không tạo approved GT; kiểm export gate độc lập vẫn chặn.
+Nhãn target cấp ảnh; geometry nguồn chưa được xác minh, không xuất thành detection GT.
+
+Kiểm thử
+- 32/32 HTTP tests đạt trên 3 suites: Admin độc lập, SOLO cũ và Fast mới.
+  Fast: 21.437/54, ADMIN-only, raw YAML/label/image, chưa tự tạo annotation,
+  identity spoofing, taxonomy, empty confirmation, stale edit, tất cả trạng thái,
+  confirmed-only export, audit tampering và independent GT gate.
+- Chromium fixture auth/state: xem canvas; nhập ghi chú không kích phím tắt;
+  C xác nhận và chuyển; bỏ qua; lọc trùng; download đúng nhãn confirmed/development.
+  Không dùng tài khoản/session chủ dự án; dữ liệu test chỉ trong thư mục tạm.
+- Frontend/backend build đạt. Vite còn cảnh báo bundle >500 kB từ cấu trúc hiện có.
+- Hướng dẫn sử dụng, cấu hình, xuất và chuẩn bị huấn luyện:
+  docs/ai01-admin/FAST-LABEL-GUIDE.txt
+
+Không sửa raw dataset/model/production inference/schema DB; không commit/push.
+Không tạo annotation thật trong runtime state; screenshot là thao tác fixture test.
+Giữ nguyên những thay đổi khác có sẵn trong workspace.

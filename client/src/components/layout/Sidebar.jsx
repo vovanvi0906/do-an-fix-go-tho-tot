@@ -5,7 +5,7 @@ import {
   X,
   LogOut,
 } from 'lucide-react';
-import { adminMenuConfig } from '../../routers/menuConfig';
+import { adminMenuConfig, aiMenuConfig } from '../../routers/menuConfig';
 import { useAuth } from '../../store/authStore';
 
 /**
@@ -93,7 +93,7 @@ export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }) {
             Menu Chức Năng
           </div>
 
-          {adminMenuConfig.map((item) => {
+          {[...adminMenuConfig, ...aiMenuConfig].map((item) => {
             const Icon = item.icon;
             const isActive =
               item.path === '/admin/dashboard'
@@ -101,6 +101,8 @@ export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }) {
                 : location.pathname.startsWith(item.path);
 
             return (
+              <React.Fragment key={item.id}>
+
               <NavLink
                 key={item.id}
                 to={item.path}
@@ -129,8 +131,9 @@ export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }) {
                 />
 
                 {/* Title */}
-                <span className="flex-1 truncate tracking-tight">{item.title}</span>
+                <span className="flex-1 tracking-tight whitespace-normal">{item.title}</span>
               </NavLink>
+              </React.Fragment>
             );
           })}
         </div>

@@ -12,6 +12,7 @@ import { AdminModule } from './modules/admin/admin.module';
 import { WorkersModule } from './modules/workers/workers.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { CustomerHomeModule } from './modules/customer-home/customer-home.module';
+import { Ai01ReviewModule } from './modules/ai01-review/ai01-review.module';
 import { AiModule } from './modules/ai/ai.module';
 import { LogsModule } from './modules/logs/logs.module';
 
@@ -31,6 +32,7 @@ import { LogsModule } from './modules/logs/logs.module';
     WorkersModule,
     OrdersModule,
     AiModule,
+    Ai01ReviewModule,
     LogsModule,
   ],
 })

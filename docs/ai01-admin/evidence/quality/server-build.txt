@@ -1,0 +1,5 @@
+
+> backend@0.0.1 build
+> babel src -d dist
+
+Successfully compiled 186 files with Babel (2803ms).

@@ -1,0 +1,40 @@
+TASK04B — 5 bước sửa dữ liệu và chuẩn bị thử nghiệm tiếp
+
+1. Đăng nhập tài khoản ACTIVE/ADMIN → Quản lý AI → Dữ liệu (hoặc Gán nhãn).
+   Bấm “Mở đợt sửa ưu tiên” ở panel TASK04B. Đợt đầu có 171 ảnh; có thể lọc
+   toàn bộ 4.203 ảnh hoặc tìm ID như img-19358. Không cần gán lại cả bộ ảnh.
+
+2. Xem nhãn tiếng Việt và box nguồn nét đứt. Chỉ lấy “box vật thể nguồn làm
+   nháp” khi nó bao đúng vật thể. Bấm Vẽ vật thể (1), chọn Danh mục → Đối
+   tượng rồi kéo box. Chọn box để kéo/đổi kích thước 4 góc, đổi nhãn hoặc xóa.
+   Nắp bồn cầu hỏng và tia nước rò không phải box toàn bồn cầu/đường ống.
+
+3. Bấm Vẽ dấu hiệu (2) nếu thấy bằng chứng: nước nhỏ giọt, bề mặt ướt, nứt,
+   cháy/xém... Đọc gợi ý/ví dụ âm và ghi bằng chứng cho từng box dấu hiệu.
+   Không rõ thì chọn Chưa chắc chắn; ảnh không dùng được chọn Loại ảnh.
+   Với quảng cáo/ảnh ghép, có thể quay về nhãn cấp ảnh để đánh dấu như trước.
+
+4. Chọn trạng thái đã xem vật thể/dấu hiệu. Chỉ xác nhận khi đã kiểm đủ box;
+   tích xác nhận box bao phần vật thể nhìn thấy, ghi lý do, rồi “Lưu & ảnh
+   tiếp theo”. Có thể lưu nháp để làm sau. Esc chọn, Delete xóa, Ctrl+Z hoàn
+   tác, Enter lưu/tiếp khi không nhập liệu. Không thấy dấu hiệu không đồng
+   nghĩa thiết bị không có lỗi. Lịch sử cũ và nguồn vẫn được giữ nguyên.
+
+5. Với ảnh muốn xuất, mở “Kiểm nguồn, quyền ảnh và nhóm trùng”, kiểm thực tế
+   rồi ghi bằng chứng (URL license/tác giả/attribution, nguồn, nhóm cùng
+   cảnh), lưu lại. Khi có ảnh đủ điều kiện, bấm “Xuất bbox solo-development
+   đã kiểm tra” ở panel TASK04B. Giao diện trả đường dẫn thật dưới state
+   bbox-quality-v1/exports/bbox-development-<UTC>; object/data.yaml và
+   sign/data.yaml tách riêng. Kiểm coverage và manifest trước khi xin chạy
+   train tiếp; hiện chỉ đề xuất YOLOv8n CPU 416/batch2/15epochs, chưa chạy.
+
+Bản sao/hàng đợi tĩnh:
+ /home/vanvi/Work/datasetai/02-development/ai01-quality-v1
+Bản sửa có audit riêng:
+ $AI01_REVIEW_STATE_DIR/bbox-quality-v1/events.jsonl
+Cấu hình local mẫu AI01_REVIEW_STATE_DIR:
+ /home/vanvi/Work/datasetai/06-benchmarks/ai01-admin-v1/reviews
+Nhãn cấp ảnh SOLO cũ không thay thế bbox detection đã kiểm. Hai loại có
+luồng xuất riêng; dùng nút có chữ “bbox” cho thử nghiệm detection tiếp theo.
+Mọi bản xuất ở đây chỉ cho phát triển, không phải benchmark/approved GT.
+Không tự train, deploy, thay weights hoặc kích hoạt model từ trang này.
