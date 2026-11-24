@@ -1,0 +1,79 @@
+FIXGO AI-01 — Thêm ảnh vào dataset
+
+CÁCH DÙNG
+1. Quản lý AI → Dữ liệu → Thêm ảnh vào dataset.
+2. Chọn/kéo thả ảnh; chọn danh mục và có thể chọn đối tượng gợi ý từ taxonomy FixGo.
+3. Khai báo nguồn, bằng chứng quyền sử dụng và mã nhóm cùng thiết bị/phiên chụp. Một đợt dùng chung các khai báo này; ảnh khác nguồn/nhóm cần nhập thành đợt riêng.
+4. Xác nhận đây là dữ liệu phát triển, không phải test/benchmark độc lập; bấm Thêm ảnh vào dataset.
+5. Xem kết quả từng file; chỉ thử lại file lỗi. Chọn Bắt đầu gán nhãn để mở đúng ảnh trong trình bbox hiện có.
+6. Vẽ riêng bbox vật thể và dấu hiệu, ghi bằng chứng quan sát. Nhãn và quyền ảnh vẫn cần kiểm tra/xác nhận trước khi xuất.
+7. Nguồn ảnh → Ảnh Admin bổ sung giúp tìm lại các ảnh vừa nhập.
+
+ĐÃ TRIỂN KHAI
+- Nhập nhiều file, preview, kéo thả, bỏ file khỏi danh sách, tiến độ từng file, kết quả thành công/trùng/lỗi, retry có idempotency key và dừng sau ảnh hiện tại.
+- Cảnh báo bỏ danh sách chưa tải và điều hướng Back/rời trang; không báo hủy một ảnh mà server có thể đã lưu.
+- API POST /api/admin/ai01/dataset/images, multipart một ảnh/request. Chỉ ACTIVE ADMIN; DTO whitelist, Swagger, giới hạn kích thước, số field và xác minh nội dung ảnh thực tế.
+- JPG/PNG/WebP tĩnh, mỗi file gốc ≤10 MB, từ 32px, ≤8192px/cạnh và ≤25 megapixel. Bản PNG chuẩn hóa tối đa 20 MB; ảnh quá lớn cần giảm độ phân giải.
+- Tối đa 20 ảnh mỗi đợt trên giao diện, gửi tuần tự. Không tải tất cả thumbnail của dataset khi nhập ảnh.
+- Sửa orientation theo EXIF cho ảnh chuẩn hóa; xóa metadata của bản phục vụ/gán nhãn. Giữ nguyên byte ảnh gốc trong vùng private để truy xuất nguồn/checksum.
+- Dữ liệu lưu riêng ở AI01_REVIEW_STATE_DIR/uploaded-dataset-v1. Không ghi vào raw dataset hoặc ảnh/mapping Roboflow cũ; không sửa DB/schema.
+- Audit nhập ảnh append-only với hash chain, file checksum, actor và thời gian. Giữ idempotency qua restart; dùng khóa file khi nhập để không ghi đè song song.
+- Mã ảnh mới không dùng lại ID của inventory gốc hoặc các reference đã được bảo vệ. Nếu inventory mới xung đột ID ảnh nhập, dừng để đối chiếu thay vì đè raw record.
+- Kiểm trùng file/pixel và pHash theo cùng cách hiện có. Ảnh trùng chính xác trả ID đã có, không tạo bản sao hoặc tự thay nhãn/bằng chứng của ảnh cũ.
+- Ảnh trùng/gần trùng reference được bảo vệ bị từ chối, không đưa lại vào development.
+- Ảnh cùng mã nhóm được giữ chung split development train/validation ổn định. Nhập ảnh không tự xác nhận split đủ an toàn hoặc cho phép train.
+- Ảnh mới có trạng thái chưa kiểm tra/quarantine, không có nhãn Roboflow tự sinh. Danh mục/đối tượng lúc nhập là gợi ý của người tải.
+- Tích hợp ảnh mới vào Dữ liệu, bộ lọc/phiên duyệt Gán nhãn, ảnh lớn và editor nhiều bbox. Hiển thị đúng nguồn và nhãn Admin đã lưu.
+- Bbox tiếp tục dùng validation, optimistic concurrency và audit hiện có. Với ảnh mới, xác nhận cần xem cả vật thể và dấu hiệu; không dùng thiếu nhãn làm ảnh âm.
+- Gần trùng khác nhóm tiếp tục chặn xuất. Mục đối chiếu bbox cho phép xác nhận độc lập chỉ khi đã xem đầy đủ các ứng viên và ghi bằng chứng ≥20 ký tự; quyết định nằm trong audit nhãn. Không xóa cờ pHash gốc. Nếu thực sự cùng nhóm hoặc có hơn 100 ứng viên, ảnh vẫn cách ly để đối chiếu dataset, không tự chuyển split/bypass gate.
+- Export bbox kiểm ảnh gốc, bản chuẩn hóa, nhãn mới nhất, quyền ảnh, nguồn và nhóm; có sourceKind/importEventHash riêng, không giả là nguồn Roboflow/YAML.
+- Pipeline visual_service_training.py nhận bản xuất nhập ảnh qua audit và checksum riêng, vẫn chặn thiếu lớp/ảnh âm/nhóm, test split và nguồn chưa kiểm. Không tự chạy training hoặc thay model.
+
+KIỂM THỬ
+PASS client: npm test --prefix client — 7 files, 28 tests.
+PASS API import: 10 tests trong server/test/ai01-import.e2e-spec.js.
+- Auth/role, DTO, file giả, MIME, >10 MB, target sai category.
+- Reference bảo vệ, ảnh mới chưa nhãn, library list và editor.
+- Duplicate/idempotency, audit sau restart, checksum khi file bị sửa.
+- Lưu bbox chưa đủ quyền vẫn chặn xuất, concurrency; xuất hợp lệ không thành Ground Truth.
+- Đối chiếu gần trùng phải đầy đủ và có audit.
+- Orientation/EXIF: bản hiển thị được xoay đúng và không chứa metadata riêng; ảnh gốc giữ nguyên.
+- Pipeline thử nghiệm đọc đúng provenance nhập ảnh nhưng không tạo thư mục training khi chưa đủ dữ liệu.
+PASS hồi quy backend: 27 tests fast/quality/label-browser hiện có.
+PASS Python: 15 tests visual detector/training gates.
+PASS trình duyệt Chromium với backend harness cô lập:
+- Batch hai file giống nhau → một ảnh mới + một duplicate.
+- Bắt đầu gán nhãn mở đúng ảnh nhập, vẽ và lưu nhiều bbox.
+- Lọc ảnh bổ sung, desktop 1440px, mobile 390px và dark mode; không có lỗi JavaScript hoặc tràn ngang modal.
+- Evidence: /tmp/fixgo-ai01-import/results.json và 01–04 PNG.
+PASS npm run build --prefix client; còn cảnh báo Vite chunk >500 kB.
+PASS npm run build --prefix server (Babel).
+PASS git diff --check.
+Client không có script typecheck/tsconfig riêng. Không thực hiện native build hoặc huấn luyện model trong công việc này.
+Mọi upload/annotation kiểm thử chỉ ở state tạm và được dọn; không thêm nhãn/ảnh giả vào state người dùng.
+
+FILE THAY ĐỔI TRONG YÊU CẦU NÀY
+client/src/pages/ai01-review/AiManagementPage.jsx
+client/src/pages/ai01-review/components/DataTab.jsx
+client/src/pages/ai01-review/components/DatasetUploadModal.jsx
+client/src/pages/ai01-review/components/DatasetUploadModal.test.jsx
+client/src/pages/ai01-review/components/LabelDetailEditor.jsx
+client/src/pages/ai01-review/components/LabelTab.jsx
+client/src/pages/ai01-review/components/BBoxQualityEditor.jsx
+client/src/pages/ai01-review/components/ImageReview.jsx
+client/src/pages/ai01-review/labelingOptions.js
+client/src/services/ai01ReviewService.js
+client/vitest.config.js
+server/src/modules/ai01-review/ai01-review.controller.js
+server/src/modules/ai01-review/ai01-review.service.js
+server/src/modules/ai01-review/dto/import-image.dto.js
+server/scripts/ai01/uploaded_dataset.py
+server/scripts/ai01/fast_review.py
+server/scripts/ai01/quality_review.py
+server/scripts/ai01/label_browser.py
+server/test/ai01-import.e2e-spec.js
+server/test/check-ai01-import-ui.cjs
+ai-service/training/visual_service_training.py
+docs/ai01-admin/DATASET-IMPORT-RESULTS.txt
+
+Không commit/push. Nếu backend dev chưa tự reload, khởi động lại backend để nạp route và Python engine mới.

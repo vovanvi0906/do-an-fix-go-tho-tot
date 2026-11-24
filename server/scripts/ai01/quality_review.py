@@ -38,6 +38,7 @@ class QualityReview:
     'signs':json.loads((self.root/'sign-ontology.json').read_text())['signs'],'reasons':json.loads((self.root/'reason-labels.json').read_text()),'pins':pins,'revision':digest(self.root/'SHA256SUMS.json')}
   self.signature=sig;return self.pack
  def row(self,i,verify=True):
+  if hasattr(self.parent,'imports') and i in self.parent.imports.rows:return self.parent.imports.quality_row(i,verify)
   p=self.load()
   if not p or i not in p['rows']:raise Invalid('Ảnh chưa thuộc hàng đợi sửa bbox.')
   r=p['rows'][i]
@@ -47,6 +48,8 @@ class QualityReview:
    if not copy.is_relative_to(self.root.resolve()) or digest(image)!=r['sha256'] or (digest(label) if label.exists() else None)!=r['annotationSha256'] or digest(yml)!=r['yamlSha256'] or digest(copy)!=r['sha256']:raise Invalid('Ảnh/nhãn/YAML hoặc bản sao đã đổi; không lưu/xuất bbox.')
   return r
  def queue_info(self,i,pack=None):
+  if hasattr(self.parent,'imports') and i in self.parent.imports.rows:
+   e=self.latest.get(i);return dict(priority=2,reasons=['new_upload'],imported=True,sourceBoxes=0,needsGeometryReview=False,pilot=False,status=e['status'] if e else 'pending',pending=not e or e['status'] not in ['confirmed','rejected'])
   p=pack if pack is not None else self.load()
   if not p or i not in p['queue']:return None
   e=self.latest.get(i)
@@ -58,20 +61,29 @@ class QualityReview:
   self.head=e['eventHash'];self.log_hash=digest(self.log);self.events.append(e)
   if e['kind']=='bbox_revision':self.latest[e['imageId']]=e
   return e
+ def packet_hash(self,i):
+  return self.parent.imports.packet_hash(i) if hasattr(self.parent,'imports') and i in self.parent.imports.rows else self.load()['revision']
+ def image_file(self,r):
+  return self.parent.imports.file(r['imageFile']) if r.get('sourceKind')=='admin_upload' else self.root/r['copyPath']
  def blockers(self,e,uid):
   if not e:return ['Chưa có bản sửa bbox.']
-  out=[]
+  out=self.parent.imports.blockers(e['imageId'],e) if hasattr(self.parent,'imports') and e['imageId'] in self.parent.imports.rows else []
   if e['status']!='confirmed':out.append('Bbox chưa được người xác nhận.')
   if e['userId']!=uid:out.append('Bản sửa thuộc Admin khác.')
-  if e['packetHash']!=self.load()['revision']:out.append('Quality snapshot đã đổi; cần xem lại bản sửa.')
+  if e['packetHash']!=self.packet_hash(e['imageId']):out.append('Quality snapshot đã đổi; cần xem lại bản sửa.')
   if not e['rightsVerified'] or not e['rightsEvidence'].strip():out.append('Thiếu xác minh quyền ảnh/license/attribution.')
   if not e['sourceEvidence'].strip():out.append('Thiếu bằng chứng kiểm nguồn.')
   if not e['groupEvidence'].strip():out.append('Thiếu kiểm nhóm trùng/cùng cảnh.')
+  if e['imageId'] in getattr(getattr(self.parent,'imports',None),'rows',{}) and (e['objectReview'] not in ['complete','none_visible'] or e['signReview'] not in ['positive','none_visible']):out.append('Ảnh mới cần xem cả vật thể và dấu hiệu trước khi xuất; không tự coi thiếu nhãn là ảnh âm.')
   if e['objectReview'] not in ['complete','none_visible'] and e['signReview'] not in ['positive','none_visible']:out.append('Chưa hoàn tất vật thể hoặc dấu hiệu.')
   return out
  def validate_payload(self,p):
   required={'imageId','expectedHash','status','boxes','objectReview','objectExtentReviewed','signReview','rightsVerified','rightsEvidence','sourceEvidence','groupEvidence','reason'}
-  if set(p)!=required:raise Invalid('Payload sửa bbox thiếu/thừa trường.')
+  imported=p.get('imageId') in getattr(getattr(self.parent,'imports',None),'rows',{})
+  if set(p)-(required|({'duplicateReview'} if imported else set())) or not required.issubset(p):raise Invalid('Payload sửa bbox thiếu/thừa trường.')
+  if imported and p.get('duplicateReview') is not None:
+   review=p['duplicateReview'];candidates=self.parent.imports.rows[p['imageId']]['nearCandidates']
+   if not isinstance(review,dict) or set(review)!={'decision','evidence','imageIds'} or review['decision']!='independent' or not isinstance(review['evidence'],str) or not 20<=len(review['evidence'].strip())<=3000 or not isinstance(review['imageIds'],list) or any(not isinstance(i,str) for i in review['imageIds']) or sorted(review['imageIds'])!=sorted(c['imageId'] for c in candidates) or len(candidates)>100:raise Invalid('Cần đối chiếu đầy đủ ứng viên gần trùng và ghi bằng chứng ảnh độc lập tối thiểu 20 ký tự.')
   r=self.row(p['imageId']);old=self.latest.get(p['imageId'])
   if p['expectedHash']!=(old['eventHash'] if old else None):raise Invalid('Bản bbox đã đổi; tải lại trước khi lưu.')
   if p['status'] not in ['draft','confirmed','uncertain','rejected']:raise Invalid('Chọn nháp/xác nhận/chưa chắc/loại ảnh.')
@@ -106,6 +118,7 @@ class QualityReview:
   if p['objectReview']=='none_visible' and obj:raise Invalid('Không có vật thể thì danh sách box vật thể phải rỗng.')
   if p['signReview']=='none_visible' and sign:raise Invalid('Không thấy dấu hiệu thì không được có box dấu hiệu dương.')
   if p['status']=='confirmed':
+   if imported and (p['objectReview'] not in ['complete','none_visible'] or p['signReview'] not in ['positive','none_visible']):raise Invalid('Ảnh mới cần xem cả vật thể và dấu hiệu trước khi xác nhận; không coi thiếu nhãn là ảnh âm.')
    if p['objectReview'] not in ['complete','none_visible'] and p['signReview'] not in ['positive','none_visible']:raise Invalid('Cần hoàn tất xem vật thể hoặc dấu hiệu trước xác nhận.')
    if obj and (p['objectReview']!='complete' or not p['objectExtentReviewed']):raise Invalid('Xác nhận đã khoanh toàn bộ phần vật thể nhìn thấy, không phải vùng nước/sự cố.')
    if p['objectReview']=='complete' and not obj:raise Invalid('Hoàn tất vật thể cần ít nhất một box, hoặc chọn không có vật thể.')
@@ -132,13 +145,13 @@ class QualityReview:
   if op=='fast_quality_detail':
    r=self.row(p['imageId']);pack=self.load();e=self.latest.get(r['id'])
    display=dict(r,sourceReferences=[dict(b,sourceLabelVi=self.parent.source_translations.get((r['dataset'],b['sourceClassId']),'Nhãn chưa rõ')) for b in r['sourceReferences']])
-   return {'item':display,'queue':pack['queue'][r['id']],'reasonLabels':pack['reasons'],'catalog':pack['catalog'],'signs':pack['signs'],'annotation':e,'blockers':self.blockers(e,uid),'history':[x for x in self.events if x.get('imageId')==r['id']]}
+   return {'item':display,'queue':self.queue_info(r['id'],pack),'reasonLabels':pack['reasons'],'catalog':pack['catalog'],'signs':pack['signs'],'annotation':e,'blockers':self.blockers(e,uid),'history':[x for x in self.events if x.get('imageId')==r['id']]}
   if op=='fast_quality_image':
-   r=self.row(p['imageId']);f=self.root/r['copyPath'];return {'binary':base64.b64encode(f.read_bytes()).decode(),'contentType':mimetypes.guess_type(f.name)[0] or 'image/jpeg'}
+   r=self.row(p['imageId']);f=self.image_file(r);return {'binary':base64.b64encode(f.read_bytes()).decode(),'contentType':mimetypes.guess_type(f.name)[0] or 'image/jpeg'}
   if op=='fast_quality_save':
    r=self.validate_payload(p)
-   return self.append({k:v for k,v in p.items() if k!='expectedHash'}|{'kind':'bbox_revision','userId':uid,'previousAnnotationHash':p['expectedHash'],'packetHash':self.load()['revision'],
-    'sha256':r['sha256'],'sourceAnnotationSha256':r['annotationSha256'],'sourceYamlSha256':r['yamlSha256'],'split':r['developmentSplit'],'leakageGroup':r['leakageGroup'],'catalogSha256':digest(self.root/'catalog-db.json'),'datasetType':'solo-bbox-development'})
+   return self.append({k:v for k,v in p.items() if k!='expectedHash'}|{'kind':'bbox_revision','userId':uid,'previousAnnotationHash':p['expectedHash'],'packetHash':self.packet_hash(p['imageId']),
+    'sha256':r['sha256'],'sourceAnnotationSha256':r['annotationSha256'],'sourceYamlSha256':r['yamlSha256'],'split':r['developmentSplit'],'leakageGroup':r['leakageGroup'],'catalogSha256':digest(self.root/'catalog-db.json'),'datasetType':'solo-bbox-development',**({'sourceKind':'admin_upload','importEventHash':r['importEventHash']} if r.get('sourceKind')=='admin_upload' else {})})
   if op=='fast_quality_export':return self.export(uid,p)
   raise Invalid('Không có thao tác quality này.')
  def export(self,uid,p):
@@ -154,7 +167,7 @@ class QualityReview:
     if pixels[r['pixelSha256']]!=signature:raise Invalid('Ảnh trùng pixel có bản sửa khác nhau; cần đối chiếu trước xuất.')
     skipped.append(i);continue
    pixels[r['pixelSha256']]=signature;events.append(e)
-  estimated=sum((self.root/self.row(e['imageId'],False)['copyPath']).stat().st_size*2 for e in events)
+  estimated=sum(self.image_file(self.row(e['imageId'],False)).stat().st_size*2 for e in events)
   if shutil.disk_usage(self.home).free-estimated<2*1024**3:raise Invalid('Cần giữ ít nhất 2GiB đĩa trống sau khi xuất.')
   exports=self.home/'exports'
   if exports.resolve().parent!=self.home.resolve():raise Invalid('Thư mục xuất bbox không hợp lệ.')
@@ -168,7 +181,7 @@ class QualityReview:
    for e in chosen:
     r=self.row(e['imageId']);split=e['split'];groups[e['leakageGroup']].add(split)
     if len(groups[e['leakageGroup']])>1:raise Invalid('Nhóm source đi qua split; không xuất.')
-    dest=folder/kind/'images'/split/(r['id']+Path(r['path']).suffix.lower());dest.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(self.root/r['copyPath'],dest)
+    dest=folder/kind/'images'/split/(r['id']+Path(r['path']).suffix.lower());dest.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(self.image_file(r),dest)
     label=folder/kind/'labels'/split/(r['id']+'.txt');label.parent.mkdir(parents=True,exist_ok=True);lines=[]
     for b in e['boxes']:
      if b['kind']!=kind:continue

@@ -1,0 +1,60 @@
+FIXGO AI-01 — Tối giản tab Huấn luyện
+
+PHẠM VI
+Chỉ thay đổi giao diện tab Huấn luyện và kiểm thử frontend liên quan.
+Không sửa backend/API, DB, dataset, model, pipeline hoặc export gate. Không chạy training/inference, không commit/push.
+Các tab Dữ liệu, Gán nhãn, Đánh giá và Triển khai giữ nguyên giao diện.
+
+KẾT QUẢ KIỂM TRA BACKEND/PIPELINE
+- management_status.training trả supported=false, status=not_integrated.
+- Admin chưa có API model pretrained, cấu hình job, khởi chạy/hủy, progress, metrics, lịch sử hoặc artifact.
+- fast_preparation cung cấp báo cáo phiên bản chuẩn bị, tác vụ, số train/validation, lớp, ngưỡng thử nghiệm và kiểm tra nhóm split.
+- fast_readiness cung cấp điều kiện xuất SOLO theo nhãn đã lưu; fast_export và fastDownload là chức năng cũ được giữ nguyên.
+- server/scripts/ai01/train_prepared.py chỉ chạy train khi được gọi CLI rõ ràng với các cờ xác nhận, task, weights cục bộ và output mới. Không gọi từ Admin.
+- CLI kiểm manifest, dữ liệu, checksum và leakage trước khi train; yêu cầu weights YOLO khớp detect/classify, không tự tải model.
+- Mẫu từ prepare_dataset.py và experiment.json hiện có: epochs=10, batch=8, image size detection=640 / classification=224, seed=23.
+- train_prepared.py cố định device=cpu, workers=0. Admin không có API phát hiện GPU hoặc lấy cấu hình phiên train.
+- Không chạy pipeline hoặc thay split trong công việc này. Bản chuẩn bị dùng split phát triển đã tái chia từ nguồn, không coi tên split Roboflow là test độc lập. Không xác nhận từ UI rằng đã loại mọi ảnh có tên split test gốc; việc kiểm dữ liệu train thực tế phải được làm trước khi chạy CLI.
+
+GIAO DIỆN MỚI — 4 KHU VỰC
+A. Bộ dữ liệu: chỉ phiên bản/tác vụ có ảnh trong báo cáo; số train/validation/lớp theo tác vụ, trạng thái ngưỡng thử nghiệm, nút Kiểm tra dữ liệu và Xem lý do.
+B. Mô hình và tác vụ: chỉ các tác vụ mà dataset hỗ trợ; model chưa có API nên chưa cho lựa chọn, có giải thích rõ.
+C. Cấu hình: hiển thị read-only các giá trị THAM KHẢO của CLI; không giả rằng đã lưu hay áp dụng cho một job. Không có tùy chọn GPU giả. Nút Bắt đầu huấn luyện disabled có lý do cụ thể.
+D. Tiến trình và lịch sử: nêu chưa kết nối; không dựng progress, epoch, loss, thời gian, metrics, lịch sử hoặc đường dẫn artifact giả. Hiển thị loại metric phù hợp tác vụ nhưng chưa có giá trị.
+Thông tin từng lớp, leakage, ảnh đã lưu, export SOLO, checksum và audit ở mục thu gọn Chi tiết dữ liệu. Cài đặt nâng cao và Chi tiết phiên train cũng thu gọn.
+
+CHỨC NĂNG ĐÃ HOẠT ĐỘNG
+- Đọc lại báo cáo qua Kiểm tra dữ liệu; hiển thị lỗi và thử lại, không biến báo cáo này thành xác nhận kiểm toàn bộ ảnh.
+- Chọn tác vụ và cập nhật dataset, số lượng, lớp và cấu hình tham khảo tương ứng.
+- Giải thích lớp thiếu dữ liệu hoặc nhóm train/validation giao nhau; không đồng nhất đạt ngưỡng số lượng với được phép train.
+- Xem số liệu từng lớp và ngưỡng thử nghiệm thực tế trong Chi tiết dữ liệu.
+- Giữ xuất SOLO, phân trang ảnh đã lưu và mở đúng ảnh sang công cụ gán nhãn.
+- Giữ server revalidation khi xuất, quarantine, kiểm nguồn/quyền ảnh/checksum/nhóm trùng. Bản xuất SOLO tách riêng với dataset nhãn nguồn và chưa được coi là dataset training đã có cấu hình/split.
+- Tiếng Việt, desktop, responsive mobile và dark mode.
+
+CÒN PHỤ THUỘC BACKEND
+- Danh sách/kiểm tính tương thích pretrained models và phiên bản dataset khác.
+- Lưu/điều chỉnh cấu hình job, chọn phần cứng thực tế, khởi chạy và hủy training.
+- Job progress, epoch/loss/thời gian, metrics, lịch sử và artifact của từng phiên.
+- Không tự deploy sau training. Không có thao tác deploy mới.
+
+FILE THAY ĐỔI
+1. client/src/pages/ai01-review/AiManagementPage.jsx
+2. client/src/pages/ai01-review/components/TrainingTab.jsx
+3. client/src/pages/ai01-review/components/TrainingTab.test.jsx
+4. client/vitest.config.js
+5. docs/ai01-admin/TRAINING-TAB-RESULTS.txt
+
+KIỂM THỬ
+PASS npm test --prefix client: 6 files, 23/23 tests.
+- 5 tests mới: 4 khu vực, dataset đúng task, cấu hình tham khảo, trạng thái backend chưa hỗ trợ, không tự train, nút đọc lại báo cáo, review links, lỗi API độc lập, leakage blocker và server từ chối export.
+PASS npm run build --prefix client. Còn cảnh báo chunk >500 kB của Vite.
+Typecheck: dự án client không có script typecheck, tsconfig hoặc jsconfig; không có bước typecheck độc lập để chạy. Build đã kiểm tra/transpile JSX; đây không thay thế kiểm tra kiểu tĩnh.
+PASS trình duyệt Chromium với backend harness cô lập, danh tính tạm và API đọc thực tế.
+- Cả ba tác vụ có số train/validation/lớp khớp fast_preparation.
+- Cấu hình mẫu cập nhật detection/classification; nút start và model selector không giả chức năng.
+- Không có progress giả, không có bảng kỹ thuật hiển thị ở giao diện chính, chỉ bảng lịch sử chưa kết nối.
+- Kiểm tra dữ liệu chỉ gọi các API đọc cũ; không có request ghi hoặc khởi chạy training trong kịch bản trình duyệt.
+- Export SOLO bị chặn khi chưa có ảnh đủ điều kiện, có hướng xử lý.
+- Desktop 1440px, mobile 390px, dark mode; không lỗi JavaScript hoặc tràn ngang panel.
+- Evidence: /tmp/fixgo-ai01-training/results.json, 01-desktop.png, 02-mobile-dark-data.png, 03-mobile-dark-config.png.

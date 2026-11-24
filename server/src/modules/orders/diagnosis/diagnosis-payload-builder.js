@@ -20,6 +20,8 @@ export function createInitialResult(imageUrl, description, categories) {
     suggestedServiceName: null,
     suggestedServiceConfidence: null,
     suggestedServices: [],
+    visualServiceSuggestions: [],
+    visualAnalysisStatus: 'disabled',
     estimatedPriceMin: null,
     estimatedPriceMax: null,
     estimatedPriceRange: null,

@@ -1,0 +1,29 @@
+{
+  "status": "NEEDS_REVIEW",
+  "appliedToDatabase": false,
+  "meaning": "Đề xuất để người có chuyên môn duyệt; KHÔNG phải mapping đã được xác nhận và không được runtime sử dụng.",
+  "target": {
+    "id": "ca1e389e-6302-4a19-a086-5c815a836473",
+    "slug": "o-cam-dien",
+    "name": "Ổ cắm điện"
+  },
+  "proposals": [
+    {
+      "modelSignCode": "burn_mark",
+      "proposedSymptomCode": "burn_mark",
+      "name": "Dấu hiệu cháy sém nhìn thấy tại ổ cắm",
+      "kind": "VISUAL_OBSERVABLE",
+      "serviceId": "51bc6727-635d-4e9e-a979-090a972ea48a",
+      "serviceSlug": "thay-o-cam-chay-hong",
+      "serviceName": "Thay ổ cắm cháy / hỏng",
+      "requiresInspection": true,
+      "reviewQuestion": "Khi nào vết cháy sém đủ căn cứ để GỢI Ý thay ổ cắm, khi nào phải hỏi thêm hoặc chỉ kiểm tra hiện trường?",
+      "forbiddenClaims": ["Đã xác định chập điện/quá tải", "Có mùi khét hoặc phát nóng chỉ từ ảnh", "Phải thay ổ cắm trước khi thợ kiểm tra", "Cần sửa toàn bộ hệ thống điện chỉ từ ảnh này"]
+    }
+  ],
+  "notes": [
+    "Dịch vụ có mùi khét/phát nóng tồn tại nhưng không ánh xạ tự động vì đây là triệu chứng người dùng báo, không suy ra từ ảnh.",
+    "Chưa tạo triệu chứng hay liên kết APPROVED trong DB. Người duyệt sử dụng quy trình catalog hiện có.",
+    "Vết nứt/bộ phận vỡ cần nhãn ảnh và quy tắc chuyên môn riêng trước khi thêm liên kết."
+  ]
+}

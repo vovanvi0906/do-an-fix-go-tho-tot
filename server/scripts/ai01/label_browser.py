@@ -12,7 +12,7 @@ LABELS = {
  'bbox': {'has': 'Có bbox', 'none': 'Không có bbox', 'suspect': 'Bbox nghi sai — hàng đợi chưa hoàn tất', 'corrected': 'Bbox đã sửa và xác nhận'},
  'imageType': {'advertisement': 'Nghi quảng cáo / đã đánh dấu quảng cáo', 'composite': 'Nghi ảnh ghép / đã đánh dấu ảnh ghép', 'out_of_scope': 'Ngoài phạm vi — nhãn nguồn hoặc Admin'},
  'duplicate': {'none': 'Không phát hiện trùng', 'exact': 'Trùng chính xác (pixel)', 'near': 'Gần trùng (ứng viên)', 'source_group': 'Cùng nhóm nguồn (ứng viên)'},
- 'queue': {'task04b': 'TASK 04B', 'prepared': 'Ảnh cần chuẩn hóa', 'unprocessed': 'Ảnh chưa xử lý'},
+ 'queue': {'uploaded': 'Ảnh Admin bổ sung', 'task04b': 'TASK 04B', 'prepared': 'Ảnh cần chuẩn hóa', 'unprocessed': 'Ảnh chưa xử lý'},
  'usage': {'needs_check': 'Cần kiểm tra điều kiện sử dụng', 'quarantine': 'Quarantine', 'eligible': 'Đủ điều kiện xuất SOLO (cần kiểm hash khi xuất)'},
  'quick': {'pending': 'Chưa kiểm tra', 'needs_fix': 'Cần sửa', 'priority': 'Ưu tiên (P0/P1)', 'completed': 'Đã hoàn thành kiểm tra nhãn'},
 }
@@ -30,11 +30,12 @@ class LabelBrowser:
         f.quality.check_audit()
         prep = f.prepared.load()
         pack = f.quality.load()
-        key = (uid, f.head, f.quality.head, f.prepared.signature, f.quality.signature, json.dumps(catalog, sort_keys=True))
+        key = (uid, f.head, f.quality.head, f.prepared.signature, f.quality.signature, f.imports.head, json.dumps(catalog, sort_keys=True))
         if key == self.cache_key:
             return self.records
         targets = {t['id']: t for t in catalog['targets']}
         mapping = {(m['dataset'], m['classId']): m for m in f.mapping['entries']}
+        uploaded_groups=Counter(r['leakageGroup'] for r in f.imports.rows.values())
         families = Counter(r.get('sourceFamilyCandidate') for r in (pack or {}).get('rows', {}).values() if r.get('sourceFamilyCandidate'))
         records = []
         for raw in f.rows.values():
@@ -45,7 +46,7 @@ class LabelBrowser:
             preparation = prep['reviewIndex'].get(image_id)
             reasons = (preparation or {}).get('reasons', [])
             working = (pack or {}).get('rows', {}).get(image_id, {})
-            target_ids = event.get('targetIds', []) if event else sorted({t['targetId'] for m in source for t in m['catalogTargetCandidates']})
+            target_ids = event.get('targetIds', []) if event else sorted({t['targetId'] for m in source for t in m['catalogTargetCandidates']} | ({raw['targetId']} if raw.get('targetId') else set()))
             # Bbox and image labels are separate journals: preserve and expose both.
             target_ids = sorted(set(target_ids) | {b['label'] for b in (box_event or {}).get('boxes', []) if b['kind'] == 'object'})
             sign_ids = set((event or {}).get('visibleSigns') or [])
@@ -69,6 +70,7 @@ class LabelBrowser:
             if f.counts[raw['pixelSha256']] > 1: duplicate_types.add('exact')
             if duplicates.get('nearDegree', 0) > 0: duplicate_types.add('near')
             if families.get(working.get('sourceFamilyCandidate'), 0) > 1: duplicate_types.add('source_group')
+            if raw.get('sourceKind')=='admin_upload' and uploaded_groups[raw['leakageGroup']]>1:duplicate_types.add('source_group')
             if not duplicate_types: duplicate_types.add('none')
             decision = (event or {}).get('decision', 'pending')
             state = 'corrected' if decision == 'confirmed' and event.get('reviewAction') == 'correct' else decision
@@ -79,13 +81,13 @@ class LabelBrowser:
             if state not in STATUS: state = 'pending'
             qualities = set()
             if decision == 'uncertain' or 'mapping_needs_context' in reasons: qualities.add('ambiguous')
-            if not raw['annotations']: qualities.add('missing')
-            if quality and quality['pending']: qualities.add('bbox')
+            if not raw['annotations'] and not (raw.get('sourceKind')=='admin_upload' and box_event and box_event['status']=='confirmed' and box_event['objectReview'] in ['complete','none_visible'] and box_event['signReview'] in ['positive','none_visible']): qualities.add('missing')
+            if quality and quality['pending'] and not quality.get('imported'): qualities.add('bbox')
             queues = set()
-            if quality: queues.add('task04b')
+            if quality: queues.add('uploaded' if quality.get('imported') else 'task04b')
             if preparation: queues.add('prepared')
             if not event and not box_event: queues.add('unprocessed')
-            eligible = not f.blockers(uid, image_id)
+            eligible = not (f.quality.blockers(box_event,uid) if raw.get('sourceKind')=='admin_upload' else f.blockers(uid,image_id))
             usage = {'eligible'} if eligible else {'quarantine', 'needs_check'}
             obj = bool(target_ids) or any(m.get('normalizedObjectProposal') for m in source)
             signs = bool(sign_ids or source_signs)
@@ -99,9 +101,9 @@ class LabelBrowser:
             if qualities & {'bbox', 'missing'}: quick.add('needs_fix')
             if priority is not None and priority <= 1: quick.add('priority')
             if state in ['confirmed', 'corrected', 'rejected'] and not (quality and quality['pending']): quick.add('completed')
-            records.append(dict(id=image_id, dataset=raw['dataset'], categoryIds=sorted({targets[t]['categoryId'] for t in target_ids if t in targets}), targetIds=target_ids,
+            records.append(dict(id=image_id, dataset=raw['dataset'], categoryIds=sorted({targets[t]['categoryId'] for t in target_ids if t in targets} | ({raw['categoryId']} if raw.get('sourceKind')=='admin_upload' else set())), targetIds=target_ids,
                 labels=current_labels if event or box_event else source_labels, labelOrigin='admin' if event or box_event else 'source',
-                sourceLabelsVi=source_labels, sourceKeys=[m['mappingKey'] for m in source], status=state, priority=priority,
+                imported=raw.get('sourceKind')=='admin_upload', sourceLabelsVi=source_labels, sourceKeys=[m['mappingKey'] for m in source], status=state, priority=priority,
                 signIds=sorted(sign_ids | {'proposal:' + s for s in source_signs}), labelType=sorted(label_types), quality=sorted(qualities), bbox=sorted(bbox_states),
                 imageType=sorted(image_types), duplicate=sorted(duplicate_types), queue=sorted(queues), usage=sorted(usage), quick=sorted(quick),
                 qualityReview=quality, eligible=eligible))
@@ -117,6 +119,7 @@ class LabelBrowser:
         datasets = {r['dataset'] for r in records}
         options['dataset'] = [{'id': d['dataset'], 'name': ('Roboflow · ' if d.get('yaml', {}).get('roboflow') else '') + d['source'].get('project', d['dataset'])} for d in f.mapping['datasets'] if d['dataset'] in datasets]
         keys = {key for r in records for key in r['sourceKeys']}
+        if 'admin_upload' in datasets: options['dataset'].append({'id':'admin_upload','name':'Ảnh Admin bổ sung'})
         options['sourceLabel'] = [{'id': m['mappingKey'], 'name': f.source_translations.get((m['dataset'], m['classId']), m['sourceLabel']) + ' · ' + m['sourceLabel'] + ' (' + m['dataset'] + ')'} for m in f.mapping['entries'] if m['mappingKey'] in keys]
         sign_ids = {s for r in records for s in r['signIds']}
         pack = f.quality.load()
@@ -151,6 +154,7 @@ class LabelBrowser:
             # Saved-label filters can become empty after an edit: retain their semantics.
             allowed = set(STATUS if key == 'status' else LABELS.get(key, {})) | {v['id'] for v in values}
             if key in ['sourceLabel', 'dataset']: allowed |= {m['mappingKey'] if key == 'sourceLabel' else m['dataset'] for m in self.parent.mapping['entries']}
+            if key == 'dataset': allowed.add('admin_upload')
             if key == 'sign': allowed |= set(SIGN_NAMES) | set((self.parent.quality.load() or {}).get('signs', {})) | {'proposal:' + p for m in self.parent.mapping['entries'] for p in m.get('visibleSignProposals') or []}
             if key == 'priority': allowed |= {'0','1','2','3'}
             if value != 'all' and value not in allowed: raise Invalid('Giá trị bộ lọc không được hỗ trợ: ' + key)

@@ -41,7 +41,9 @@ class FastReview:
         self.display_vi['lamvuon/v1/17']['labelVi'] = 'Lá đậu tương'
         self.source_translations = {(e['dataset'], e['classId']): self.display_vi.get(e['mappingKey'], {}).get('labelVi', 'Nhãn chưa có bản dịch') for e in self.mapping['entries']}
         self.tax = json.loads((pilot / 'taxonomy-reference.json').read_text())
-        self.rows = {r['id']: r for r in map(json.loads, (folder / 'images.jsonl').read_text().splitlines()) if not r['reference']}
+        inventory = list(map(json.loads, (folder / 'images.jsonl').read_text().splitlines()))
+        self.rows = {r['id']: r for r in inventory if not r['reference']}
+        self.reference_rows = [r for r in inventory if r['reference']]
         self.duplicates = json.loads((folder / 'duplicate-lookup.json').read_text())
         self.counts = Counter(r['pixelSha256'] for r in self.rows.values())
         self.home = state / 'fast-label-development'
@@ -66,6 +68,8 @@ class FastReview:
         self.log_digest = digest(self.log) if self.log.exists() else None
         from quality_review import QualityReview
         self.quality = QualityReview(self)
+        from uploaded_dataset import UploadedDataset
+        self.imports = UploadedDataset(self)
 
     def check_audit(self):
         current = digest(self.log) if self.log.exists() else None
@@ -93,7 +97,7 @@ class FastReview:
     def blockers(self, uid, image_id, verify_files=False):
         label = self.latest.get(image_id)
         check = self.checks.get(image_id)
-        out = []
+        out = self.imports.blockers(image_id) if image_id in self.imports.rows else []
         if not label or label['decision'] != 'confirmed': out.append('Chưa có nhãn người xác nhận.')
         if label and label['userId'] != uid: out.append('Nhãn thuộc Admin khác; cần tự kiểm và lưu nhãn của bạn.')
         if not check: out.append('Quarantine: chưa kiểm nguồn, quyền ảnh và nhóm trùng.')
@@ -117,6 +121,7 @@ class FastReview:
         return p
 
     def detail(self, image_id):
+        if hasattr(self, 'imports') and image_id in self.imports.rows: return self.imports.detail(image_id)
         if image_id not in self.rows:
             raise Invalid('Không có ảnh phát triển này.')
         r = self.rows[image_id]
@@ -150,6 +155,8 @@ class FastReview:
 
     def handle(self, uid, op, p):
         self.check_audit()
+        self.imports.check_audit()
+        if op == 'fast_import_image': return self.imports.upload(uid,p)
         if op.startswith('fast_label_'):
             if not hasattr(self, 'label_browser'):
                 from label_browser import LabelBrowser
@@ -175,13 +182,13 @@ class FastReview:
                                   preparationReview=preparation['reviewIndex'].get(r['id']),
                                   sourceLabelsVi=[self.source_translations.get((r['dataset'], cid), 'Nhãn chưa có bản dịch') for cid in r['classIds']],
                                   status=self.latest.get(r['id'], {}).get('decision', 'pending'),
-                                  eligible=not self.blockers(uid, r['id'])) for r in self.rows.values()], 'mappingCount': len(self.mapping['entries'])}
+                                  eligible=not self.blockers(uid, r['id'])) | (self.imports.presentation(r['id']) if r['id'] in self.imports.rows else {}) for r in self.rows.values()], 'mappingCount': len(self.mapping['entries'])}
         if op in ['fast_detail', 'fast_image']:
             d = self.detail(p.get('imageId'))
             if op == 'fast_detail':
                 preparation = self.prepared.load()
                 return dict(d, qualityReview=self.quality.queue_info(p['imageId']), blockers=self.blockers(uid, p['imageId']), preparationReview=preparation['reviewIndex'].get(p['imageId']), preparationReasonLabels=preparation['reasonLabels'])
-            f = self.file(d['imagePath'])
+            f = self.imports.file(self.imports.rows[d['id']]['imageFile']) if d['id'] in self.imports.rows else self.file(d['imagePath'])
             return {'binary': base64.b64encode(f.read_bytes()).decode(), 'contentType': mimetypes.guess_type(f.name)[0] or 'image/jpeg'}
         if op == 'fast_save':
             self.check_audit()
@@ -231,6 +238,7 @@ class FastReview:
             if set(p) != {'imageId', 'annotationEventHash', 'rightsEvidence', 'sourceEvidence', 'groupEvidence', 'reason'}:
                 raise Invalid('Cần hash nhãn và đủ bằng chứng kiểm tra SOLO.')
             self.detail(p['imageId'])
+            if p['imageId'] in self.imports.rows and self.imports.blockers(p['imageId']):raise Invalid('Cần đối chiếu ảnh gần trùng/nhóm split trước khi duyệt xuất.')
             label = self.latest.get(p['imageId'])
             if not label or label['decision'] != 'confirmed' or label['userId'] != uid or label['eventHash'] != p['annotationEventHash']:
                 raise Invalid('Chỉ kiểm bản nhãn đã xác nhận mới nhất do chính bạn lưu.')

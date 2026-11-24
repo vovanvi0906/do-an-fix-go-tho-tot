@@ -64,6 +64,14 @@ export default function DiagnosisChoices({ result, imageUrl, description = '', o
       {!!error && <View><Text accessibilityRole="alert" style={{ color: '#DC2626' }}>{error}</Text>
         <Pressable disabled={busy} onPress={() => answer(lastAnswers)} style={{ padding: 12 }}><Text>Thử lại</Text></Pressable>
       </View>}
+      {!targetId && !!result?.visualServiceSuggestions?.length && <View nativeID="visual-service-suggestions" style={{ padding:12, borderWidth:1, borderColor:'#CBD5E1', borderRadius:8, marginBottom:12 }}>
+        <Text style={{ fontWeight:'700', marginBottom:8 }}>Dịch vụ gợi ý từ dấu hiệu trong ảnh</Text>
+        <Text>Đây là gợi ý ban đầu. Thợ cần kiểm tra trước khi kết luận nguyên nhân và cách xử lý.</Text>
+        {result.visualServiceSuggestions.map(item=><View key={`${item.targetId}:${item.id}`} style={{ marginTop:12 }}>
+          <Text style={{ fontWeight:'600' }}>{item.name}</Text><Text>{item.targetName}</Text><Text>{item.reason}</Text>
+          <Pressable accessibilityRole="button" nativeID={`visual-service-${item.id}`} disabled={busy} onPress={()=>answer({ categoryId:item.categoryId, targetId:item.targetId, serviceId:item.id })} style={{ paddingVertical:12 }}><Text>Chọn dịch vụ này</Text></Pressable>
+        </View>)}
+      </View>}
       {!!result?.suggestedCategoryId && <TargetCandidateSection result={result} onSelectTarget={id => answer({ categoryId: result?.suggestedCategoryId, targetId: id })}
         onSelectCategory={selectCategory} busy={busy} />}
       {targetId && <>

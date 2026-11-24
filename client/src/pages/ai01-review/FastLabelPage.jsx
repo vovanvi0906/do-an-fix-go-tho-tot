@@ -1,3 +1,4 @@
+import { useLabelDraft, draftKey, removeDraft } from './useLabelDraft';
 import React, {useEffect, useRef, useState} from 'react';
 import {ai01ReviewService as api} from '../../services/ai01ReviewService';
 import ImageReview from './components/ImageReview';
@@ -13,8 +14,12 @@ const EVIDENCE_HINTS={rightsEvidence:'Ví dụ: liên kết license, tên tác g
 
 export function DevelopmentCheck({detail, busy, onSave, onDirtyChange}) {
   const [form,setForm]=useState({rightsEvidence:'',sourceEvidence:'',groupEvidence:'',reason:''});
+  const localDraft=useLabelDraft('check',detail.id,detail.annotation?.eventHash||null,form,setForm);
+  const initialCheck=useRef(JSON.stringify({rightsEvidence:'',sourceEvidence:'',groupEvidence:'',reason:''}));
+  useEffect(()=>{onDirtyChange?.(JSON.stringify(form)!==initialCheck.current);},[form,onDirtyChange]);
   const own = detail.annotation?.decision === 'confirmed';
   return <ReviewPanel title="Kiểm tra trước khi xuất SOLO">
+    {localDraft.notice&&<p role="status" className="text-sm text-amber-600">{localDraft.notice}</p>}
     <p className="text-sm">Nhãn vừa lưu vẫn cách ly khỏi bản xuất cho đến khi bạn kiểm tra nguồn, quyền sử dụng và nhóm ảnh trùng. Thiếu bằng chứng thì để trống và xem lại sau.</p>
     {detail.blockers.length ? <ul className="text-sm text-amber-700 dark:text-amber-300 list-disc pl-5">{detail.blockers.map(b=><li key={b}>{b}</li>)}</ul> : <p className="text-emerald-700 dark:text-emerald-300">Đủ điều kiện xuất solo-development; không đủ điều kiện benchmark độc lập.</p>}
     <form className="space-y-3" onSubmit={e=>{e.preventDefault();onSave(form);}}>
@@ -45,11 +50,11 @@ export default function FastLabelPage({embedded=false,readOnly=false,initialImag
   function next(){const index=filtered.findIndex(r=>r.id===selected);if(filtered[index+1])setSelected(filtered[index+1].id);}
   async function save(payload,advance){
     if(lock.current||!detail||!url||!editing)return;lock.current=true;setBusy(true);setError('');setNotice('');
-    try{const e=await api.save('fast_save',{...payload,imageId:detail.id,expectedHash:detail.annotation?.eventHash||null});setDetail(d=>({...d,annotation:e,history:[...d.history,e],blockers:['Nhãn đã lưu; cần kiểm tra lại trước khi xuất.']}));if(advance)next();else setFilter('all');setRows(rs=>rs.map(r=>r.id===detail.id?{...r,status:e.decision,eligible:false}:r));setNotice(`Đã lưu ${detail.id}: ${REVIEW_ACTIONS[e.reviewAction]||STATUS_NAMES[e.decision]}.`);}catch(e){setError(message(e));}finally{lock.current=false;setBusy(false);}
+    try{const e=await api.save('fast_save',{...payload,imageId:detail.id,expectedHash:detail.annotation?.eventHash||null});removeDraft(draftKey('image',detail.id));setDetail(d=>({...d,annotation:e,history:[...d.history,e],blockers:['Nhãn đã lưu; cần kiểm tra lại trước khi xuất.']}));if(advance)next();else setFilter('all');setRows(rs=>rs.map(r=>r.id===detail.id?{...r,status:e.decision,eligible:false}:r));setNotice(`Đã lưu ${detail.id}: ${REVIEW_ACTIONS[e.reviewAction]||STATUS_NAMES[e.decision]}.`);}catch(e){setError(message(e));}finally{lock.current=false;setBusy(false);}
   }
   async function check(form){
     if(lock.current||!detail?.annotation||!editing)return;lock.current=true;setBusy(true);setError('');setNotice('');
-    try{await api.save('fast_check',{...form,imageId:detail.id,annotationEventHash:detail.annotation.eventHash});setNotice('Đã kiểm tra và ghi bằng chứng. Ảnh đủ điều kiện xuất solo-development.');setRevision(v=>v+1);const r=await api.read('fast_items');setRows(r.items);}catch(e){setError(message(e));}finally{lock.current=false;setBusy(false);}
+    try{await api.save('fast_check',{...form,imageId:detail.id,annotationEventHash:detail.annotation.eventHash});removeDraft(draftKey('check',detail.id));setNotice('Đã kiểm tra và ghi bằng chứng. Ảnh đủ điều kiện xuất solo-development.');setRevision(v=>v+1);const r=await api.read('fast_items');setRows(r.items);}catch(e){setError(message(e));}finally{lock.current=false;setBusy(false);}
   }
   const qualityPanel=<DatasetQualityPanel revision={qualityRevision} onBusyChange={onBusyChange} onReview={pilot=>{setFilter(pilot?'quality_pilot':'quality');setDataset('all');setQuery('');setBboxMode(true);}}/>;
   return <div className={`${embedded?'':'h-full overflow-auto p-5'} space-y-4`}>

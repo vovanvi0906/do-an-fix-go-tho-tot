@@ -1,3 +1,4 @@
+import { draftKey as labelDraftKey, removeDraft } from '../useLabelDraft';
 import React,{useEffect,useRef,useState} from 'react';
 import {ai01ReviewService as api} from '../../../services/ai01ReviewService';
 import {message} from '../constants';
@@ -18,15 +19,15 @@ export default function LabelDetailEditor({imageId,catalog,onSaved,onNext,onDirt
  useEffect(()=>{onBusyChange(busy);return()=>onBusyChange(false);},[busy,onBusyChange]);
  useEffect(()=>()=>onDirtyChange(false),[onDirtyChange]);
  useEffect(()=>{let alive=true,objectUrl;setDetail(null);setUrl('');setError('');
-  Promise.all([api.read('fast_detail',{imageId}),api.fastImage(imageId)]).then(([d,b])=>{objectUrl=URL.createObjectURL(b);if(alive){setDetail(d);setUrl(objectUrl);}else URL.revokeObjectURL(objectUrl);}).catch(e=>{if(alive)setError(message(e));});return()=>{alive=false;if(objectUrl)URL.revokeObjectURL(objectUrl);};
+  Promise.all([api.read('fast_detail',{imageId}),api.fastImage(imageId)]).then(([d,b])=>{objectUrl=URL.createObjectURL(b);if(alive){setDetail(d);setUrl(objectUrl);if(d.imported)setBbox(true);}else URL.revokeObjectURL(objectUrl);}).catch(e=>{if(alive)setError(message(e));});return()=>{alive=false;if(objectUrl)URL.revokeObjectURL(objectUrl);};
  },[imageId,revision]);
  function mode(value){if(busy||dirty.current&&!window.confirm('Bạn có thay đổi chưa lưu. Bỏ thay đổi và chuyển công cụ?'))return;markDirty(false);setDraftKey(v=>v+1);setBbox(value);}
  async function save(payload,advance){if(lock.current||!detail||!url)return;lock.current=true;setBusy(true);setError('');try{
-  const event=await api.save('fast_save',{...payload,imageId,expectedHash:detail.annotation?.eventHash||null});markDirty(false);
+  const event=await api.save('fast_save',{...payload,imageId,expectedHash:detail.annotation?.eventHash||null});removeDraft(labelDraftKey('image',imageId));markDirty(false);
   setDetail(d=>({...d,annotation:event,history:[...d.history,event],blockers:['Nhãn đã lưu; cần kiểm tra lại trước khi xuất.']}));setNotice(`Đã lưu ${imageId}: ${REVIEW_ACTIONS[event.reviewAction]||STATUS_NAMES[event.decision]}.`);
   await onSaved();if(advance)await onNext();
  }catch(e){setError(message(e));}finally{lock.current=false;setBusy(false);}}
- async function check(form){if(lock.current||!detail?.annotation)return;lock.current=true;setBusy(true);setError('');try{await api.save('fast_check',{...form,imageId,annotationEventHash:detail.annotation.eventHash});markDirty(false);setNotice('Đã kiểm tra và ghi bằng chứng cho bản xuất SOLO.');setRevision(v=>v+1);await onSaved();}catch(e){setError(message(e));}finally{lock.current=false;setBusy(false);}}
+ async function check(form){if(lock.current||!detail?.annotation)return;lock.current=true;setBusy(true);setError('');try{await api.save('fast_check',{...form,imageId,annotationEventHash:detail.annotation.eventHash});removeDraft(labelDraftKey('check',imageId));markDirty(false);setNotice('Đã kiểm tra và ghi bằng chứng cho bản xuất SOLO.');setRevision(v=>v+1);await onSaved();}catch(e){setError(message(e));}finally{lock.current=false;setBusy(false);}}
  return <div className="space-y-4">
   {error&&<div role="alert" className="rounded-lg border border-rose-300 p-3 text-rose-700 dark:text-rose-300">{error}{!detail&&<button className={`${buttonClass} ml-2`} onClick={()=>setRevision(v=>v+1)}>Thử lại</button>}</div>}
   {notice&&<p role="status" className="text-sm text-emerald-700 dark:text-emerald-300">{notice}</p>}
@@ -34,7 +35,7 @@ export default function LabelDetailEditor({imageId,catalog,onSaved,onNext,onDirt
    <div className="flex flex-wrap gap-2"><button className={buttonClass} disabled={busy} aria-pressed={!bbox} onClick={()=>mode(false)}>Nhãn ảnh</button><button className={buttonClass} disabled={busy||!detail.qualityReview} aria-pressed={bbox} onClick={()=>mode(true)}>Chỉnh bounding box</button></div>
    {!detail.qualityReview&&<p className="text-xs text-slate-500">API hiện chỉ hỗ trợ chỉnh bbox cho ảnh thuộc hàng đợi sửa bbox.</p>}
    {bbox?<BBoxQualityEditor compact key={imageId} imageId={imageId} onBusyChange={setBusy} onDirtyChange={stableDirty} onNext={onNext} onSaved={()=>{markDirty(false);onSaved();}}/>:<ImageReview compact hideNavigation items={[detail]} item={detail} imageUrl={url} datasetNames={DATASET_NAMES} disabled={busy} onSelect={()=>{}} reviewTitle="Kiểm tra và gán nhãn">
-    <p className="rounded-lg bg-amber-50 dark:bg-amber-950/30 p-3 text-xs text-amber-800 dark:text-amber-200">Nhãn Roboflow và mapping là gợi ý chưa xác nhận. Chỉ thao tác Lưu mới ghi quyết định của bạn.</p>
+    <p className="rounded-lg bg-amber-50 dark:bg-amber-950/30 p-3 text-xs text-amber-800 dark:text-amber-200">{detail.imported?'Danh mục/đối tượng lúc nhập chỉ là gợi ý của người tải. Ảnh chưa có nhãn được xác nhận.':'Nhãn Roboflow và mapping là gợi ý chưa xác nhận. Chỉ thao tác Lưu mới ghi quyết định của bạn.'}</p>
     <QuickLabelEditor compact key={`${imageId}-${detail.annotation?.eventHash||'new'}-${draftKey}`} detail={detail} catalog={catalog} busy={busy} onSave={save} onDirtyChange={stableDirty}/>
    </ImageReview>}
    <details className="rounded-xl border border-slate-200 dark:border-slate-800 p-4"><summary className="cursor-pointer text-sm font-medium">Chi tiết, điều kiện xuất và lịch sử</summary><div className="mt-4 space-y-4">

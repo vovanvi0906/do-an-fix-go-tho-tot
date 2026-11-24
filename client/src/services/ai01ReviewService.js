@@ -4,6 +4,11 @@ const data = response => response.data.data;
 export const ai01ReviewService = {
   permissions: search => apiClient.get(`${ROOT}/permissions`, {params:{search}}).then(data),
   changePermission: (action, body) => apiClient.post(`${ROOT}/permissions/${action}`, body).then(data),
+  importImage: (file,metadata,onProgress) => {
+    const form=new FormData();form.append('image',file);
+    Object.entries(metadata).forEach(([key,value])=>form.append(key,String(value)));
+    return apiClient.post(`${ROOT}/dataset/images`,form,{headers:{'Content-Type':'multipart/form-data'},timeout:90000,onUploadProgress:e=>onProgress?.(e.total?Math.min(95,Math.round(e.loaded/e.total*95)):0)}).then(data);
+  },
   access: () => apiClient.get(`${ROOT}/access`).then(data),
   read: (operation, params = {}) => apiClient.get(`${ROOT}/data/${operation}`, { params, timeout: 45000 }).then(data),
   save: (operation, payload) => apiClient.post(`${ROOT}/actions/${operation}`, { payload }, { timeout: 45000 }).then(data),

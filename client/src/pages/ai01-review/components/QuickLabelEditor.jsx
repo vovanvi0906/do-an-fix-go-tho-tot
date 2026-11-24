@@ -1,3 +1,4 @@
+import { useLabelDraft } from '../useLabelDraft';
 import React,{useEffect,useRef,useState} from 'react';
 import {buttonClass,fieldClass,Field} from './ReviewPanel';
 import {IMAGE_FLAGS,REVIEW_ACTIONS,VISUAL_CONDITIONS,VISIBLE_SIGNS} from '../labelingOptions';
@@ -10,6 +11,7 @@ export default function QuickLabelEditor({detail,catalog,busy,onSave,compact=fal
  const [condition,setCondition]=useState(previous?.visualCondition||'not_reviewed');
  const [signs,setSigns]=useState(previous?.visibleSigns||[]),[flags,setFlags]=useState(previous?.imageFlags||[]);
  const [reason,setReason]=useState(previous?.reason||''),[error,setError]=useState('');
+ const localDraft=useLabelDraft('image',detail.id,previous?.eventHash||null,{action,targets,condition,signs,flags,reason},v=>{setAction(v.action);setTargets(v.targets);setCondition(v.condition);setSigns(v.signs);setFlags(v.flags);setReason(v.reason);});
  const snapshot=JSON.stringify({action,targets,condition,signs,flags,reason});
  const initialSnapshot=useRef(snapshot);
  useEffect(()=>{onDirtyChange?.(snapshot!==initialSnapshot.current);},[snapshot,onDirtyChange]);
@@ -40,6 +42,7 @@ export default function QuickLabelEditor({detail,catalog,busy,onSave,compact=fal
  }window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[busy]);
  const actions=(<div className="sticky top-0 z-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-900/95 backdrop-blur p-3 space-y-2"><div className="flex flex-wrap gap-2"><button className={`${buttonClass} bg-indigo-600 text-white hover:bg-indigo-700 dark:hover:bg-indigo-700`} disabled={busy} onClick={()=>save(true)}>Lưu & ảnh tiếp theo</button><button className={buttonClass} disabled={busy} onClick={()=>save(false)}>{compact?'Lưu':'Lưu tại ảnh này'}</button></div><p className="text-xs text-slate-500">C: xác nhận · E: sửa · U: chưa chắc · R: loại · Enter: lưu & tiếp. Chọn quyết định chưa ghi dữ liệu; chỉ nút Lưu hoặc Enter mới lưu.</p></div>);
  return <div className="space-y-4">
+  {localDraft.notice&&<p role="status" className="text-sm text-amber-600 dark:text-amber-300">{localDraft.notice}</p>}
   {compact&&actions}
   {!compact&&<div className="rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 dark:bg-indigo-950/20 p-3 text-sm"><b>1. Xem ảnh · 2. Chọn quyết định · 3. Lưu</b><p className="mt-1 text-slate-600 dark:text-slate-300">Đề xuất chưa được xác nhận. Chọn đúng đối tượng và chỉ ghi dấu hiệu nhìn thấy; không suy ra nguyên nhân hoặc dịch vụ sửa.</p></div>}
   <fieldset disabled={busy} className="space-y-2"><legend className="text-sm font-semibold">Bạn muốn xử lý ảnh này thế nào?</legend><div className="grid grid-cols-2 gap-2">{Object.entries(REVIEW_ACTIONS).map(([id,label])=><label key={id} className={`flex gap-2 rounded-lg border p-3 text-sm cursor-pointer ${action===id?'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/30':'border-slate-200 dark:border-slate-700'}`}><input type="radio" name={`review-action-${detail.id}`} value={id} checked={action===id} onChange={()=>chooseAction(id)}/>{label}</label>)}</div></fieldset>

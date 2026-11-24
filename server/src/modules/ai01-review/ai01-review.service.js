@@ -4,6 +4,7 @@ import { plainToInstance } from 'class-transformer';
 import { validateSync } from 'class-validator';
 import { readPolicy, principalFor, requireOperation, soloPrincipalFor } from './ai01-policy';
 import { PrismaService } from '../../infrastructure/database/prisma.service';
+import { ImportImageDto } from './dto/import-image.dto';
 import { LabelBrowserQueryDto } from './dto/label-browser-query.dto';
 import { ReviewEngine } from './review-engine';
 import { ReviewActionDto } from './dto/review-action.dto';
@@ -78,6 +79,17 @@ export class Ai01ReviewService {
     const payload = {};
     if (['adjudication', 'provenance', 'related', 'solo_detail', 'solo_related', 'fast_detail', 'fast_quality_detail'].includes(operation)) { if (!/^img-\d{5}$/.test(query.imageId || '')) throw new BadRequestException('ID ảnh không hợp lệ.'); payload.imageId = query.imageId; }
     return this.engine.call(principal, operation, payload);
+  }
+  async importImage(user,file,body) {
+    const principal=this.principal(user,'fast_import_image');
+    if(!file?.buffer?.length||file.buffer.length>10*1024*1024)throw new BadRequestException('Cần chọn ảnh JPG/PNG/WebP tối đa 10 MB.');
+    const dto=plainToInstance(ImportImageDto,body);
+    if(validateSync(dto,{whitelist:true,forbidNonWhitelisted:true}).length)throw new BadRequestException('Cần danh mục, nguồn, quyền ảnh, mã nhóm và xác nhận ảnh không thuộc bộ test.');
+    const [categories,targets]=await Promise.all([
+      this.prisma.serviceCategory.findMany({where:{isActive:true},select:{id:true,name:true,isActive:true}}),
+      this.prisma.serviceTarget.findMany({where:{isActive:true,category:{isActive:true}},select:{id:true,name:true,categoryId:true,isActive:true}}),
+    ]);
+    return this.engine.call(principal,'fast_import_image',{...dto,filename:file.originalname,mime:file.mimetype,content:file.buffer.toString('base64'),catalog:{categories,targets}});
   }
   async mutate(user, operation, body) {
     if (!MUTATIONS.has(operation)) throw new BadRequestException('Không có thao tác ghi này.');
