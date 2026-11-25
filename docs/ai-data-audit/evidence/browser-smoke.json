@@ -1,0 +1,9 @@
+{
+  "test": "Playwright local reviewer with isolated generated fixture only",
+  "gridImages": 2,
+  "boxProposalSaved": true,
+  "approvedGroundTruth": false,
+  "trainingEligible": false,
+  "pageErrors": [],
+  "businessDataChanged": false
+}

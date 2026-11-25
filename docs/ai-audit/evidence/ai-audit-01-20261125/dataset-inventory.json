@@ -1,0 +1,420 @@
+{
+  "auditDate": "2026-11-25",
+  "scope": "read-only existing files; no labels changed; actual byte/decode checks; source rights and real-vs-synthetic cannot be inferred from pixels",
+  "classification": {
+    "root": "/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/dataset",
+    "actualImages": 1200,
+    "bySplitClass": {
+      "test:dien_lanh": 20,
+      "test:lam_vuon": 20,
+      "test:other_unclear": 20,
+      "test:sua_dien": 20,
+      "test:sua_nuoc": 20,
+      "test:thiet_bi": 20,
+      "train:dien_lanh": 140,
+      "train:lam_vuon": 140,
+      "train:other_unclear": 140,
+      "train:sua_dien": 140,
+      "train:sua_nuoc": 140,
+      "train:thiet_bi": 140,
+      "val:dien_lanh": 40,
+      "val:lam_vuon": 40,
+      "val:other_unclear": 40,
+      "val:sua_dien": 40,
+      "val:sua_nuoc": 40,
+      "val:thiet_bi": 40
+    },
+    "decodeErrors": [],
+    "exactDuplicateGroups": 244,
+    "exactCrossSplitDuplicateGroups": 210,
+    "pixelCrossSplitDuplicateGroups": 210,
+    "declaredSources": "dataset_info claims multiple named corpora; training/prepare_dataset.py actually draws synthetic OpenCV fixtures",
+    "imageManifestSha256": "407e97f1df22f7d5acec06a47edf1d95913a7e67ce6a4c7b9a1a9194b2b91e67"
+  },
+  "externalPrepared": {
+    "root": "/home/vanvi/Work/datasetai/02-development/ai01-prepared-v1",
+    "records": 21437,
+    "recordPinsMatch": true,
+    "byDataset": {
+      "dienlanh": 254,
+      "giupviec": 1155,
+      "lamvuon": 4950,
+      "suadien": 11204,
+      "suanuoc": 2815,
+      "thietbigiadinh": 1059
+    },
+    "developmentSplits": {
+      "train": 17106,
+      "val": 4331
+    },
+    "annotationCountsBySourceClass": {
+      "dienlanh:1": 78,
+      "dienlanh:0": 59,
+      "dienlanh:2": 127,
+      "giupviec:0": 1175,
+      "giupviec:1": 733,
+      "giupviec:2": 953,
+      "lamvuon:29": 242,
+      "lamvuon:11": 1184,
+      "lamvuon:9": 723,
+      "lamvuon:3": 347,
+      "lamvuon:4": 527,
+      "lamvuon:6": 1572,
+      "lamvuon:30": 464,
+      "lamvuon:15": 1051,
+      "lamvuon:19": 856,
+      "lamvuon:14": 553,
+      "lamvuon:13": 21,
+      "lamvuon:20": 416,
+      "lamvuon:12": 443,
+      "lamvuon:5": 623,
+      "lamvuon:22": 1612,
+      "lamvuon:7": 441,
+      "lamvuon:21": 829,
+      "lamvuon:23": 784,
+      "lamvuon:8": 148,
+      "lamvuon:26": 510,
+      "lamvuon:18": 496,
+      "lamvuon:24": 579,
+      "lamvuon:27": 587,
+      "lamvuon:10": 236,
+      "lamvuon:1": 316,
+      "lamvuon:16": 512,
+      "lamvuon:25": 421,
+      "lamvuon:2": 454,
+      "lamvuon:0": 18,
+      "lamvuon:28": 5,
+      "lamvuon:17": 30,
+      "suadien:0": 11206,
+      "suanuoc:9": 1273,
+      "suanuoc:8": 124,
+      "suanuoc:1": 847,
+      "suanuoc:7": 75,
+      "suanuoc:6": 970,
+      "suanuoc:2": 36,
+      "suanuoc:3": 157,
+      "suanuoc:4": 99,
+      "suanuoc:0": 200,
+      "suanuoc:5": 338,
+      "thietbigiadinh:0": 282,
+      "thietbigiadinh:1": 324,
+      "thietbigiadinh:2": 314,
+      "thietbigiadinh:3": 98,
+      "thietbigiadinh:4": 86,
+      "thietbigiadinh:5": 89
+    },
+    "annotationFormats": {
+      "bbox": 35199,
+      "polygon": 1444
+    },
+    "sourceVerification": {
+      "unverified": 21437
+    },
+    "syntheticDeclaration": {
+      "not_declared": 21437
+    },
+    "imageBytesHashed": 21437,
+    "imagesDecoded": 21437,
+    "imageIssues": [],
+    "exactDuplicateGroups": 24,
+    "exactCrossDevelopmentSplitGroups": 0,
+    "exactCrossOriginalSplitGroups": 5,
+    "pixelCrossDevelopmentSplitGroupsByPreparedHash": 0,
+    "leakageGroupsCrossDevelopmentSplits": 0,
+    "pixelHashCaveat": "Uses prepared pixel hash; actual file SHA/decode independently checked, pixel hash not recomputed for this entire corpus",
+    "nearDuplicateCaveat": "No new exhaustive pairwise pHash search; existing near-pairs artifact and policy inspected",
+    "rawImagesOnDisk": 21437,
+    "rawImagesOutsidePreparedManifest": 0,
+    "imagesBySourceClass": {
+      "dienlanh:0": 59,
+      "dienlanh:1": 75,
+      "dienlanh:2": 127,
+      "giupviec:0": 358,
+      "giupviec:1": 169,
+      "giupviec:2": 492,
+      "lamvuon:29": 123,
+      "lamvuon:11": 213,
+      "lamvuon:9": 363,
+      "lamvuon:3": 173,
+      "lamvuon:4": 141,
+      "lamvuon:6": 205,
+      "lamvuon:30": 140,
+      "lamvuon:15": 233,
+      "lamvuon:19": 174,
+      "lamvuon:13": 5,
+      "lamvuon:14": 213,
+      "lamvuon:20": 171,
+      "lamvuon:12": 191,
+      "lamvuon:5": 122,
+      "lamvuon:22": 146,
+      "lamvuon:7": 105,
+      "lamvuon:21": 294,
+      "lamvuon:23": 142,
+      "lamvuon:8": 135,
+      "lamvuon:26": 108,
+      "lamvuon:18": 267,
+      "lamvuon:24": 229,
+      "lamvuon:27": 178,
+      "lamvuon:10": 215,
+      "lamvuon:1": 183,
+      "lamvuon:16": 131,
+      "lamvuon:25": 215,
+      "lamvuon:2": 171,
+      "lamvuon:0": 1,
+      "lamvuon:28": 5,
+      "lamvuon:17": 2,
+      "suadien:0": 11204,
+      "suanuoc:9": 694,
+      "suanuoc:8": 110,
+      "suanuoc:1": 500,
+      "suanuoc:7": 73,
+      "suanuoc:6": 739,
+      "suanuoc:2": 34,
+      "suanuoc:3": 154,
+      "suanuoc:4": 95,
+      "suanuoc:0": 200,
+      "suanuoc:5": 338,
+      "thietbigiadinh:0": 264,
+      "thietbigiadinh:1": 277,
+      "thietbigiadinh:2": 264,
+      "thietbigiadinh:3": 95,
+      "thietbigiadinh:4": 85,
+      "thietbigiadinh:5": 86
+    }
+  },
+  "rawSourceYamls": [
+    {
+      "path": "/home/vanvi/Work/datasetai/01-raw/dienlanh/data.yaml",
+      "sha256": "f2548074acb244dfa8776ff12b5f45ba525caf0477e951dd8e01071c048451d7",
+      "data": {
+        "train": "../train/images",
+        "val": "../valid/images",
+        "test": "../test/images",
+        "nc": 3,
+        "names": [
+          "CASSETTE TYPE",
+          "CELLING TYPE",
+          "ROOM AIR"
+        ],
+        "roboflow": {
+          "workspace": "sut-nzvsb",
+          "project": "air-conditioner-q7pxp",
+          "version": 1,
+          "license": "CC BY 4.0",
+          "url": "https://universe.roboflow.com/sut-nzvsb/air-conditioner-q7pxp/dataset/1"
+        }
+      }
+    },
+    {
+      "path": "/home/vanvi/Work/datasetai/01-raw/giupviec/data.yaml",
+      "sha256": "ef238352451b40227c8d175c646a4bd90fb518c963c393d664f1dbbfaa887caf",
+      "data": {
+        "train": "../train/images",
+        "val": "../valid/images",
+        "test": "../test/images",
+        "nc": 3,
+        "names": [
+          "Birdpoop",
+          "Dirt",
+          "Leaf"
+        ],
+        "roboflow": {
+          "workspace": "marius-lee",
+          "project": "dirty",
+          "version": 1,
+          "license": "CC BY 4.0",
+          "url": "https://universe.roboflow.com/marius-lee/dirty/dataset/1"
+        }
+      }
+    },
+    {
+      "path": "/home/vanvi/Work/datasetai/01-raw/lamvuon/data.yaml",
+      "sha256": "adf709ec8540c04b169ba6de6db867bb2a966c07aa63316c62f30ce4da3110c1",
+      "data": {
+        "train": "../train/images",
+        "val": "../valid/images",
+        "test": "../test/images",
+        "nc": 31,
+        "names": [
+          "12",
+          "Apple Scab Leaf",
+          "Apple leaf",
+          "Apple rust leaf",
+          "Bell_pepper leaf spot",
+          "Bell_pepper leaf",
+          "Blueberry leaf",
+          "Cherry leaf",
+          "Corn Gray leaf spot",
+          "Corn leaf blight",
+          "Corn rust leaf",
+          "Peach leaf",
+          "Potato leaf early blight",
+          "Potato leaf late blight",
+          "Potato leaf",
+          "Raspberry leaf",
+          "Soyabean leaf",
+          "Soybean leaf",
+          "Squash Powdery mildew leaf",
+          "Strawberry leaf",
+          "Tomato Early blight leaf",
+          "Tomato Septoria leaf spot",
+          "Tomato leaf bacterial spot",
+          "Tomato leaf late blight",
+          "Tomato leaf mosaic virus",
+          "Tomato leaf yellow virus",
+          "Tomato leaf",
+          "Tomato mold leaf",
+          "Tomato two spotted spider mites leaf",
+          "grape leaf black rot",
+          "grape leaf"
+        ],
+        "roboflow": {
+          "workspace": "annie-niu-icloud-com",
+          "project": "plant-disease-w0ogb",
+          "version": 1,
+          "license": "CC BY 4.0",
+          "url": "https://universe.roboflow.com/annie-niu-icloud-com/plant-disease-w0ogb/dataset/1"
+        }
+      }
+    },
+    {
+      "path": "/home/vanvi/Work/datasetai/01-raw/suadien/data.yaml",
+      "sha256": "ed948417c213afb6dd015a9d23e185874315b3d476323a5fbad36ae56eeefc55",
+      "data": {
+        "train": "../train/images",
+        "val": "../valid/images",
+        "test": "../test/images",
+        "nc": 1,
+        "names": [
+          "OUTLET"
+        ],
+        "roboflow": {
+          "workspace": "outletv2",
+          "project": "outlet-4xvv4",
+          "version": 1,
+          "license": "CC BY 4.0",
+          "url": "https://universe.roboflow.com/outletv2/outlet-4xvv4/dataset/1"
+        }
+      }
+    },
+    {
+      "path": "/home/vanvi/Work/datasetai/01-raw/suanuoc/data.yaml",
+      "sha256": "8da74e746665ea984d834e15e6b165fa5282fad69fcdab0e7c717b6663b3a440",
+      "data": {
+        "train": "../train/images",
+        "val": "../valid/images",
+        "test": "../test/images",
+        "nc": 10,
+        "names": [
+          "broken_shower_head",
+          "ceiling_leak",
+          "clogged_sink",
+          "faucet",
+          "leaking_faucet",
+          "leaking_pipe",
+          "pipe_burst",
+          "toilet_issue",
+          "water_damage",
+          "water_leak"
+        ],
+        "roboflow": {
+          "workspace": "yess-workspace-jjb25",
+          "project": "smart-estate-plumbing",
+          "version": 3,
+          "license": "CC BY 4.0",
+          "url": "https://universe.roboflow.com/yess-workspace-jjb25/smart-estate-plumbing/dataset/3"
+        }
+      }
+    },
+    {
+      "path": "/home/vanvi/Work/datasetai/01-raw/thietbigiadinh/data.yaml",
+      "sha256": "f0acac263e88b2004787b0aac6e4033304fbed0a9268efbfcfae70eac0c80bc3",
+      "data": {
+        "train": "../train/images",
+        "val": "../valid/images",
+        "test": "../test/images",
+        "nc": 6,
+        "names": [
+          "bed",
+          "chair",
+          "refrigerator",
+          "table",
+          "tv",
+          "washing_machine"
+        ],
+        "roboflow": {
+          "workspace": "furniture-pp9ke",
+          "project": "appliance-hnlxr",
+          "version": 1,
+          "license": "CC BY 4.0",
+          "url": "https://universe.roboflow.com/furniture-pp9ke/appliance-hnlxr/dataset/1"
+        }
+      }
+    }
+  ],
+  "experiments": [
+    {
+      "path": "/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/runs/classify/fixgo_cls_v1/results.csv",
+      "sha256": "c8eb4c2873e21b189fbaaa2ae7f4f2d252992b745fa6eb0e6bcd247fbc0dd725",
+      "loggedEpochs": 5,
+      "lastLoggedMetrics": {
+        "epoch": "5",
+        "time": "111.402",
+        "train/loss": "0.01044",
+        "metrics/accuracy_top1": "1",
+        "metrics/accuracy_top5": "1",
+        "val/loss": "0.00065",
+        "lr/pg0": "0.000208",
+        "lr/pg1": "0.000208",
+        "lr/pg2": "0.000208"
+      },
+      "caveat": "Historical logs only; not a new independent benchmark"
+    },
+    {
+      "path": "/home/vanvi/Work/datasetai/03-experiments/ai01-task04a-strict-v2/training/results.csv",
+      "sha256": "1a9c06aa499ceb8f4cee38f383d716cce8fe8534886aceb9477737f8da8912fd",
+      "loggedEpochs": 5,
+      "lastLoggedMetrics": {
+        "epoch": "5",
+        "time": "375.103",
+        "train/box_loss": "1.13847",
+        "train/cls_loss": "1.43604",
+        "train/dfl_loss": "1.33621",
+        "metrics/precision(B)": "0.64954",
+        "metrics/recall(B)": "0.55499",
+        "metrics/mAP50(B)": "0.53367",
+        "metrics/mAP50-95(B)": "0.34295",
+        "val/box_loss": "1.23341",
+        "val/cls_loss": "1.39036",
+        "val/dfl_loss": "1.37761",
+        "lr/pg0": "0.000104537",
+        "lr/pg1": "0.000104537",
+        "lr/pg2": "0.000104537"
+      },
+      "caveat": "Historical logs only; not a new independent benchmark"
+    },
+    {
+      "path": "/home/vanvi/Work/datasetai/03-experiments/ai01-task04a-v1/training/results.csv",
+      "sha256": "4bfc183905bc8ca4f09f5eba9a76dad7655053be1d7730c79b4aed35f3dbfc90",
+      "loggedEpochs": 5,
+      "lastLoggedMetrics": {
+        "epoch": "5",
+        "time": "695.357",
+        "train/box_loss": "1.5401",
+        "train/cls_loss": "2.06169",
+        "train/dfl_loss": "1.59749",
+        "metrics/precision(B)": "0.57411",
+        "metrics/recall(B)": "0.46754",
+        "metrics/mAP50(B)": "0.46438",
+        "metrics/mAP50-95(B)": "0.28273",
+        "val/box_loss": "1.63609",
+        "val/cls_loss": "2.03742",
+        "val/dfl_loss": "1.66399",
+        "lr/pg0": "0.000104537",
+        "lr/pg1": "0.000104537",
+        "lr/pg2": "0.000104537"
+      },
+      "caveat": "Historical logs only; not a new independent benchmark"
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+[
+  {
+    "url": "https://universe.roboflow.com/sut-nzvsb/air-conditioner-q7pxp/dataset/1",
+    "title": "AIR CONDITIONER",
+    "author": "sut",
+    "declaredLicense": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "observedAt": "2026-11-25",
+    "evidenceUrl": "https://universe.roboflow.com/sut-nzvsb/air-conditioner-q7pxp/dataset/1",
+    "versionPageObserved": true,
+    "sourceEvidence": "AIR CONDITIONER by sut; Roboflow Universe dataset version 1: https://universe.roboflow.com/sut-nzvsb/air-conditioner-q7pxp/dataset/1",
+    "licenseEvidence": "Public project page lists CC BY 4.0; observed 2026-11-25: https://universe.roboflow.com/sut-nzvsb/air-conditioner-q7pxp. License: https://creativecommons.org/licenses/by/4.0/ . Retain author/source attribution and describe label/processing changes.",
+    "automaticallyVerified": false
+  },
+  {
+    "url": "https://universe.roboflow.com/marius-lee/dirty/dataset/1",
+    "title": "dirty",
+    "author": "MARIUS LEE",
+    "declaredLicense": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "observedAt": "2026-11-25",
+    "evidenceUrl": "https://universe.roboflow.com/marius-lee/dirty",
+    "versionPageObserved": false,
+    "sourceEvidence": "dirty by MARIUS LEE; Roboflow Universe dataset version 1: https://universe.roboflow.com/marius-lee/dirty/dataset/1",
+    "licenseEvidence": "Public project page lists CC BY 4.0; observed 2026-11-25: https://universe.roboflow.com/marius-lee/dirty. License: https://creativecommons.org/licenses/by/4.0/ . Retain author/source attribution and describe label/processing changes.",
+    "automaticallyVerified": false
+  },
+  {
+    "url": "https://universe.roboflow.com/annie-niu-icloud-com/plant-disease-w0ogb/dataset/1",
+    "title": "plant disease",
+    "author": "annie.niu@icloud.com",
+    "declaredLicense": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "observedAt": "2026-11-25",
+    "evidenceUrl": "https://universe.roboflow.com/annie-niu-icloud-com/plant-disease-w0ogb",
+    "versionPageObserved": false,
+    "sourceEvidence": "plant disease by annie.niu@icloud.com; Roboflow Universe dataset version 1: https://universe.roboflow.com/annie-niu-icloud-com/plant-disease-w0ogb/dataset/1",
+    "licenseEvidence": "Public project page lists CC BY 4.0; observed 2026-11-25: https://universe.roboflow.com/annie-niu-icloud-com/plant-disease-w0ogb. License: https://creativecommons.org/licenses/by/4.0/ . Retain author/source attribution and describe label/processing changes.",
+    "automaticallyVerified": false
+  },
+  {
+    "url": "https://universe.roboflow.com/outletv2/outlet-4xvv4/dataset/1",
+    "title": "OUTLET",
+    "author": "OUTLETv2",
+    "declaredLicense": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "observedAt": "2026-11-25",
+    "evidenceUrl": "https://universe.roboflow.com/outletv2/outlet-4xvv4",
+    "versionPageObserved": false,
+    "sourceEvidence": "OUTLET by OUTLETv2; Roboflow Universe dataset version 1: https://universe.roboflow.com/outletv2/outlet-4xvv4/dataset/1",
+    "licenseEvidence": "Public project page lists CC BY 4.0; observed 2026-11-25: https://universe.roboflow.com/outletv2/outlet-4xvv4. License: https://creativecommons.org/licenses/by/4.0/ . Retain author/source attribution and describe label/processing changes.",
+    "automaticallyVerified": false
+  }
+]

@@ -1,0 +1,27 @@
+{
+  "auditDate": "2026-11-25",
+  "catalogUnchangedBeforeAfter": true,
+  "catalogCounts": {
+    "categories": 6,
+    "targets": 70,
+    "services": 693,
+    "symptoms": 0,
+    "links": 0
+  },
+  "all16ModelArtifactHashesUnchanged": true,
+  "all56CitedSourcesUnchanged": true,
+  "catalogCoverageRows": 70,
+  "catalogServiceTotal": 693,
+  "requestedReportsPresent": 15,
+  "inferenceCases": 24,
+  "COCOCases": 3,
+  "metricsComputedFromNewCases": false,
+  "reason": "No independent ground truth",
+  "applicationCodeEdited": false,
+  "trainingRun": false,
+  "downloadsRun": false,
+  "databaseWritesRun": false,
+  "sourceCitationCount": 56,
+  "uniqueSourceFilesCited": 45,
+  "allExistingInferenceCorrectnessNull": true
+}

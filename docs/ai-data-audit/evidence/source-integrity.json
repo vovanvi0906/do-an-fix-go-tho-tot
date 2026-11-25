@@ -1,0 +1,6 @@
+{
+  "source_labels_unchanged_after_scan": true,
+  "source_yamls_unchanged_after_scan": true,
+  "raw_image_hash_mismatches_vs_pinned_before": 0,
+  "no_sources_written": true
+}

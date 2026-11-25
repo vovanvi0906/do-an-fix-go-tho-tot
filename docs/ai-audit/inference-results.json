@@ -1,0 +1,2019 @@
+{
+  "observedAtClientDate": "2026-11-25",
+  "scope": "actual local HTTP inference, not authenticated customer-to-business E2E; no accuracy computed",
+  "runtime": {
+    "status": "online",
+    "service": "FixGo Pro AI Service",
+    "version": "2.0.0",
+    "clip": true,
+    "classifier_mode": "clip",
+    "engine": "model",
+    "models_loaded": {
+      "yolo_cls": true,
+      "yolo_detect": true,
+      "visual_service": false,
+      "face_detector": true,
+      "face_recognizer": true,
+      "opencv_cv": true,
+      "clip": true
+    },
+    "weights_available": [
+      "blaze_face_short_range.tflite",
+      "face_detection_yunet_2023mar.onnx",
+      "yolov8n-cls-fixgo.pt",
+      "face_recognition_sface_2021dec.onnx",
+      "yolov8n.pt"
+    ]
+  },
+  "cases": [
+    {
+      "caseId": "AUD-01",
+      "imagePath": "/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/eval/images/sample_appliance.jpg",
+      "group": "appliance_fixture",
+      "variant": "original",
+      "inputSha256": "1fb5ee9edd221ce5eb416aa2083c22e297f9a36cdc6c1e395912bf987c1e19d9",
+      "requestDescription": "",
+      "model": "live /ai/v2/diagnose (CLIP + YOLO classifier; visual detector per health)",
+      "httpStatus": 200,
+      "elapsedHttpMs": 831.553,
+      "groundTruth": null,
+      "groundTruthStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT",
+      "correctness": null,
+      "notes": "",
+      "result": {
+        "suggestedCategoryId": null,
+        "suggestedCategoryName": null,
+        "suggestedTargetId": null,
+        "suggestedTargetName": null,
+        "categoryCandidates": [
+          {
+            "id": "thiet-bi",
+            "slug": "thiet-bi",
+            "name": "Thiết bị gia dụng",
+            "confidence": 0.3824,
+            "provenance": "ensemble"
+          },
+          {
+            "id": "dien-lanh",
+            "slug": "dien-lanh",
+            "name": "Điện lạnh",
+            "confidence": 0.3166,
+            "provenance": "ensemble"
+          },
+          {
+            "id": "sua-dien",
+            "slug": "sua-dien",
+            "name": "Sửa điện",
+            "confidence": 0.1206,
+            "provenance": "ensemble"
+          }
+        ],
+        "targetCandidates": [],
+        "confidence": null,
+        "detectedLabels": [],
+        "observableSigns": [],
+        "visualAnalysis": {
+          "status": "disabled",
+          "modelVersion": null,
+          "weightsSha256": null,
+          "detections": []
+        },
+        "decision_source": "abstained_ood",
+        "engine": "model",
+        "model_version": "fixgo-ai-rec-v1",
+        "notes": "Ảnh chưa đủ rõ hoặc ngoài danh mục dịch vụ hỗ trợ."
+      },
+      "error": null,
+      "normalizedPrediction": {
+        "object": null,
+        "category": null,
+        "defect": null,
+        "service": null,
+        "confidence": null,
+        "boxes": [],
+        "source": "abstained_ood",
+        "correctness": null,
+        "qualityMetricStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT"
+      }
+    },
+    {
+      "caseId": "AUD-02",
+      "imagePath": "/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/eval/images/sample_garden.jpg",
+      "group": "garden_fixture",
+      "variant": "original",
+      "inputSha256": "a7b1eb7aa1b7e70df3c7fb02761a07c7034e10550644de8beac919f16bc996ad",
+      "requestDescription": "",
+      "model": "live /ai/v2/diagnose (CLIP + YOLO classifier; visual detector per health)",
+      "httpStatus": 200,
+      "elapsedHttpMs": 120.343,
+      "groundTruth": null,
+      "groundTruthStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT",
+      "correctness": null,
+      "notes": "",
+      "result": {
+        "suggestedCategoryId": "lam-vuon",
+        "suggestedCategoryName": "Làm vườn",
+        "suggestedTargetId": "32acffd8-6255-49b1-8035-eb34a5dff180",
+        "suggestedTargetName": "Thảm cỏ / Bãi cỏ",
+        "categoryCandidates": [
+          {
+            "id": "lam-vuon",
+            "slug": "lam-vuon",
+            "name": "Làm vườn",
+            "confidence": 0.6909,
+            "provenance": "ensemble"
+          },
+          {
+            "id": "giup-viec",
+            "slug": "giup-viec",
+            "name": "Giúp việc",
+            "confidence": 0.0799,
+            "provenance": "ensemble"
+          },
+          {
+            "id": "thiet-bi",
+            "slug": "thiet-bi",
+            "name": "Thiết bị gia dụng",
+            "confidence": 0.0615,
+            "provenance": "ensemble"
+          }
+        ],
+        "targetCandidates": [
+          {
+            "targetId": "32acffd8-6255-49b1-8035-eb34a5dff180",
+            "targetName": "Thảm cỏ / Bãi cỏ",
+            "targetCategory": "lam-vuon",
+            "similarity": 0.2135,
+            "confidence": 0.6067,
+            "provenance": "clip_target_similarity"
+          },
+          {
+            "targetId": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+            "targetName": "Cây bóng mát / Cây lớn",
+            "targetCategory": "lam-vuon",
+            "similarity": 0.211,
+            "confidence": 0.6055,
+            "provenance": "clip_target_similarity"
+          },
+          {
+            "targetId": "059da690-c6be-46a8-83d5-d96e250cbe4f",
+            "targetName": "Hàng rào cây / Bồn hoa / Vườn rau",
+            "targetCategory": "lam-vuon",
+            "similarity": 0.202,
+            "confidence": 0.601,
+            "provenance": "clip_target_similarity"
+          }
+        ],
+        "confidence": 0.6909,
+        "detectedLabels": [
+          "lam-vuon"
+        ],
+        "observableSigns": [
+          "Nhận diện danh mục: Làm vườn",
+          "Nhận diện đối tượng: Thảm cỏ / Bãi cỏ"
+        ],
+        "visualAnalysis": {
+          "status": "disabled",
+          "modelVersion": null,
+          "weightsSha256": null,
+          "detections": []
+        },
+        "decision_source": "ensemble",
+        "engine": "model",
+        "model_version": "fixgo-ai-rec-v1",
+        "notes": "Chẩn đoán danh mục và đối tượng thành công."
+      },
+      "error": null,
+      "normalizedPrediction": {
+        "object": "32acffd8-6255-49b1-8035-eb34a5dff180",
+        "category": "lam-vuon",
+        "defect": null,
+        "service": null,
+        "confidence": 0.6909,
+        "boxes": [],
+        "source": "ensemble",
+        "correctness": null,
+        "qualityMetricStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT"
+      }
+    },
+    {
+      "caseId": "AUD-03",
+      "imagePath": "/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/eval/images/sample_before.jpg",
+      "group": "before_fixture",
+      "variant": "original",
+      "inputSha256": "79786bd2f4f5033856a86cb21b44c0fd77737a93846bb5b908ac34baadb36d21",
+      "requestDescription": "",
+      "model": "live /ai/v2/diagnose (CLIP + YOLO classifier; visual detector per health)",
+      "httpStatus": 200,
+      "elapsedHttpMs": 77.697,
+      "groundTruth": null,
+      "groundTruthStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT",
+      "correctness": null,
+      "notes": "",
+      "result": {
+        "suggestedCategoryId": "thiet-bi",
+        "suggestedCategoryName": "Thiết bị gia dụng",
+        "suggestedTargetId": "812864e5-2682-4d13-bbd4-5c22aba656cd",
+        "suggestedTargetName": "Máy xay / Máy ép / Máy đánh trứng",
+        "categoryCandidates": [
+          {
+            "id": "thiet-bi",
+            "slug": "thiet-bi",
+            "name": "Thiết bị gia dụng",
+            "confidence": 0.6195,
+            "provenance": "ensemble"
+          },
+          {
+            "id": "sua-dien",
+            "slug": "sua-dien",
+            "name": "Sửa điện",
+            "confidence": 0.1504,
+            "provenance": "ensemble"
+          },
+          {
+            "id": "dien-lanh",
+            "slug": "dien-lanh",
+            "name": "Điện lạnh",
+            "confidence": 0.1118,
+            "provenance": "ensemble"
+          }
+        ],
+        "targetCandidates": [
+          {
+            "targetId": "812864e5-2682-4d13-bbd4-5c22aba656cd",
+            "targetName": "Máy xay / Máy ép / Máy đánh trứng",
+            "targetCategory": "thiet-bi",
+            "similarity": 0.2264,
+            "confidence": 0.6132,
+            "provenance": "clip_target_similarity"
+          },
+          {
+            "targetId": "c3e13154-aeb8-4c3f-a6d3-6fa4f20566df",
+            "targetName": "Lò vi sóng",
+            "targetCategory": "thiet-bi",
+            "similarity": 0.2247,
+            "confidence": 0.6124,
+            "provenance": "clip_target_similarity"
+          },
+          {
+            "targetId": "a265bdb4-3c9f-4d0a-bcba-1f0722c8b420",
+            "targetName": "Bàn ủi / Bàn là hơi nước",
+            "targetCategory": "thiet-bi",
+            "similarity": 0.2217,
+            "confidence": 0.6108,
+            "provenance": "clip_target_similarity"
+          }
+        ],
+        "confidence": 0.6195,
+        "detectedLabels": [
+          "thiet-bi"
+        ],
+        "observableSigns": [
+          "Nhận diện danh mục: Thiết bị gia dụng",
+          "Nhận diện đối tượng: Máy xay / Máy ép / Máy đánh trứng"
+        ],
+        "visualAnalysis": {
+          "status": "disabled",
+          "modelVersion": null,
+          "weightsSha256": null,
+          "detections": []
+        },
+        "decision_source": "ensemble",
+        "engine": "model",
+        "model_version": "fixgo-ai-rec-v1",
+        "notes": "Chẩn đoán danh mục và đối tượng thành công."
+      },
+      "error": null,
+      "normalizedPrediction": {
+        "object": "812864e5-2682-4d13-bbd4-5c22aba656cd",
+        "category": "thiet-bi",
+        "defect": null,
+        "service": null,
+        "confidence": 0.6195,
+        "boxes": [],
+        "source": "ensemble",
+        "correctness": null,
+        "qualityMetricStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT"
+      }
+    },
+    {
+      "caseId": "AUD-04",
+      "imagePath": "/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/eval/images/sample_after.jpg",
+      "group": "after_fixture",
+      "variant": "original",
+      "inputSha256": "ae25616f14c6b86fe9d81e4ae4823c799073127b1886060ef5a4e7190dabca9d",
+      "requestDescription": "",
+      "model": "live /ai/v2/diagnose (CLIP + YOLO classifier; visual detector per health)",
+      "httpStatus": 200,
+      "elapsedHttpMs": 78.172,
+      "groundTruth": null,
+      "groundTruthStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT",
+      "correctness": null,
+      "notes": "",
+      "result": {
+        "suggestedCategoryId": null,
+        "suggestedCategoryName": null,
+        "suggestedTargetId": null,
+        "suggestedTargetName": null,
+        "categoryCandidates": [
+          {
+            "id": "thiet-bi",
+            "slug": "thiet-bi",
+            "name": "Thiết bị gia dụng",
+            "confidence": 0.3382,
+            "provenance": "ensemble"
+          },
+          {
+            "id": "sua-dien",
+            "slug": "sua-dien",
+            "name": "Sửa điện",
+            "confidence": 0.2403,
+            "provenance": "ensemble"
+          },
+          {
+            "id": "dien-lanh",
+            "slug": "dien-lanh",
+            "name": "Điện lạnh",
+            "confidence": 0.2096,
+            "provenance": "ensemble"
+          }
+        ],
+        "targetCandidates": [],
+        "confidence": null,
+        "detectedLabels": [],
+        "observableSigns": [],
+        "visualAnalysis": {
+          "status": "disabled",
+          "modelVersion": null,
+          "weightsSha256": null,
+          "detections": []
+        },
+        "decision_source": "abstained_ood",
+        "engine": "model",
+        "model_version": "fixgo-ai-rec-v1",
+        "notes": "Ảnh chưa đủ rõ hoặc ngoài danh mục dịch vụ hỗ trợ."
+      },
+      "error": null,
+      "normalizedPrediction": {
+        "object": null,
+        "category": null,
+        "defect": null,
+        "service": null,
+        "confidence": null,
+        "boxes": [],
+        "source": "abstained_ood",
+        "correctness": null,
+        "qualityMetricStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT"
+      }
+    },
+    {
+      "caseId": "AUD-05",
+      "imagePath": "/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/eval/images/sample_face.jpg",
+      "group": "ood_fixture",
+      "variant": "original",
+      "inputSha256": "584248e3a5f2d4879c9a69888f9053063d54b359d2201016fb88215cb8c5db9d",
+      "requestDescription": "",
+      "model": "live /ai/v2/diagnose (CLIP + YOLO classifier; visual detector per health)",
+      "httpStatus": 200,
+      "elapsedHttpMs": 72.753,
+      "groundTruth": null,
+      "groundTruthStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT",
+      "correctness": null,
+      "notes": "",
+      "result": {
+        "suggestedCategoryId": null,
+        "suggestedCategoryName": null,
+        "suggestedTargetId": null,
+        "suggestedTargetName": null,
+        "categoryCandidates": [
+          {
+            "id": "thiet-bi",
+            "slug": "thiet-bi",
+            "name": "Thiết bị gia dụng",
+            "confidence": 0.2848,
+            "provenance": "ensemble"
+          },
+          {
+            "id": "lam-vuon",
+            "slug": "lam-vuon",
+            "name": "Làm vườn",
+            "confidence": 0.2448,
+            "provenance": "ensemble"
+          },
+          {
+            "id": "giup-viec",
+            "slug": "giup-viec",
+            "name": "Giúp việc",
+            "confidence": 0.1262,
+            "provenance": "ensemble"
+          }
+        ],
+        "targetCandidates": [],
+        "confidence": null,
+        "detectedLabels": [],
+        "observableSigns": [],
+        "visualAnalysis": {
+          "status": "disabled",
+          "modelVersion": null,
+          "weightsSha256": null,
+          "detections": []
+        },
+        "decision_source": "abstained_ood",
+        "engine": "model",
+        "model_version": "fixgo-ai-rec-v1",
+        "notes": "Ảnh chưa đủ rõ hoặc ngoài danh mục dịch vụ hỗ trợ."
+      },
+      "error": null,
+      "normalizedPrediction": {
+        "object": null,
+        "category": null,
+        "defect": null,
+        "service": null,
+        "confidence": null,
+        "boxes": [],
+        "source": "abstained_ood",
+        "correctness": null,
+        "qualityMetricStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT"
+      }
+    },
+    {
+      "caseId": "AUD-06",
+      "imagePath": "/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/eval/images/sample_appliance.jpg",
+      "group": "low_light",
+      "variant": "low_light",
+      "inputSha256": "5cd1e1a5d58f85e9de43089f6da0cfbee3d98861fd31ba4df48a33da0b4d5e52",
+      "requestDescription": "",
+      "model": "live /ai/v2/diagnose (CLIP + YOLO classifier; visual detector per health)",
+      "httpStatus": 200,
+      "elapsedHttpMs": 76.384,
+      "groundTruth": null,
+      "groundTruthStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT",
+      "correctness": null,
+      "notes": "in-memory transform, base source unchanged",
+      "result": {
+        "suggestedCategoryId": null,
+        "suggestedCategoryName": null,
+        "suggestedTargetId": null,
+        "suggestedTargetName": null,
+        "categoryCandidates": [
+          {
+            "id": "sua-nuoc",
+            "slug": "sua-nuoc",
+            "name": "Sửa nước",
+            "confidence": 0.3311,
+            "provenance": "ensemble"
+          },
+          {
+            "id": "thiet-bi",
+            "slug": "thiet-bi",
+            "name": "Thiết bị gia dụng",
+            "confidence": 0.3048,
+            "provenance": "ensemble"
+          },
+          {
+            "id": "sua-dien",
+            "slug": "sua-dien",
+            "name": "Sửa điện",
+            "confidence": 0.1435,
+            "provenance": "ensemble"
+          }
+        ],
+        "targetCandidates": [],
+        "confidence": null,
+        "detectedLabels": [],
+        "observableSigns": [],
+        "visualAnalysis": {
+          "status": "disabled",
+          "modelVersion": null,
+          "weightsSha256": null,
+          "detections": []
+        },
+        "decision_source": "abstained_ood",
+        "engine": "model",
+        "model_version": "fixgo-ai-rec-v1",
+        "notes": "Ảnh chưa đủ rõ hoặc ngoài danh mục dịch vụ hỗ trợ."
+      },
+      "error": null,
+      "normalizedPrediction": {
+        "object": null,
+        "category": null,
+        "defect": null,
+        "service": null,
+        "confidence": null,
+        "boxes": [],
+        "source": "abstained_ood",
+        "correctness": null,
+        "qualityMetricStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT"
+      }
+    },
+    {
+      "caseId": "AUD-07",
+      "imagePath": "/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/eval/images/sample_appliance.jpg",
+      "group": "blur",
+      "variant": "blur",
+      "inputSha256": "2198eefd0c38ea78aa41ea28e96bdd18841d8b484776756d38ecc66f47ac739c",
+      "requestDescription": "",
+      "model": "live /ai/v2/diagnose (CLIP + YOLO classifier; visual detector per health)",
+      "httpStatus": 200,
+      "elapsedHttpMs": 76.131,
+      "groundTruth": null,
+      "groundTruthStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT",
+      "correctness": null,
+      "notes": "in-memory transform, base source unchanged",
+      "result": {
+        "suggestedCategoryId": null,
+        "suggestedCategoryName": null,
+        "suggestedTargetId": null,
+        "suggestedTargetName": null,
+        "categoryCandidates": [
+          {
+            "id": "thiet-bi",
+            "slug": "thiet-bi",
+            "name": "Thiết bị gia dụng",
+            "confidence": 0.4629,
+            "provenance": "clip"
+          },
+          {
+            "id": "sua-dien",
+            "slug": "sua-dien",
+            "name": "Sửa điện",
+            "confidence": 0.1134,
+            "provenance": "clip"
+          }
+        ],
+        "targetCandidates": [],
+        "confidence": null,
+        "detectedLabels": [],
+        "observableSigns": [],
+        "visualAnalysis": {
+          "status": "disabled",
+          "modelVersion": null,
+          "weightsSha256": null,
+          "detections": []
+        },
+        "decision_source": "abstained_ood",
+        "engine": "model",
+        "model_version": "fixgo-ai-rec-v1",
+        "notes": "Ảnh chưa đủ rõ hoặc ngoài danh mục dịch vụ hỗ trợ."
+      },
+      "error": null,
+      "normalizedPrediction": {
+        "object": null,
+        "category": null,
+        "defect": null,
+        "service": null,
+        "confidence": null,
+        "boxes": [],
+        "source": "abstained_ood",
+        "correctness": null,
+        "qualityMetricStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT"
+      }
+    },
+    {
+      "caseId": "AUD-08",
+      "imagePath": "/home/vanvi/Downloads/fixgo_suadien_outlet_burnmark_20.zip!/fixgo_suadien_outlet_burnmark_20/images/outlet_burn_001.jpg",
+      "group": "synthetic_burn_candidate",
+      "variant": "original",
+      "inputSha256": "5045e4fbbd85b9202081a3101f7b1e18549284bf8661b7a28de3edcae6102be5",
+      "requestDescription": "",
+      "model": "live /ai/v2/diagnose (CLIP + YOLO classifier; visual detector per health)",
+      "httpStatus": 200,
+      "elapsedHttpMs": 108.192,
+      "groundTruth": null,
+      "groundTruthStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT",
+      "correctness": null,
+      "notes": "User package candidate only; not verified burn/object GT",
+      "result": {
+        "suggestedCategoryId": "sua-dien",
+        "suggestedCategoryName": "Sửa điện",
+        "suggestedTargetId": "b45c19d2-93d2-43ac-8330-87d223d941b4",
+        "suggestedTargetName": "Bóng đèn / Đèn LED",
+        "categoryCandidates": [
+          {
+            "id": "sua-dien",
+            "slug": "sua-dien",
+            "name": "Sửa điện",
+            "confidence": 0.5506,
+            "provenance": "ensemble"
+          },
+          {
+            "id": "dien-lanh",
+            "slug": "dien-lanh",
+            "name": "Điện lạnh",
+            "confidence": 0.2247,
+            "provenance": "ensemble"
+          },
+          {
+            "id": "thiet-bi",
+            "slug": "thiet-bi",
+            "name": "Thiết bị gia dụng",
+            "confidence": 0.1267,
+            "provenance": "ensemble"
+          }
+        ],
+        "targetCandidates": [
+          {
+            "targetId": "b45c19d2-93d2-43ac-8330-87d223d941b4",
+            "targetName": "Bóng đèn / Đèn LED",
+            "targetCategory": "sua-dien",
+            "similarity": 0.2743,
+            "confidence": 0.6372,
+            "provenance": "clip_target_similarity"
+          },
+          {
+            "targetId": "72afafec-8d91-4ed9-b153-238d314ddfdf",
+            "targetName": "Điện mặt trời / Inverter",
+            "targetCategory": "sua-dien",
+            "similarity": 0.2579,
+            "confidence": 0.6289,
+            "provenance": "clip_target_similarity"
+          },
+          {
+            "targetId": "8e1b308f-a8cd-4de8-9a30-6db52cfdb32c",
+            "targetName": "Đèn sự cố / Đèn thoát hiểm",
+            "targetCategory": "sua-dien",
+            "similarity": 0.2571,
+            "confidence": 0.6286,
+            "provenance": "clip_target_similarity"
+          }
+        ],
+        "confidence": 0.5506,
+        "detectedLabels": [
+          "sua-dien"
+        ],
+        "observableSigns": [
+          "Nhận diện danh mục: Sửa điện",
+          "Nhận diện đối tượng: Bóng đèn / Đèn LED"
+        ],
+        "visualAnalysis": {
+          "status": "disabled",
+          "modelVersion": null,
+          "weightsSha256": null,
+          "detections": []
+        },
+        "decision_source": "ensemble",
+        "engine": "model",
+        "model_version": "fixgo-ai-rec-v1",
+        "notes": "Chẩn đoán danh mục và đối tượng thành công."
+      },
+      "error": null,
+      "normalizedPrediction": {
+        "object": "b45c19d2-93d2-43ac-8330-87d223d941b4",
+        "category": "sua-dien",
+        "defect": null,
+        "service": null,
+        "confidence": 0.5506,
+        "boxes": [],
+        "source": "ensemble",
+        "correctness": null,
+        "qualityMetricStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT"
+      }
+    },
+    {
+      "caseId": "AUD-09",
+      "imagePath": "/home/vanvi/Work/datasetai/01-raw/dienlanh/test/images/-500x400_png.rf.a8a3c97c658367c7c9daa4a6309d6626.jpg",
+      "group": "multiple_source_annotations",
+      "variant": "original",
+      "inputSha256": "993ecfa9456306f2749869fae573d9facbeb237432af761e55ded9d08e97ca9e",
+      "requestDescription": "",
+      "model": "live /ai/v2/diagnose (CLIP + YOLO classifier; visual detector per health)",
+      "httpStatus": 200,
+      "elapsedHttpMs": 78.194,
+      "groundTruth": null,
+      "groundTruthStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT",
+      "correctness": null,
+      "notes": "Source annotations unverified; multi-object semantics not independently judged",
+      "result": {
+        "suggestedCategoryId": null,
+        "suggestedCategoryName": null,
+        "suggestedTargetId": null,
+        "suggestedTargetName": null,
+        "categoryCandidates": [
+          {
+            "id": "dien-lanh",
+            "slug": "dien-lanh",
+            "name": "Điện lạnh",
+            "confidence": 0.4792,
+            "provenance": "ensemble"
+          },
+          {
+            "id": "thiet-bi",
+            "slug": "thiet-bi",
+            "name": "Thiết bị gia dụng",
+            "confidence": 0.4579,
+            "provenance": "ensemble"
+          },
+          {
+            "id": "giup-viec",
+            "slug": "giup-viec",
+            "name": "Giúp việc",
+            "confidence": 0.0303,
+            "provenance": "ensemble"
+          }
+        ],
+        "targetCandidates": [],
+        "confidence": null,
+        "detectedLabels": [],
+        "observableSigns": [],
+        "visualAnalysis": {
+          "status": "disabled",
+          "modelVersion": null,
+          "weightsSha256": null,
+          "detections": []
+        },
+        "decision_source": "abstained_ood",
+        "engine": "model",
+        "model_version": "fixgo-ai-rec-v1",
+        "notes": "Ảnh chưa đủ rõ hoặc ngoài danh mục dịch vụ hỗ trợ."
+      },
+      "error": null,
+      "normalizedPrediction": {
+        "object": null,
+        "category": null,
+        "defect": null,
+        "service": null,
+        "confidence": null,
+        "boxes": [],
+        "source": "abstained_ood",
+        "correctness": null,
+        "qualityMetricStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT"
+      }
+    },
+    {
+      "caseId": "FAIL-10",
+      "endpoint": "/ai/v2/diagnose",
+      "imagePath": {
+        "imageUrl": "/no-such-audit-image.jpg",
+        "description": "ổ cắm cháy"
+      },
+      "group": "invalid_image_handling",
+      "groundTruth": null,
+      "correctness": null,
+      "elapsedHttpMs": 1.322,
+      "httpStatus": 200,
+      "result": {
+        "suggestedCategoryId": null,
+        "suggestedCategoryName": null,
+        "suggestedTargetId": null,
+        "suggestedTargetName": null,
+        "categoryCandidates": [],
+        "targetCandidates": [],
+        "confidence": null,
+        "detectedLabels": [],
+        "observableSigns": [],
+        "visualAnalysis": {
+          "status": "disabled",
+          "modelVersion": null,
+          "weightsSha256": null,
+          "detections": []
+        },
+        "decision_source": "unavailable",
+        "engine": "unavailable",
+        "model_version": "fixgo-ai-rec-v1",
+        "notes": "Không đọc được ảnh. Vui lòng chụp lại hoặc chọn dịch vụ."
+      },
+      "normalizedPrediction": {
+        "object": null,
+        "category": null,
+        "defect": null,
+        "service": null,
+        "confidence": null,
+        "boxes": [],
+        "source": "unavailable",
+        "correctness": null,
+        "qualityMetricStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT"
+      }
+    },
+    {
+      "caseId": "FAIL-11",
+      "endpoint": "/ai/compare-before-after",
+      "imagePath": {
+        "beforeImageUrl": "/no-such-before.jpg",
+        "afterImageUrl": "/no-such-after.jpg"
+      },
+      "group": "invalid_image_handling",
+      "groundTruth": null,
+      "correctness": null,
+      "elapsedHttpMs": 1.389,
+      "httpStatus": 200,
+      "result": {
+        "matchScore": 0.92,
+        "passed": true,
+        "notes": "Nghiệm thu đạt chuẩn: Sự cố đã được xử lý triệt để, bề mặt sạch sẽ và an toàn kỹ thuật.",
+        "engine": "heuristic",
+        "alignmentScore": null,
+        "inliersCount": null,
+        "ssimScore": null,
+        "changeScore": null,
+        "cleanlinessScore": null,
+        "diffRatio": null,
+        "histScore": null
+      },
+      "normalizedPrediction": {
+        "object": null,
+        "category": null,
+        "defect": null,
+        "service": null,
+        "confidence": null,
+        "boxes": [],
+        "source": "heuristic",
+        "correctness": null,
+        "qualityMetricStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT"
+      }
+    },
+    {
+      "caseId": "STRICT-1",
+      "imagePath": "/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/eval/images/sample_appliance.jpg",
+      "modelPath": "/home/vanvi/Work/datasetai/03-experiments/ai01-task04a-strict-v2/training/weights/best.pt",
+      "modelSha256": "898293e8446b7ad08d52132a8a95525ea967474f1ce7d49dce40b97a0bdda9fd",
+      "group": "offline_source_supervised_object_trial",
+      "elapsedMs": 728.987,
+      "groundTruth": null,
+      "correctness": null,
+      "boxes": [],
+      "predictedDefect": null,
+      "predictedService": null,
+      "notes": "Actual CPU object inference with existing trial weights; not loaded by production API; no independent GT",
+      "normalizedPrediction": {
+        "object": null,
+        "category": null,
+        "defect": null,
+        "service": null,
+        "confidence": null,
+        "boxes": [],
+        "source": "offline_object_detector",
+        "correctness": null,
+        "qualityMetricStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT"
+      }
+    },
+    {
+      "caseId": "STRICT-2",
+      "imagePath": "/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/eval/images/sample_garden.jpg",
+      "modelPath": "/home/vanvi/Work/datasetai/03-experiments/ai01-task04a-strict-v2/training/weights/best.pt",
+      "modelSha256": "898293e8446b7ad08d52132a8a95525ea967474f1ce7d49dce40b97a0bdda9fd",
+      "group": "offline_source_supervised_object_trial",
+      "elapsedMs": 31.584,
+      "groundTruth": null,
+      "correctness": null,
+      "boxes": [],
+      "predictedDefect": null,
+      "predictedService": null,
+      "notes": "Actual CPU object inference with existing trial weights; not loaded by production API; no independent GT",
+      "normalizedPrediction": {
+        "object": null,
+        "category": null,
+        "defect": null,
+        "service": null,
+        "confidence": null,
+        "boxes": [],
+        "source": "offline_object_detector",
+        "correctness": null,
+        "qualityMetricStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT"
+      }
+    },
+    {
+      "caseId": "STRICT-3",
+      "imagePath": "/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/eval/images/sample_before.jpg",
+      "modelPath": "/home/vanvi/Work/datasetai/03-experiments/ai01-task04a-strict-v2/training/weights/best.pt",
+      "modelSha256": "898293e8446b7ad08d52132a8a95525ea967474f1ce7d49dce40b97a0bdda9fd",
+      "group": "offline_source_supervised_object_trial",
+      "elapsedMs": 28.661,
+      "groundTruth": null,
+      "correctness": null,
+      "boxes": [],
+      "predictedDefect": null,
+      "predictedService": null,
+      "notes": "Actual CPU object inference with existing trial weights; not loaded by production API; no independent GT",
+      "normalizedPrediction": {
+        "object": null,
+        "category": null,
+        "defect": null,
+        "service": null,
+        "confidence": null,
+        "boxes": [],
+        "source": "offline_object_detector",
+        "correctness": null,
+        "qualityMetricStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT"
+      }
+    },
+    {
+      "caseId": "STRICT-4",
+      "imagePath": "/home/vanvi/Downloads/fixgo_suadien_outlet_burnmark_20.zip!/fixgo_suadien_outlet_burnmark_20/images/outlet_burn_001.jpg",
+      "modelPath": "/home/vanvi/Work/datasetai/03-experiments/ai01-task04a-strict-v2/training/weights/best.pt",
+      "modelSha256": "898293e8446b7ad08d52132a8a95525ea967474f1ce7d49dce40b97a0bdda9fd",
+      "group": "offline_source_supervised_object_trial",
+      "elapsedMs": 40.757,
+      "groundTruth": null,
+      "correctness": null,
+      "boxes": [],
+      "predictedDefect": null,
+      "predictedService": null,
+      "notes": "Actual CPU object inference with existing trial weights; not loaded by production API; no independent GT",
+      "normalizedPrediction": {
+        "object": null,
+        "category": null,
+        "defect": null,
+        "service": null,
+        "confidence": null,
+        "boxes": [],
+        "source": "offline_object_detector",
+        "correctness": null,
+        "qualityMetricStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT"
+      }
+    },
+    {
+      "caseId": "BACKEND-1",
+      "group": "garden_pixels",
+      "imagePath": "/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/eval/images/sample_garden.jpg",
+      "endpoint": "/api/orders/diagnose",
+      "httpStatus": 201,
+      "elapsedHttpMs": 187.817,
+      "answers": {},
+      "result": {
+        "requestId": "4e598d07-9b12-47ed-b004-f4a3df5d9758",
+        "status": "needs_more_info",
+        "source": "model",
+        "imageUrl": "[omitted: input image only; hash/source path recorded]",
+        "confidence": 0.6909,
+        "modelScore": 0.6909,
+        "detectedLabels": [
+          "Làm vườn"
+        ],
+        "categoryCandidates": [],
+        "targetCandidates": [],
+        "suggestedCategoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e",
+        "suggestedCategoryName": "Làm vườn",
+        "suggestedTargetId": "32acffd8-6255-49b1-8035-eb34a5dff180",
+        "suggestedTargetName": "Thảm cỏ / Bãi cỏ",
+        "suggestedServiceId": null,
+        "suggestedServiceName": null,
+        "suggestedServiceConfidence": null,
+        "suggestedServices": [],
+        "visualServiceSuggestions": [],
+        "visualAnalysisStatus": "disabled",
+        "estimatedPriceMin": null,
+        "estimatedPriceMax": null,
+        "estimatedPriceRange": null,
+        "category": {
+          "id": "ef9682ad-e5dc-494e-a22f-45df72b68f9e",
+          "slug": "lam-vuon",
+          "name": "Làm vườn"
+        },
+        "target": null,
+        "service": null,
+        "priceEstimate": null,
+        "requiresManualSelection": true,
+        "needsMoreInfo": true,
+        "decisionSource": "model",
+        "modelVersion": "fixgo-ai-rec-v1",
+        "reasonCodes": [
+          "category_detected",
+          "symptom_required"
+        ],
+        "observableSigns": [
+          "Nhận diện danh mục: Làm vườn"
+        ],
+        "reportedSymptoms": [],
+        "questions": [],
+        "availableCategories": [
+          {
+            "id": "76c09b08-3231-4abd-be79-c2da76e06495",
+            "name": "Giúp việc",
+            "basePrice": 120000
+          },
+          {
+            "id": "ef9682ad-e5dc-494e-a22f-45df72b68f9e",
+            "name": "Làm vườn",
+            "basePrice": 150000
+          },
+          {
+            "id": "2a367f64-e8b2-4b94-8227-f5058c842af8",
+            "name": "Sửa nước",
+            "basePrice": 150000
+          },
+          {
+            "id": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+            "name": "Sửa điện",
+            "basePrice": 100000
+          },
+          {
+            "id": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+            "name": "Thiết bị gia dụng",
+            "basePrice": 120000
+          },
+          {
+            "id": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+            "name": "Điện lạnh",
+            "basePrice": 180000
+          }
+        ],
+        "availableTargets": [
+          {
+            "id": "32acffd8-6255-49b1-8035-eb34a5dff180",
+            "name": "Thảm cỏ / Bãi cỏ",
+            "slug": "tham-co-bai-co",
+            "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+          },
+          {
+            "id": "fbcd5b31-5530-43ba-b35b-a32d25479477",
+            "name": "Cây cảnh / Chậu cây",
+            "slug": "cay-canh-chau-cay",
+            "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+          },
+          {
+            "id": "e6e9a725-4058-4af4-83b7-a35fc91af354",
+            "name": "Cây bóng mát / Cây lớn",
+            "slug": "cay-bong-mat-cay-lon",
+            "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+          },
+          {
+            "id": "059da690-c6be-46a8-83d5-d96e250cbe4f",
+            "name": "Hàng rào cây / Bồn hoa / Vườn rau",
+            "slug": "hang-rao-cay-bon-hoa-vuon-rau",
+            "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+          },
+          {
+            "id": "cc0ab115-0758-4fd3-a4ad-b10a68cd0cdb",
+            "name": "Hệ thống tưới / Sân vườn tổng thể",
+            "slug": "he-thong-tuoi-san-vuon-tong-the",
+            "categoryId": "ef9682ad-e5dc-494e-a22f-45df72b68f9e"
+          }
+        ],
+        "availableServices": [],
+        "issueDescription": "",
+        "reason": "symptom_required",
+        "notes": "Vui lòng chọn danh mục và dịch vụ phù hợp.",
+        "message": "Xác nhận triệu chứng hoặc chọn dịch vụ bên dưới. Ảnh chưa xác định được nguyên nhân hỏng.",
+        "symptomCatalogEnabled": false,
+        "selectedSymptomIds": []
+      },
+      "groundTruth": null,
+      "correctness": null,
+      "scope": "live read-only resolver; no order or upload/storage mutation",
+      "normalizedPrediction": {
+        "object": "32acffd8-6255-49b1-8035-eb34a5dff180",
+        "category": "ef9682ad-e5dc-494e-a22f-45df72b68f9e",
+        "defect": null,
+        "service": null,
+        "confidence": 0.6909,
+        "boxes": [],
+        "source": "model",
+        "correctness": null,
+        "qualityMetricStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT"
+      }
+    },
+    {
+      "caseId": "BACKEND-2",
+      "group": "before_pixels",
+      "imagePath": "/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/eval/images/sample_before.jpg",
+      "endpoint": "/api/orders/diagnose",
+      "httpStatus": 201,
+      "elapsedHttpMs": 97.606,
+      "answers": {},
+      "result": {
+        "requestId": "48b05891-2aef-402d-b24a-b7da9bdb2fe8",
+        "status": "needs_more_info",
+        "source": "model",
+        "imageUrl": "[omitted: input image only; hash/source path recorded]",
+        "confidence": 0.6195,
+        "modelScore": 0.6195,
+        "detectedLabels": [
+          "Thiết bị gia dụng"
+        ],
+        "categoryCandidates": [],
+        "targetCandidates": [],
+        "suggestedCategoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+        "suggestedCategoryName": "Thiết bị gia dụng",
+        "suggestedTargetId": "812864e5-2682-4d13-bbd4-5c22aba656cd",
+        "suggestedTargetName": "Máy xay / Máy ép / Máy đánh trứng",
+        "suggestedServiceId": null,
+        "suggestedServiceName": null,
+        "suggestedServiceConfidence": null,
+        "suggestedServices": [],
+        "visualServiceSuggestions": [],
+        "visualAnalysisStatus": "disabled",
+        "estimatedPriceMin": null,
+        "estimatedPriceMax": null,
+        "estimatedPriceRange": null,
+        "category": {
+          "id": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+          "slug": "thiet-bi",
+          "name": "Thiết bị gia dụng"
+        },
+        "target": null,
+        "service": null,
+        "priceEstimate": null,
+        "requiresManualSelection": true,
+        "needsMoreInfo": true,
+        "decisionSource": "model",
+        "modelVersion": "fixgo-ai-rec-v1",
+        "reasonCodes": [
+          "category_detected",
+          "symptom_required"
+        ],
+        "observableSigns": [
+          "Nhận diện danh mục: Thiết bị gia dụng"
+        ],
+        "reportedSymptoms": [],
+        "questions": [],
+        "availableCategories": [
+          {
+            "id": "76c09b08-3231-4abd-be79-c2da76e06495",
+            "name": "Giúp việc",
+            "basePrice": 120000
+          },
+          {
+            "id": "ef9682ad-e5dc-494e-a22f-45df72b68f9e",
+            "name": "Làm vườn",
+            "basePrice": 150000
+          },
+          {
+            "id": "2a367f64-e8b2-4b94-8227-f5058c842af8",
+            "name": "Sửa nước",
+            "basePrice": 150000
+          },
+          {
+            "id": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+            "name": "Sửa điện",
+            "basePrice": 100000
+          },
+          {
+            "id": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+            "name": "Thiết bị gia dụng",
+            "basePrice": 120000
+          },
+          {
+            "id": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+            "name": "Điện lạnh",
+            "basePrice": 180000
+          }
+        ],
+        "availableTargets": [
+          {
+            "id": "79d5736c-c8e1-4514-a9ce-e01899beffa9",
+            "name": "Bếp từ / Bếp hồng ngoại",
+            "slug": "bep-tu-bep-hong-ngoai",
+            "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d"
+          },
+          {
+            "id": "863b2a1d-05f2-4792-beaa-4073e6197141",
+            "name": "Bếp gas / Bếp gas âm",
+            "slug": "bep-gas-bep-gas-am",
+            "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d"
+          },
+          {
+            "id": "65f531cd-165d-4feb-b69f-922398fde6db",
+            "name": "Nồi cơm điện / Nồi áp suất điện",
+            "slug": "noi-com-dien-noi-ap-suat-dien",
+            "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d"
+          },
+          {
+            "id": "c3e13154-aeb8-4c3f-a6d3-6fa4f20566df",
+            "name": "Lò vi sóng",
+            "slug": "lo-vi-song",
+            "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d"
+          },
+          {
+            "id": "a289a9b0-6cb9-4d94-b3a3-3ff6dd55e1f7",
+            "name": "Lò nướng / Nồi chiên không dầu",
+            "slug": "lo-nuong-noi-chien-khong-dau",
+            "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d"
+          },
+          {
+            "id": "82430f58-a332-4d4f-aa99-5c27f888a0e7",
+            "name": "Máy lọc nước RO / Nano",
+            "slug": "may-loc-nuoc-ro-nano",
+            "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d"
+          },
+          {
+            "id": "42c03e7a-0da1-446a-ae1e-db7783716016",
+            "name": "Máy hút mùi",
+            "slug": "may-hut-mui",
+            "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d"
+          },
+          {
+            "id": "ac770808-e06b-4f11-8c0d-ea2c5ca4ab55",
+            "name": "Máy hút bụi / Robot hút bụi",
+            "slug": "may-hut-bui-robot-hut-bui",
+            "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d"
+          },
+          {
+            "id": "a9f91e3c-16d5-484d-92bf-68c526ac9606",
+            "name": "Quạt điện / Quạt đứng / Quạt bàn",
+            "slug": "quat-dien-quat-dung-quat-ban",
+            "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d"
+          },
+          {
+            "id": "8c5b11b7-adfe-4c5d-a3b6-fd7afbf53636",
+            "name": "Bình nóng lạnh điện",
+            "slug": "binh-nong-lanh-dien",
+            "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d"
+          },
+          {
+            "id": "812864e5-2682-4d13-bbd4-5c22aba656cd",
+            "name": "Máy xay / Máy ép / Máy đánh trứng",
+            "slug": "may-xay-may-ep-may-danh-trung",
+            "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d"
+          },
+          {
+            "id": "f37e014f-c25d-4bcf-a5de-af804d32bd40",
+            "name": "Máy pha cà phê / Ấm siêu tốc",
+            "slug": "may-pha-ca-phe-am-sieu-toc",
+            "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d"
+          },
+          {
+            "id": "44c6d84b-0c8c-44f0-855b-36aff9d8222a",
+            "name": "Máy rửa chén / Máy rửa bát",
+            "slug": "may-rua-chen-may-rua-bat",
+            "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d"
+          },
+          {
+            "id": "a265bdb4-3c9f-4d0a-bcba-1f0722c8b420",
+            "name": "Bàn ủi / Bàn là hơi nước",
+            "slug": "ban-ui-ban-la-hoi-nuoc",
+            "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d"
+          },
+          {
+            "id": "31a46f93-b19d-46e0-89ec-de97705944e4",
+            "name": "Máy lọc không khí / Máy hút ẩm",
+            "slug": "may-loc-khong-khi-may-hut-am",
+            "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d"
+          }
+        ],
+        "availableServices": [],
+        "issueDescription": "",
+        "reason": "symptom_required",
+        "notes": "Vui lòng chọn danh mục và dịch vụ phù hợp.",
+        "message": "Xác nhận triệu chứng hoặc chọn dịch vụ bên dưới. Ảnh chưa xác định được nguyên nhân hỏng.",
+        "symptomCatalogEnabled": false,
+        "selectedSymptomIds": []
+      },
+      "groundTruth": null,
+      "correctness": null,
+      "scope": "live read-only resolver; no order or upload/storage mutation",
+      "normalizedPrediction": {
+        "object": "812864e5-2682-4d13-bbd4-5c22aba656cd",
+        "category": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+        "defect": null,
+        "service": null,
+        "confidence": 0.6195,
+        "boxes": [],
+        "source": "model",
+        "correctness": null,
+        "qualityMetricStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT"
+      }
+    },
+    {
+      "caseId": "BACKEND-3",
+      "group": "manual_existing_service",
+      "imagePath": null,
+      "endpoint": "/api/orders/diagnose",
+      "httpStatus": 201,
+      "elapsedHttpMs": 16.028,
+      "answers": {
+        "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+        "targetId": "ca1e389e-6302-4a19-a086-5c815a836473",
+        "serviceId": "02695ade-1d71-4518-a4a3-4112f0f99055"
+      },
+      "result": {
+        "requestId": "8b0c2be7-f8eb-40ec-a7b5-b82c673847fd",
+        "status": "suggested",
+        "source": "manual",
+        "imageUrl": "[omitted: input image only; hash/source path recorded]",
+        "confidence": null,
+        "modelScore": null,
+        "detectedLabels": [],
+        "categoryCandidates": [],
+        "targetCandidates": [],
+        "suggestedCategoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+        "suggestedCategoryName": "Sửa điện",
+        "suggestedTargetId": "ca1e389e-6302-4a19-a086-5c815a836473",
+        "suggestedTargetName": "Ổ cắm điện",
+        "suggestedServiceId": "02695ade-1d71-4518-a4a3-4112f0f99055",
+        "suggestedServiceName": "Sửa ổ cắm lỏng / tiếp xúc kém",
+        "suggestedServiceConfidence": null,
+        "suggestedServices": [
+          {
+            "id": "02695ade-1d71-4518-a4a3-4112f0f99055",
+            "name": "Sửa ổ cắm lỏng / tiếp xúc kém",
+            "slug": "sua-o-cam-long-tiep-xuc-kem",
+            "targetId": "ca1e389e-6302-4a19-a086-5c815a836473",
+            "basePrice": 100000,
+            "maxPrice": null,
+            "unit": "điểm",
+            "rankingScore": 100,
+            "matchScore": 100,
+            "confidence": null,
+            "reason": "Khớp chính xác triệu chứng đã xác nhận: Sửa ổ cắm lỏng / tiếp xúc kém",
+            "provenance": "symptom_match"
+          }
+        ],
+        "visualServiceSuggestions": [],
+        "visualAnalysisStatus": "disabled",
+        "estimatedPriceMin": 100000,
+        "estimatedPriceMax": null,
+        "estimatedPriceRange": {
+          "min": 100000,
+          "max": null,
+          "unit": "điểm",
+          "formatted": "Từ 100.000 đ / điểm"
+        },
+        "category": {
+          "id": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+          "slug": "sua-dien",
+          "name": "Sửa điện"
+        },
+        "target": {
+          "id": "ca1e389e-6302-4a19-a086-5c815a836473",
+          "slug": "o-cam-dien",
+          "name": "Ổ cắm điện"
+        },
+        "service": {
+          "id": "02695ade-1d71-4518-a4a3-4112f0f99055",
+          "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+          "targetId": "ca1e389e-6302-4a19-a086-5c815a836473",
+          "name": "Sửa ổ cắm lỏng / tiếp xúc kém",
+          "slug": "sua-o-cam-long-tiep-xuc-kem",
+          "description": "Sửa ổ cắm lỏng / tiếp xúc kém chuyên nghiệp, khảo sát nhanh, vật tư chính hãng bảo hành 30 ngày.",
+          "basePrice": "100000",
+          "maxPrice": null,
+          "unit": "điểm",
+          "estimatedDurationMin": 45,
+          "isPopular": false,
+          "isActive": true,
+          "createdAt": "2026-11-01T06:08:14.270Z",
+          "updatedAt": "2026-11-01T06:08:14.270Z"
+        },
+        "priceEstimate": {
+          "min": 100000,
+          "max": null,
+          "unit": "điểm",
+          "formatted": "Từ 100.000 đ / điểm"
+        },
+        "requiresManualSelection": false,
+        "needsMoreInfo": false,
+        "decisionSource": "manual",
+        "modelVersion": "fixgo-ai-rec-v1",
+        "reasonCodes": [
+          "customer_selected"
+        ],
+        "observableSigns": [],
+        "reportedSymptoms": [],
+        "questions": [],
+        "availableCategories": [
+          {
+            "id": "76c09b08-3231-4abd-be79-c2da76e06495",
+            "name": "Giúp việc",
+            "basePrice": 120000
+          },
+          {
+            "id": "ef9682ad-e5dc-494e-a22f-45df72b68f9e",
+            "name": "Làm vườn",
+            "basePrice": 150000
+          },
+          {
+            "id": "2a367f64-e8b2-4b94-8227-f5058c842af8",
+            "name": "Sửa nước",
+            "basePrice": 150000
+          },
+          {
+            "id": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+            "name": "Sửa điện",
+            "basePrice": 100000
+          },
+          {
+            "id": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+            "name": "Thiết bị gia dụng",
+            "basePrice": 120000
+          },
+          {
+            "id": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+            "name": "Điện lạnh",
+            "basePrice": 180000
+          }
+        ],
+        "availableTargets": [
+          {
+            "id": "ca1e389e-6302-4a19-a086-5c815a836473",
+            "name": "Ổ cắm điện",
+            "slug": "o-cam-dien",
+            "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3"
+          },
+          {
+            "id": "f2b5a73e-b1e3-45c2-97c1-a09015ad18b6",
+            "name": "Công tắc điện",
+            "slug": "cong-tac-dien",
+            "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3"
+          },
+          {
+            "id": "b45c19d2-93d2-43ac-8330-87d223d941b4",
+            "name": "Bóng đèn / Đèn LED",
+            "slug": "bong-den-den-led",
+            "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3"
+          },
+          {
+            "id": "667cd41a-d6ab-42fa-808c-08898ba947dc",
+            "name": "Đèn trang trí / Đèn chùm",
+            "slug": "den-trang-tri-den-chum",
+            "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3"
+          },
+          {
+            "id": "2f246a0e-3617-4083-83da-2713460741cb",
+            "name": "Đèn ngoài trời / Sân vườn",
+            "slug": "den-ngoai-troi-san-vuon",
+            "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3"
+          },
+          {
+            "id": "484e7b6f-469e-4b22-acd8-bae2b7ea60a1",
+            "name": "Aptomat / CB / MCB",
+            "slug": "aptomat-cb-mcb",
+            "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3"
+          },
+          {
+            "id": "9a3f2d63-e61b-4d6c-8ff0-15e179c15d02",
+            "name": "Thiết bị chống rò / Chống giật",
+            "slug": "thiet-bi-chong-ro-chong-giat",
+            "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3"
+          },
+          {
+            "id": "470acb27-41b1-4d36-9ee3-84b9bbc857de",
+            "name": "Tủ điện / Bảng điện",
+            "slug": "tu-dien-bang-dien",
+            "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3"
+          },
+          {
+            "id": "36d41107-3c4a-4a4e-9aa1-22cba07aed57",
+            "name": "Dây điện / Cáp điện",
+            "slug": "day-dien-cap-dien",
+            "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3"
+          },
+          {
+            "id": "56d03ad1-b3a0-469a-bf79-ec9e83d23e08",
+            "name": "Hộp nối điện / Hộp kỹ thuật",
+            "slug": "hop-noi-dien-hop-ky-thuat",
+            "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3"
+          },
+          {
+            "id": "cc357a32-647e-4598-9c0c-86c6d62f2427",
+            "name": "Hệ thống điện phòng",
+            "slug": "he-thong-dien-phong",
+            "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3"
+          },
+          {
+            "id": "481e60aa-a20b-466e-8ae0-c581284e67ee",
+            "name": "Hệ thống điện toàn nhà",
+            "slug": "he-thong-dien-toan-nha",
+            "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3"
+          },
+          {
+            "id": "492a7d40-96f6-4b1a-8146-34956f8a95f8",
+            "name": "Quạt trần / Quạt treo tường",
+            "slug": "quat-tran-quat-treo-tuong",
+            "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3"
+          },
+          {
+            "id": "9b5276c6-9692-46be-a8ad-f3e1afdac569",
+            "name": "Quạt thông gió / Quạt hút",
+            "slug": "quat-thong-gio-quat-hut",
+            "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3"
+          },
+          {
+            "id": "b5e21dc2-ed41-4aaa-9f0f-8f5f5aaf025c",
+            "name": "Chuông cửa / Nút nhấn",
+            "slug": "chuong-cua-nut-nhan",
+            "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3"
+          },
+          {
+            "id": "56725529-2a0c-4bdf-a437-4f18d98b5939",
+            "name": "Cảm biến / Thiết bị tự động",
+            "slug": "cam-bien-thiet-bi-tu-dong",
+            "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3"
+          },
+          {
+            "id": "1c1b61c3-be55-4d27-8a32-46410e2a2017",
+            "name": "Công tắc thông minh / Relay",
+            "slug": "cong-tac-thong-minh-relay",
+            "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3"
+          },
+          {
+            "id": "215bc4ef-6d9d-49ec-841f-4a9fb91868f5",
+            "name": "Ổ cắm thông minh / Hẹn giờ",
+            "slug": "o-cam-thong-minh-hen-gio",
+            "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3"
+          },
+          {
+            "id": "199c79fa-7e5d-424f-bb45-f2fd9242024f",
+            "name": "Nguồn điện / Adapter / Bộ nguồn",
+            "slug": "nguon-dien-adapter-bo-nguon",
+            "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3"
+          },
+          {
+            "id": "ec503642-d273-4742-bf35-e8b3d509e7e5",
+            "name": "Ổn áp / UPS / Bộ lưu điện",
+            "slug": "on-ap-ups-bo-luu-dien",
+            "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3"
+          },
+          {
+            "id": "aa15b0ce-a9e6-4faf-9c87-1d5102d339f5",
+            "name": "Tiếp địa / Chống sét",
+            "slug": "tiep-dia-chong-set",
+            "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3"
+          },
+          {
+            "id": "8e1b308f-a8cd-4de8-9a30-6db52cfdb32c",
+            "name": "Đèn sự cố / Đèn thoát hiểm",
+            "slug": "den-su-co-den-thoat-hiem",
+            "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3"
+          },
+          {
+            "id": "2fe406ed-6aae-4f00-b90f-b262e69645e5",
+            "name": "Điện cửa cuốn / Cổng tự động",
+            "slug": "dien-cua-cuon-cong-tu-dong",
+            "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3"
+          },
+          {
+            "id": "bc70283c-4093-4574-aa3f-f5ef1fcdb353",
+            "name": "Máy bơm nước – Phần điện",
+            "slug": "may-bom-nuoc-phan-dien",
+            "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3"
+          },
+          {
+            "id": "9e70ad4f-39e3-44f9-90d6-cb70c8ce9fbe",
+            "name": "Nguồn cấp cho thiết bị cố định",
+            "slug": "nguon-cap-cho-thiet-bi-co-dinh",
+            "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3"
+          },
+          {
+            "id": "72afafec-8d91-4ed9-b153-238d314ddfdf",
+            "name": "Điện mặt trời / Inverter",
+            "slug": "dien-mat-troi-inverter",
+            "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3"
+          },
+          {
+            "id": "34f7d2f7-e63f-4081-b968-2b8275cab527",
+            "name": "Bộ sạc xe điện / Ổ cắm sạc",
+            "slug": "bo-sac-xe-dien-o-cam-sac",
+            "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3"
+          },
+          {
+            "id": "53a59ef2-9ffe-4206-940f-bc364951b917",
+            "name": "Kiểm tra / Khảo sát sự cố điện",
+            "slug": "kiem-tra-khao-sat-su-co-dien",
+            "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3"
+          },
+          {
+            "id": "93797cd8-e539-456e-a38f-f76316e84107",
+            "name": "Thiết bị đo điện / Công tơ điện",
+            "slug": "thiet-bi-do-dien-cong-to-dien",
+            "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3"
+          }
+        ],
+        "availableServices": [
+          {
+            "id": "222dcb57-598c-49d5-b25d-49c3accd6bbe",
+            "name": "Di dời ổ cắm",
+            "basePrice": 100000,
+            "targetId": "ca1e389e-6302-4a19-a086-5c815a836473",
+            "unit": "điểm"
+          },
+          {
+            "id": "d0ddcbd3-5c6e-4a2b-a3bf-ea42821acf6c",
+            "name": "Kiểm tra ổ cắm phát nóng hoặc có mùi khét",
+            "basePrice": 100000,
+            "targetId": "ca1e389e-6302-4a19-a086-5c815a836473",
+            "unit": "điểm"
+          },
+          {
+            "id": "8476aab0-c6df-474f-9b85-2a92fbd83ca6",
+            "name": "Lắp đặt ổ cắm mới",
+            "basePrice": 100000,
+            "targetId": "ca1e389e-6302-4a19-a086-5c815a836473",
+            "unit": "điểm"
+          },
+          {
+            "id": "c0a035df-1c69-46c0-85a7-3268df1887e6",
+            "name": "Lắp ổ cắm USB / USB-C",
+            "basePrice": 100000,
+            "targetId": "ca1e389e-6302-4a19-a086-5c815a836473",
+            "unit": "điểm"
+          },
+          {
+            "id": "d4d49da5-26d1-4d18-9a85-0e7a8570f87b",
+            "name": "Lắp ổ cắm chống nước",
+            "basePrice": 100000,
+            "targetId": "ca1e389e-6302-4a19-a086-5c815a836473",
+            "unit": "điểm"
+          },
+          {
+            "id": "20399951-fdf7-477b-ad0d-b03945e42e21",
+            "name": "Sửa ổ cắm chập chờn",
+            "basePrice": 100000,
+            "targetId": "ca1e389e-6302-4a19-a086-5c815a836473",
+            "unit": "điểm"
+          },
+          {
+            "id": "660c93a4-0bc0-4b90-8175-6b6b331de93c",
+            "name": "Sửa ổ cắm không có điện",
+            "basePrice": 100000,
+            "targetId": "ca1e389e-6302-4a19-a086-5c815a836473",
+            "unit": "điểm"
+          },
+          {
+            "id": "02695ade-1d71-4518-a4a3-4112f0f99055",
+            "name": "Sửa ổ cắm lỏng / tiếp xúc kém",
+            "basePrice": 100000,
+            "targetId": "ca1e389e-6302-4a19-a086-5c815a836473",
+            "unit": "điểm"
+          },
+          {
+            "id": "51bc6727-635d-4e9e-a979-090a972ea48a",
+            "name": "Thay ổ cắm cháy / hỏng",
+            "basePrice": 100000,
+            "targetId": "ca1e389e-6302-4a19-a086-5c815a836473",
+            "unit": "điểm"
+          },
+          {
+            "id": "d1eddfb8-da4c-42d7-b37e-37452af4d8ef",
+            "name": "Thay ổ cắm nổi",
+            "basePrice": 100000,
+            "targetId": "ca1e389e-6302-4a19-a086-5c815a836473",
+            "unit": "điểm"
+          },
+          {
+            "id": "ef6468e6-5b5d-4ed8-a7d5-eef4eefac7c8",
+            "name": "Thay ổ cắm âm tường",
+            "basePrice": 100000,
+            "targetId": "ca1e389e-6302-4a19-a086-5c815a836473",
+            "unit": "điểm"
+          }
+        ],
+        "issueDescription": "",
+        "reason": "customer_selected",
+        "notes": "Vui lòng chọn danh mục và dịch vụ phù hợp.",
+        "message": "Dịch vụ theo thông tin bạn xác nhận. Giá tham khảo; thợ kiểm tra và báo giá thực tế.",
+        "symptomCatalogEnabled": false,
+        "selectedSymptomIds": []
+      },
+      "groundTruth": null,
+      "correctness": null,
+      "scope": "live read-only resolver; no order or upload/storage mutation",
+      "normalizedPrediction": {
+        "object": "ca1e389e-6302-4a19-a086-5c815a836473",
+        "category": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+        "defect": null,
+        "service": "02695ade-1d71-4518-a4a3-4112f0f99055",
+        "confidence": null,
+        "boxes": [],
+        "source": "manual",
+        "correctness": null,
+        "qualityMetricStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT"
+      }
+    },
+    {
+      "caseId": "BACKEND-4",
+      "group": "wrong_target_service",
+      "imagePath": null,
+      "endpoint": "/api/orders/diagnose",
+      "httpStatus": 400,
+      "elapsedHttpMs": 10.884,
+      "answers": {
+        "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+        "targetId": "ca1e389e-6302-4a19-a086-5c815a836473",
+        "serviceId": "00266281-fe1f-4ba4-8343-7432e856db80"
+      },
+      "result": {
+        "message": "Dịch vụ không thuộc danh mục hoặc đã ngừng hoạt động",
+        "error": "Bad Request",
+        "statusCode": 400
+      },
+      "groundTruth": null,
+      "correctness": null,
+      "scope": "live read-only resolver; no order or upload/storage mutation",
+      "normalizedPrediction": {
+        "object": null,
+        "category": null,
+        "defect": null,
+        "service": null,
+        "confidence": null,
+        "boxes": [],
+        "source": null,
+        "correctness": null,
+        "qualityMetricStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT"
+      }
+    },
+    {
+      "caseId": "SOURCE-1",
+      "imagePath": "/home/vanvi/Work/datasetai/01-raw/dienlanh/test/images/-500x400_png.rf.a8a3c97c658367c7c9daa4a6309d6626.jpg",
+      "modelPath": "/home/vanvi/Work/datasetai/03-experiments/ai01-task04a-strict-v2/training/weights/best.pt",
+      "group": "source_member_smoke_NOT_INDEPENDENT",
+      "sourceTargetCandidate": "may-lanh-dieu-hoa",
+      "sourceDevelopmentSplit": "train",
+      "groundTruth": null,
+      "groundTruthStatus": "SOURCE_UNVERIFIED_AND_MODEL_EXPOSED_NOT_INDEPENDENT",
+      "correctness": null,
+      "elapsedMs": 754.099,
+      "boxes": [
+        {
+          "label": "may-lanh-dieu-hoa",
+          "confidence": 0.4242312014102936,
+          "xyxyNormalized": [
+            0.009360742755234241,
+            0.12379058450460434,
+            0.3515393137931824,
+            0.43741124868392944
+          ]
+        },
+        {
+          "label": "may-lanh-dieu-hoa",
+          "confidence": 0.29938268661499023,
+          "xyxyNormalized": [
+            0.02667865715920925,
+            0.5672891736030579,
+            0.34723687171936035,
+            0.840308666229248
+          ]
+        }
+      ],
+      "predictedDefect": null,
+      "predictedService": null,
+      "normalizedPrediction": {
+        "object": [
+          "may-lanh-dieu-hoa",
+          "may-lanh-dieu-hoa"
+        ],
+        "category": null,
+        "defect": null,
+        "service": null,
+        "confidence": null,
+        "boxes": [
+          {
+            "label": "may-lanh-dieu-hoa",
+            "confidence": 0.4242312014102936,
+            "xyxyNormalized": [
+              0.009360742755234241,
+              0.12379058450460434,
+              0.3515393137931824,
+              0.43741124868392944
+            ]
+          },
+          {
+            "label": "may-lanh-dieu-hoa",
+            "confidence": 0.29938268661499023,
+            "xyxyNormalized": [
+              0.02667865715920925,
+              0.5672891736030579,
+              0.34723687171936035,
+              0.840308666229248
+            ]
+          }
+        ],
+        "source": "offline_object_detector",
+        "correctness": null,
+        "qualityMetricStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT"
+      }
+    },
+    {
+      "caseId": "SOURCE-2",
+      "imagePath": "/home/vanvi/Work/datasetai/01-raw/suadien/test/images/1597ntltrla-wall_jpg.rf.c0fc66464263260d32df63d1d1370e9d.jpg",
+      "modelPath": "/home/vanvi/Work/datasetai/03-experiments/ai01-task04a-strict-v2/training/weights/best.pt",
+      "group": "source_member_smoke_NOT_INDEPENDENT",
+      "sourceTargetCandidate": "o-cam-dien",
+      "sourceDevelopmentSplit": "val",
+      "groundTruth": null,
+      "groundTruthStatus": "SOURCE_UNVERIFIED_AND_MODEL_EXPOSED_NOT_INDEPENDENT",
+      "correctness": null,
+      "elapsedMs": 25.373,
+      "boxes": [
+        {
+          "label": "o-cam-dien",
+          "confidence": 0.6572502255439758,
+          "xyxyNormalized": [
+            0.40817132592201233,
+            0.2928599715232849,
+            0.6594027876853943,
+            0.6915491819381714
+          ]
+        }
+      ],
+      "predictedDefect": null,
+      "predictedService": null,
+      "normalizedPrediction": {
+        "object": [
+          "o-cam-dien"
+        ],
+        "category": null,
+        "defect": null,
+        "service": null,
+        "confidence": null,
+        "boxes": [
+          {
+            "label": "o-cam-dien",
+            "confidence": 0.6572502255439758,
+            "xyxyNormalized": [
+              0.40817132592201233,
+              0.2928599715232849,
+              0.6594027876853943,
+              0.6915491819381714
+            ]
+          }
+        ],
+        "source": "offline_object_detector",
+        "correctness": null,
+        "qualityMetricStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT"
+      }
+    },
+    {
+      "caseId": "SOURCE-3",
+      "imagePath": "/home/vanvi/Work/datasetai/01-raw/suanuoc/test/images/clogged_sink13_jpg.rf.69f513439533cea1a574fb7f63cba18c.jpg",
+      "modelPath": "/home/vanvi/Work/datasetai/03-experiments/ai01-task04a-strict-v2/training/weights/best.pt",
+      "group": "source_member_smoke_NOT_INDEPENDENT",
+      "sourceTargetCandidate": "voi-nuoc-voi-sen",
+      "sourceDevelopmentSplit": "train",
+      "groundTruth": null,
+      "groundTruthStatus": "SOURCE_UNVERIFIED_AND_MODEL_EXPOSED_NOT_INDEPENDENT",
+      "correctness": null,
+      "elapsedMs": 26.567,
+      "boxes": [
+        {
+          "label": "may-lanh-dieu-hoa",
+          "confidence": 0.2715374827384949,
+          "xyxyNormalized": [
+            0.006092548370361328,
+            0.040874578058719635,
+            0.9690187573432922,
+            1.0
+          ]
+        }
+      ],
+      "predictedDefect": null,
+      "predictedService": null,
+      "normalizedPrediction": {
+        "object": [
+          "may-lanh-dieu-hoa"
+        ],
+        "category": null,
+        "defect": null,
+        "service": null,
+        "confidence": null,
+        "boxes": [
+          {
+            "label": "may-lanh-dieu-hoa",
+            "confidence": 0.2715374827384949,
+            "xyxyNormalized": [
+              0.006092548370361328,
+              0.040874578058719635,
+              0.9690187573432922,
+              1.0
+            ]
+          }
+        ],
+        "source": "offline_object_detector",
+        "correctness": null,
+        "qualityMetricStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT"
+      }
+    },
+    {
+      "caseId": "SOURCE-4",
+      "imagePath": "/home/vanvi/Work/datasetai/01-raw/thietbigiadinh/test/images/refrigerator-png101_jpg.rf.86fff4645d3739d62bafe9ab490daaa4.jpg",
+      "modelPath": "/home/vanvi/Work/datasetai/03-experiments/ai01-task04a-strict-v2/training/weights/best.pt",
+      "group": "source_member_smoke_NOT_INDEPENDENT",
+      "sourceTargetCandidate": "tu-lanh-tu-lanh-side-by-side",
+      "sourceDevelopmentSplit": "val",
+      "groundTruth": null,
+      "groundTruthStatus": "SOURCE_UNVERIFIED_AND_MODEL_EXPOSED_NOT_INDEPENDENT",
+      "correctness": null,
+      "elapsedMs": 21.216,
+      "boxes": [
+        {
+          "label": "tu-lanh-tu-lanh-side-by-side",
+          "confidence": 0.7270381450653076,
+          "xyxyNormalized": [
+            0.22206230461597443,
+            0.012895965948700905,
+            0.7679721713066101,
+            0.9970054626464844
+          ]
+        }
+      ],
+      "predictedDefect": null,
+      "predictedService": null,
+      "normalizedPrediction": {
+        "object": [
+          "tu-lanh-tu-lanh-side-by-side"
+        ],
+        "category": null,
+        "defect": null,
+        "service": null,
+        "confidence": null,
+        "boxes": [
+          {
+            "label": "tu-lanh-tu-lanh-side-by-side",
+            "confidence": 0.7270381450653076,
+            "xyxyNormalized": [
+              0.22206230461597443,
+              0.012895965948700905,
+              0.7679721713066101,
+              0.9970054626464844
+            ]
+          }
+        ],
+        "source": "offline_object_detector",
+        "correctness": null,
+        "qualityMetricStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT"
+      }
+    },
+    {
+      "caseId": "SOURCE-5",
+      "imagePath": "/home/vanvi/Work/datasetai/01-raw/thietbigiadinh/test/images/washing-machine-png107_jpg.rf.cbcdb8ec35334598bf9966b5140e910e.jpg",
+      "modelPath": "/home/vanvi/Work/datasetai/03-experiments/ai01-task04a-strict-v2/training/weights/best.pt",
+      "group": "source_member_smoke_NOT_INDEPENDENT",
+      "sourceTargetCandidate": "may-giat-may-giat-say",
+      "sourceDevelopmentSplit": "train",
+      "groundTruth": null,
+      "groundTruthStatus": "SOURCE_UNVERIFIED_AND_MODEL_EXPOSED_NOT_INDEPENDENT",
+      "correctness": null,
+      "elapsedMs": 20.761,
+      "boxes": [
+        {
+          "label": "may-lanh-dieu-hoa",
+          "confidence": 0.5314405560493469,
+          "xyxyNormalized": [
+            0.09630374610424042,
+            0.006385707762092352,
+            0.9022451639175415,
+            0.9043610692024231
+          ]
+        },
+        {
+          "label": "may-giat-may-giat-say",
+          "confidence": 0.35109150409698486,
+          "xyxyNormalized": [
+            0.07625789940357208,
+            0.0006450653309002519,
+            0.9537893533706665,
+            0.9423755407333374
+          ]
+        },
+        {
+          "label": "may-lanh-dieu-hoa",
+          "confidence": 0.28566914796829224,
+          "xyxyNormalized": [
+            0.013678359799087048,
+            0.17228946089744568,
+            0.9375072717666626,
+            0.9923776388168335
+          ]
+        }
+      ],
+      "predictedDefect": null,
+      "predictedService": null,
+      "normalizedPrediction": {
+        "object": [
+          "may-lanh-dieu-hoa",
+          "may-giat-may-giat-say",
+          "may-lanh-dieu-hoa"
+        ],
+        "category": null,
+        "defect": null,
+        "service": null,
+        "confidence": null,
+        "boxes": [
+          {
+            "label": "may-lanh-dieu-hoa",
+            "confidence": 0.5314405560493469,
+            "xyxyNormalized": [
+              0.09630374610424042,
+              0.006385707762092352,
+              0.9022451639175415,
+              0.9043610692024231
+            ]
+          },
+          {
+            "label": "may-giat-may-giat-say",
+            "confidence": 0.35109150409698486,
+            "xyxyNormalized": [
+              0.07625789940357208,
+              0.0006450653309002519,
+              0.9537893533706665,
+              0.9423755407333374
+            ]
+          },
+          {
+            "label": "may-lanh-dieu-hoa",
+            "confidence": 0.28566914796829224,
+            "xyxyNormalized": [
+              0.013678359799087048,
+              0.17228946089744568,
+              0.9375072717666626,
+              0.9923776388168335
+            ]
+          }
+        ],
+        "source": "offline_object_detector",
+        "correctness": null,
+        "qualityMetricStatus": "NOT_VERIFIED_NO_INDEPENDENT_GT"
+      }
+    }
+  ],
+  "normalizationNote": "Missing defect/category/service outputs remain null; manual service selections are tagged source manual and are not model service predictions. Empty emitted boxes do not establish a reviewed negative image."
+}
