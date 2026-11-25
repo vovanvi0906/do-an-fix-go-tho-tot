@@ -9,6 +9,15 @@ export const ai01ReviewService = {
     Object.entries(metadata).forEach(([key,value])=>form.append(key,String(value)));
     return apiClient.post(`${ROOT}/dataset/images`,form,{headers:{'Content-Type':'multipart/form-data'},timeout:90000,onUploadProgress:e=>onProgress?.(e.total?Math.min(95,Math.round(e.loaded/e.total*95)):0)}).then(data);
   },
+  datasetLimits: () => apiClient.get(`${ROOT}/dataset/limits`).then(data),
+  previewDataset: (files,options,onProgress) => {
+    const form=new FormData();files.forEach(file=>form.append('files',file));
+    Object.entries(options).forEach(([key,value])=>form.append(key,typeof value==='object'?JSON.stringify(value):String(value)));
+    return apiClient.post(`${ROOT}/dataset/preview`,form,{headers:{'Content-Type':'multipart/form-data'},timeout:210000,onUploadProgress:e=>onProgress?.(e.total?Math.round(e.loaded/e.total*100):0)}).then(data);
+  },
+  datasetStatus: id => apiClient.get(`${ROOT}/dataset/batches/${id}`,{timeout:210000}).then(data),
+  validateDataset: (id,options) => apiClient.post(`${ROOT}/dataset/batches/${id}/validate`,options,{timeout:210000}).then(data),
+  commitDatasetItem: (id,item) => apiClient.post(`${ROOT}/dataset/batches/${id}/items/${item}`,{}, {timeout:210000}).then(data),
   access: () => apiClient.get(`${ROOT}/access`).then(data),
   read: (operation, params = {}) => apiClient.get(`${ROOT}/data/${operation}`, { params, timeout: 45000 }).then(data),
   save: (operation, payload) => apiClient.post(`${ROOT}/actions/${operation}`, { payload }, { timeout: 45000 }).then(data),

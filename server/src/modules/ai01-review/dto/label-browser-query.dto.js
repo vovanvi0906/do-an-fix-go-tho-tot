@@ -20,6 +20,8 @@ export class LabelBrowserQueryDto {
   @ApiPropertyOptional() @IsOptional() @IsString() @MaxLength(160)
   sourceLabel;
   @ApiPropertyOptional() @IsOptional() @IsString() @MaxLength(160)
+  sourceType;
+  @ApiPropertyOptional() @IsOptional() @IsString() @MaxLength(160)
   sign;
   @ApiPropertyOptional() @IsOptional() @IsString() @MaxLength(160)
   labelType;

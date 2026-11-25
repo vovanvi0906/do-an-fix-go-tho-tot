@@ -1,0 +1,168 @@
+CHUẨN HIỆN HÀNH (25/11/2026): xem FIXGO-DATASET-PACKAGE-SPEC.md.
+Gói ChatGPT mới dùng fixgo.dataset.v1 và metadata.csv duy nhất. Các ví dụ CSV/JSONL/YAML bên dưới là tài liệu luồng legacy, không phải chuẩn đóng gói v1.
+
+FIXGO AI-01 — THÊM DATASET TRONG ADMIN WEB
+
+CÁCH NHẬP ZIP 20 ẢNH — GIAO DIỆN TỐI GIẢN
+1. Quản lý AI → Dữ liệu → Thêm dataset.
+2. Chọn ZIP hoặc kéo thả nhiều ảnh. Tên dataset được lấy từ tên ZIP và có thể sửa.
+3. Chọn danh mục Sửa điện; đối tượng Ổ cắm điện là không bắt buộc nếu bộ ảnh có nhiều đối tượng.
+4. Nhấn Kiểm tra dữ liệu. CSV/JSONL/YAML được đọc trên server; không phải nhập tay thông tin nguồn nếu metadata đã đầy đủ.
+5. Nếu thiếu nguồn/quyền/nhóm cảnh, giao diện cảnh báo ngắn và chặn ảnh đó. Nhấn Bổ sung thông tin để mở Thông tin nâng cao, điền thông tin có thật rồi Kiểm tra lại.
+6. Xem bảng ảnh/nhãn. Đối chiếu nhãn được thu gọn nếu mapping đã đầy đủ, tự mở nếu còn class chưa mapping.
+7. Xác nhận nhập → theo dõi kết quả → Bắt đầu gán nhãn. Nhãn nguồn không được tự duyệt.
+
+Form chính chỉ có: chọn file, tên dataset, danh mục và đối tượng tùy chọn.
+Thông tin nâng cao chứa nguồn, quyền, nhóm cảnh và thông tin tạo ảnh; mặc định đóng. Không có form riêng cho ảnh AI hoặc checkbox tự xác nhận quyền ở form chính.
+Cờ developmentOnly=true chỉ xác định mục đích của endpoint nhập phát triển, không phải bằng chứng quyền sử dụng hoặc xác nhận nhãn.
+Ảnh không metadata vẫn xem trước được, nhưng phải bổ sung nguồn/quyền/nhóm cảnh có thật trước khi nhập.
+Không sinh bằng chứng quyền, không tự đặt group độc lập, không suy ảnh AI/thật từ tên hoặc nội dung ảnh.
+
+CẤU TRÚC ZIP GỢI Ý
+fixgo_suadien_outlet_burnmark_20.zip
+  images/socket-01.png
+  images/socket-02.png
+  ...
+  labels/socket-01.txt
+  labels/socket-02.txt
+  ...
+  data.yaml
+  metadata.csv và/hoặc metadata.jsonl
+
+Có thể có một thư mục gốc bao ngoài. Cũng hỗ trợ layout images/train/... và labels/train/... khi tên ảnh khớp duy nhất.
+Không dùng đường dẫn trong YAML để đọc filesystem hoặc tải URL bên ngoài. Không tự gán dấu hiệu/bbox theo tên ảnh.
+ZIP không metadata/nhãn vẫn nhập được với thông tin form; ảnh chưa có nhãn, không tự thành ảnh âm/bình thường.
+Thiếu YAML nhưng có TXT: UI liệt kê Class 0, Class 1... để Admin chọn mapping trước khi nhập.
+Chỉ hỗ trợ YOLO detection TXT 5 trường, không nhận polygon/segmentation như bbox hợp lệ.
+
+VÍ DỤ data.yaml
+nc: 2
+names:
+  0: o-cam-dien
+  1: burn_mark
+
+VÍ DỤ labels/socket-01.txt
+0 0.50 0.50 0.80 0.80
+1 0.50 0.40 0.20 0.20
+
+Các tọa độ trên CHỈ minh họa cú pháp. Phải đo đúng từng ảnh, không sao chép cùng box cho cả 20 ảnh.
+Box đối tượng bao phần ổ cắm nhìn thấy; box cháy khoanh sát vùng cháy, không bao toàn cụm.
+
+VÍ DỤ metadata.csv (UTF-8)
+filename,source_type,generator_tool,generated_at,prompt,group_key,target_slug,sign_label
+socket-01.png,synthetic_ai,ChatGPT Images,2026-11-24,"Ổ cắm có vùng cháy/xém rõ",scene-01,o-cam-dien,burn_mark
+socket-02.png,synthetic_ai,ChatGPT Images,2026-11-24,"Ổ cắm có vùng cháy/xém ở góc khác",scene-01,o-cam-dien,burn_mark
+
+Nếu các ảnh là biến thể cùng cảnh/thiết bị thì dùng cùng group_key. Chỉ dùng nhóm khác khi thực sự khác cảnh, không chia giả để vượt gate.
+Metadata JSONL tương đương: một JSON object mỗi dòng, dùng các key như CSV.
+filename cũng chấp nhận image/file_name/image_path. Có thể ghi đường dẫn tương đối trong ZIP hoặc basename khớp duy nhất.
+Có thể thêm source_reference, rights_type (owned/licensed/permission), rights_evidence.
+Đối tượng từ target_id/target_slug/object_label chỉ được đối chiếu với taxonomy thực tế, không tự tạo taxonomy.
+Thông tin condition/sign_label trong metadata được giữ để đối chiếu, không tạo bbox từ mô tả.
+Danh mục ở form áp dụng toàn lô; đối tượng form là gợi ý, class YOLO đối chiếu riêng nên hỗ trợ nhiều đối tượng/dấu hiệu.
+Metadata khai synthetic_ai luôn giữ nguồn đó dù form chọn own_photo. Nếu form chọn synthetic_ai thì toàn lô được gắn synthetic_ai.
+Không xác minh nguồn thật/AI chỉ bằng ngoại hình: Admin phải khai đúng nguồn và quyền sử dụng thực tế.
+
+GIỚI HẠN VÀ AN TOÀN
+- Mặc định: 200 ảnh/lô, tổng upload 64 MiB, mỗi ảnh tối đa 10 MiB, ZIP giải nén tối đa 256 MiB.
+- Env backend: AI01_IMPORT_MAX_IMAGES (tối đa 500), AI01_IMPORT_MAX_UPLOAD_MB (tối đa 256), AI01_IMPORT_MAX_EXPANDED_MB (tối đa 1024), AI01_IMPORT_MAX_IMAGE_MB (tối đa 10).
+- Giới hạn thêm: 2.000 ZIP entries, tỷ lệ giải nén tối đa 100:1, metadata 2 MiB, YAML 1 MiB, TXT 100.000 byte, 100 box/ảnh, 200 lớp.
+- JPG/PNG/WebP tĩnh, thực kiểm decoder/MIME theo nội dung, từ 32px, tối đa 8192px/cạnh và 25 MP. Bản chuẩn hóa tối đa 20 MiB; loại EXIF riêng tư.
+- Ảnh có EXIF xoay kèm nhãn: yêu cầu chuẩn hóa ảnh/nhãn đồng bộ trước để tránh lệch bbox; không tự xoay nhãn đoán.
+- Multipart ghi stream có chặn tổng byte, không giữ cả ZIP trong RAM. Trình duyệt không tự giải ZIP hoặc giải mã toàn bộ ảnh.
+- Chặn traversal, đường dẫn tuyệt đối/Windows, symlink, ZIP mã hóa, ZIP lồng, file không hỗ trợ, đường dẫn trùng/case collision, ZIP bomb và YAML alias/anchor.
+- Kiểm SHA/pixel chống trùng, kiểm cả tập tham chiếu được bảo vệ; near duplicate tiếp tục giữ gate hiện có.
+- Không extractall, không ghi đè raw. Lưu ảnh/nhãn nguồn vào uploaded-dataset-v1; lưu staging trong reviews/dataset-import-v1/<batchId>.
+- Staging thành công được giữ để khôi phục; chưa có tự dọn theo TTL. Admin vận hành cần theo dõi dung lượng. Giữ ít nhất 2 GiB đĩa trống.
+- Lô staging chỉ Admin tạo được xem/nhập. Không đổi nguồn/mapping sau khi đã bắt đầu nhập; file lỗi cần sửa và chọn lô mới.
+- Nhập tuần tự từng ảnh, import UUID ổn định; retry không tạo bản sao khi response bị mất hoặc engine khởi động lại. Kết quả theo từng ảnh được ghi bền vững.
+- Nguồn ảnh gồm roboflow/own_photo/licensed/permission/synthetic_ai. Lưu generatorTool/generatedAt/prompt/sourceMetadata, class mapping/sourceReferences và YAML trong provenance import có hash chain.
+- synthetic_ai: synthetic=true, chỉ train phát triển, benchmarkEligible=false, independentlyReviewed=false, approvedGroundTruth=false. Nếu nhóm nguồn đã ở val thì không chuyển split âm thầm; báo lỗi cần đối chiếu.
+- Export SOLO giữ nguồn AI và provenance. Không tự bật train, không bỏ checksum/audit/quyền ảnh/quarantine/export gate hoặc bảo vệ Ground Truth.
+- Endpoint cũ /dataset/images vẫn hoạt động tương thích; không đổi DB/schema hoặc dữ liệu đã có.
+- Sau khi backend tải code mới: nếu Python review engine cũ vẫn đang chạy, cần khởi động lại backend trước khi dùng route mới.
+
+API MỚI (JWT + ACTIVE ADMIN)
+GET  /api/admin/ai01/dataset/limits
+POST /api/admin/ai01/dataset/preview             multipart files[] + DatasetOptionsDto
+GET  /api/admin/ai01/dataset/batches/:batchId
+POST /api/admin/ai01/dataset/batches/:batchId/validate
+POST /api/admin/ai01/dataset/batches/:batchId/items/:itemId
+
+BỘ LỌC
+Dữ liệu: danh mục, đối tượng, trạng thái, tìm kiếm, loại nguồn, tên lô dataset đã nhập.
+Gán nhãn: thêm loại nguồn thực có vào bộ lọc nâng cao; nhãn nguồn vẫn riêng với bản sửa Admin.
+Chỉ tải thumbnail của trang hiện tại; bảng xem trước phân trang 20 dòng.
+
+FILE THAY ĐỔI TRONG LƯỢT NÀY
+client/src/pages/ai01-review/components/DataTab.jsx
+client/src/pages/ai01-review/components/DatasetImportModal.jsx (mới)
+client/src/pages/ai01-review/components/DatasetImportModal.test.jsx (mới)
+client/src/pages/ai01-review/components/BBoxQualityEditor.jsx
+client/src/pages/ai01-review/components/ImageReview.jsx
+client/src/pages/ai01-review/components/LabelTab.jsx
+client/src/services/ai01ReviewService.js
+client/vitest.config.js
+server/src/modules/ai01-review/dataset-upload.js (mới)
+server/src/modules/ai01-review/dto/dataset-options.dto.js (mới)
+server/src/modules/ai01-review/dto/label-browser-query.dto.js
+server/src/modules/ai01-review/ai01-review.controller.js
+server/src/modules/ai01-review/ai01-review.service.js
+server/src/modules/ai01-review/review-engine.js (timeout đủ cho kiểm ZIP trong engine tuần tự)
+server/scripts/ai01/dataset_import.py (mới)
+server/scripts/ai01/uploaded_dataset.py
+server/scripts/ai01/fast_review.py
+server/scripts/ai01/label_browser.py
+server/scripts/ai01/quality_review.py
+server/test/ai01-dataset.e2e-spec.js (mới)
+server/test/check-ai01-dataset-ui.cjs (mới)
+Báo cáo này.
+Các file customer-app và báo cáo thiếu dữ liệu đang có từ lượt trước được giữ nguyên.
+
+KIỂM THỬ / BUILD
+- Frontend: 43 tests / 10 files đạt (4 test modal mới: preview trước confirm, class mapping, retry bỏ qua ảnh đã nhập, khôi phục lô + chặn quá dung lượng).
+- Backend: 53 tests / 5 suites đạt: 16 test dataset mới + 37 regression import ảnh/label/quality/browser.
+- Browser Chromium: ZIP 20 ảnh, mapping thủ công OUTLET, nhập, nguồn synthetic_ai, đóng/mở lại modal, mở bbox editor, lấy cả box vật thể/dấu hiệu làm nháp rồi lưu, không auto approve, mobile 390px dark mode, không tràn ngang/JS error.
+- Bằng chứng browser tạm: /tmp/fixgo-ai01-dataset-ui/results.json và ảnh chụp 01-preview.png, 02-mobile-dark-preview.png, 03-import-results.png, 04-label-editor.png.
+- Client npm run build đạt; cảnh báo bundle >500 kB còn tồn tại. Server npm run build đạt (192 files).
+- Python syntax check và git diff --check đạt. Client JS không có script typecheck riêng.
+- Tất cả import/label test sử dụng state tạm và fixture sinh tự động; không thêm ảnh thử vào dataset người dùng.
+- Không train/deploy, không sửa dataset gốc/nhãn cũ/model/DB/schema, không commit/push.
+
+BỔ SUNG KIỂM TRA KHỞI ĐỘNG SWAGGER
+- Sửa DatasetOptionsDto khai báo rõ kiểu String/Boolean/object cho Swagger trong dự án JavaScript/Babel.
+- Trước sửa, thiếu metadata kiểu categoryId khiến Swagger.createDocument báo circular dependency và backend dừng trước app.listen.
+- Thêm server/test/ai01-swagger.e2e-spec.js dùng createDocument trên controller thật trong harness cách ly.
+- Swagger bootstrap + dataset API: 17 tests / 2 suites đạt; backend build đạt. Không thay validation, dữ liệu hoặc model.
+
+BỔ SUNG TRẢI NGHIỆM KÉO THẢ ZIP
+- Vùng thả riêng có aria-label “Vùng thả dataset”, đổi viền/nền khi kéo file vào; nút “Chọn file ZIP / ảnh” riêng biệt.
+- Thả file ở phần khác trong modal cũng được tiếp nhận; không để trình duyệt mở ZIP thay cho trang Admin.
+- Sau khi nhận hiển thị banner tên/dung lượng file và “Đã nhận … file — chưa tải lên server”; điền tên dataset từ tên ZIP (không suy nhãn từ tên).
+- Chỉ tải lên sau khi khai báo nguồn/quyền và nhấn Kiểm tra dữ liệu; không tự xác nhận nhập.
+- Có thông báo cho thao tác thả không chứa file, loại file không hỗ trợ, quá giới hạn hoặc đang xử lý.
+- Frontend 45 tests đạt; build đạt. Browser Chromium đã dùng DataTransfer drag/drop ZIP 20 ảnh, nhập/gán nhãn/khôi phục và mobile dark mode đạt.
+
+BỔ SUNG KIỂM CHỨNG GIAO DIỆN TỐI GIẢN
+- Chỉ thay modal import và component/test liên quan. Điều chỉnh tối thiểu DatasetOptionsDto và dataset_import.py để cho preview với thông tin nguồn trống, đọc metadata trước và giữ lỗi thiếu thông tin ở từng ảnh.
+- API/đường dẫn/kiến trúc lưu và export gate giữ nguyên; DTO tương thích payload trước. Giá trị trống chỉ phục vụ staging, không được import vào kho ảnh thật khi provenance chưa đủ.
+- Đọc YAML metadata/source_type/roboflow. URL Roboflow đã khai có thể dùng làm nguồn; license khai trong YAML không được biến thành bằng chứng quyền hoặc nhóm cảnh.
+- Frontend: 47 tests đạt; backend import + dataset + Swagger: 33 tests đạt. Client/server build đạt; Vite còn cảnh báo bundle >500 kB.
+- Browser: kéo thả ZIP 20 ảnh với metadata đầy đủ, chỉ chọn danh mục/đối tượng, advanced luôn đóng; kiểm mapping, nhập và lưu nhãn nháp; mobile dark mode không tràn ngang, không lỗi JS.
+- Kiểm thử thêm CSV/JSONL/YAML đủ thông tin, ZIP không metadata rồi bổ sung advanced, metadata thiếu quyền, YAML Roboflow không tạo bằng chứng giả.
+- File liên quan trong lượt tối giản: DatasetImportModal.jsx, DatasetImportModal.test.jsx; server/src/modules/ai01-review/dto/dataset-options.dto.js; server/scripts/ai01/dataset_import.py; server/test/ai01-dataset.e2e-spec.js; server/test/check-ai01-dataset-ui.cjs; báo cáo này.
+- Không sửa dữ liệu cũ/DB/model/pipeline train; không train/deploy, không commit/push.
+
+BỔ SUNG ĐỐI CHIẾU CSV + JSONL
+- ZIP có cả metadata.csv và metadata.jsonl được đối chiếu theo đường dẫn ảnh đã resolve, không theo thứ tự dòng. Tương đương thì tự dùng CSV duy nhất; không nhân đôi ảnh.
+- Chuẩn hóa alias image/image_file/file_name/image_path → filename; source/sourceType → source_type; source_group/groupKey → group_key; sign_label_candidate → sign_label và các alias nguồn/quyền/công cụ. Bảo toàn dữ liệu khai báo, không suy nhãn/bbox từ tên ảnh.
+- So sánh cả nhãn và thông tin nguồn/quyền/nhóm cùng các trường khác; bỏ khác biệt rỗng/null và kiểu biểu diễn đơn giản CSV/JSONL. Không mặc định hai file tương đương chỉ vì có cùng số dòng.
+- Có khác biệt: hiển thị số ảnh, trường khác và ví dụ CSV/JSONL (tối đa 20 ảnh), cho chọn nguồn rồi Kiểm tra lại. Cả UI lẫn API commit chặn khi chưa chọn nguồn.
+- Không ghép record từ hai nguồn. File lỗi không được chọn; vẫn giữ giới hạn parse, kiểm trùng record, checksum, quyền và quarantine.
+- Khai báo test/benchmark trong bất kỳ metadata hợp lệ nào vẫn bị chặn. Khai báo synthetic_ai trong nguồn còn lại không bị hạ xuống ảnh thật khi đổi lựa chọn; có cảnh báo cần kiểm chứng.
+- Lưu tên/hash của cả hai file, kết quả đối chiếu, nguồn được chọn trong metadataProvenance của import event và provenance bản xuất.
+- Kiểm thử trực tiếp /home/vanvi/Downloads/fixgo_suadien_outlet_burnmark_20.zip trong state tạm: 20 ảnh, 20 CSV + 20 JSONL record tương đương, chọn CSV. SHA256 ZIP trước/sau không đổi: 8322a48017186679e9b91458079ce50f73901311059a7e2f987d6c6d1cab2916.
+- ZIP thật hiện chưa có YOLO/bbox và thiếu sourceReference, rightsType, rightsEvidence, generatorTool, generatedAt; vẫn cần bổ sung hợp lệ trong Thông tin nâng cao. Không bỏ gate để ép nhập thành công.
+- Kết quả: 49 test frontend; 40 test API/Swagger/import ảnh đạt; build client/backend đạt. File kiểm chứng ZIP thật: /tmp/fixgo-real-zip-metadata-result.json.
+- File liên quan lượt sửa: dataset_import.py, uploaded_dataset.py, quality_review.py, dataset-options.dto.js, DatasetImportModal.jsx và test tương ứng ai01-dataset.e2e-spec.js / DatasetImportModal.test.jsx / check-ai01-dataset-ui.cjs; báo cáo này.
+- Không sửa ZIP/dataset gốc, model hoặc pipeline train. Không commit/push.

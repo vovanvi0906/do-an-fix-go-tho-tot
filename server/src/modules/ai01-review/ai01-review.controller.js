@@ -1,9 +1,11 @@
+import { datasetStorage, datasetLimits, datasetFileFilter } from './dataset-upload';
+import { DatasetOptionsDto } from './dto/dataset-options.dto';
 import { Ai01AuthConfigurationGuard } from './ai01-auth-configuration.guard';
-import { Controller, Get, Post, Req, Res, Param, Query, Body, Bind, UseGuards, Dependencies, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Req, Res, Param, Query, Body, Bind, UseGuards, Dependencies, UseInterceptors, UploadedFile, UploadedFiles, BadRequestException } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiBody, ApiConsumes, ApiResponse } from '@nestjs/swagger';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Ai01ReviewService } from './ai01-review.service';
@@ -22,6 +24,26 @@ export class Ai01ReviewController {
   @Bind(Req(), Param('operation'), Query()) async read(req, op, query) { return { success: true, data: await this.service.read(req.user, op, query) }; }
   @Post('actions/:operation') @ApiOperation({ summary: 'Quyết định của user FixGo; gọi approval gate TASK 03C' }) @ApiBody({ type: ReviewActionDto })
   @Bind(Req(), Param('operation'), Body()) async mutate(req, op, body) { return { success: true, data: await this.service.mutate(req.user, op, body) }; }
+  @Get('dataset/limits') @UseGuards(RolesGuard) @Roles('ADMIN')
+  @ApiOperation({summary:'Giới hạn nhập dataset hiện hành'})
+  @Bind(Req()) datasetLimits(req) { this.service.principal(req.user,'fast_dataset_limits'); return {success:true,data:datasetLimits()}; }
+  @Post('dataset/preview') @UseGuards(RolesGuard) @Roles('ADMIN')
+  @ApiOperation({summary:'Kiểm tra ZIP/ảnh và metadata; chỉ staging, chưa nhập vào thư viện'})
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({schema:{type:'object',properties:{files:{type:'array',items:{type:'string',format:'binary'}},categoryId:{type:'string'},targetId:{type:'string'},sourceType:{type:'string'},sourceReference:{type:'string'},rightsType:{type:'string'},rightsEvidence:{type:'string'},groupKey:{type:'string'},generatorTool:{type:'string'},generatedAt:{type:'string'},prompt:{type:'string'},datasetName:{type:'string'},developmentOnly:{type:'boolean'},classMapping:{type:'string',description:'JSON map class ID → {kind,label}'}}}})
+  @ApiResponse({status:201,description:'Bản xem trước theo từng ảnh; chưa xác nhận nhãn'})
+  @ApiResponse({status:413,description:'Vượt giới hạn upload, ZIP hoặc số ảnh'})
+  @UseInterceptors(FilesInterceptor('files',500,{storage:datasetStorage,limits:{fileSize:datasetLimits().maxUploadBytes,files:500,fields:16,fieldSize:64000,parts:516},fileFilter:datasetFileFilter}))
+  @Bind(Req(),UploadedFiles(),Body()) async datasetPreview(req,files,body) { return {success:true,data:await this.service.previewDataset(req.user,files,body)}; }
+  @Get('dataset/batches/:batchId') @UseGuards(RolesGuard) @Roles('ADMIN')
+  @ApiOperation({summary:'Khôi phục tiến trình nhập dataset của chính Admin'})
+  @Bind(Req(),Param('batchId')) async datasetStatus(req,id) { return {success:true,data:await this.service.datasetOperation(req.user,'status',id)}; }
+  @Post('dataset/batches/:batchId/validate') @UseGuards(RolesGuard) @Roles('ADMIN')
+  @ApiOperation({summary:'Kiểm tra lại class mapping/danh mục trước khi xác nhận nhập'}) @ApiBody({type:DatasetOptionsDto})
+  @Bind(Req(),Param('batchId'),Body()) async datasetValidate(req,id,body) { return {success:true,data:await this.service.datasetOperation(req.user,'validate',id,null,body)}; }
+  @Post('dataset/batches/:batchId/items/:itemId') @UseGuards(RolesGuard) @Roles('ADMIN')
+  @ApiOperation({summary:'Nhập một ảnh đã kiểm tra; gọi tuần tự, idempotent và có thể tiếp tục sau gián đoạn'})
+  @Bind(Req(),Param('batchId'),Param('itemId')) async datasetCommit(req,id,item) { return {success:true,data:await this.service.datasetOperation(req.user,'commit',id,item)}; }
   @Post('dataset/images')
   @UseGuards(RolesGuard) @Roles('ADMIN')
   @ApiOperation({summary:'Thêm ảnh phát triển vào vùng dataset riêng; chưa xác nhận nhãn hoặc quyền xuất'})

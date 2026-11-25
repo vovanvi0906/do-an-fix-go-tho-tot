@@ -1,0 +1,46 @@
+KIỂM TRA ZIP 20 ẢNH CŨ — 25/11/2026
+
+Đã chạy validator v1 dùng chung DatasetImport.preview trên cả hai ZIP trong Downloads.
+Mỗi ZIP đọc đủ 20 ảnh. Cả hai chưa hợp lệ theo chuẩn mới; trainingEligible=false.
+Không sửa ZIP/ảnh/nhãn, không nhập vào state thực. SHA256 ZIP trước/sau giống nhau.
+Chi tiết theo từng filename và trường: previous-20-images-validation.json.
+
+Cần sửa đóng gói cho cả hai:
+- Bỏ thư mục bọc fixgo_suadien_outlet_burnmark_20/; metadata.csv và data.yaml ở gốc.
+- Bản gốc có CSV + JSONL: giữ CSV duy nhất, bỏ JSONL khỏi gói mới.
+- Thêm data.yaml có fixgo_package_version=fixgo.dataset.v1 và class names đúng spec.
+- Chuyển header sang đúng 18 cột của spec, bỏ alias/cột lặp.
+- category_id = 4d397d29-ec22-4eae-88ea-8e411e04bdb3 (Sửa điện).
+- target_id = ca1e389e-6302-4a19-a086-5c815a836473 (Ổ cắm điện).
+- object_label=o-cam-dien, sign_label=burn_mark (đề xuất, chưa xác minh).
+
+Thông tin phải bổ sung từ bằng chứng thật cho 20/20 ảnh, không tự tạo:
+- source_reference: tham chiếu lượt tạo/ảnh gốc/record thực tế.
+- rights_type: chọn loại quyền chỉ khi có căn cứ. Cả hai hiện thiếu cột chuẩn này.
+- generator_tool, generated_at: cột chuẩn. Bản import_ready có ai_tool,
+  ai_created_at và nhiều alias khác; phải đối chiếu nguồn trước khi chuyển tên.
+- prompt: cả hai không có prompt gốc; phải tìm lại, không tái dựng rồi gọi là bản gốc.
+- rights_evidence: bản gốc thiếu; bản import_ready có lời khai cần người xác minh,
+  không phải bằng chứng đã được kiểm độc lập. Giữ căn cứ thật và khai declared_unverified.
+- rights_status=declared_unverified. Bản gốc thiếu; import_ready đang requires_user_confirmation.
+
+Giữ group_key theo các nhóm nguồn đã biết (prior_gen_01...): bản import_ready nói
+10 ảnh rời và 10 crop từ hai collage. Cần người đối chiếu record nguồn xác nhận nhóm;
+không coi 20 ảnh là 20 cảnh độc lập, không tách crop cùng collage sang nhóm khác.
+
+Không có YOLO/bbox trong cả hai ZIP. Đây KHÔNG phải lý do phải bịa bbox:
+giữ bbox_status=not_annotated, review_status=unreviewed, split=unassigned;
+sau khi hoàn tất metadata hợp lệ có thể nhập vào quarantine/pending để gán nhãn.
+Không tự sửa ZIP trong lượt này, không tự tạo bằng chứng quyền, prompt hoặc bbox.
+
+Kiểm thử:
+- Backend import + Swagger: 38 test đạt (có ZIP thật read-only, v1 20 ảnh fixture,
+  no-bbox pending, proposal không auto approve, SHA/ontology/rights status lỗi,
+  hai nguồn metadata bị chặn trong v1, parity CLI/backend, auth, ZIP bomb/path,
+  duplicate, restart/resume, gate xuất bị chặn khi chưa review).
+- Modal frontend: 11 test đạt, bao gồm preview không chọn danh mục và tự điền từ metadata.
+- Build backend/client đạt. Client có cảnh báo kích thước bundle hiện hữu.
+- Preflight offline mặc định chưa đối chiếu toàn bộ inventory/reference: cờ
+  crossInventoryChecked=false. Backend khi upload luôn kiểm trực tiếp các tập đó.
+
+Không train/deploy, không commit/push, không sửa raw dataset/model hoặc ngưỡng gate.

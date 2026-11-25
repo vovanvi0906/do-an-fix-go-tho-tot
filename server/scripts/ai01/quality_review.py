@@ -144,14 +144,14 @@ class QualityReview:
   if op=='fast_quality_overview':return self.overview(uid)
   if op=='fast_quality_detail':
    r=self.row(p['imageId']);pack=self.load();e=self.latest.get(r['id'])
-   display=dict(r,sourceReferences=[dict(b,sourceLabelVi=self.parent.source_translations.get((r['dataset'],b['sourceClassId']),'Nhãn chưa rõ')) for b in r['sourceReferences']])
+   display=dict(r,sourceReferences=[dict(b,sourceLabelVi=b.get('sourceLabelVi',b['sourceLabel']) if r.get('sourceKind')=='admin_upload' else self.parent.source_translations.get((r['dataset'],b['sourceClassId']),'Nhãn chưa rõ')) for b in r['sourceReferences']])
    return {'item':display,'queue':self.queue_info(r['id'],pack),'reasonLabels':pack['reasons'],'catalog':pack['catalog'],'signs':pack['signs'],'annotation':e,'blockers':self.blockers(e,uid),'history':[x for x in self.events if x.get('imageId')==r['id']]}
   if op=='fast_quality_image':
    r=self.row(p['imageId']);f=self.image_file(r);return {'binary':base64.b64encode(f.read_bytes()).decode(),'contentType':mimetypes.guess_type(f.name)[0] or 'image/jpeg'}
   if op=='fast_quality_save':
    r=self.validate_payload(p)
    return self.append({k:v for k,v in p.items() if k!='expectedHash'}|{'kind':'bbox_revision','userId':uid,'previousAnnotationHash':p['expectedHash'],'packetHash':self.packet_hash(p['imageId']),
-    'sha256':r['sha256'],'sourceAnnotationSha256':r['annotationSha256'],'sourceYamlSha256':r['yamlSha256'],'split':r['developmentSplit'],'leakageGroup':r['leakageGroup'],'catalogSha256':digest(self.root/'catalog-db.json'),'datasetType':'solo-bbox-development',**({'sourceKind':'admin_upload','importEventHash':r['importEventHash']} if r.get('sourceKind')=='admin_upload' else {})})
+    'sha256':r['sha256'],'sourceAnnotationSha256':r['annotationSha256'],'sourceYamlSha256':r['yamlSha256'],'split':r['developmentSplit'],'leakageGroup':r['leakageGroup'],'catalogSha256':digest(self.root/'catalog-db.json'),'datasetType':'solo-bbox-development',**({'sourceKind':'admin_upload','importEventHash':r['importEventHash'],'sourceType':r['sourceType'],'synthetic':r.get('synthetic',False),'sourceProvenance':{k:r.get(k) for k in ['batchId','datasetName','generatorTool','generatedAt','prompt','sourceMetadata','sourceReferences','sourceYaml','metadataProvenance']}} if r.get('sourceKind')=='admin_upload' else {})})
   if op=='fast_quality_export':return self.export(uid,p)
   raise Invalid('Không có thao tác quality này.')
  def export(self,uid,p):

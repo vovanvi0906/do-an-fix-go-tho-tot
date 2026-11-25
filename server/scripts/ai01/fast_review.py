@@ -156,6 +156,11 @@ class FastReview:
     def handle(self, uid, op, p):
         self.check_audit()
         self.imports.check_audit()
+        if op.startswith('fast_dataset_'):
+            if not hasattr(self,'dataset_import'):
+                from dataset_import import DatasetImport
+                self.dataset_import=DatasetImport(self)
+            return self.dataset_import.handle(uid,op,p)
         if op == 'fast_import_image': return self.imports.upload(uid,p)
         if op.startswith('fast_label_'):
             if not hasattr(self, 'label_browser'):

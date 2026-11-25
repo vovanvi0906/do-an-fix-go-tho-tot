@@ -1,3 +1,7 @@
+import fs from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
+import { datasetLimits } from './dataset-upload';
+import { DatasetOptionsDto } from './dto/dataset-options.dto';
 import path from 'node:path';
 import { Injectable, Dependencies, BadRequestException, ForbiddenException, ServiceUnavailableException } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
@@ -79,6 +83,41 @@ export class Ai01ReviewService {
     const payload = {};
     if (['adjudication', 'provenance', 'related', 'solo_detail', 'solo_related', 'fast_detail', 'fast_quality_detail'].includes(operation)) { if (!/^img-\d{5}$/.test(query.imageId || '')) throw new BadRequestException('ID ảnh không hợp lệ.'); payload.imageId = query.imageId; }
     return this.engine.call(principal, operation, payload);
+  }
+  datasetOptions(body) {
+    const dto=plainToInstance(DatasetOptionsDto,body);
+    if(validateSync(dto,{whitelist:true,forbidNonWhitelisted:true}).length)throw new BadRequestException('Thông tin nguồn dataset, danh mục hoặc class mapping không hợp lệ.');
+    return dto;
+  }
+  async datasetCatalog() {
+    const [categories,targets]=await Promise.all([
+      this.prisma.serviceCategory.findMany({where:{isActive:true},select:{id:true,name:true,slug:true,isActive:true}}),
+      this.prisma.serviceTarget.findMany({where:{isActive:true,category:{isActive:true}},select:{id:true,name:true,slug:true,categoryId:true,isActive:true}}),
+    ]);return {categories,targets};
+  }
+  async previewDataset(user,files=[],body) {
+    let folder;
+    try {
+      const principal=this.principal(user,'fast_dataset_preview'), options=this.datasetOptions(body), limits=datasetLimits();
+      if(!files.length||files.length>limits.maxImages||files.reduce((n,f)=>n+f.size,0)>limits.maxUploadBytes)throw new BadRequestException('Dataset thiếu file hoặc vượt giới hạn dung lượng/số file.');
+      const batchId=randomUUID();folder=path.join(this.config.stateDir,'dataset-import-v1',batchId);
+      await fs.mkdir(path.join(folder,'input'),{recursive:true,mode:0o700});
+      const inputs=[];
+      for(const [i,f] of files.entries()) { const name=String(i);await fs.copyFile(f.path,path.join(folder,'input',name));inputs.push({stored:name,name:f.originalname,size:f.size}); }
+      const result=await this.engine.call(principal,'fast_dataset_preview',{batchId,inputs,options,catalog:await this.datasetCatalog(),limits});
+      folder=null;return result;
+    } finally {
+      await Promise.all(files.map(f=>fs.unlink(f.path).catch(()=>{})));
+      if(folder)await fs.rm(folder,{recursive:true,force:true});
+    }
+  }
+  async datasetOperation(user,action,batchId,itemId=null,body={}) {
+    const principal=this.principal(user,'fast_dataset_'+action);
+    if(!/^[0-9a-f-]{36}$/.test(batchId)||itemId!==null&&!/^item-\d{4}$/.test(itemId))throw new BadRequestException('Mã lô/ảnh không hợp lệ.');
+    const payload={batchId};
+    if(action==='validate')Object.assign(payload,{options:this.datasetOptions(body),catalog:await this.datasetCatalog()});
+    if(action==='commit')Object.assign(payload,{itemId,catalog:await this.datasetCatalog()});
+    return this.engine.call(principal,'fast_dataset_'+action,payload);
   }
   async importImage(user,file,body) {
     const principal=this.principal(user,'fast_import_image');

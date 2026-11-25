@@ -49,18 +49,20 @@ class LabelBrowser:
             target_ids = event.get('targetIds', []) if event else sorted({t['targetId'] for m in source for t in m['catalogTargetCandidates']} | ({raw['targetId']} if raw.get('targetId') else set()))
             # Bbox and image labels are separate journals: preserve and expose both.
             target_ids = sorted(set(target_ids) | {b['label'] for b in (box_event or {}).get('boxes', []) if b['kind'] == 'object'})
+            target_ids=sorted(set(target_ids)|{b['candidateTargetId'] for b in raw.get('sourceReferences',[]) if b.get('candidateTargetId')})
             sign_ids = set((event or {}).get('visibleSigns') or [])
             sign_ids.update(b['label'] for b in (box_event or {}).get('boxes', []) if b['kind'] == 'sign')
             sign_names = dict(SIGN_NAMES)
             sign_names.update({k: v['name'] for k, v in (pack or {}).get('signs', {}).items()})
             source_signs = {p for m in source for p in m.get('visibleSignProposals') or []}
+            imported_signs={b['candidateSign'] for b in raw.get('sourceReferences',[]) if b.get('candidateSign')}
             flags = set((event or {}).get('imageFlags') or [])
             image_types = set()
             if 'advertisement' in flags or any(r.startswith('advertisement_') for r in reasons): image_types.add('advertisement')
             if 'composite' in flags or 'composite_layout_candidate' in reasons: image_types.add('composite')
             if (event or {}).get('decision') == 'out_of_scope' or 'out_of_scope_candidate' in reasons: image_types.add('out_of_scope')
             boxes = (box_event or {}).get('boxes', [])
-            has_bbox = any(a['format'] == 'bbox' for a in raw['annotations']) or bool(boxes)
+            has_bbox = any(a['format'] == 'bbox' for a in raw['annotations']) or bool(boxes) or bool(raw.get('sourceReferences'))
             bbox_states = {'has' if has_bbox else 'none'}
             if quality and quality['pending'] and quality.get('needsGeometryReview'): bbox_states.add('suspect')
             if box_event and box_event['status'] == 'confirmed': bbox_states.add('corrected')
@@ -81,7 +83,7 @@ class LabelBrowser:
             if state not in STATUS: state = 'pending'
             qualities = set()
             if decision == 'uncertain' or 'mapping_needs_context' in reasons: qualities.add('ambiguous')
-            if not raw['annotations'] and not (raw.get('sourceKind')=='admin_upload' and box_event and box_event['status']=='confirmed' and box_event['objectReview'] in ['complete','none_visible'] and box_event['signReview'] in ['positive','none_visible']): qualities.add('missing')
+            if not raw['annotations'] and not raw.get('sourceReferences') and not (raw.get('sourceKind')=='admin_upload' and box_event and box_event['status']=='confirmed' and box_event['objectReview'] in ['complete','none_visible'] and box_event['signReview'] in ['positive','none_visible']): qualities.add('missing')
             if quality and quality['pending'] and not quality.get('imported'): qualities.add('bbox')
             queues = set()
             if quality: queues.add('uploaded' if quality.get('imported') else 'task04b')
@@ -90,7 +92,7 @@ class LabelBrowser:
             eligible = not (f.quality.blockers(box_event,uid) if raw.get('sourceKind')=='admin_upload' else f.blockers(uid,image_id))
             usage = {'eligible'} if eligible else {'quarantine', 'needs_check'}
             obj = bool(target_ids) or any(m.get('normalizedObjectProposal') for m in source)
-            signs = bool(sign_ids or source_signs)
+            signs = bool(sign_ids or source_signs or imported_signs)
             label_types = ({'object'} if obj else set()) | ({'sign'} if signs else set())
             if obj and signs: label_types.add('both')
             current_labels = [targets[t]['name'] for t in target_ids if t in targets] + [sign_names.get(s, s) for s in sorted(sign_ids)]
@@ -102,9 +104,9 @@ class LabelBrowser:
             if priority is not None and priority <= 1: quick.add('priority')
             if state in ['confirmed', 'corrected', 'rejected'] and not (quality and quality['pending']): quick.add('completed')
             records.append(dict(id=image_id, dataset=raw['dataset'], categoryIds=sorted({targets[t]['categoryId'] for t in target_ids if t in targets} | ({raw['categoryId']} if raw.get('sourceKind')=='admin_upload' else set())), targetIds=target_ids,
-                labels=current_labels if event or box_event else source_labels, labelOrigin='admin' if event or box_event else 'source',
-                imported=raw.get('sourceKind')=='admin_upload', sourceLabelsVi=source_labels, sourceKeys=[m['mappingKey'] for m in source], status=state, priority=priority,
-                signIds=sorted(sign_ids | {'proposal:' + s for s in source_signs}), labelType=sorted(label_types), quality=sorted(qualities), bbox=sorted(bbox_states),
+                labels=current_labels if event or box_event else source_labels+[b.get('sourceLabelVi',b['sourceLabel']) for b in raw.get('sourceReferences',[])], labelOrigin='admin' if event or box_event else 'source',
+                imported=raw.get('sourceKind')=='admin_upload',sourceType=raw.get('sourceType','roboflow'),batchId=raw.get('batchId'), sourceLabelsVi=source_labels, sourceKeys=[m['mappingKey'] for m in source], status=state, priority=priority,
+                signIds=sorted(sign_ids | {'proposal:' + s for s in source_signs|imported_signs}), labelType=sorted(label_types), quality=sorted(qualities), bbox=sorted(bbox_states),
                 imageType=sorted(image_types), duplicate=sorted(duplicate_types), queue=sorted(queues), usage=sorted(usage), quick=sorted(quick),
                 qualityReview=quality, eligible=eligible))
         self.cache_key, self.records = key, records
@@ -125,19 +127,20 @@ class LabelBrowser:
         pack = f.quality.load()
         names = SIGN_NAMES | {k: v['name'] for k, v in (pack or {}).get('signs', {}).items()}
         proposals = {'proposal:' + p: f.display_vi.get(m['mappingKey'], {}).get('signVi') or p for m in f.mapping['entries'] for p in m.get('visibleSignProposals') or []}
-        options['sign'] = [{'id': s, 'name': (proposals.get(s, s) + ' · nguồn đề xuất') if s.startswith('proposal:') else names.get(s, s) + ' · Admin đã lưu'} for s in sorted(sign_ids)]
+        options['sign'] = [{'id': s, 'name': (proposals.get(s, names.get(s[len('proposal:'):],s)) + ' · nguồn đề xuất') if s.startswith('proposal:') else names.get(s, s) + ' · Admin đã lưu'} for s in sorted(sign_ids)]
         options['priority'] = [{'id': str(p), 'name': 'P' + str(p)} for p in sorted({r['priority'] for r in records if r['priority'] is not None})]
+        options['sourceType']=[{'id':k,'name':v} for k,v in {'roboflow':'Roboflow','own_photo':'Ảnh tự chụp','licensed':'Có giấy phép','permission':'Được cho phép','synthetic_ai':'Ảnh AI tạo'}.items() if any(r['sourceType']==k for r in records)]
         return dict(catalog=catalog, filters=options, total=len(records))
 
     @staticmethod
     def filtered(records, query):
         result = records
-        for field in ['category', 'target', 'status', 'dataset', 'sourceLabel', 'sign', 'labelType', 'quality', 'bbox', 'imageType', 'duplicate', 'queue', 'priority', 'usage', 'quick']:
+        for field in ['category', 'target', 'status', 'dataset', 'sourceType', 'sourceLabel', 'sign', 'labelType', 'quality', 'bbox', 'imageType', 'duplicate', 'queue', 'priority', 'usage', 'quick']:
             value = query.get(field, 'all')
             if value == 'all': continue
             column = {'category':'categoryIds', 'target':'targetIds', 'sourceLabel':'sourceKeys', 'sign':'signIds'}.get(field, field)
             if field == 'priority': result = [r for r in result if str(r['priority']) == value]
-            else: result = [r for r in result if value in r[column]] if field not in ['status', 'dataset'] else [r for r in result if r[column] == value]
+            else: result = [r for r in result if value in r[column]] if field not in ['status', 'dataset', 'sourceType'] else [r for r in result if r[column] == value]
         search = query.get('q', '').strip().lower()
         return [r for r in result if search in r['id'].lower()]
 

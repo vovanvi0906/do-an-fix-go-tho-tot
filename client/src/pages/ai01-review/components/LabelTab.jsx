@@ -5,9 +5,9 @@ import {buttonClass,fieldClass,Field,LoadingReview} from './ReviewPanel';
 import LabelDetailEditor from './LabelDetailEditor';
 
 const STORAGE='fixgo-ai01-label-table';
-const DEFAULT_FILTERS={category:'all',target:'all',status:'all',q:'',dataset:'all',sourceLabel:'all',sign:'all',labelType:'all',quality:'all',bbox:'all',imageType:'all',duplicate:'all',queue:'all',priority:'all',usage:'all',quick:'all'};
+const DEFAULT_FILTERS={category:'all',target:'all',status:'all',q:'',dataset:'all',sourceType:'all',sourceLabel:'all',sign:'all',labelType:'all',quality:'all',bbox:'all',imageType:'all',duplicate:'all',queue:'all',priority:'all',usage:'all',quick:'all'};
 const STATUS={pending:'Chưa kiểm tra',confirmed:'Đã xác nhận',corrected:'Đã sửa',uncertain:'Chưa chắc chắn',rejected:'Đã loại'};
-const ADVANCED={dataset:'Nguồn dataset',sourceLabel:'Nhãn nguồn',sign:'Nhãn dấu hiệu',labelType:'Loại nhãn',quality:'Chất lượng nhãn',bbox:'Tình trạng bbox',imageType:'Loại ảnh',duplicate:'Ảnh trùng',queue:'Hàng đợi ưu tiên',priority:'Mức độ ưu tiên',usage:'Điều kiện sử dụng'};
+const ADVANCED={dataset:'Nguồn dataset',sourceType:'Loại nguồn ảnh',sourceLabel:'Nhãn nguồn',sign:'Nhãn dấu hiệu',labelType:'Loại nhãn',quality:'Chất lượng nhãn',bbox:'Tình trạng bbox',imageType:'Loại ảnh',duplicate:'Ảnh trùng',queue:'Hàng đợi ưu tiên',priority:'Mức độ ưu tiên',usage:'Điều kiện sử dụng'};
 const DISCARD='Bạn có thay đổi chưa lưu. Bỏ thay đổi và tiếp tục?';
 function remembered(){try{return JSON.parse(sessionStorage.getItem(STORAGE)||'{}');}catch{return {};}}
 function Thumbnail({id}) {

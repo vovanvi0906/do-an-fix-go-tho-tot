@@ -37,7 +37,7 @@ export class ReviewEngine {
     this.start();
     const id = randomUUID();
     return new Promise((resolve, reject) => {
-      const timer = setTimeout(() => this.close(), 35000);
+      const timer = setTimeout(() => this.close(), 180000);
       this.pending.set(id, { resolve, reject, timer });
       this.child.stdin.write(JSON.stringify({ id, principal, op, payload }) + '\n', error => { if (error) this.close(); });
     });
