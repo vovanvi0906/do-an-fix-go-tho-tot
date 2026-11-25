@@ -1,0 +1,157 @@
+[
+  {
+    "path": "client/src/components/layout/Sidebar.jsx",
+    "change": "modified",
+    "sha256": "37f691dde42aab30e4c6579cd306863dcdb1ad90717c8c5a10b90901245f9a98"
+  },
+  {
+    "path": "client/src/layouts/AdminLayout.jsx",
+    "change": "modified",
+    "sha256": "20cc036eaeee6402ed83b22e0232c79878f69acc481d6513b38f93736f27c93e"
+  },
+  {
+    "path": "client/src/pages/ai01-review/Ai01ReviewPage.jsx",
+    "change": "added",
+    "sha256": "458380d28e389134aa8c8ab8823e6a5081204d05acced46b07a1ebb86fe6e214"
+  },
+  {
+    "path": "client/src/pages/ai01-review/components/ImageReview.jsx",
+    "change": "added",
+    "sha256": "70a1299021a99a14fb656619e007364952237197f57162da1794289d0a7c02f8"
+  },
+  {
+    "path": "client/src/pages/ai01-review/components/LabelForm.jsx",
+    "change": "added",
+    "sha256": "0282ab645938b5e76254c2b93113ddd427a4508011dae17b08c2fb5bfaac9c8d"
+  },
+  {
+    "path": "client/src/pages/ai01-review/components/MappingReview.jsx",
+    "change": "added",
+    "sha256": "4a8cadad124159d1609c56cbd7b6de56aeae89605d96211c54b337dee4e677a6"
+  },
+  {
+    "path": "client/src/pages/ai01-review/components/PermissionReview.jsx",
+    "change": "added",
+    "sha256": "a3379a2bc43c1423ea9052095166e0a0aa1c382726d3bafa90691094840edebf"
+  },
+  {
+    "path": "client/src/pages/ai01-review/components/ReviewPanel.jsx",
+    "change": "added",
+    "sha256": "ce7c5d0009c779b51716563294f0194ab67575d22543aca7825bf251ea970d06"
+  },
+  {
+    "path": "client/src/pages/ai01-review/components/SourceReview.jsx",
+    "change": "added",
+    "sha256": "5e03dbb91c8e161d6e70f9c537dd4e2733b32b5c3ba4ffa6d742a0ec84807e00"
+  },
+  {
+    "path": "client/src/pages/ai01-review/constants.js",
+    "change": "added",
+    "sha256": "e3c43e7ad6626191be645ba891452e7248b07accb5a7c332b527aaaaf9a1d80f"
+  },
+  {
+    "path": "client/src/routers/menuConfig.js",
+    "change": "modified",
+    "sha256": "96bf7aad8a37f814cdc9f312765b4cf9f8eb6e5b957188b3b54111450888cb98"
+  },
+  {
+    "path": "client/src/routers/routes.jsx",
+    "change": "modified",
+    "sha256": "665ea61e81f8292447714e01494e99d8c8c0146a58d795c14d6ca6c495b5d516"
+  },
+  {
+    "path": "client/src/services/ai01ReviewService.js",
+    "change": "added",
+    "sha256": "5ab8d1608b275a5496c5b122829ea88d48082cae3741f82dbc822c472038015a"
+  },
+  {
+    "path": "server/config/ai01-review.example.json",
+    "change": "added",
+    "sha256": "6091a11a624f8fe33af6421020c28e7e01d7dd796b7e98cef6be2eace2179bca"
+  },
+  {
+    "path": "server/scripts/ai01/review_bridge.py",
+    "change": "added",
+    "sha256": "9c74b0af68f8198388ced22121e5f31237c27424db9117b1cccf04ad8d29e8f7"
+  },
+  {
+    "path": "server/scripts/ai01/verify_integrity.py",
+    "change": "added",
+    "sha256": "bfefcf0ea0dcbd68e89875f6af1dde9a92024ec9a2b048721d6b7409b8ee0581"
+  },
+  {
+    "path": "server/src/app.module.js",
+    "change": "modified",
+    "sha256": "3b5d457237822b46bff6ece6cc40cce2d0a6775b3637593731d13c7b8a309dee"
+  },
+  {
+    "path": "server/src/modules/ai01-review/ai01-auth-configuration.guard.js",
+    "change": "added",
+    "sha256": "2e995b2507036f8f124aca499524808e7b8b91218a59036cb29322c5c08472d6"
+  },
+  {
+    "path": "server/src/modules/ai01-review/ai01-permissions.controller.js",
+    "change": "added",
+    "sha256": "4311bd6d166c4a0d0998c9a056c8950bb2e0e7f3691a583c9f9743de9dde89fb"
+  },
+  {
+    "path": "server/src/modules/ai01-review/ai01-permissions.service.js",
+    "change": "added",
+    "sha256": "3e3fa6f1cfbe93aa219ab7bbf6b722649efd39873535ef7ca3a33b6666c15988"
+  },
+  {
+    "path": "server/src/modules/ai01-review/ai01-policy.js",
+    "change": "added",
+    "sha256": "705a7def667406ce942976bcd16ed83d68c50e0317d9b04597bffc8f5503b0e9"
+  },
+  {
+    "path": "server/src/modules/ai01-review/ai01-review.controller.js",
+    "change": "added",
+    "sha256": "f685109639d057482ec62ed745b412327ee75fb7bdcbeeb6acbc94cbcd43bf26"
+  },
+  {
+    "path": "server/src/modules/ai01-review/ai01-review.module.js",
+    "change": "added",
+    "sha256": "91a3717d3ca901712f3e3967acdaa99d7111fc511be0b89c4846c04923221287"
+  },
+  {
+    "path": "server/src/modules/ai01-review/ai01-review.service.js",
+    "change": "added",
+    "sha256": "f3bd4bd908860fa29a2a52b1029dda2015a2942a783f840bb33cdd9df15cef86"
+  },
+  {
+    "path": "server/src/modules/ai01-review/dto/ai01-permission.dto.js",
+    "change": "added",
+    "sha256": "2f9f1fbaf02363fa6492d656de8d4a36e6b4687615fc5b50bf833b2ba2680428"
+  },
+  {
+    "path": "server/src/modules/ai01-review/dto/review-action.dto.js",
+    "change": "added",
+    "sha256": "612dfd0e9ed42b593b157a6a78b615145b4f7aeb48907518d08e6928b4c39925"
+  },
+  {
+    "path": "server/src/modules/ai01-review/review-engine.js",
+    "change": "added",
+    "sha256": "63ea0ff3bbf7fb02fea238afbb4f9d0de268cbbd5c2de2d8f7119d464deff21b"
+  },
+  {
+    "path": "server/test/ai01-admin-harness.cjs",
+    "change": "added",
+    "sha256": "48f601800391a106442525ebde4fefb323be1ee2e0c9762eaa112a32f0dff49f"
+  },
+  {
+    "path": "server/test/ai01-admin.e2e-spec.js",
+    "change": "added",
+    "sha256": "5230bc17624cdf4c11cb47aeaaa2248931b19b722d446fbe1b24ed3d30ee40db"
+  },
+  {
+    "path": "server/test/check-ai01-admin-ui.cjs",
+    "change": "added",
+    "sha256": "0957db7a2bfad9b32158e2e8bd20cd7ea5378471d5d752b67dfc2472fd6afbbc"
+  },
+  {
+    "path": "server/test/jest-ai01-admin.config.cjs",
+    "change": "added",
+    "sha256": "2836f5c6e89cf6172caa786723a0157298c6e4a2e0598593ba90452ee391a39a"
+  }
+]

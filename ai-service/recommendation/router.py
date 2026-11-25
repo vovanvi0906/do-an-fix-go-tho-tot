@@ -8,6 +8,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Optional
 from fastapi import APIRouter, File, Form, Request, UploadFile, Response, HTTPException
+from recommendation.visual_detector import analyze_visual
 from recommendation.schemas import DiagnosisV2Response, CatalogSyncResponse
 from recommendation.category_classifier import evaluate_categories, CATEGORY_NAMES, CATEGORY_MIN_CONFIDENCE, CATEGORY_MIN_MARGIN
 from recommendation.target_matcher import match_targets, TARGET_MIN_SIMILARITY
@@ -92,7 +93,25 @@ async def diagnose_v2(
     target_candidates = match_targets(img_feat, cat_slug, targets_dict, target_embs, top_k=3) if cat_slug else []
 
     stages["target_resolution"] = (time.perf_counter()-stage_start)*1000
+    stage_start = time.perf_counter()
+    visual = analyze_visual(cv_img, getattr(request.app.state, 'visual_service_detector', None))
+    stages['visual_detection'] = (time.perf_counter()-stage_start)*1000
+    visual_objects = [b for b in visual['detections'] if b['kind'] == 'object']
+    visual_categories = {b['categorySlug'] for b in visual_objects}
+    if not cat_slug and len(visual_categories) == 1:
+        candidate_category = next(iter(visual_categories))
+        if candidate_category.replace('-', '_') in CATEGORY_NAMES:
+            cat_slug = candidate_category
+            conf = max(b['confidence'] for b in visual_objects)
+            source = 'visual_detector'
+            cat_candidates.insert(0, {'id':cat_slug,'slug':cat_slug,'name':CATEGORY_NAMES[cat_slug.replace('-', '_')],'confidence':conf,'provenance':'visual_detector'})
     top_target = target_candidates[0] if target_candidates else None
+    aligned = [b for b in visual_objects if b['categorySlug'] == cat_slug]
+    if len({b['targetSlug'] for b in aligned}) == 1:
+        best = max(aligned, key=lambda b:b['confidence'])
+        meta = targets_dict.get(best['targetSlug'], {})
+        top_target = {'targetId': meta.get('id') or best['targetSlug'], 'targetName': meta.get('name', best['targetSlug'])}
+
     observable = []
     if cat_slug:
         cat_name = CATEGORY_NAMES.get(cat_slug.replace("-", "_"), cat_slug)
@@ -107,14 +126,14 @@ async def diagnose_v2(
     request.state.recommendation_debug = {
         "requestId": request_id, "stagesMs": stages,
         "clipScores": clip_probs, "yoloScores": yolo_probs,
-        "modelsLoaded": {"clip": has_clip, "yolo": yolo_model is not None},
-        "stageOutcomes":{"model_loading":"ready" if has_clip or yolo_model is not None else "unavailable", "clip":"ready" if clip_result else ("failed" if has_clip else "unavailable"), "yolo":"failed" if yolo_error else ("ready" if yolo_probs else "unavailable"),"category_fusion":"accepted" if cat_slug else "abstained","target_resolution":"accepted" if top_target else "unresolved"},
+        "modelsLoaded": {"clip": has_clip, "yolo": yolo_model is not None, "visual": visual["status"] in ["detected", "no_evidence"]},
+        "stageOutcomes":{"model_loading":"ready" if has_clip or yolo_model is not None or visual["status"] in ["detected", "no_evidence"] else "unavailable", "clip":"ready" if clip_result else ("failed" if has_clip else "unavailable"), "yolo":"failed" if yolo_error else ("ready" if yolo_probs else "unavailable"),"category_fusion":"accepted" if cat_slug else "abstained","target_resolution":"accepted" if top_target else "unresolved"},
         "gates": {"categoryMinConfidence": CATEGORY_MIN_CONFIDENCE, "categoryMinMargin":CATEGORY_MIN_MARGIN,
                   "categoryAccepted": bool(cat_slug), "confidence":conf,
                   "targetMinSimilarity":TARGET_MIN_SIMILARITY, "targetAccepted":bool(top_target),
                   "source":"evaluate_categories defaults / match_targets defaults"},
         "catalog":{"version":state.get("version"),"source":state.get("source","static_fallback"),"targetCount":len(targets_dict)},
-        "model":{"clip":"openai/clip-vit-base-patch32","clipCommit":getattr(getattr(getattr(clip_classifier,"_model",None),"config",None),"_commit_hash",None),"declaredVersion":"fixgo-ai-rec-v1"}
+        "model":{"clip":"openai/clip-vit-base-patch32","clipCommit":getattr(getattr(getattr(clip_classifier,"_model",None),"config",None),"_commit_hash",None),"declaredVersion":"fixgo-ai-rec-v1", "visualModelVersion":visual["modelVersion"], "visualWeightsSha256":visual["weightsSha256"]}
     }
     return DiagnosisV2Response(
         suggestedCategoryId=cat_slug,
@@ -126,6 +145,7 @@ async def diagnose_v2(
         confidence=conf,
         detectedLabels=[cat_slug] if cat_slug else [],
         observableSigns=observable,
+        visualAnalysis=visual,
         decision_source=final_source,
         engine="model" if source != "unavailable" else "unavailable",
         notes=notes,

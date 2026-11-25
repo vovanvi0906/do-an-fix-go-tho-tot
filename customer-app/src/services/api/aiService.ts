@@ -65,6 +65,12 @@ export interface AiDiagnosisResponse {
   availableTargets?: Array<{ id: string; name: string; slug?: string; categoryId: string }>;
   availableServices: Array<{ id: string; name: string; basePrice: number; unit?: string }>;
   suggestedServices?: SuggestedServiceItem[];
+  visualAnalysisStatus?: 'disabled' | 'unavailable' | 'no_evidence' | 'no_approved_match' | 'suggestions';
+  visualServiceSuggestions?: Array<SuggestedServiceItem & {
+    categoryId: string; targetId: string; targetName: string;
+    requiresUserConfirmation: true; requiresInspection: true;
+    visualEvidence: Array<{code:string;name:string;boxes:Array<{xyxy:number[];confidence:number;objectId:string}>}>;
+  }>;
 }
 
 export async function diagnoseIssueImage(

@@ -1,46 +1,19 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { tokenStorage } from '../services/storage/tokenStorage';
 import authService from '../features/auth/services/auth.service';
-import { isTokenExpired } from '../utils/jwt';
 
 export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  // Khởi tạo state an toàn: nếu token trong storage đã hết hạn thì xóa ngay lập tức
-  const [accessToken, setAccessToken] = useState(() => {
-    const token = tokenStorage.getAccessToken();
-    if (token && isTokenExpired(token, 10)) {
-      console.warn('⚠️ [AuthProvider]: Token trong storage đã hết hạn khi khởi động. Đang dọn dẹp...');
-      tokenStorage.clearAuth();
-      return null;
-    }
-    return token;
-  });
-
-  const [user, setUser] = useState(() => {
-    const token = tokenStorage.getAccessToken();
-    if (!token || isTokenExpired(token, 10)) {
-      return null;
-    }
-    return tokenStorage.getUser();
-  });
-
+  const [accessToken, setAccessToken] = useState(() => tokenStorage.getAccessToken());
+  const [user, setUser] = useState(() => tokenStorage.getUser());
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  // Đồng bộ và kiểm tra lại trạng thái khi Mount
   useEffect(() => {
-    const storedToken = tokenStorage.getAccessToken();
-    const storedUser = tokenStorage.getUser();
-
-    if (storedToken && isTokenExpired(storedToken, 10)) {
-      tokenStorage.clearAuth();
-      setUser(null);
-      setAccessToken(null);
-    } else if (storedToken && storedUser) {
-      setUser(storedUser);
-      setAccessToken(storedToken);
-    }
+    const sync = () => { setAccessToken(tokenStorage.getAccessToken()); setUser(tokenStorage.getUser()); };
+    window.addEventListener('auth:updated', sync);
+    window.addEventListener('storage', sync);
+    return () => { window.removeEventListener('auth:updated', sync); window.removeEventListener('storage', sync); };
   }, []);
 
   const login = useCallback(async ({ account, email, password }) => {

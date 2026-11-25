@@ -1,0 +1,20 @@
+{
+  "status": "blocked",
+  "readyForTrialTraining": false,
+  "approvedGroundTruth": false,
+  "productionActivation": false,
+  "reviewedImages": 0,
+  "reviewedSignBoxes": {},
+  "minimumTrialCriteria": {
+    "trainImagesPerClass": 20,
+    "valImagesPerClass": 5,
+    "trainGroupsPerClass": 2,
+    "valGroupsPerClass": 1,
+    "negativeTrainImages": 5,
+    "negativeValImages": 2
+  },
+  "blockers": [
+    "Chưa chỉ định bản xuất bbox qua export gate.",
+    "Chưa có ảnh bbox được người gán nhãn xác nhận trong state hiện tại."
+  ]
+}

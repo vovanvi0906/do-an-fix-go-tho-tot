@@ -1,0 +1,78 @@
+Cập nhật giao diện gán nhãn: xem VIETNAMESE-LABELING-RESULTS.txt (45 HTTP tests, editor tiếng Việt ngay trong tab Dữ liệu). Các kết quả bên dưới là mốc hợp nhất 5 tab trước cập nhật UX.
+
+FIXGO — AI MANAGEMENT SIMPLIFICATION
+
+Đã bàn giao
+- Một trang /admin/ai01 với 5 tab: Dữ liệu, Gán nhãn, Huấn luyện, Đánh giá,
+  Triển khai. Sidebar chỉ một mục Quản lý AI. Link Admin cũ redirect vào tab.
+- Dữ liệu: 21.437 ảnh, 54 mapping TASK03B, lọc dataset/ID/trùng/khó/chưa chắc/
+  ngoài phạm vi; canvas Roboflow bbox/polygon, tắt overlay; tab chỉ xem.
+- Gán nhãn: Admin tự sửa/xác nhận từng ảnh, keyboard C/R/S/U/O/phải,
+  lưu rồi chuyển; lịch sử nhãn và kiểm tra có userId/timestamp/hash audit.
+- Kiểm tra xuất SOLO: bản confirmed mới nhất của chính Admin + đọc lại nhãn,
+  bằng chứng quyền ảnh, nguồn, nhóm trùng/cùng cảnh và kết luận. Thiếu evidence
+  giữ quarantine; sửa nhãn làm lần kiểm trước hết hiệu lực.
+- Huấn luyện: readiness có blockers từng ảnh, mở lại ảnh để kiểm tra;
+  export solo-development có schemaVersion, check binding, nhóm chống leakage,
+  checksum artifact, export audit; file server bất biến và tải theo owner/hash.
+- Nhãn cũ không bị ghi đè; nhãn Fast cũ chưa có check phải kiểm tra lại để xuất.
+
+Audit/tái sử dụng
+- TASK03B: images.jsonl, mapping proposal, duplicate-lookup và SHA256SUMS.
+  Đối chiếu lại raw ảnh, data.yaml, YOLO labels khi đọc/lưu/xuất.
+- AI-ADMIN: JWT/ACTIVE DB lookup, ReviewActionDto identity rejection, ReviewEngine
+  stdio/writer lock, canvas ImageReview và review components.
+- TASK03C/solo_review.py: giữ Store/annotation/export contract và lịch sử cũ;
+  không gộp nhãn AI-assisted vào approved export hoặc sửa baseline/source.
+- evaluation CLI: giữ annotation.py/protocol.py/runner.py/metrics.py và các gate.
+- training CLI: audit train.py thấy có ghi trọng số production; không gọi từ UI.
+
+Phân quyền
+- access và fast_*/solo_*/management_status dùng soloPrincipalFor dựa trên
+  authenticated JWT principal có role ADMIN từ DB hiện tại.
+- SOLO không đọc legacy personnel policy để cấp quyền; policy rỗng/hỏng hoặc
+  assignment reviewer lịch sử không chặn quyền SOLO. Không tự cấp expertise.
+- Giữ principalFor/ACL cho workspace độc lập và permission APIs lịch sử.
+- Không có bước nhân sự/reviewer A/B/phân xử/bootstrap trong trang SOLO mới.
+
+Các phần chưa có backend thực tế
+- Training/fine-tuning job API: not_integrated. Có CLI cũ nhưng thiếu job/config/
+  output cách ly. Không có nút chạy giả, không khởi động training.
+- Official evaluation/test management/model comparison API: not_integrated.
+  Precision/Recall/F1=null, UI “—”; không lấy smoke/cache làm số liệu chất lượng.
+- Registry/inference sandbox/activation/rollback API: not_integrated. Không
+  hiển thị model giả hoặc nút deploy/rollback; không đổi production model.
+- management_status là API mô tả năng lực thật, không phải job runner/registry.
+
+Chống leakage và quarantine
+- Xuất labelScope=image_targets, sourceGeometryHumanVerified=false.
+- mode=SOLO_THESIS, datasetType=solo-development, split/partition=development,
+  aiExposed=true, independentlyReviewed=false, approvedGroundTruth=false,
+  blindTest=false. Mapping hash + annotation/check hashes được giữ.
+- Mang theo duplicateGroup, sourceFamilyCandidate, pHash/pixel SHA và nhóm
+  nearCandidateGroup để chia development theo nhóm, không tự tạo independent test.
+- Không có benchmark admission trong trang mới. Gate và hợp đồng độc lập cũ
+  không nhận bản xuất SOLO; quarantine/thiếu chứng cứ không được đi tắt vào GT.
+
+Kết quả kiểm thử
+- 38/38 HTTP tests, 3 suites đạt: Admin độc lập + SOLO cũ + management mới.
+- Bao phủ JWT/role DB/ACTIVE và role claim giả; ADMIN không assignment vẫn
+  quản lý SOLO khi policy legacy hỏng; quyền non-admin bị chặn tại backend.
+- Validation/identity spoof, optimistic concurrency; thiếu evidence/nhãn chưa
+  kiểm không xuất; người khác không tự check/tải; sửa nhãn yêu cầu check lại;
+  uncertain/rejected/skipped/out_of_scope không xuất; lịch sử sống qua restart;
+  hash export/audit bị sửa bị chặn; independent export gate vẫn chặn.
+- Chromium: 5 tabs/1 sidebar AI, read-only data, 54 mapping, sửa target,
+  gõ ghi chú không kích shortcut, C lưu/chuyển, quarantine chặn export,
+  đi từ readiness về đúng ảnh, check bằng chứng, history, tải đúng SOLO artifact,
+  unsupported tabs không có action button, legacy redirects và viewport mobile.
+  Không lỗi JavaScript. Auth/DB fixture và state tạm, không session chủ dự án.
+- Frontend Vite build và backend Babel build đạt; git diff --check sạch.
+  Còn cảnh báo bundle Vite >500 kB; không chặn build.
+- Evidence: docs/ai01-admin/evidence/management/ (6 screenshots + browser-results.json).
+
+Không sửa raw dataset, production model, inference hoặc schema DB.
+Không train/deploy, không tạo annotation/check/provenance thật, không commit/push.
+Những thay đổi không liên quan đã có trong workspace được giữ nguyên.
+
+Sử dụng: docs/ai01-admin/AI-MANAGEMENT-GUIDE.txt

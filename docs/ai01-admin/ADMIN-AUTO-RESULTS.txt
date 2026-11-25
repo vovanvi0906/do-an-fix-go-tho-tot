@@ -1,0 +1,34 @@
+CẬP NHẬT GIAO DIỆN: xem AI-MANAGEMENT-GUIDE.txt và AI-MANAGEMENT-RESULTS.txt. Trang Admin cũ đã chuyển về một trang /admin/ai01 với 5 tab. Nội dung bên dưới giữ làm hồ sơ phiên bản trước; luồng xuất hiện tại yêu cầu development_check và bằng chứng.
+
+Bổ sung SOLO_THESIS: xem SOLO-THESIS-RESULTS.txt. Các hạn chế ADMIN không nộp annotation bên dưới áp dụng cho quy trình độc lập; chế độ SOLO có API và dữ liệu riêng.
+
+FIXGO AI-01 — ACTIVE ADMIN tự quản trị (21/11/2026)
+
+Đã triển khai
+- JWT strategy hiện có truy vấn user từ PostgreSQL từng request, từ chối account không ACTIVE và dùng role DB. Giữ nguyên auth/inference toàn hệ thống.
+- ADMIN tự có quản lý nhân sự + Coordinator; không phụ thuộc permissionManagers, bootstrap hoặc approval metadata. Policy users rỗng vẫn hoạt động. Không tự cấp expert.
+- Review API nhận JWT hợp lệ, sau đó ACL kiểm assignment cho non-admin. Permissions API giữ JWT + ADMIN guard. Tài khoản non-admin chưa phân công không đọc được dataset review.
+- Nhân sự AI tìm tài khoản ACTIVE thật; assignment không đổi role DB. Chặn self grant/revoke, reviewer assignment cho ADMIN, slot trùng, chuyển vai trò/chuyên môn đã gắn lịch sử. Giữ expectedRevision, lock, audit hash chain và audit-before-swap.
+- Reviewer dùng /ai01/annotation, không mở AdminLayout hoặc có quyền quản trị FixGo. A/B chỉ nhận nhãn nguồn/metadata trung tính và nhãn của mình; không thấy mapping AI/prediction/nhãn khác. ADMIN không được nộp annotation. Promotion reviewer thành ADMIN gây xung đột bị chặn, không tự lộ nhãn.
+- Giữ adapter/Store TASK03C, validation độc lập/chuyên môn/nguồn/hash/GT contract và export gate.
+
+Bằng chứng kiểm thử
+- HTTP integration cô lập: 17/17 đạt; kiểm tra audit bị sửa chặn policy swap. bao phủ đăng nhập/JWT, role claim giả, status/role DB thay đổi với token cũ, policy rỗng, API nhân sự, audit/revision, reviewer độc lập, người thứ ba phân xử, ảnh/hash, export gate và export contract fixture tạm. Không ghi DB thật hoặc tạo GT thật.
+- Chromium cô lập: Admin không assignment vẫn mở overview; mapping 54 dòng, A/B độc lập qua workspace non-admin, phân xử người thứ ba, nguồn/ảnh trùng, readiness/export gate, grant/revoke có audit. Không dùng session người dùng.
+- Backend build và client build đạt. Vite có cảnh báo kích thước bundle, không chặn build.
+- Kiểm tra kỹ thuật backend local thật trước cập nhật giới hạn xác thực mới của chủ dự án: phiên headless riêng đăng nhập account admin@fg.com bằng cấu hình seed local có sẵn; JWT do login API thật cấp, không tự ký, không intercept. Không dùng session người dùng; không lưu password/JWT. 15 kiểm tra API đạt, 6 trang quản trị render, không lỗi JS.
+- /access thật: enabled=true, assigned=true, role=coordinator, canManagePermissions=true, expert=false. Self grant/revoke 403; annotate ADMIN 403; export ảnh chưa đủ điều kiện 409.
+- Sau khi chủ dự án yêu cầu tự đăng nhập: không tiếp tục đọc credential hoặc truy cập token/session của họ. Phiên kiểm thử headless trước đó đã đóng. Chủ dự án tự nghiệm thu phiên của mình; không coi kiểm tra kỹ thuật là nghiệm thu người dùng cuối.
+- Checksum source TASK03C và log gốc giữ nguyên. State Admin giữ baseline prefix nguyên byte; chỉ thêm principal_binding hợp lệ của Admin qua engine. Không thêm annotation/mapping/provenance/adjudication/export quyết định thật. Policy users vẫn rỗng.
+
+Audit runtime
+Hồ sơ chuyển chế độ được ghi ngoài Git: ai01-admin-v1/authorization-mode-events.jsonl. Đây là audit vận hành riêng, không giả là grant của một manager hoặc sửa permission-events lịch sử. Evidence/screenshot kỹ thuật nằm trong ai01-admin-v1/admin-auto-evidence/. Các hồ sơ bootstrap pending cũ là lịch sử đã được yêu cầu mới thay thế, không còn là điều kiện chặn quyền.
+
+Còn cần nghiệm thu người thật
+1. Chủ dự án tự đăng nhập /login, mở Quản lý AI: overview, mapping, nhân sự, phân xử, nguồn và readiness/export. Không chia sẻ mật khẩu hoặc token.
+2. Xác nhận hai người thật với hai tài khoản ACTIVE không phải ADMIN; Admin phân công A/B có lý do/audit. Không dùng tài khoản thử hoặc đổi DB role trong task này.
+3. Thử danh sách 10 ảnh Sửa nước trước; A và B tự gán nhãn độc lập. Admin/người thứ ba khác A/B phân xử; ca cần chuyên gia phải có xác minh phù hợp.
+4. Kiểm quyền ảnh, metadata và hash. Thiếu điều kiện giữ quarantine và export bị chặn. Chỉ kiểm export dương với quyết định thật đủ điều kiện; không tạo GT để vượt test. Sau đó mở rộng pilot 150 ảnh.
+
+Giới hạn
+Chưa phân công A/B thật, chưa tạo nhãn/phân xử/GT thật và chưa kiểm export dương bằng review người thật. Chỉ một backend writer local; tiến trình nền không tự chạy sau reboot. Không sửa database/schema, dataset/model/inference hoặc migration; không commit/push. Các thay đổi khác đã tồn tại trong workspace được giữ nguyên.

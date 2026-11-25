@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Literal
 from pydantic import BaseModel, Field
 
 
@@ -24,6 +24,24 @@ class DiagnosisV2Request(BaseModel):
     description: Optional[str] = ""
 
 
+class VisualDetection(BaseModel):
+    id: str
+    kind: Literal['object', 'sign']
+    categorySlug: str
+    targetSlug: str
+    code: str
+    confidence: float = Field(ge=0, le=1)
+    xyxy: List[float]
+    objectId: Optional[str] = None
+
+
+class VisualAnalysis(BaseModel):
+    status: Literal['disabled', 'unavailable', 'no_evidence', 'detected'] = 'disabled'
+    modelVersion: Optional[str] = None
+    weightsSha256: Optional[str] = None
+    detections: List[VisualDetection] = Field(default_factory=list)
+
+
 class DiagnosisV2Response(BaseModel):
     suggestedCategoryId: Optional[str] = None
     suggestedCategoryName: Optional[str] = None
@@ -34,6 +52,7 @@ class DiagnosisV2Response(BaseModel):
     confidence: Optional[float] = None
     detectedLabels: List[str] = Field(default_factory=list)
     observableSigns: List[str] = Field(default_factory=list)
+    visualAnalysis: VisualAnalysis = Field(default_factory=VisualAnalysis)
     decision_source: str = "unavailable"
     engine: str = "unavailable"
     model_version: str = "fixgo-ai-rec-v1"

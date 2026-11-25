@@ -1,0 +1,16 @@
+{
+  "status": "implementation_complete_bootstrap_pending",
+  "ui": "http://127.0.0.1:5173/admin/ai01/overview",
+  "permissionUi": "http://127.0.0.1:5173/admin/ai01/permissions",
+  "httpSecurityTestsPassed": 14,
+  "browserIntegration": "passed_in_isolated_auth_harness",
+  "clientBuild": "passed",
+  "backendBuild": "passed",
+  "realUserAssignmentsApplied": 0,
+  "permissionManagersBootstrapped": 0,
+  "migrationExecuted": false,
+  "productionInferenceChanged": false,
+  "rawOrHistoricalReviewsModified": false,
+  "actualApprovedGroundTruthCreated": 0,
+  "commitOrPush": false
+}

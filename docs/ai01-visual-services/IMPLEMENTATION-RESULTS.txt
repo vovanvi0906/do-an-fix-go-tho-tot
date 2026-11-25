@@ -1,0 +1,79 @@
+FIXGO — Gợi ý dịch vụ từ vật thể và dấu hiệu nhìn thấy
+
+KẾT QUẢ THỰC HIỆN
+Đã triển khai luồng kỹ thuật AI Service → Diagnosis Resolver → Customer App.
+Chưa huấn luyện hoặc kích hoạt detector lỗi thật: dữ liệu và catalog hiện tại chưa đủ điều kiện.
+Không tự duyệt nhãn nguồn, không sửa DB/schema, raw dataset, production weights hoặc export gate. Không commit/push.
+Các thay đổi tab Huấn luyện có sẵn từ yêu cầu trước được giữ nguyên, không thuộc phần triển khai mới này.
+
+KIỂM TRA TRẠNG THÁI THẬT
+- State AI01 hiện tại: 0 ảnh bbox đã xác nhận, chưa có bbox burn_mark/crack qua gate. Xem readiness.json.
+- Nguồn điện hiện có lớp OUTLET; tên lớp không phải nhãn “ổ cắm cháy”.
+- Đã SELECT DB thật: target o-cam-dien có 11 dịch vụ active, trong đó có “Thay ổ cắm cháy / hỏng”.
+- Chưa có triệu chứng VISUAL_OBSERVABLE được APPROVED/active và chưa có liên kết dịch vụ APPROVED/active cho ổ cắm. Xem catalog-readiness.json.
+- catalog-mapping-draft.json là đề xuất có ID thật để người có chuyên môn review; chưa ghi DB và không được runtime sử dụng.
+- Không ánh xạ từ ảnh sang phát nóng/mùi khét hoặc chập điện/quá tải. Không tự suy phải kiểm tra toàn hệ thống điện từ ảnh một ổ cắm.
+
+ĐÃ TRIỂN KHAI
+1. Detector tùy chọn với local weights + manifest định danh classes, SHA256, ngưỡng theo lớp và báo cáo đánh giá đã review. Không lấy COCO/CLIP/filename làm detector lỗi dự phòng. Thiếu model/hỏng manifest → unavailable, luồng cũ tiếp tục.
+2. V2 trả visualAnalysis riêng cho vật thể/dấu hiệu và bbox chuẩn hóa; không giả đó là triệu chứng người dùng xác nhận. Có version/hash và timing cho debug, models_loaded.visual_service ở health.
+3. Dấu hiệu chỉ gắn vào một box vật thể tương thích, chứa ít nhất 80% diện tích box dấu hiệu. Trường hợp mơ hồ hoặc điểm thấp bị bỏ qua. Đây là quy tắc liên kết hình học, không phải số đo độ chính xác model.
+4. Resolver chỉ dùng phản hồi AI cho chính request; không đọc bằng chứng người dùng tự gửi. Kiểm category/target, bbox, điểm, version/hash; chỉ lấy triệu chứng VISUAL_OBSERVABLE và liên kết catalog APPROVED/active.
+5. Trả tối đa 3 visualServiceSuggestions ngay sau ảnh, có lý do và requiresInspection/requiresUserConfirmation. Không chọn dịch vụ hoặc tạo đơn tự động; selectedSymptomIds/reportedSymptoms không bị gán giả.
+6. Customer App hiển thị nhóm gợi ý trước bước xác nhận triệu chứng. Người dùng bấm Chọn dịch vụ này → request qua validation cũ với categoryId/targetId/serviceId; giá và khả dụng tiếp tục lấy từ server. Nhánh thủ công và hỏi thêm không bị bỏ.
+7. Công cụ audit/prepare/train trial riêng, chỉ nhận bản xuất bbox có audit xuất hợp lệ trong state, nhãn vẫn là bản mới nhất, quyền ảnh/nguồn/nhóm đã kiểm. Kiểm checksum raw/YAML/bản xuất, cả vật thể và dấu hiệu đã xem; không dùng thiếu nhãn làm ảnh âm.
+8. Dataset thử nghiệm kết hợp box vật thể và dấu hiệu; kiểm dấu hiệu thuộc rõ một vật thể, mức hỗ trợ lớp/nhóm và ảnh ổ cắm không thấy lỗi. Không tái sử dụng ảnh có split test gốc hoặc test/benchmark độc lập. Không đổi split/nhãn gốc để đạt ngưỡng.
+9. --execute-train cần dataset qua gate và weights detect cục bộ. CPU, workers 0, seed 23, batch 4, ảnh 640; epochs mặc định 20 (1..200). Chỉ ghi thư mục thử nghiệm mới. Không tự tải model, sinh phê duyệt hoặc tự deploy.
+
+GIỚI HẠN HIỆN TẠI
+- Chưa có model nhận diện ổ cắm cháy được huấn luyện/kiểm chứng bởi công việc này.
+- Ngưỡng dữ liệu trial 20 train/5 validation và 2/1 nhóm mỗi lớp, cùng 5/2 ảnh vật thể không thấy dấu hiệu, chỉ là điều kiện kỹ thuật để bắt đầu thử nghiệm; không đảm bảo chất lượng thực tế.
+- Test dùng model/DB giả lập và filesystem tạm kiểm logic. Chúng không chứng minh độ chính xác nhận diện trên ảnh thực địa.
+- Feature flags mặc định tắt; không chỉnh .env và không thay model đang chạy. Runtime không phát sinh gợi ý lỗi khi chưa có bằng chứng/mapping hợp lệ.
+
+CÁCH TIẾP TỤC SAU KHI CÓ NHÃN ĐƯỢC DUYỆT
+A. Gán bbox vật thể + burn_mark/crack trên bản sao ở công cụ hiện có. Có ảnh bình thường, bẩn/đổi màu nhưng không cháy, nền âm, nhiều thiết bị và ảnh khó. Duyệt nguồn/quyền/split; không tự đánh dấu ảnh thiếu nhãn là không lỗi.
+B. Xuất qua fast_quality_export hiện có bằng Admin đã kiểm; không bypass gate hoặc tạo export thủ công.
+C. Chạy audit (trả mã 2 nếu còn chặn):
+   ai-service/.venv/bin/python -B ai-service/training/visual_service_training.py --state <AI01_REVIEW_STATE_DIR>
+D. Chuẩn bị trial mới (đường dẫn out phải nằm ngoài raw/state/export):
+   ai-service/.venv/bin/python -B ai-service/training/visual_service_training.py --state <state> --export <gated-export-folder> --raw <01-raw> --out <new-experiment-folder> --target-slug o-cam-dien --signs burn_mark crack
+   Thêm --execute-train --weights <local-detect-weights.pt> khi đủ điều kiện. Không chạy train trong lần triển khai hiện tại vì audit bị chặn.
+E. Đánh giá trên ảnh hiện trường độc lập theo thiết bị/phiên/nhóm nguồn; đo từng dấu hiệu, ảnh âm và độ phù hợp dịch vụ; hiệu chỉnh ngưỡng trên tập calibration tách biệt. Không gọi development validation là test độc lập.
+F. Người có chuyên môn duyệt mapping trong catalog qua quy trình hiện có. Symptom.code phải khớp code của sign trong manifest. USER_REPORTED và REQUIRES_TECHNICIAN_CHECK không được suy từ ảnh.
+G. Chuẩn bị manifest theo model-manifest.example.json với weights/class-map đúng và SHA/report thật; ví dụ cố tình chưa hợp lệ để không tự kích hoạt. Sau review mới cấu hình pilot:
+   AI Service: VISUAL_SERVICE_DETECTOR_ENABLED=true, VISUAL_SERVICE_MODEL_MANIFEST=<local-manifest>
+   Backend: VISUAL_SERVICE_SUGGESTIONS_ENABLED=true, SYMPTOM_CATALOG_ENABLED=true
+   Backend ngưỡng tối thiểu VISUAL_SERVICE_MIN_CONFIDENCE mặc định 0.75; cần hiệu chỉnh/kiểm chứng, không diễn giải là 75% accuracy.
+   Tắt một trong các cờ để quay về luồng hỏi thêm. Không tự thay registry/model production.
+
+KIỂM THỬ
+- Python mới: 15 tests detector/training gate đạt, gồm bbox nhiều vật thể, dấu hiệu ngoài vùng, ambiguity, model thiếu, contract endpoint V2, audit bị sửa, nhãn đã đổi sau xuất, quyền ảnh, raw checksum, thiếu support và test split.
+- Python hồi quy: 14 tests recommendation + 5 tests legacy diagnosis contract đạt.
+- Backend: 7 suites, 70 tests diagnosis/visual resolver/upload/catalog/giá/order validation đạt.
+- Customer App: 4 suites, 32 tests choices/preview/API đạt; kiểm không tự chọn, không giả triệu chứng và giữ lỗi server.
+- Customer App npx tsc --noEmit --pretty false: PASS.
+- Backend npm run build: PASS (Babel).
+- Customer npm run check:build: PASS chế độ development; đây là kiểm cấu hình, chưa phải native APK/IPA build.
+- Không đo benchmark ảnh thực địa mới và không có kết quả accuracy/mAP mới.
+
+FILE THAY ĐỔI TRONG YÊU CẦU NÀY
+ai-service/main.py
+ai-service/recommendation/router.py
+ai-service/recommendation/schemas.py
+ai-service/recommendation/visual_detector.py
+ai-service/training/visual_service_training.py
+ai-service/eval/test_visual_detector.py
+ai-service/eval/test_visual_training.py
+server/src/modules/orders/diagnosis/diagnosis-resolver.js
+server/src/modules/orders/diagnosis/diagnosis-payload-builder.js
+server/src/modules/orders/diagnosis/visual-service-resolver.js
+server/src/modules/orders/diagnosis/visual-service-resolver.spec.js
+customer-app/src/components/diagnosis/DiagnosisChoices.jsx
+customer-app/src/components/diagnosis/VisualServiceSuggestions.test.jsx
+customer-app/src/services/api/aiService.ts
+docs/ai01-visual-services/readiness.json
+docs/ai01-visual-services/catalog-readiness.json
+docs/ai01-visual-services/catalog-mapping-draft.json
+docs/ai01-visual-services/model-manifest.example.json
+docs/ai01-visual-services/IMPLEMENTATION-RESULTS.txt

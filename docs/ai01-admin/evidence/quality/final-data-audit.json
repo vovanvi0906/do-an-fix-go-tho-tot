@@ -1,0 +1,111 @@
+{
+  "qualityAndStrictFilesVerified": {
+    "ai01-quality-v1": 4212,
+    "ai01-task04a-strict-v2": 6912
+  },
+  "sourceValidation": {
+    "status": "passed",
+    "rawUnchanged": true,
+    "manifestFilesChecked": 46054,
+    "recordsChecked": 21437,
+    "crossSplitGroups": {
+      "sha256": 0,
+      "pixelSha256": 0,
+      "sourceFamilyCandidate": 0,
+      "leakageGroup": 0
+    },
+    "phashPairsChecked": 2757,
+    "phashPairsCrossSplit": 0,
+    "tasks": {
+      "object_detection": {
+        "imagesChecked": 13086,
+        "allClassesMeetTrialMinimum": false
+      },
+      "visible_sign_detection": {
+        "imagesChecked": 964,
+        "allClassesMeetTrialMinimum": true
+      },
+      "category_classification": {
+        "imagesChecked": 17937,
+        "allClassesMeetTrialMinimum": true
+      }
+    },
+    "trained": false,
+    "approvedGroundTruth": false
+  },
+  "protectedFilesUnchanged": 33,
+  "protectedDifferences": [],
+  "actualStrictFileCoverage": {
+    "train": {
+      "Máy lạnh / Điều hòa": {
+        "images": 155,
+        "boxes": 157
+      },
+      "Vòi nước / Vòi sen": {
+        "images": 23,
+        "boxes": 23
+      },
+      "Tủ lạnh / Tủ lạnh side-by-side": {
+        "images": 151,
+        "boxes": 181
+      },
+      "Ổ cắm điện": {
+        "images": 300,
+        "boxes": 302
+      },
+      "Máy giặt / Máy giặt sấy": {
+        "images": 61,
+        "boxes": 64
+      }
+    },
+    "val": {
+      "Máy lạnh / Điều hòa": {
+        "images": 65,
+        "boxes": 68
+      },
+      "Vòi nước / Vòi sen": {
+        "images": 9,
+        "boxes": 9
+      },
+      "Tủ lạnh / Tủ lạnh side-by-side": {
+        "images": 49,
+        "boxes": 60
+      },
+      "Ổ cắm điện": {
+        "images": 100,
+        "boxes": 100
+      },
+      "Máy giặt / Máy giặt sấy": {
+        "images": 18,
+        "boxes": 18
+      }
+    },
+    "full_val": {
+      "Máy lạnh / Điều hòa": {
+        "images": 65,
+        "boxes": 68
+      },
+      "Vòi nước / Vòi sen": {
+        "images": 9,
+        "boxes": 9
+      },
+      "Tủ lạnh / Tủ lạnh side-by-side": {
+        "images": 49,
+        "boxes": 60
+      },
+      "Ổ cắm điện": {
+        "images": 2331,
+        "boxes": 2331
+      },
+      "Máy giặt / Máy giặt sấy": {
+        "images": 18,
+        "boxes": 18
+      }
+    }
+  },
+  "classMapWarning": "Strict-v2 class-map.json includes prefilter source support; actual per-split file counts above are authoritative. Original artifact retained.",
+  "diskFreeGiB": 5.36,
+  "humanCorrectionsCreatedByAgent": 0,
+  "trainedInTask04B": false,
+  "deployedInTask04B": false
+}

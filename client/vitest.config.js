@@ -1,2 +1,2 @@
 import { defineConfig } from 'vitest/config';
-export default defineConfig({ test: { environment: 'jsdom', include: ['src/features/symptoms/**/*.test.{js,jsx}', 'src/pages/test-ai/**/*.test.{js,jsx}', 'src/features/workers/**/*.test.{js,jsx}'], globals: false, maxWorkers: 1 } });
+export default defineConfig({ test: { environment: 'jsdom', include: ['src/services/auth/*.test.js', 'src/pages/ai01-review/useLabelDraft.test.jsx', 'src/features/symptoms/**/*.test.{js,jsx}', 'src/pages/test-ai/**/*.test.{js,jsx}', 'src/features/workers/**/*.test.{js,jsx}', 'src/pages/ai01-review/components/{DataTab,LabelTab,TrainingTab,DatasetUploadModal,DatasetImportModal}.test.jsx'], globals: false, maxWorkers: 1 } });

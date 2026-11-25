@@ -11,6 +11,7 @@ import { STATUS, DECISION_SOURCE, REASON_CODES } from './diagnosis-constants';
 import { validateDiagnosisInput } from './diagnosis-input-validator';
 import { createInitialResult } from './diagnosis-payload-builder';
 import { buildSymptomOptions, SYMPTOM_RULES } from './symptom-taxonomy';
+import { resolveVisualServices } from './visual-service-resolver';
 import { rankServices, formatPriceRange } from './service-ranker';
 
 export { SYMPTOM_RULES };
@@ -205,6 +206,19 @@ export async function resolveDiagnosis(prisma, aiClient, input) {
     message:
       'Xác nhận triệu chứng hoặc chọn dịch vụ bên dưới. Ảnh chưa xác định được nguyên nhân hỏng.',
   });
+
+  // Image evidence offers previews only. It never confirms a user symptom,
+  // books a service, approves a catalog mapping, or claims an invisible cause.
+  if (!Object.keys(answers).length) {
+    const visual = await resolveVisualServices(prisma, ai, category, targets);
+    result.visualAnalysisStatus = visual.status;
+    result.visualServiceSuggestions = visual.suggestions;
+    if (visual.suggestions.length) {
+      result.observableSigns.push(...visual.observations);
+      result.reasonCodes.push('visual_service_candidates');
+      result.message = 'Có dịch vụ gợi ý từ dấu hiệu trong ảnh. Bạn chọn dịch vụ để tiếp tục; thợ sẽ kiểm tra và xác định cách xử lý thực tế.';
+    }
+  }
 
   if (
     targets.length &&

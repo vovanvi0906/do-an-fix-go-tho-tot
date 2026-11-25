@@ -3,9 +3,12 @@
  */
 
 const ACCESS_TOKEN_KEY = 'home_service_access_token';
+const REFRESH_TOKEN_KEY = 'home_service_refresh_token';
 const USER_KEY = 'home_service_user';
 
 export const tokenStorage = {
+  getRefreshToken: () => localStorage.getItem(REFRESH_TOKEN_KEY),
+  setRefreshToken: (token) => token ? localStorage.setItem(REFRESH_TOKEN_KEY, token) : localStorage.removeItem(REFRESH_TOKEN_KEY),
   getAccessToken: () => {
     try {
       return localStorage.getItem(ACCESS_TOKEN_KEY) || null;
@@ -52,6 +55,7 @@ export const tokenStorage = {
   clearAuth: () => {
     try {
       localStorage.removeItem(ACCESS_TOKEN_KEY);
+      localStorage.removeItem(REFRESH_TOKEN_KEY);
       localStorage.removeItem(USER_KEY);
     } catch (e) {
       console.error('Error clearing auth storage:', e);

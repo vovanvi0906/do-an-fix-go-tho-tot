@@ -19,6 +19,7 @@ export const authService = {
     const data = response.data;
     if (data.accessToken) {
       tokenStorage.setAccessToken(data.accessToken);
+      tokenStorage.setRefreshToken(data.refreshToken);
     }
     if (data.user) {
       tokenStorage.setUser(data.user);
@@ -41,6 +42,7 @@ export const authService = {
       const data = response.data;
       if (data.accessToken) {
         tokenStorage.setAccessToken(data.accessToken);
+        tokenStorage.setRefreshToken(data.refreshToken);
       }
       if (data.user) {
         tokenStorage.setUser(data.user);
@@ -53,6 +55,7 @@ export const authService = {
         const data = fallbackRes.data;
         if (data.accessToken) {
           tokenStorage.setAccessToken(data.accessToken);
+        tokenStorage.setRefreshToken(data.refreshToken);
         }
         if (data.user) {
           tokenStorage.setUser(data.user);

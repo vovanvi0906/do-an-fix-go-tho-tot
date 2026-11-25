@@ -198,10 +198,14 @@ async def lifespan(app: FastAPI):
     app.state.models_status = {
         "yolo_cls": False,
         "yolo_detect": False,
+        "visual_service": False,
         "face_detector": False,
         "face_recognizer": False,
         "opencv_cv": HAS_OPENCV,
     }
+    from recommendation.visual_detector import load_visual_detector
+    app.state.visual_service_detector = load_visual_detector()
+    app.state.models_status["visual_service"] = app.state.visual_service_detector is not None
     app.state.yolo_cls_model = None
     app.state.yolo_model = None
     app.state.face_detector = None
@@ -266,6 +270,7 @@ async def lifespan(app: FastAPI):
     yield
 
     logger.info("🛑 [Lifespan] Giải phóng tài nguyên AI Microservice...")
+    app.state.visual_service_detector = None
     app.state.yolo_cls_model = None
     app.state.yolo_model = None
     app.state.face_detector = None
@@ -863,7 +868,7 @@ async def health_check(request: Request):
         "opencv_cv": HAS_OPENCV,
     })
 
-    has_any_model = any(models_status.get(k) for k in ["yolo_cls", "yolo_detect", "clip", "face_detector", "face_recognizer"])
+    has_any_model = any(models_status.get(k) for k in ["yolo_cls", "yolo_detect", "visual_service", "clip", "face_detector", "face_recognizer"])
 
     available_weights = []
     if WEIGHTS_DIR.exists():

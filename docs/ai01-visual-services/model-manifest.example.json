@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "fixgo.visual-detector.v1",
+  "task": "detect",
+  "modelVersion": "REPLACE_WITH_EVALUATED_MODEL_VERSION",
+  "weights": "weights/best.pt",
+  "weightsSha256": "REPLACE_WITH_ACTUAL_SHA256",
+  "imageSize": 640,
+  "validation": {
+    "approvedForPilot": false,
+    "reviewedBy": null,
+    "report": "independent-evaluation.json",
+    "reportSha256": null
+  },
+  "classes": [
+    {
+      "name": "object:o-cam-dien",
+      "kind": "object",
+      "categorySlug": "sua-dien",
+      "targetSlug": "o-cam-dien",
+      "code": "o-cam-dien",
+      "threshold": null
+    },
+    {
+      "name": "sign:burn_mark",
+      "kind": "sign",
+      "categorySlug": "sua-dien",
+      "targetSlug": "o-cam-dien",
+      "code": "burn_mark",
+      "threshold": null
+    },
+    {
+      "name": "sign:crack",
+      "kind": "sign",
+      "categorySlug": "sua-dien",
+      "targetSlug": "o-cam-dien",
+      "code": "crack",
+      "threshold": null
+    }
+  ]
+}

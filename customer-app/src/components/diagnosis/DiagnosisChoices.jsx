@@ -1,3 +1,4 @@
+import VisualAnalysisSummary from './VisualAnalysisSummary';
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TextInput, Pressable, ActivityIndicator } from 'react-native';
 import { diagnoseIssueImage } from '../../services/api/aiService';
@@ -50,9 +51,11 @@ export default function DiagnosisChoices({ result, imageUrl, description = '', o
   };
   const selectCategory = categoryId => { setChangingCategory(false); answer({ categoryId }); };
   const categoryRows = result?.availableCategories?.length ? result.availableCategories : categories;
+  const visualSuggestions = (!result?.visualAnalysisStatus || result.visualAnalysisStatus === 'suggestions' ? result?.visualServiceSuggestions || [] : []).filter(item => !targetId || item.targetId === targetId);
   const context = { categoryId: result?.suggestedCategoryId, ...(targetId ? { targetId } : {}) };
   return (
     <View nativeID="diagnosis-choices-container" style={{ marginVertical: 12 }}>
+      <VisualAnalysisSummary key={imageUrl || result?.imageUrl} result={result} imageUri={imageUrl || result?.imageUrl} />
       <Text style={{ fontWeight: '700', marginBottom: 8 }}>1. Xác nhận thiết bị → 2. Triệu chứng → 3. Dịch vụ</Text>
       <TextInput nativeID="diagnosis-description-input" value={note} onChangeText={setNote}
         placeholder="Mô tả thiết bị và triệu chứng" multiline editable={!busy}
@@ -63,6 +66,14 @@ export default function DiagnosisChoices({ result, imageUrl, description = '', o
       {busy && <ActivityIndicator nativeID="diagnosis-choices-loading" />}
       {!!error && <View><Text accessibilityRole="alert" style={{ color: '#DC2626' }}>{error}</Text>
         <Pressable disabled={busy} onPress={() => answer(lastAnswers)} style={{ padding: 12 }}><Text>Thử lại</Text></Pressable>
+      </View>}
+      {!!visualSuggestions.length && <View nativeID="visual-service-suggestions" style={{ padding:12, borderWidth:1, borderColor:'#CBD5E1', borderRadius:8, marginBottom:12 }}>
+        <Text style={{ fontWeight:'700', marginBottom:8 }}>Dịch vụ gợi ý từ dấu hiệu trong ảnh</Text>
+        <Text>Đây là gợi ý ban đầu. Thợ cần kiểm tra trước khi kết luận nguyên nhân và cách xử lý.</Text>
+        {visualSuggestions.map(item=><View key={`${item.targetId}:${item.id}`} style={{ marginTop:12 }}>
+          <Text style={{ fontWeight:'600' }}>{item.name}</Text><Text>{item.targetName}</Text><Text>{item.reason}</Text>
+          <Pressable accessibilityRole="button" nativeID={`visual-service-${item.id}`} disabled={busy} onPress={()=>answer({ categoryId:item.categoryId, targetId:item.targetId, serviceId:item.id })} style={{ paddingVertical:12 }}><Text>Chọn dịch vụ này</Text></Pressable>
+        </View>)}
       </View>}
       {!!result?.suggestedCategoryId && <TargetCandidateSection result={result} onSelectTarget={id => answer({ categoryId: result?.suggestedCategoryId, targetId: id })}
         onSelectCategory={selectCategory} busy={busy} />}

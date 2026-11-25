@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertCircle, CheckCircle2, X } from 'lucide-react';
 import { useAuth } from '../../../store/authStore';
@@ -21,6 +21,7 @@ export default function LoginPage() {
 
   const { login, setUser, isAuthenticated, role } = useAuth();
   const navigate = useNavigate();
+  const redirected = useRef(false);
 
   const showToast = (type, message) => {
     setToast({ type, message });
@@ -30,9 +31,13 @@ export default function LoginPage() {
   };
 
   const handleRedirectByRole = (userRole) => {
+    if (redirected.current) return;
+    redirected.current = true;
     const normalizedRole = String(userRole || '').toUpperCase();
     if (normalizedRole === 'ADMIN') {
-      navigate('/admin/dashboard', { replace: true });
+      const returnTo = sessionStorage.getItem('auth:returnTo');
+      sessionStorage.removeItem('auth:returnTo');
+      navigate(returnTo?.startsWith('/admin/') ? returnTo : '/admin/dashboard', { replace: true });
     } else if (normalizedRole === 'WORKER') {
       navigate('/worker/dashboard', { replace: true });
     } else {

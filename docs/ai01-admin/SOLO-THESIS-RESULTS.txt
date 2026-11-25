@@ -1,0 +1,43 @@
+CẬP NHẬT GIAO DIỆN: xem AI-MANAGEMENT-GUIDE.txt và AI-MANAGEMENT-RESULTS.txt. Trang Admin cũ đã chuyển về một trang /admin/ai01 với 5 tab. Nội dung bên dưới giữ làm hồ sơ phiên bản trước; luồng xuất hiện tại yêu cầu development_check và bằng chứng.
+
+FIXGO AI-01 — SOLO_THESIS (21/11/2026)
+
+Đã bàn giao
+- UI tiếng Việt /admin/ai01/solo trong menu Quản lý AI: mapping, gán nhãn, nguồn/ảnh trùng, tự kiểm tra, xuất dữ liệu; lọc thử 10 ảnh Sửa nước, ảnh/bbox nguồn, lịch sử sửa nhãn theo user/timestamp, danh sách điều kiện còn thiếu.
+- ACTIVE ADMIN được tự gán và tự xác nhận trong SOLO; không cần A/B hoặc người thứ ba. Non-admin, reviewer, viewer và role claim giả không vào được API SOLO. Guard JWT vẫn kiểm account ACTIVE và role từ DB, JWT secret/runtime hiện có.
+- API SOLO tách theo tên operation; không thêm nhánh bypass vào Store độc lập hoặc TASK01. Thư mục solo-thesis không copy baseline, tài khoản reviewer, annotation hoặc phê duyệt của luồng độc lập. Kiểm đường dẫn state chống symlink ra ngoài.
+- Reuse Store.check_files/validate_labels/mapping/record_provenance; kiểm nguồn/quyền/metadata/duplicate group riêng cho solo-development. Chuỗi audit SOLO riêng, kế thừa cơ chế revision/hash/timestamp/fsync của Store. Không giả principal A/B, không tạo approved/adjudicated decision.
+- Nhãn uncertain/needsExpertReview/reject lưu đầy đủ nhưng không được tự xác nhận để xuất. expectedAnnotationHash chặn sửa nhãn stale; xác nhận yêu cầu annotation hash mới nhất, đúng tác giả và lý do. Thay nhãn/mapping/provenance khiến cần xác nhận lại.
+- Xuất subset toàn bộ hoặc không xuất: kiểm taxonomy, tình trạng, mapping, license/rights, source, SHA ảnh/annotation/YAML, phash/group evidence, metadata thật và xác nhận hiện hành. Không tạo device/session/site ID. Dịch vụ dương cần chuyên môn hiện hành và bằng chứng.
+
+API (cùng JWT backend, không token riêng)
+GET /api/admin/ai01/access: thêm canUseSolo cho ACTIVE ADMIN.
+GET /api/admin/ai01/data/{solo_catalog,solo_items,solo_mappings,solo_readiness}
+GET /api/admin/ai01/data/{solo_detail,solo_related}?imageId=img-xxxxx
+POST /api/admin/ai01/actions/solo_mapping: payload mappingKey, decision, allowedTargetIds/revisedMeaning, reason.
+POST /api/admin/ai01/actions/solo_annotate: payload imageId, labels 7 trường, visualCondition, decision, reason, evidence tùy trường và expectedAnnotationHash (null nếu nhãn đầu tiên).
+POST /api/admin/ai01/actions/solo_save_provenance: payload nguồn/rights/group/metadata như Store hiện có, nhưng lưu riêng SOLO.
+POST /api/admin/ai01/actions/solo_confirm: payload imageId, annotationEventHash, reason.
+POST /api/admin/ai01/actions/solo_export: payload imageIds (subset không rỗng/trùng).
+GET /api/admin/ai01/solo/images/:imageId
+GET /api/admin/ai01/solo/images/:imageId/related/:memberId
+GET /api/admin/ai01/solo/exports/:file
+Mọi POST bọc {payload:{...}}; danh tính lấy từ req.user. Không nhận reviewerId/userId/role/expert do client gửi. Invalid/stale/gate trả 409, chưa xác thực 401, không phải Admin 403, engine/audit hỏng 503.
+
+Bản xuất
+File solo-development-<UTC>.jsonl trong <state>/solo-thesis/exports/, có audit hash và kiểm hash khi tải. Schema fixgo.ai01.solo-development.v1, mode SOLO_THESIS, datasetType solo-development, split development. review.status self_confirmed, annotatorIds đúng 1 user, confirmedBy cùng user, independentlyReviewed=false, blindTest=false. Có input/label/source hashes, phash, nguồn/metadata và aiExposure. Không có adjudicatorId giả, không trạng thái adjudicated, không nhãn independently approved. Endpoint approved-development không chấp nhận tên file SOLO và ngược lại.
+
+Kiểm thử
+HTTP integration: 26/26 đạt (17 độc lập giữ nguyên, 9 SOLO). Bao phủ ACL/ACTIVE/JWT giả, identity spoof, Admin vẫn không annotate độc lập, uncertain/reject, stale edit/confirm, taxonomy/tình trạng, nguồn/quyền/metadata, mapping/provenance invalidation, export subset toàn bộ, export SOLO dương bằng fixture tạm, một annotator, download/audit/hash, replay restart, audit corrupt và chặn symlink state ra ngoài. So sánh hash chứng minh các thao tác SOLO không đổi independent events hoặc log nguồn TASK03C.
+Chromium SOLO: đạt toàn bộ 5 bước qua LoginPage thật + auth fixture in-memory; water10 filter, không có independent attestation, uncertain không confirm/export, mapping/annotation/source/self-confirm/history/export SOLO, cờ phân biệt dữ liệu và approved export vẫn bị chặn. Artifact dương CHỈ là contract fixture tạm, không nhãn thật/GT thật; harness dọn state khi kết thúc.
+Không dùng mật khẩu, localStorage hoặc session của chủ dự án. Không đăng nhập tài khoản thật trong task SOLO. Sau triển khai cần chủ dự án tự đăng nhập để nghiệm thu UX với tài khoản của mình; không yêu cầu chia sẻ JWT.
+
+Lệnh kiểm thử
+cd server && npx jest --config test/jest-ai01-admin.config.cjs --runInBand --silent
+node server/test/check-ai01-solo-ui.cjs
+AI01_SOLO_EVIDENCE_DIR có thể đổi nơi lưu screenshot/summary ra ngoài repo. Vite phải chạy cổng 5173; harness dùng loopback 3039. Không chạy song song hai browser harness cùng cổng.
+
+Giới hạn và việc tiếp theo
+SOLO không tự làm cho license/metadata đang thiếu trở nên hợp lệ; ảnh vẫn cách ly và export bị chặn cho tới khi có bằng chứng thật. Nhãn phát triển một người không phù hợp làm đánh giá độc lập/blind test. Chưa tạo nhãn/mapping/nguồn/confirmation/export SOLO thật. Không sửa raw dataset, model, production inference, TASK03C core hoặc schema/migration DB. Không commit/push. Một backend writer local; không cấu hình tự khởi động sau reboot.
+
+Build/smoke cuối: backend và frontend build đạt; Vite cảnh báo kích thước bundle hiện có. Backend local đã restart; Swagger có 3 binary route SOLO, request không JWT trả 401. Kiểm thử trình duyệt độc lập 7 bước cũng đạt sau khi tích hợp SOLO. Evidence local ngoài repo: /home/vanvi/Work/datasetai/06-benchmarks/ai01-admin-v1/solo-test-evidence/ (SOLO và independent-regression). Không chứa credential/JWT/session của chủ dự án.

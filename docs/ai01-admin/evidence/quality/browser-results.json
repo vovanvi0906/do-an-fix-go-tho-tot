@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "queue": true,
+  "pilotImages": 171,
+  "inlineObjectAndSignDrawing": true,
+  "resize": true,
+  "deleteUndo": true,
+  "explicitEvidence": true,
+  "separateJournal": true,
+  "rightsBlocksExport": true,
+  "reloadPreservesBoxes": true,
+  "keyboardSaveAndNext": true,
+  "mobile": true,
+  "jsErrors": [],
+  "syntheticTemporaryStateOnly": true
+}

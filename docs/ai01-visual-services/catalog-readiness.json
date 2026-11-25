@@ -1,0 +1,74 @@
+{
+  "readOnly": true,
+  "databaseAvailable": true,
+  "targets": [
+    {
+      "id": "ca1e389e-6302-4a19-a086-5c815a836473",
+      "slug": "o-cam-dien",
+      "name": "Ổ cắm điện",
+      "category": {
+        "name": "Sửa điện",
+        "isActive": true
+      },
+      "services": [
+        {
+          "id": "660c93a4-0bc0-4b90-8175-6b6b331de93c",
+          "name": "Sửa ổ cắm không có điện",
+          "slug": "sua-o-cam-khong-co-dien"
+        },
+        {
+          "id": "20399951-fdf7-477b-ad0d-b03945e42e21",
+          "name": "Sửa ổ cắm chập chờn",
+          "slug": "sua-o-cam-chap-chon"
+        },
+        {
+          "id": "02695ade-1d71-4518-a4a3-4112f0f99055",
+          "name": "Sửa ổ cắm lỏng / tiếp xúc kém",
+          "slug": "sua-o-cam-long-tiep-xuc-kem"
+        },
+        {
+          "id": "51bc6727-635d-4e9e-a979-090a972ea48a",
+          "name": "Thay ổ cắm cháy / hỏng",
+          "slug": "thay-o-cam-chay-hong"
+        },
+        {
+          "id": "ef6468e6-5b5d-4ed8-a7d5-eef4eefac7c8",
+          "name": "Thay ổ cắm âm tường",
+          "slug": "thay-o-cam-am-tuong"
+        },
+        {
+          "id": "d1eddfb8-da4c-42d7-b37e-37452af4d8ef",
+          "name": "Thay ổ cắm nổi",
+          "slug": "thay-o-cam-noi"
+        },
+        {
+          "id": "8476aab0-c6df-474f-9b85-2a92fbd83ca6",
+          "name": "Lắp đặt ổ cắm mới",
+          "slug": "lap-dat-o-cam-moi"
+        },
+        {
+          "id": "222dcb57-598c-49d5-b25d-49c3accd6bbe",
+          "name": "Di dời ổ cắm",
+          "slug": "di-doi-o-cam"
+        },
+        {
+          "id": "d4d49da5-26d1-4d18-9a85-0e7a8570f87b",
+          "name": "Lắp ổ cắm chống nước",
+          "slug": "lap-o-cam-chong-nuoc"
+        },
+        {
+          "id": "c0a035df-1c69-46c0-85a7-3268df1887e6",
+          "name": "Lắp ổ cắm USB / USB-C",
+          "slug": "lap-o-cam-usb-usb-c"
+        },
+        {
+          "id": "d0ddcbd3-5c6e-4a2b-a3bf-ea42821acf6c",
+          "name": "Kiểm tra ổ cắm phát nóng hoặc có mùi khét",
+          "slug": "kiem-tra-o-cam-phat-nong-hoac-co-mui-khet"
+        }
+      ],
+      "visualSymptoms": [],
+      "approvedLinks": []
+    }
+  ]
+}

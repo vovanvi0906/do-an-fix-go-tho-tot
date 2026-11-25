@@ -16,6 +16,8 @@ import HomePage from '../pages/HomePage';
 import HomeMobileView from '../features/customer/views/HomeMobileView';
 import ProtectedRoute from '../app/router/ProtectedRoute';
 import AdminLayout from '../layouts/AdminLayout';
+import Ai01ReviewPage from '../pages/ai01-review/Ai01ReviewPage';
+import AiManagementPage, {AiManagementLegacyRedirect} from '../pages/ai01-review/AiManagementPage';
 import { useAuth } from '../store/authStore';
 
 const TestAiPage = import.meta.env.DEV ? lazy(() => import('../pages/test-ai/TestAiPage')) : null;
@@ -53,6 +55,8 @@ export default function AppRoutes() {
       >
         <Route index element={<Navigate to="/admin/dashboard" replace />} />
         <Route path="dashboard" element={<DashboardPage />} />
+        <Route path="ai01" element={<AiManagementPage />} />
+        <Route path="ai01/:section" element={<AiManagementLegacyRedirect />} />
         <Route path="users" element={<UsersPage />} />
         <Route path="workers" element={<WorkersManagementPage />} />
         <Route path="categories" element={<CategoryManagementPage />} />
@@ -66,6 +70,8 @@ export default function AppRoutes() {
         <Route path="settings" element={<SystemSettingsPage />} />
       </Route>
 
+      {/* Assigned non-admin reviewers have a separate workspace; API enforces all ACLs. */}
+      <Route path="/ai01/:section" element={<ProtectedRoute><Ai01ReviewPage /></ProtectedRoute>} />
       {/* 3. Worker Protected Routes */}
       <Route
         path="/worker/dashboard"

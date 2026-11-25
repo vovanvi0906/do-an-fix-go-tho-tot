@@ -1,0 +1,22 @@
+{
+  "image+text": {
+    "n": 0,
+    "qualityMetrics": null,
+    "reason": "no reviewed independent ground truth"
+  },
+  "image-only": {
+    "n": 0,
+    "qualityMetrics": null,
+    "reason": "no reviewed independent ground truth"
+  },
+  "text-only": {
+    "n": 0,
+    "qualityMetrics": null,
+    "reason": "no reviewed independent ground truth"
+  },
+  "pairedAblation": {
+    "comparison": "image+text minus text-only on same cases; text branch is keyword heuristic",
+    "categoryTop1Delta": null,
+    "interpretation": "requires nonempty original user descriptions; no causal image claim from smoke or empty text"
+  }
+}

@@ -1,0 +1,76 @@
+FIXGO AI-01 — DATASET PREPARATION RESULTS
+
+Dataset: /home/vanvi/Work/datasetai/02-development/ai01-prepared-v1
+Raw unchanged: true; trained: false; deployed: false; approved Ground Truth: false.
+DB: verified READ ONLY, 6 categories / 70 targets.
+
+COUNTS
+{
+  "scanned": 21437,
+  "matchingTask03B": 21437,
+  "technicalErrorImages": 148,
+  "geometryWarningImages": 246,
+  "exactGroups": 24,
+  "exactImages": 48,
+  "redundantExactCopies": 12,
+  "conflictingDuplicateImages": 24,
+  "nearPairs": 2757,
+  "nearImages": 3131,
+  "leakageGroups": 6969,
+  "largestLeakageGroup": 390,
+  "advertisementCandidates": 163,
+  "compositeCandidates": 285,
+  "manualReview": 11750,
+  "decodeErrors": 0,
+  "missingLabels": 0,
+  "emptyLabels": 148,
+  "invalidLabelFormatImages": 0,
+  "usableAnyTask": 18901,
+  "excludedAllTasks": 2536
+}
+
+MAPPING
+{
+  "usable_source_candidate": 13,
+  "pending_context": 40,
+  "out_of_scope": 1
+}
+All human approvals remain pending.
+
+TASKS
+object_detection: 13086 images, 10418 train / 2668 development validation
+  Máy lạnh / Điều hòa: 155 train / 65 val; trial minimum: True
+  Lavabo / Chậu rửa / Bồn rửa: 27 train / 4 val; trial minimum: False
+  Vòi nước / Vòi sen: 250 train / 71 val; trial minimum: True
+  Tủ lạnh / Tủ lạnh side-by-side: 151 train / 49 val; trial minimum: True
+  Bồn cầu / Két nước: 52 train / 19 val; trial minimum: True
+  Ổ cắm điện: 8803 train / 2331 val; trial minimum: True
+  Máy giặt / Máy giặt sấy: 61 train / 18 val; trial minimum: True
+  Đường ống cấp / thoát nước: 942 train / 114 val; trial minimum: True
+visible_sign_detection: 964 images, 784 train / 180 development validation
+  Vết giống phân chim: 289 train / 62 val; trial minimum: True
+  Lá / rác lá: 358 train / 97 val; trial minimum: True
+  Bụi / bẩn bám: 139 train / 21 val; trial minimum: True
+category_classification: 17937 images, 14294 train / 3643 development validation
+  Sửa nước: 1250 train / 207 val; trial minimum: True
+  Sửa điện: 8803 train / 2331 val; trial minimum: True
+  Điện lạnh: 389 train / 134 val; trial minimum: True
+  Làm vườn: 3852 train / 971 val; trial minimum: True
+
+VALIDATION
+46,054 pinned files, 21,437 source records, derived classes/boxes/classifier order verified.
+SHA/pixel/source-family/group overlap: 0; pHash pairs cross split: 0 / 2,757.
+No independent test created. Exported source labels remain unverified weak supervision.
+
+ADMIN
+Existing five-tab page now displays preparation progress, per-task/class counts,
+mapping states and preparation review queue. Row warnings link to the same inline
+Vietnamese label editor. Existing human history/export checks remain separate.
+
+TESTS
+6 synthetic Python tests passed; 46 HTTP tests passed (4 suites).
+Chromium: preparation report, review queue/filter, inline labeling/check/history/export; no JS errors.
+Client/server builds passed; Vite retains existing >500kB bundle warning.
+No source data/model/production inference/schema changes; no commit/push.
+
+Guide: DATASET-PREPARATION-GUIDE.txt

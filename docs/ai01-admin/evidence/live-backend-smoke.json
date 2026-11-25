@@ -1,0 +1,7 @@
+{
+  "port": 3000,
+  "unauthenticatedAi01AccessStatus": 401,
+  "bootstrapApplied": false,
+  "realUserRoleGrantsApplied": false,
+  "note": "Live startup/unauthenticated rejection only; authenticated end-to-end tested in isolated harness, pending real user bootstrap"
+}

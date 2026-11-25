@@ -1,6 +1,7 @@
+import { ensureSession, refreshSession, expireSession } from '../auth/session';
 import { tokenStorage } from '../storage/tokenStorage';
 
-let isRedirecting = false;
+const isAuth = url => /\/auth\/(login|register|refresh|firebase|google)/.test(url || '');
 
 /**
  * Cấu hình Axios request & response interceptors (Lớp 1: Bảo vệ bị động)
@@ -9,7 +10,8 @@ let isRedirecting = false;
 export const setupInterceptors = (axiosInstance) => {
   // 1. REQUEST INTERCEPTOR: Tự động đính kèm Token Bearer
   axiosInstance.interceptors.request.use(
-    (config) => {
+    async (config) => {
+      if (!isAuth(config.url)) await ensureSession();
       const token = tokenStorage.getAccessToken();
       if (token && !config.headers.Authorization) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -22,7 +24,7 @@ export const setupInterceptors = (axiosInstance) => {
   // 2. RESPONSE INTERCEPTOR: Bắt lỗi toàn cục & xử lý mã 401 Unauthorized khi Token hết hạn
   axiosInstance.interceptors.response.use(
     (response) => response,
-    (error) => {
+    async (error) => {
       if (error.response) {
         const { status, data, config } = error.response;
         const requestUrl = config?.url || '';
@@ -35,23 +37,22 @@ export const setupInterceptors = (axiosInstance) => {
         } else if (status === 401) {
           // Phân biệt 2 trường hợp lỗi 401:
           // TH 1: Đang ở trang Login gọi API đăng nhập sai tài khoản/mật khẩu
-          const isAuthEndpoint = requestUrl.includes('/auth/login') || requestUrl.includes('/auth/register');
+          const isAuthEndpoint = isAuth(requestUrl);
 
           if (isAuthEndpoint) {
             friendlyMessage = data?.message || 'Tài khoản hoặc mật khẩu không chính xác';
           } else {
-            // TH 2: Token JWT đã hết hạn hoặc bị thu hồi khi đang sử dụng app
-            friendlyMessage = 'Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.';
-
-            // Xóa sạch thông tin xác thực khỏi localStorage
-            tokenStorage.clearAuth();
-
-            // Điều hướng về trang /login nếu chưa ở trang login
-            if (!isRedirecting && window.location.pathname !== '/login') {
-              isRedirecting = true;
-              alert('⚠️ Phiên đăng nhập của bạn đã hết hạn. Vui lòng đăng nhập lại!');
-              window.location.href = '/login';
+            const request = error.config;
+            if (request && !request._authRetry) {
+              request._authRetry = true;
+              const current = tokenStorage.getAccessToken();
+              const sent = request.headers?.Authorization;
+              const token = current && sent !== `Bearer ${current}` ? current : await refreshSession();
+              request.headers.Authorization = `Bearer ${token}`;
+              return axiosInstance(request);
             }
+            friendlyMessage = 'Phiên đăng nhập không còn hợp lệ, vui lòng đăng nhập lại.';
+            expireSession();
           }
         } else if (status === 403) {
           friendlyMessage = data?.message || 'Tài khoản không có quyền truy cập chức năng này (403)';

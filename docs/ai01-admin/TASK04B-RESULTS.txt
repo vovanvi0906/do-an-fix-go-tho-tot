@@ -1,0 +1,141 @@
+FIXGO AI-01 — TASK 04B: Dataset Quality Improvement
+Ngày bàn giao: 23/11/2026. Chỉ chuẩn bị và tích hợp review, không train/deploy.
+
+Kết quả và giới hạn
+Đã đối chiếu 21.437 ảnh raw, 46.054 file manifest prepared-v1, 6.912 artifact
+strict-v2, 4.212 file quality-v1 và 33 file được bảo vệ (weights, inference,
+Diagnosis Resolver, schema, manifest prepared). Tất cả checksum khớp. Không sửa
+raw, prepared-v1, strict-v2, production inference, DB/schema; không commit/push.
+Không thay lịch sử gán nhãn trước đây. Không tạo nhãn approved Ground Truth.
+Kiểm thử dùng identity giả và state tạm, đã dọn; không ghi annotation giả vào
+state của người dùng.
+
+Vòi nước yếu: bằng chứng so với giả thuyết
+- Đếm trực tiếp file YOLO strict-v2: 23 ảnh/23 box train, 9 ảnh/9 box val.
+  class-map.json cũ còn số support trước lọc (250/71); không lấy số này làm số
+  ảnh thực train. Giữ nguyên artifact cũ; số đếm đúng được ghi trong final-data-audit.json.
+- Chỉ nguồn faucet literal đơn lớp được strict-v2 giữ. Các lớp leaking_faucet,
+  broken_shower_head... thường là vùng sự cố/bộ phận, không thể cộng tự động
+  vào whole-object faucet. Có 154 ảnh chứa raw class faucet (kể cả nhãn hỗn hợp)
+  trong hàng đợi; cần xem đủ tất cả vật thể trước khi tái sử dụng.
+- Full validation: cả 9 box vòi bị bỏ sót tại confidence 0,25 / IoU 0,5.
+  Score cao nhất của dự đoán đúng lớp và IoU>=0,5 chỉ 0,03105.
+  P=1 của thư viện ở operating point báo cáo KHÔNG có nghĩa vòi chính xác 100%.
+- Cạnh ngắn box sau resize 320 trung vị 142,5px (min 26,5px). Chưa đủ bằng
+  chứng kết luận chỉ do vật thể nhỏ/320px. 5 epochs có thể thiếu học, nhưng
+  chưa chạy ablation nên đây là giả thuyết.
+- Ví dụ img-19358 và img-20263: nhìn thấy vòi nhưng model không có box >=0,25.
+  img-19358 còn có vật thể nền cần người kiểm tra độ đầy đủ nhãn.
+
+Phân tích mỗi lớp (source validation, chưa độc lập)
+Lớp          ảnh train/full-val    P       R       AP50    AP50-95
+Máy lạnh         155 / 65        0,315   0,529   0,442    0,231
+Vòi nước          23 / 9         1,000   0,000   0,075    0,011
+Tủ lạnh          151 / 49        0,573   0,737   0,655    0,458
+Ổ cắm            300 / 2331      0,810   0,954   0,954    0,742
+Máy giặt          61 / 18        0,319   0,521   0,320    0,181
+Không gọi đây là accuracy/F1 chính thức. Số FP/FN ở ngưỡng cố định 0,25 trong
+error-analysis.json khác operating point tối ưu của thư viện. Model_extra chỉ
+là box không khớp nguồn: nguồn có thể thiếu nhãn, không mặc định model sai.
+- Máy lạnh img-00217: box dự đoán quá lớn so với thiết bị, có chữ quảng cáo.
+- Máy giặt img-21277: có box đúng vùng nhưng box dư/biên rộng, ảnh sản phẩm nền trắng.
+- Tủ lạnh: 17 box nguồn bị bỏ sót, 27 box không khớp nguồn tại ngưỡng cố định.
+- Ổ cắm: coverage nguồn lớn nhất, 507 box không khớp nguồn; ưu tiên hard negatives,
+  ảnh nhãn thiếu và source-family balance thay vì lấy thêm nhiều ảnh tương tự.
+- img-17671 toilet_issue khoanh phần nắp bồn cầu hỏng, không bao toàn bồn cầu;
+  img-17804 leaking_pipe khoanh tia nước/vùng sự cố. Tiếp tục cách ly hai loại
+  này khỏi whole-object training cho đến khi người vẽ box vật thể mới.
+Ảnh minh họa: evidence/quality/source-model-cases.png (nguồn vàng nét đứt,
+model xanh; chưa phải nhãn người xác nhận).
+
+Bản sao và hàng đợi
+/home/vanvi/Work/datasetai/02-development/ai01-quality-v1 (~186MiB)
+- 4.203 ảnh / 5.861 box nguồn cần kiểm; không khẳng định tất cả đều sai.
+- Đợt đầu 171 ảnh / 325 box nguồn, ưu tiên vòi và nhóm nguồn đa dạng, thêm
+  ví dụ định vị của các lớp khác. Không yêu cầu gán lại toàn bộ 21.437 ảnh.
+- 2.782 ảnh / 3.962 box plumbing có phạm vi mơ hồ cần xem; 678 ảnh có khác
+  biệt model–nhãn nguồn. Các nhóm này giao nhau, không cộng các số cảnh báo.
+- Chuẩn hóa tham chiếu thành xyxy [0,1], bao polygon khi cần, giữ tọa độ/
+  format/nhãn/checksum gốc trong provenance. Không tự sửa ngữ nghĩa hoặc tạo
+  box human: workingBoxes bắt đầu rỗng. Admin có thể lấy box vật thể nguồn
+  làm NHÁP, rồi kiểm/xác nhận; vùng sự cố không có thao tác nhập làm vật thể.
+- drafts.jsonl + queue-index.json + reason-labels.json + SHA256SUMS.json giữ
+  ảnh bản sao, nhóm leakage/split cũ, cảnh báo, tham chiếu, hash và trạng thái.
+
+Duplicates, leakage, quyền ảnh
+- 24 nhóm / 48 ảnh trùng; 24 ảnh có nhãn trùng mâu thuẫn; 2.757 cặp pHash
+  trên 3.131 ảnh; 6.969 nhóm leakage, lớn nhất 390 ảnh.
+- 148 label rỗng, 246 ảnh có box gần toàn khung. Không phát hiện ảnh decode
+  lỗi, thiếu label hoặc label sai định dạng. Label rỗng chưa phải ảnh âm.
+- Heuristic: 163 nghi quảng cáo, 285 nghi ảnh ghép; chỉ dùng để ưu tiên xem.
+- Cross-split SHA/pixel/pHash/source family đã biết: 0 sau kiểm lại snapshot
+  và dữ liệu thực. pHash/source-family vẫn là phương pháp phát hiện có giới
+  hạn; không chứng minh mọi nguồn web hoàn toàn độc lập.
+- 6 YAML tuyên bố CC BY 4.0. Kiểm web: trang điều hòa hiện hiển thị tuyên bố
+  này, 5 trang khác công cụ không truy cập được. Chưa xác minh quyền của ảnh
+  gốc/tác giả và nghĩa vụ attribution cho từng ảnh: rightsVerified=0.
+  Không coi tuyên bố trong YAML là chứng nhận quyền. Audit URL và bằng chứng
+  cần bổ sung nằm trong rights-audit.json; không tự xác nhận quyền.
+
+Coverage và dấu hiệu
+Nguồn máy lạnh, tủ lạnh, ổ cắm, máy giặt có support cho thử nghiệm phát triển
+trước đây; vòi cần ưu tiên bổ sung box kiểm và cảnh đa dạng. Bồn cầu/đường ống
+chưa đủ điều kiện ngữ nghĩa vật thể. Với bộ đã sửa: 0 lớp object, 0 lớp sign
+sẵn sàng train tại bàn giao; chưa có bản sửa thật của người dùng.
+Thiết kế riêng water_dripping, wet_surface, crack, burn_mark. Có hướng dẫn
+bằng chứng và ví dụ âm từng trường. Có thể bổ sung water_spray, broken_part,
+stain_or_discoloration, surface_soiling, bird_droppings, leaf_debris CHỈ khi
+thấy bằng chứng; tên lỗi nguồn không tạo positive. Crack khác mối nối; burn
+mark khác bẩn tối; wet_surface không suy nguồn rò; water_dripping không tự
+coi vòi mở bình thường là hư. Không có lớp sign nào có số lượng box human
+đã kiểm đủ để đề nghị train ngay. Alias water_drip cũ chỉ phục vụ hiển thị,
+không viết lại lịch sử cũ.
+
+Admin / audit / export
+Dữ liệu và Gán nhãn có panel TASK04B, bộ lọc ưu tiên/toàn bộ hàng đợi, editor
+bbox cùng ảnh, source reference riêng, nhãn tiếng Việt, mapping là đề xuất.
+Vẽ/kéo/resize/xóa/undo; object và sign là hai namespace. Có nháp, xác nhận,
+chưa chắc và loại. Phím 1/2, Esc, Delete, Ctrl+Z, Enter; nhập liệu không kích
+hoạt shortcut. Editor cấp ảnh và bbox không cùng mount, tránh hai lần ghi.
+State mới: $AI01_REVIEW_STATE_DIR/bbox-quality-v1/events.jsonl; hash chain,
+user ID server, UTC timestamp, source/copy/catalog/snapshot hash, optimistic
+concurrency. JWT kiểm ACTIVE/ADMIN ở backend; không cần reviewer/nhân sự AI.
+Confirmed object cần attestation phạm vi vật thể; mỗi positive sign cần box
+và bằng chứng. Export chặn thiếu quyền/nguồn/group evidence, nhãn chưa xác
+nhận, ảnh đổi checksum, khác owner, snapshot cũ hoặc duplicate pixel có nhãn
+mâu thuẫn. Bộ xuất dùng split frozen, không tự chia lại theo Roboflow.
+Bản xuất nằm dưới $AI01_REVIEW_STATE_DIR/bbox-quality-v1/exports/
+bbox-development-<UTC>/, gồm object/{images,labels, data.yaml}, sign tương tự,
+records.jsonl, summary.json và SHA256SUMS.json. Các class YOLO zero-based liên
+tục, bbox xywh chuẩn hóa. Mọi record aiExposed=true, benchmarkEligible=false,
+approvedGroundTruth=false, independentlyReviewed=false. Không đưa ảnh
+quarantine chưa kiểm sang benchmark. Không có nút train/deploy giả.
+Export là bước chuẩn bị; không tự chạy train dù số lớp tăng đủ mức tối thiểu.
+
+Cấu hình tiếp theo (CHƯA chạy)
+next-training-proposal.json: local YOLOv8n, detection, CPU, 416px, batch2,
+15epochs, workers0, cache=false, seed23; cap cân bằng ~400 ảnh/lớp, ưu tiên
+nhóm đa dạng; chỉ giữ best/last, không checkpoint mỗi epoch. Nếu thiếu RAM
+thì batch1/320 trước khi chạy. Máy 12 logical CPU, RAM ~14,7GiB; lúc audit
+~6GiB khả dụng, đĩa trống ~5,36GiB. Giữ >=2GiB sau export/train; không nhân
+bản thêm raw hay cache ảnh RAM/đĩa. Thread cap4 phải đặt process-local cả
+Ultralytics NUM_THREADS và torch.set_num_threads; env đơn thuần không đủ.
+Mức engineering tối thiểu 20 ảnh train /5 val và 2/1 nhóm mỗi lớp không phải
+chứng nhận chất lượng. Riêng vòi nên tăng nhiều cảnh đã kiểm trước train;
+không dùng augmentation để tính thành mẫu độc lập. Kiểm lại nhãn sửa, đủ
+quyền/bằng chứng, coverage và leakage trước khi cho phép thử nghiệm mới.
+
+Kiểm thử
+- 52 HTTP tests / 5 suites và 6 Python preparation tests qua.
+- Browser workflow Quản lý AI 5 tab qua; browser TASK04B vẽ object/sign,
+  resize, delete/undo, reload, keyboard save/next, quyền chặn export, mobile
+  qua; không JS error. Identity và state tạm, không dùng phiên người dùng.
+- Client build và server build qua; Vite còn cảnh báo chunk >500kB hiện có.
+- final-data-audit.json và browser-results.json trong evidence/quality.
+Các lệnh chạy lại:
+ npm --prefix server test -- --config test/jest-ai01-admin.config.cjs --runInBand --silent
+ ai-service/.venv/bin/python -B -m unittest discover -s server/test -p test_ai01_preparation.py
+ node server/test/check-ai01-quality-ui.cjs   (Vite 127.0.0.1:5173)
+ node server/test/check-ai01-management-ui.cjs
+ npm --prefix client run build
+ npm --prefix server run build

@@ -1,0 +1,47 @@
+ADMIN — TỰ LÀM MỚI PHIÊN VÀ GIỮ BẢN NHÁP
+
+Hành vi
+- Lưu access/refresh token từ API đăng nhập/đăng ký hiện có.
+- Trước request, định kỳ 30 giây và khi quay lại tab: access token còn dưới 60 giây được làm mới qua POST /auth/refresh.
+- Request đồng thời dùng chung một Promise refresh. Request 401 muộn dùng token mới đã nhận. Mỗi request chỉ replay một lần.
+- Refresh bị từ chối (400/401/403), hoặc protected request tiếp tục 401 sau replay: giữ bản nháp, xóa auth và về login.
+- Lỗi mạng/timeout/5xx giữ phiên để thử lại; không tự đăng xuất.
+- Logout/đăng nhập khác trong khi refresh đang chạy không bị kết quả cũ khôi phục phiên.
+- AuthProvider không xóa token quá hạn trước khi refresh, đồng bộ state sau refresh.
+- Sau đăng nhập lại, Admin trở về đường dẫn nội bộ cũ, gồm query image/bộ lọc.
+
+Bản nháp
+- Giữ form bbox (boxes, nhãn mỗi box, review, ghi chú/bằng chứng), nhãn ảnh (đối tượng, dấu hiệu, quyết định, cờ, ghi chú), và form kiểm tra trước xuất.
+- sessionStorage tách theo tài khoản/công cụ/ID ảnh, sống qua reload/đăng nhập lại trong cùng tab. Đóng tab hoặc xóa dữ liệu trình duyệt có thể mất bản nháp.
+- Có thông báo khôi phục; nếu eventHash server đổi thì hỏi trước khi áp dụng bản nháp cũ để đối chiếu.
+- Không tự gửi/duyệt/xuất nhãn. Giữ optimistic concurrency, audit và export gate.
+- Lưu thành công hoặc hoàn tác về ban đầu mới xóa bản nháp; lỗi lưu vẫn giữ.
+- Nếu không thể ghi storage, thông báo để lưu bản sửa lên server. Không lưu blob ảnh vào storage.
+
+Vận hành
+Phiên đăng nhập từ phiên bản cũ chưa có refresh token: cần đăng nhập lại MỘT LẦN để nhận cặp token. Không kéo dài access token, không thay đổi backend/schema/dataset/model.
+
+File thay đổi trong lượt này
+client/src/services/auth/session.js (mới)
+client/src/services/auth/session.test.js (mới)
+client/src/services/api/interceptors.js
+client/src/services/storage/tokenStorage.js
+client/src/features/auth/services/auth.service.js
+client/src/features/auth/pages/LoginPage.jsx
+client/src/store/authStore.jsx
+client/src/hooks/useAuthCheck.js
+client/src/pages/ai01-review/useLabelDraft.js (mới)
+client/src/pages/ai01-review/useLabelDraft.test.jsx (mới)
+client/src/pages/ai01-review/components/BBoxQualityEditor.jsx
+client/src/pages/ai01-review/components/QuickLabelEditor.jsx
+client/src/pages/ai01-review/components/LabelDetailEditor.jsx
+client/src/pages/ai01-review/FastLabelPage.jsx
+client/vitest.config.js
+Báo cáo này.
+
+Kiểm chứng
+- client npm test: 39 tests / 9 files đạt. Bao gồm 11 test mới về refresh đồng thời, xoay token, lỗi mạng/5xx, logout khi refresh, refresh từ chối, 401 muộn, replay, không lặp 401, bản nháp/khôi phục/tách tài khoản/xung đột/hoàn tác; cùng 28 test regression hiện có.
+- client npm run build: đạt, cảnh báo bundle lớn hơn 500 kB còn tồn tại.
+- git diff --check: đạt. Client không có script typecheck riêng.
+- Chưa chờ hết hạn phiên thật 15 phút trên trình duyệt người dùng; các tình huống thời hạn và API lỗi được mô phỏng trong test.
+- Không commit/push, không chạy training, không sửa dữ liệu thật.

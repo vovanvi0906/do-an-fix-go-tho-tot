@@ -1,0 +1,45 @@
+FIXGO AI-01 TASK04A — KẾT QUẢ THỬ NGHIỆM
+
+Run chính: /home/vanvi/Work/datasetai/03-experiments/ai01-task04a-strict-v2
+
+YOLOv8n pretrained local COCO detector, fine-tune 5 lớp; CPU, batch 4, imgsz 320, 5 epochs, AdamW lr0=0.001, seed23, workers0, cache=False.
+Thực tế Ultralytics dùng 8 luồng Torch (override yêu cầu 4 ban đầu); nice10. Không CUDA. RAM tiến trình khoảng 1.2GiB; đĩa luôn còn hơn 5GiB.
+Data: 690 train, 241 balanced development val (dùng chọn checkpoint), 2472 full development val. Balanced val là subset của full val, không phải test độc lập.
+Chỉ các lớp nguồn chỉ vật thể trực tiếp: điều hòa, faucet, refrigerator, OUTLET, washing_machine. Tối đa 300 ảnh train/lớp, 100 balanced-val/lớp, ưu tiên đa dạng nhóm.
+Bồn cầu/ống và mọi source plumbing fault labels bị cách ly: một số bbox nguồn khoanh vùng sự cố/nước, không phải toàn vật thể. Không đổi bbox/ảnh/nhãn gốc.
+Run7 v1 chỉ giữ để chẩn đoán lỗi ngữ nghĩa dữ liệu; không dùng làm detector đầy đủ. Không so AP hai run như cùng một benchmark.
+
+Full development: P=0.603328, R=0.548247, mAP50=0.489238, mAP50-95=0.324297
+Balanced development: P=0.649227, R=0.554993, mAP50=0.533630, mAP50-95=0.342922
+Nhãn nguồn chưa xác minh độc lập; không phải accuracy/F1 chính thức hoặc approved GT. P/R theo operating point toolkit chọn trên val.
+
+THEO LỚP (full source val)
+may-lanh-dieu-hoa: P=0.3152, R=0.5294, AP50=0.4422, AP50-95=0.2306
+voi-nuoc-voi-sen: P=1.0000, R=0.0000, AP50=0.0750, AP50-95=0.0106
+tu-lanh-tu-lanh-side-by-side: P=0.5726, R=0.7370, AP50=0.6546, AP50-95=0.4582
+o-cam-dien: P=0.8097, R=0.9537, AP50=0.9542, AP50-95=0.7415
+may-giat-may-giat-say: P=0.3191, R=0.5212, AP50=0.3203, AP50-95=0.1806
+Vòi: chỉ 23 train/9 val, R=0 ở operating point báo cáo; P=1 là quy ước nội suy khi không có prediction tại điểm đó, không phải model hoàn hảo.
+
+VÍ DỤ (conf .25, IoU match .5 với nguồn chưa xác minh)
+img-20905: detector định vị tủ lạnh; baseline raw V2 gợi ý lò vi sóng, Resolver offline needs_more_info.
+img-19358: vòi nước rõ trong ảnh nhưng detector không trả box.
+img-00217: dự đoán điều hòa đúng tên nhưng box phủ quá rộng, không khớp vị trí vật thể.
+15 ảnh so sánh chọn cố định trước strict training; source/prediction box, YOLO category scores, CLIP scores, raw fused V2 và Resolver output lưu riêng.
+YOLO+CLIP hiện tại là image-level classifier/target suggestion, không phải detector cùng 5 lớp; không có so sánh mAP ngang tác vụ.
+Resolver chạy code hiện có OFFLINE với catalog TASK03B đóng băng, legacy symptom flag false; không gọi production API hoặc DB.
+
+ARTIFACTS
+/home/vanvi/Work/datasetai/03-experiments/ai01-task04a-strict-v2/training/weights/best.pt
+/home/vanvi/Work/datasetai/03-experiments/ai01-task04a-strict-v2/training/weights/last.pt
+Config: train-config.json, training/args.yaml; logs: train.log/evaluation.log/comparison.log; history: training/results.csv/results.png.
+Confusion matrix/PR/predictions: validation-full_development/ và validation-balanced_development/.
+Manifest: selection.jsonl, data-manifest.json, experiment-manifest.json; raw/prepared validation: audit-prepared.json/audit-postrun.json.
+Production proof: protected-before.json == protected-after.json. Nguồn raw/prepared được kiểm SHA lần cuối, không có leakage SHA/pixel/pHash/source family.
+
+ĐỀ XUẤT
+Giữ production hiện tại. Cần thêm ảnh hiện trường và ảnh âm cho vòi; kiểm/sửa vùng đối tượng ống/bồn cầu trên bản sao phát triển trước khi đưa lại vào object detector.
+Cho nhận diện dấu hiệu lỗi, duyệt riêng vùng giọt nước/tia nước/vết ẩm/nứt; bổ sung ca vòi xả bình thường, bồn cầu bình thường, ảnh quảng cáo/stock để tránh suy mọi nước thành lỗi.
+Train dấu hiệu thành tác vụ riêng; không dùng tên water_leak/toilet_issue làm nguyên nhân hoặc box toàn vật thể. Giữ test độc lập chưa tiếp xúc prediction.
+
+Không thay production weights, database/schema, API hoặc inference. Không commit/push.

@@ -1,0 +1,7 @@
+# Backend runtime only. ACTIVE ADMIN management is automatic; users policy holds explicit review assignments.
+AI01_REVIEW_ENABLED=true
+AI01_PILOT_DIR=/home/vanvi/Work/datasetai/06-benchmarks/ai01-pilot-v1
+AI01_REVIEW_STATE_DIR=/home/vanvi/Work/datasetai/06-benchmarks/ai01-admin-v1/reviews
+AI01_REVIEW_POLICY_FILE=/home/vanvi/Work/datasetai/06-benchmarks/ai01-admin-v1/role-policy.json
+# AI01_REVIEW_PYTHON=/path/to/venv/bin/python
+# Keep JWT_SECRET in backend secret configuration, never in frontend or this file.

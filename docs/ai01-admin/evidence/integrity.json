@@ -1,0 +1,17 @@
+{
+  "status": "passed",
+  "task03CImmutableArtifactHashesVerified": 35,
+  "rawImageAndAnnotationHashesVerified": 21437,
+  "trainingReferenceHashesVerified": 1200,
+  "pilotImages": 150,
+  "mappingClasses": 54,
+  "productionInferenceSourceAndWeightsUnchanged": true,
+  "historicalReviewEventsSha256": "2b9a105f275f17a3d51ebcd09e232a460fa9ebce60d063410632ae785d3170bf",
+  "historicalReviewEventCount": 1,
+  "defaultAssignments": 0,
+  "defaultPermissionManagers": 0,
+  "realDbAccountsOrGrantsCreated": 0,
+  "actualApprovedGroundTruthCreated": 0,
+  "qualityMetricsComputed": false,
+  "scope": "Read-only integrity audit, not model accuracy or human annotation approval"
+}

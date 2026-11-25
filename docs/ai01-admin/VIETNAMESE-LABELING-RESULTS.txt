@@ -1,0 +1,54 @@
+FIXGO — CẢI THIỆN NHÃN TIẾNG VIỆT VÀ THAO TÁC CÙNG ẢNH
+
+Đã triển khai
+- Tên tiếng Việt cho đủ 54 lớp nguồn từ display TASK03C. Làm rõ subtype chưa
+  xác minh và nhãn nguồn chưa rõ nghĩa. Bản dịch chỉ dùng khi hiển thị, không
+  ghi lại mapping/source/YAML. Giữ mã gốc trong phần chi tiết.
+- Dataset/danh sách ảnh có tên tiếng Việt; mỗi lựa chọn ảnh kèm nhãn nguồn.
+  Canvas có tên tiếng Việt trên bbox/polygon, nhãn nguồn nổi rõ dưới ảnh.
+- Mapping đề xuất hiển thị Danh mục → Đối tượng → Dấu hiệu quan sát được,
+  badge “Đề xuất — chưa xác nhận”. Không tự gán dấu hiệu hoặc bệnh từ nguồn.
+- Tab Dữ liệu mở editor tại ảnh đang xem, không chuyển tab. Tab Gán nhãn mở
+  sẵn editor. Ảnh bám cạnh form khi cuộn trên desktop, toolbar Lưu cũng bám.
+- Bốn lựa chọn: Xác nhận nhãn / Sửa nhãn / Chưa chắc chắn / Loại ảnh.
+  Thay đối tượng chuyển sang Sửa nhãn; yêu cầu lý do. Checkbox chọn nhiều vật,
+  bộ lọc danh mục và tìm đối tượng tiếng Việt, không cần Ctrl/Cmd.
+- Tình trạng quan sát: Chưa xem / Có dấu hiệu / Không thấy dấu hiệu lỗi /
+  Chưa chắc. Có dấu hiệu thì chọn cụ thể; không khẳng định thiết bị tốt.
+- Đánh dấu độc lập ảnh quảng cáo và ảnh ghép/tổng hợp; có thể cùng chọn.
+  Không tự loại ảnh chỉ vì có đánh dấu, vẫn cần quyết định người dùng.
+- Hướng dẫn và ví dụ cho trường nhập/chọn. Nút Lưu & ảnh tiếp theo và
+  Lưu tại ảnh này. Chọn một quyết định chưa lưu; cần bấm Lưu hoặc Enter.
+- C/E/U/R chọn quyết định, Enter lưu & tiếp; không kích khi đang nhập/bận.
+- Kiểm tra nguồn/quyền/nhóm trùng thu gọn sau phần gán nhãn, gate xuất giữ nguyên.
+
+Dữ liệu và tương thích
+- API fast_save nhận thêm nhóm trường tùy chọn đầy đủ: reviewAction,
+  imageFlags, visualCondition, visibleSigns. categoryIds được backend suy ra
+  từ taxonomy targetIds, không nhận category giả do client gửi.
+- Dấu hiệu chưa xem/chưa chắc là null; không thấy lỗi là []; có dấu hiệu phải
+  có ID hợp lệ, không trùng. Chặn tình trạng mâu thuẫn hoặc thiếu trường.
+- Nhóm trường cũ vẫn được chấp nhận; log cũ giữ nguyên, không migrate bằng cách
+  tự suy dấu hiệu/đặc điểm ảnh. Event mới append-only, giữ expectedHash/audit.
+- Các trường người xác nhận sống qua restart và đi kèm export solo-development.
+  Chưa chắc/Loại ảnh không xuất. Chỉnh nhãn làm check cũ hết hiệu lực như trước.
+- approvedGroundTruth=false, independentlyReviewed=false, sourceGeometryHumanVerified=false.
+  Không tự xác nhận Roboflow/AI, không đổi gate benchmark độc lập.
+
+Kiểm thử
+- 45/45 HTTP tests, 4 suites đạt (Admin độc lập, SOLO cũ, management và UX mới).
+- Kiểm đủ 54 nhãn tiếng Việt/mã gốc, tương thích event cũ không có dấu hiệu giả;
+  prefix log nguyên byte sau lưu mới; observation/flag sai bị chặn; category
+  giả bị chặn; dấu hiệu dương/âm/chưa chắc, ad/composite, replay/export và gate.
+- Chromium cô lập: dữ liệu mặc định chỉ xem; mở gán nhãn trong chính tab Dữ liệu;
+  4 lựa chọn, chọn quyết định không tự lưu, chưa xem không xác nhận; sửa target,
+  không thấy lỗi, ad + composite, gõ không kích shortcut, E/C/Enter, lưu/chuyển;
+  history/check/evidence/quarantine/export và các tab khác vẫn hoạt động;
+  Lưu tại ảnh này giữ đúng ảnh kể cả khi bắt đầu từ bộ lọc Chưa duyệt.
+  Không lỗi JavaScript; auth fixture/state tạm, không dùng session chủ dự án.
+- Frontend/backend build đạt; Vite vẫn cảnh báo bundle >500 kB.
+- Evidence: evidence/management/07-inline-vietnamese-labeling.png và browser-results.json.
+
+Hướng dẫn: VIETNAMESE-LABELING-GUIDE.txt
+Không sửa raw dataset, model, production inference, schema DB hoặc lịch sử thật.
+Không tạo annotation thật trong runtime, không commit/push.

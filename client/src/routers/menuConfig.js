@@ -10,6 +10,7 @@ import {
   ShieldAlert,
   FileBarChart,
   Settings,
+  BrainCircuit,
 } from 'lucide-react';
 
 /**
@@ -87,3 +88,7 @@ export const adminMenuConfig = [
 ];
 
 export default adminMenuConfig;
+
+export const aiMenuConfig = [
+  { id: 'ai-management', title: 'Quản lý AI', path: '/admin/ai01', icon: BrainCircuit },
+];

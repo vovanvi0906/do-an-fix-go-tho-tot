@@ -1,0 +1,33 @@
+CẬP NHẬT AI MODAL TRONG CUSTOMER-APP
+
+Đã làm
+- Modal AI trang chủ và màn chẩn đoán dùng chung VisualAnalysisSummary.
+- Hiển thị trạng thái phân tích dấu hiệu thực tế do API trả về; disabled/unavailable/no_evidence không bị trình bày như đã nhận diện lỗi.
+- Xem lại ảnh nguyên khung, nhãn dấu hiệu, bật/tắt khung nhận diện. Bbox lấy từ visualEvidence API, kiểm tra tọa độ chuẩn hóa [0,1], tính đúng phần đệm khi ảnh được contain; không lấy bbox Admin làm kết quả inference.
+- Gợi ý dịch vụ vẫn xuất hiện sau khi xác nhận thiết bị, chỉ giữ dịch vụ cùng target. Ẩn kết quả cũ nếu API báo phân tích dấu hiệu đang disabled/unavailable.
+- Khách tự xác nhận dịch vụ qua API hiện có; không tự đặt lịch, không tự xác nhận triệu chứng.
+- Tắt crop bắt buộc ở camera/thư viện để không cắt mất phần dấu hiệu trên ảnh.
+
+Giới hạn model
+- Customer-app gọi backend /orders/diagnose[-upload], backend gọi AI Service. Không nhúng model vào điện thoại hoặc chạy offline.
+- Chưa tìm thấy artifact/manifest model nhận diện dấu hiệu mới có thể kích hoạt; không bật VISUAL_SERVICE_DETECTOR_ENABLED và không thay weights hiện có.
+- Lưu ảnh/gán nhãn Admin không tự cập nhật model. Cần dataset đủ điều kiện, train, đánh giá, artifact và mapping dấu hiệu-dịch vụ được duyệt trước khi kích hoạt nhận diện lỗi mới.
+- UI đã sẵn sàng nhận visualAnalysisStatus/visualServiceSuggestions/visualEvidence từ pipeline hiện có. Khi model chưa bật, người dùng có thể xác nhận thiết bị/triệu chứng hoặc chọn thủ công.
+
+File sửa
+customer-app/src/features/home/components/AiScanModal.tsx
+customer-app/src/components/diagnosis/DiagnosisChoices.jsx
+customer-app/src/components/diagnosis/VisualServiceSuggestions.test.jsx
+File mới
+customer-app/src/components/diagnosis/VisualAnalysisSummary.jsx
+customer-app/src/components/diagnosis/VisualAnalysisSummary.test.jsx
+Báo cáo này.
+
+Kiểm thử
+- 5 suite liên quan: 38 tests đạt, gồm adapter ảnh local/remote, xác nhận thiết bị/dấu hiệu/dịch vụ, gợi ý visual, trạng thái chưa hỗ trợ, tọa độ bbox portrait/contain, bật/tắt box và bỏ bbox sai.
+- npx tsc --noEmit: đạt.
+- npm run check:build: đạt cho môi trường development hiện tại.
+- npx expo export --platform android --output-dir /tmp/fixgo-customer-ai-export: đạt (bundle Android, không phải APK/AAB native).
+- git diff --check: đạt.
+- Chưa kiểm thử inference model cháy/xém trên thiết bị thật; chưa có model mới để kiểm chứng.
+- Không commit/push, không deploy AI hoặc thay dataset/model.
