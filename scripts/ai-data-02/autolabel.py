@@ -36,11 +36,11 @@ def run_dir(state, run_id):
     return path
 
 
-def request_run(store, ids, sign_manifest=None):
+def request_run(store, ids, sign_manifest=None, *, include_reviewed=False):
     require(isinstance(ids, list) and 1 <= len(ids) <= LIMIT and len(ids)==len(set(ids)) and all(i in store.rows for i in ids), 'Select 1..50000 known images')
     # Human annotations/drafts are kept out of the automatic queue, not overwritten or demoted.
     protected = [i for i in ids if i in store.studio_latest]
-    ids = [i for i in ids if i not in store.studio_latest]
+    ids = [i for i in ids if i not in store.studio_latest] if not include_reviewed else ids
     require(ids, 'All selected images already have human review/drafts; choose unreviewed images')
     if sign_manifest:
         from sign_model import descriptor
@@ -49,12 +49,12 @@ def request_run(store, ids, sign_manifest=None):
     folder = run_dir(store.state, run_id)
     folder.mkdir(parents=True, exist_ok=False)
     request = {'schema': 'fixgo.studio.auto-request.v1', 'runId': run_id, 'createdAt': now(),
-               'imageIds': ids, 'skippedHumanImages': protected, 'inventoryPins': json.loads((store.state/'inventory-pin.json').read_text()),
+               'imageIds': ids, 'skippedHumanImages': protected if not include_reviewed else [], 'inspectionOnly':include_reviewed, 'inventoryPins': json.loads((store.state/'inventory-pin.json').read_text()),
                'signManifest': str(Path(sign_manifest).resolve()) if sign_manifest else None,
                'signManifestSha256': sha(sign_manifest) if sign_manifest else None,
                'threads': 2, 'ramMiB': 3072, 'automaticHumanVerification': False}
     atomic(folder/'request.json', request)
-    atomic(store.state/'auto-active.json', {'runId': run_id})
+    atomic(store.state/('grounding-active.json' if include_reviewed else 'auto-active.json'), {'runId': run_id})
     atomic(folder/'progress.json', {'runId': run_id, 'status': 'STARTING', 'requested': len(ids), 'processed': 0})
     return request
 
@@ -105,7 +105,7 @@ def analyze(context, ids, profile):
             require(isinstance(raw_boxes, list), 'Invalid AI geometry')
             boxes = [{k: b.get(k) for k in ['id','kind','label','xyxy','objectId']} | {'annotationSource':'AI'} for b in raw_boxes]
             Studio.validate_boxes(context, boxes, row)
-            record.update(boxes=boxes, cacheHash=cache['cacheHash'], targetCandidates=prediction.get('targetCandidates', []))
+            record.update(boxes=boxes, cacheHash=cache['cacheHash'], targetCandidates=prediction.get('targetCandidates', []), searchScope={k:prediction.get('groundingDiagnostics',{}).get(k) for k in ['targetIdsSearched','signCodesSearched','scopeWarnings']})
             objects = [b for b in boxes if b['kind']=='object']
             signs = [b for b in boxes if b['kind']=='sign']
             if not objects:
@@ -121,6 +121,7 @@ def analyze(context, ids, profile):
             if prediction.get('uncertain'):
                 record['issues'].append('MODEL_UNCERTAIN')
             record['issues'].extend(prediction.get('signIssues', []))
+            record['warnings'].extend(prediction.get('groundingWarnings', []))
             if prediction.get('visibleDefects') is not None and not profile.get('signDetector'):
                 record['issues'].append('UNSUPPORTED_SIGN_CLAIM')
             if signs and not profile.get('signDetector'):
@@ -191,7 +192,8 @@ def export_pseudo(store, run_id, version, task='objects', acknowledged=False):
 def _export_pseudo(store, run_id, version, task='objects', acknowledged=False):
     require(acknowledged is True, 'Explicit acknowledgement: unverified AI labels only')
     require(task in ['objects','objects-and-signs'], 'Unknown pseudo-label task')
-    safe_id(version)
+    try:safe_id(version)
+    except ValueError as error:raise ValueError('Tên phiên bản xuất không hợp lệ. Nhập ví dụ filter-v1; chỉ dùng chữ, số, dấu - hoặc _.') from error
     report = read_report(store.state, run_id)
     context = snapshot(store.inventory, store.state)
     require(report['inventoryPins']==context.pins, 'Export inventory changed')

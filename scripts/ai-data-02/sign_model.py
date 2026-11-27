@@ -8,6 +8,9 @@ def descriptor(path, catalog, ontology):
     from batch import file_hash
     path = Path(path).resolve()
     m = json.loads(path.read_text())
+    if m.get('backend')=='grounding-dino':
+        from grounding import descriptor as grounding_descriptor
+        return grounding_descriptor(path,catalog,ontology)
     if m.get('schema') != 'fixgo.studio.pseudo-detector.v1' or m.get('task') != 'detect':
         raise ValueError('Expected local pseudo detector manifest, task detect')
     weights = (path.parent/m['weights']).resolve()

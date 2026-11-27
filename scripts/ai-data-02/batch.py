@@ -18,6 +18,20 @@ def file_hash(path):
     return h.hexdigest()
 
 def profile(catalog,threads=2,detector=DEFAULT_DETECTOR,sign_manifest=None):
+    if sign_manifest and json.loads(Path(sign_manifest).read_text()).get('backend')=='grounding-dino':
+        from grounding import descriptor
+        d=descriptor(sign_manifest,json.loads(catalog.read_text()),json.loads((catalog.parent/'ontology.json').read_text())['signs'])
+        result={'schema':'fixgo.studio.model-profile.v1','adapterVersion':'grounding-dino-v1','runtimeEngine':'grounding-dino','cpuThreads':threads,
+                'catalogSha256':file_hash(catalog),'ontologySha256':file_hash(catalog.parent/'ontology.json'),'signDetector':d,
+                'models':{'groundingDino':{'path':d['path'],'sha256':d['sha256']}},
+                'packageVersions':{n:importlib.metadata.version(n) for n in (['torch','transformers','ultralytics'] if d.get('objectDetector') else ['torch','transformers'])},
+                'adapterSha256':file_hash(Path(__file__)),'groundingCatalogCodeSha256':file_hash(Path(__file__).with_name('grounding_catalog.py')),'groundingAdapterSha256':file_hash(Path(__file__).with_name('grounding.py'))}
+        if d.get('scopeMode')=='catalog-adaptive':
+            shared={k:v for k,v in d.items() if k not in ['classes','manifestPath','manifestSha256','explicitTarget','categoryId','broadSceneTargetIds','unsupportedTargetIds']}
+            result['compatibilityKey']=digest(canonical({'sharedRuntime':shared,'catalog':result['catalogSha256'],'ontology':result['ontologySha256'],
+                'batchCode':result['adapterSha256'],'groundingCode':result['groundingAdapterSha256'],'scopeCode':result['groundingCatalogCodeSha256'],
+                'packages':result['packageVersions'],'threads':threads}).encode())
+        result['profileHash']=digest(canonical(result).encode());return result
     from huggingface_hub import try_to_load_from_cache
     cached=None
     for name in ['model.safetensors','pytorch_model.bin']:
@@ -43,6 +57,9 @@ class RealModels:
         cv2.setNumThreads(1);torch.set_num_threads(p['cpuThreads'])
         try:torch.set_num_interop_threads(1)
         except RuntimeError:pass
+        if p.get('runtimeEngine')=='grounding-dino':
+            from grounding import GroundingModel
+            self.profile=p;self.grounding=GroundingModel(p['signDetector'],{t['id']:t for t in catalog['targets']});return
         sys.path.insert(0,str(REPO/'ai-service'))
         import clip_classifier as clip
         from ultralytics import YOLO
@@ -57,6 +74,7 @@ class RealModels:
         self.sign_model=SignModel(p['signDetector'],self.targets) if p.get('signDetector') else None
         self.profile=p
     def predict(self,row):
+        if hasattr(self,'grounding'):return self.grounding.prediction(row,self.profile)
         import numpy as np,cv2
         from recommendation.category_classifier import evaluate_categories
         from recommendation.target_matcher import match_targets
@@ -95,10 +113,17 @@ class RealModels:
         catmeta=next((c for c in self.catalog['categories'] if c['slug']==cat),None)
         return {'category':{'id':catmeta['id'],'slug':cat,'score':score,'source':source} if catmeta else None,'targetCandidates':targets[:3],'categoryCandidates':candidates,'boxes':boxes,'uncertain':not bool(cat and targets),'scopeDecision':'UNKNOWN_OR_OUT_OF_SCOPE_CANDIDATE' if not cat else 'SUPPORTED_CATEGORY_CANDIDATE','visibleDefects':[b['label'] for b in boxes if b['kind']=='sign'] if self.sign_model else None,'signCapability':bool(self.sign_model),'signIssues':sign_issues,'defectNote':'Optional local model proposals, unverified; no absence/normal guarantee' if self.sign_model else 'Existing classifier/detector does not predict defect classes; source/user annotation only','stagesMs':stages}
 
+def scope_hash(row,p):
+    if p.get('runtimeEngine')=='grounding-dino' and p.get('signDetector',{}).get('scopeMode')=='catalog-adaptive':
+        from grounding_catalog import image_scope
+        classes,warnings=image_scope(p['signDetector'],row)
+        return digest(canonical({'targetIds':sorted(c['targetId'] for c in classes),'warnings':warnings}).encode())
+    return None
+
 def valid_cache(path,row,p):
     if not path.exists():return False
     try:
-        c=json.loads(path.read_text());return c['profileHash']==p['profileHash'] and c['contentHash']==row['sha256'] and digest(canonical({k:v for k,v in c.items() if k!='cacheHash'}).encode())==c['cacheHash'] and c.get('technicalStatus')=='SUCCESS'
+        c=json.loads(path.read_text());return c['profileHash']==p['profileHash'] and c.get('scopeHash')==scope_hash(row,p) and c['contentHash']==row['sha256'] and digest(canonical({k:v for k,v in c.items() if k!='cacheHash'}).encode())==c['cacheHash'] and c.get('technicalStatus')=='SUCCESS'
     except (ValueError,KeyError):return False
 
 def run(inventory,state,ids,threads=2,ram_mb=3072,detector=DEFAULT_DETECTOR,*,max_images=500,sign_manifest=None,stop_path=None):
@@ -123,13 +148,13 @@ def run(inventory,state,ids,threads=2,ram_mb=3072,detector=DEFAULT_DETECTOR,*,ma
             for i in ids:
                 if stop_path and Path(stop_path).exists():
                     job.update(status='CANCELLED',finishedAt=now());atomic(progress,job);return job
-                row=rows[i];path=cache/(safe_id(i)+'.json');t=time.perf_counter()
+                row=rows[i];cache_key=(row['sha256'],scope_hash(row,p));path=cache/(safe_id(i)+'.json');t=time.perf_counter()
                 try:
                     # Per-image errors must not abort the remaining automated queue.
                     if digest(read_asset(row['path']))!=row['sha256']:raise ValueError('Source changed: '+i)
                     if valid_cache(path,row,p):job['cacheHits']+=1;job['succeeded']+=1
-                    elif row['sha256'] in seen_hashes and valid_cache(cache/(seen_hashes[row['sha256']]+'.json'),row,p):
-                        source_id=seen_hashes[row['sha256']];c=json.loads((cache/(source_id+'.json')).read_text())
+                    elif cache_key in seen_hashes and valid_cache(cache/(seen_hashes[cache_key]+'.json'),row,p):
+                        source_id=seen_hashes[cache_key];c=json.loads((cache/(source_id+'.json')).read_text())
                         c.update(imageId=i,sourcePath=row['path'],duplicateGroupId=row['proposed_source_component'],reusedFromImageId=source_id,createdAt=now())
                         c.pop('cacheHash',None);c['cacheHash']=digest(canonical(c).encode());atomic(path,c)
                         job['cacheHits']+=1;job['succeeded']+=1;job['exactDuplicateReuse']+=1
@@ -138,9 +163,9 @@ def run(inventory,state,ids,threads=2,ram_mb=3072,detector=DEFAULT_DETECTOR,*,ma
                             try:model=RealModels(p,json.loads((audit/'evidence/catalog.json').read_text()))
                             except Exception as exc:raise ModelLoadError('Cannot load local models: '+str(exc)) from exc
                         result=model.predict(row)
-                        c={'schema':'fixgo.studio.ai-proposal.v1','imageId':i,'sourcePath':row['path'],'contentHash':row['sha256'],'duplicateGroupId':row['proposed_source_component'],'annotationSource':'AI','reviewStatus':'AI_PROPOSED','reviewedAt':None,'reviewer':None,'licenseStatus':'UNVERIFIED','modelVersion':p['profileHash'],'modelProfile':p,'profileHash':p['profileHash'],'technicalStatus':'SUCCESS','createdAt':now(),'elapsedMs':round((time.perf_counter()-t)*1000,3),'prediction':result,'approvedGroundTruth':False,'independentlyReviewed':False}
+                        c={'schema':'fixgo.studio.ai-proposal.v1','imageId':i,'sourcePath':row['path'],'contentHash':row['sha256'],'duplicateGroupId':row['proposed_source_component'],'annotationSource':'AI','reviewStatus':'AI_PROPOSED','reviewedAt':None,'reviewer':None,'licenseStatus':'UNVERIFIED','modelVersion':p['profileHash'],'modelProfile':p,'profileHash':p['profileHash'],'scopeHash':scope_hash(row,p),'technicalStatus':'SUCCESS','createdAt':now(),'elapsedMs':round((time.perf_counter()-t)*1000,3),'prediction':result,'approvedGroundTruth':False,'independentlyReviewed':False}
                         c['cacheHash']=digest(canonical(c).encode());atomic(path,c);job['succeeded']+=1
-                    seen_hashes[row['sha256']]=i
+                    seen_hashes[cache_key]=i
                 except Exception as exc:
                     if isinstance(exc,ModelLoadError):raise
                     job['failed']+=1

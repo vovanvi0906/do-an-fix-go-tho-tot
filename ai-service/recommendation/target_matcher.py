@@ -3,6 +3,26 @@ import torch
 
 
 TARGET_MIN_SIMILARITY = 0.20
+# CLIP logit scale is 100: a 0.01 cosine gap means top-1 is ~e (2.7x) as likely as top-2.
+# Smaller gaps are reported as ambiguous options for the user, never auto-selected.
+TARGET_MIN_MARGIN = 0.01
+# Service tasks without a visible physical object must never be matched from pixels.
+NON_VISUAL_TARGET_SLUGS = frozenset({"kiem-tra-khao-sat-su-co-dien"})
+
+
+def is_visual_target(key: str, meta: Dict[str, Any]) -> bool:
+    if meta.get("visual") is False:
+        return False
+    return key not in NON_VISUAL_TARGET_SLUGS and meta.get("slug") not in NON_VISUAL_TARGET_SLUGS
+
+
+def select_target(candidates: List[Dict[str, Any]], min_margin: float = TARGET_MIN_MARGIN) -> Optional[Dict[str, Any]]:
+    """Auto-select only a clear winner; ties stay as options for the user."""
+    if not candidates:
+        return None
+    if len(candidates) > 1 and candidates[0]["similarity"] - candidates[1]["similarity"] < min_margin:
+        return None
+    return candidates[0]
 
 
 def match_targets(
@@ -19,7 +39,7 @@ def match_targets(
     norm_cat = category_slug.replace("_", "-")
     filtered_keys = [
         k for k, meta in targets_dict.items()
-        if not meta.get("category") or meta.get("category") == norm_cat
+        if (not meta.get("category") or meta.get("category") == norm_cat) and is_visual_target(k, meta)
     ]
     if not filtered_keys:
         return []

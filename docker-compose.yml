@@ -70,6 +70,8 @@ services:
     environment:
       - PORT=8000
       - PYTHONUNBUFFERED=1
+      - MULTISERVICE_OBSERVER_ENABLED=true
+      - MULTISERVICE_OBSERVER_MANIFEST=/app/weights/multiservice-observer-v2-gated/release.json
     ports:
       - '8000:8000'
     volumes:
@@ -78,10 +80,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1200M
+          memory: 2300M
         reservations:
           memory: 350M
-    mem_limit: 1200m
+    mem_limit: 2300m
     mem_reservation: 350m
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:8000/health']

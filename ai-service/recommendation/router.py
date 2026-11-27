@@ -9,9 +9,11 @@ from pathlib import Path
 from typing import Optional
 from fastapi import APIRouter, File, Form, Request, UploadFile, Response, HTTPException
 from recommendation.visual_detector import analyze_visual
+from recommendation.observable_candidate import analyze_candidate
+from recommendation.multiservice_observer import analyze_observer, scope_observations, enabled as observer_enabled
 from recommendation.schemas import DiagnosisV2Response, CatalogSyncResponse
 from recommendation.category_classifier import evaluate_categories, CATEGORY_NAMES, CATEGORY_MIN_CONFIDENCE, CATEGORY_MIN_MARGIN
-from recommendation.target_matcher import match_targets, TARGET_MIN_SIMILARITY
+from recommendation.target_matcher import match_targets, select_target, TARGET_MIN_SIMILARITY, TARGET_MIN_MARGIN
 from recommendation.catalog_manager import get_catalog_state, sync_catalog
 from recommendation.image_utils import decode_image_to_cv2
 
@@ -96,6 +98,11 @@ async def diagnose_v2(
     stage_start = time.perf_counter()
     visual = analyze_visual(cv_img, getattr(request.app.state, 'visual_service_detector', None))
     stages['visual_detection'] = (time.perf_counter()-stage_start)*1000
+    stage_start = time.perf_counter()
+    observable_candidate = (analyze_observer(cv_img, request.app.state.multiservice_observer)
+                            if hasattr(request.app.state, 'multiservice_observer') and observer_enabled()
+                            else analyze_candidate(cv_img, getattr(request.app.state, 'observable_candidate', None)))
+    stages['observable_candidate'] = (time.perf_counter()-stage_start)*1000
     visual_objects = [b for b in visual['detections'] if b['kind'] == 'object']
     visual_categories = {b['categorySlug'] for b in visual_objects}
     if not cat_slug and len(visual_categories) == 1:
@@ -105,13 +112,15 @@ async def diagnose_v2(
             conf = max(b['confidence'] for b in visual_objects)
             source = 'visual_detector'
             cat_candidates.insert(0, {'id':cat_slug,'slug':cat_slug,'name':CATEGORY_NAMES[cat_slug.replace('-', '_')],'confidence':conf,'provenance':'visual_detector'})
-    top_target = target_candidates[0] if target_candidates else None
+    top_target = select_target(target_candidates)
     aligned = [b for b in visual_objects if b['categorySlug'] == cat_slug]
     if len({b['targetSlug'] for b in aligned}) == 1:
         best = max(aligned, key=lambda b:b['confidence'])
         meta = targets_dict.get(best['targetSlug'], {})
         top_target = {'targetId': meta.get('id') or best['targetSlug'], 'targetName': meta.get('name', best['targetSlug'])}
 
+    if observable_candidate.get('modelVersion') and hasattr(request.app.state, 'multiservice_observer'):
+        observable_candidate = scope_observations(observable_candidate, request.app.state.multiservice_observer, cat_slug)
     observable = []
     if cat_slug:
         cat_name = CATEGORY_NAMES.get(cat_slug.replace("-", "_"), cat_slug)
@@ -119,21 +128,22 @@ async def diagnose_v2(
     if top_target and top_target.get("targetName"):
         observable.append(f"Nhận diện đối tượng: {top_target['targetName']}")
 
-    final_source = source if cat_slug else ("abstained_ood" if source != "unavailable" else "unavailable")
+    observer_ready = observable_candidate.get('modelVersion') is not None and observable_candidate['status'] in ['proposed', 'no_detection']
+    final_source = source if cat_slug else ("abstained_ood" if source != "unavailable" else ("observable_only" if observer_ready else "unavailable"))
     notes = "Chẩn đoán danh mục và đối tượng thành công." if cat_slug else "Ảnh chưa đủ rõ hoặc ngoài danh mục dịch vụ hỗ trợ."
 
     stages["total"] = (time.perf_counter()-started)*1000
     request.state.recommendation_debug = {
         "requestId": request_id, "stagesMs": stages,
         "clipScores": clip_probs, "yoloScores": yolo_probs,
-        "modelsLoaded": {"clip": has_clip, "yolo": yolo_model is not None, "visual": visual["status"] in ["detected", "no_evidence"]},
-        "stageOutcomes":{"model_loading":"ready" if has_clip or yolo_model is not None or visual["status"] in ["detected", "no_evidence"] else "unavailable", "clip":"ready" if clip_result else ("failed" if has_clip else "unavailable"), "yolo":"failed" if yolo_error else ("ready" if yolo_probs else "unavailable"),"category_fusion":"accepted" if cat_slug else "abstained","target_resolution":"accepted" if top_target else "unresolved"},
+        "modelsLoaded": {"clip": has_clip, "yolo": yolo_model is not None, "visual": visual["status"] in ["detected", "no_evidence"], "observable": observer_ready},
+        "stageOutcomes":{"model_loading":"ready" if has_clip or yolo_model is not None or observer_ready or visual["status"] in ["detected", "no_evidence"] else "unavailable", "clip":"ready" if clip_result else ("failed" if has_clip else "unavailable"), "yolo":"failed" if yolo_error else ("ready" if yolo_probs else "unavailable"),"category_fusion":"accepted" if cat_slug else "abstained","target_resolution":"accepted" if top_target else "unresolved"},
         "gates": {"categoryMinConfidence": CATEGORY_MIN_CONFIDENCE, "categoryMinMargin":CATEGORY_MIN_MARGIN,
                   "categoryAccepted": bool(cat_slug), "confidence":conf,
-                  "targetMinSimilarity":TARGET_MIN_SIMILARITY, "targetAccepted":bool(top_target),
+                  "targetMinSimilarity":TARGET_MIN_SIMILARITY, "targetMinMargin":TARGET_MIN_MARGIN, "targetAccepted":bool(top_target), "targetAmbiguous":bool(target_candidates) and not top_target,
                   "source":"evaluate_categories defaults / match_targets defaults"},
         "catalog":{"version":state.get("version"),"source":state.get("source","static_fallback"),"targetCount":len(targets_dict)},
-        "model":{"clip":"openai/clip-vit-base-patch32","clipCommit":getattr(getattr(getattr(clip_classifier,"_model",None),"config",None),"_commit_hash",None),"declaredVersion":"fixgo-ai-rec-v1", "visualModelVersion":visual["modelVersion"], "visualWeightsSha256":visual["weightsSha256"]}
+        "model":{"clip":"openai/clip-vit-base-patch32","clipCommit":getattr(getattr(getattr(clip_classifier,"_model",None),"config",None),"_commit_hash",None),"declaredVersion":"fixgo-ai-rec-v1", "visualModelVersion":visual["modelVersion"], "visualWeightsSha256":visual["weightsSha256"], "observableModelVersion":observable_candidate.get("modelVersion"), "observableReleaseSha256":observable_candidate.get("releaseSha256")}
     }
     return DiagnosisV2Response(
         suggestedCategoryId=cat_slug,
@@ -146,8 +156,10 @@ async def diagnose_v2(
         detectedLabels=[cat_slug] if cat_slug else [],
         observableSigns=observable,
         visualAnalysis=visual,
+        observableAnalysis=observable_candidate,
+        model_version='fixgo-ai-rec-v2-multiservice' if observable_candidate.get('modelVersion') else 'fixgo-ai-rec-v1',
         decision_source=final_source,
-        engine="model" if source != "unavailable" else "unavailable",
+        engine="model" if source != "unavailable" or observer_ready else "unavailable",
         notes=notes,
     )
 

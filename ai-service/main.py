@@ -206,6 +206,12 @@ async def lifespan(app: FastAPI):
     from recommendation.visual_detector import load_visual_detector
     app.state.visual_service_detector = load_visual_detector()
     app.state.models_status["visual_service"] = app.state.visual_service_detector is not None
+    from recommendation.observable_candidate import load_candidate
+    app.state.observable_candidate = load_candidate()
+    app.state.models_status['observable_candidate'] = app.state.observable_candidate is not None
+    from recommendation.multiservice_observer import load_observer
+    app.state.multiservice_observer = load_observer()
+    app.state.models_status['multiservice_observer'] = app.state.multiservice_observer is not None
     app.state.yolo_cls_model = None
     app.state.yolo_model = None
     app.state.face_detector = None
@@ -265,12 +271,13 @@ async def lifespan(app: FastAPI):
             logger.warning(f"⚠️ [Lifespan] Không thể nạp CLIP: {e}")
 
     loaded_count = sum(1 for v in app.state.models_status.values() if v)
-    logger.info(f"🎉 [Lifespan] Hoàn tất nạp mô hình. Trạng thái: {app.state.models_status} ({loaded_count}/6 engine sẵn sàng)")
+    logger.info(f"🎉 [Lifespan] Hoàn tất nạp mô hình. Trạng thái: {app.state.models_status} ({loaded_count}/{len(app.state.models_status)} engine sẵn sàng)")
 
     yield
 
     logger.info("🛑 [Lifespan] Giải phóng tài nguyên AI Microservice...")
     app.state.visual_service_detector = None
+    app.state.observable_candidate = None
     app.state.yolo_cls_model = None
     app.state.yolo_model = None
     app.state.face_detector = None
@@ -870,6 +877,15 @@ async def health_check(request: Request):
 
     has_any_model = any(models_status.get(k) for k in ["yolo_cls", "yolo_detect", "visual_service", "clip", "face_detector", "face_recognizer"])
 
+    observer = getattr(request.app.state, "multiservice_observer", None)
+    observer_status = {
+        "enabled": os.environ.get("MULTISERVICE_OBSERVER_ENABLED", "true") == "true",
+        "loaded": observer is not None,
+        "modelVersion": observer.release["modelVersion"] if observer else None,
+        "releaseSha256": observer.release_sha if observer else None,
+        "enabledSigns": sorted(code for code, meta in observer.release["classes"].items()
+                               if meta.get("enabled", True)) if observer else [],
+    }
     available_weights = []
     if WEIGHTS_DIR.exists():
         available_weights = [f.name for f in WEIGHTS_DIR.glob("*") if f.is_file()]
@@ -883,6 +899,7 @@ async def health_check(request: Request):
         "engine": "model" if has_any_model else "heuristic",
         "models_loaded": models_status,
         "weights_available": available_weights,
+        "observableModel": observer_status,
     }
 
 

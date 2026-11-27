@@ -1,0 +1,197 @@
+{
+  "schema": "fixgo.observable-trial-taxonomy.v1",
+  "status": "EXPERIMENTAL_NOT_PRODUCTION_DIAGNOSIS",
+  "classes": [
+    {
+      "code": "surface_soiling",
+      "name": "sign:surface_soiling",
+      "displayNameVi": "Bụi/bẩn bám",
+      "definition": "Vùng có chất bẩn hoặc xơ/bụi nhìn thấy; không suy thiết bị hỏng.",
+      "positivePrompts": [
+        "a photo of a dirty dusty surface",
+        "a photo of dust buildup on an air filter",
+        "a photo of a muddy dirty floor"
+      ],
+      "negativePrompts": [
+        "a photo of a clean surface",
+        "a photo of a clean floor",
+        "a photo of a new clean air filter"
+      ]
+    },
+    {
+      "code": "stain_or_discoloration",
+      "name": "sign:stain_or_discoloration",
+      "displayNameVi": "Vết ố/đổi màu",
+      "definition": "Vùng đổi màu nhìn thấy; không kết luận ướt hoặc nguồn rò.",
+      "positivePrompts": [
+        "a photo of a stained wall",
+        "a photo of a stained dirty floor",
+        "a photo of water stains on a ceiling"
+      ],
+      "negativePrompts": [
+        "a photo of a clean wall",
+        "a photo of a clean floor",
+        "a photo of plain tiles"
+      ]
+    },
+    {
+      "code": "crack",
+      "name": "sign:crack",
+      "displayNameVi": "Vết nứt",
+      "definition": "Đường nứt trên vật liệu, phân biệt mạch ghép và họa tiết.",
+      "positivePrompts": [
+        "a photo of a cracked wall",
+        "a photo of a crack in plaster"
+      ],
+      "negativePrompts": [
+        "a photo of an intact wall",
+        "a photo of tile joints",
+        "a photo of scratched paint"
+      ]
+    },
+    {
+      "code": "mold_like_growth",
+      "name": "sign:mold_like_growth",
+      "displayNameVi": "Mảng bám nghi nấm/rêu",
+      "definition": "Mảng bám có hình dạng phù hợp; không xác định loài nấm hoặc độc tính.",
+      "positivePrompts": [
+        "a photo of mold growth on a wall",
+        "a photo of green algae on a wall"
+      ],
+      "negativePrompts": [
+        "a photo of a clean wall",
+        "a photo of a painted wall pattern",
+        "a photo of peeling paint"
+      ]
+    },
+    {
+      "code": "scorched_outlet",
+      "name": "sign:scorched_outlet",
+      "displayNameVi": "Ổ cắm có dấu cháy/xém",
+      "definition": "Khung bao ổ cắm có dấu cháy; không phải khung vết cháy nhỏ và không suy nguyên nhân.",
+      "positivePrompts": [
+        "a photo of a burnt electrical outlet",
+        "a photo of a scorched power socket"
+      ],
+      "negativePrompts": [
+        "a photo of a clean intact electrical outlet",
+        "a photo of a new power outlet",
+        "a photo of a normal electrical switch"
+      ]
+    },
+    {
+      "code": "socket_damage_or_displacement",
+      "name": "sign:socket_damage_or_displacement",
+      "displayNameVi": "Ổ cắm hư hại/lệch khỏi mặt lắp",
+      "definition": "Khung bao ổ cắm có hư hại hoặc tách lệch nhìn thấy; không kết luận đấu dây sai.",
+      "positivePrompts": [
+        "a photo of a broken electrical outlet",
+        "a photo of a loose power socket detached from a wall"
+      ],
+      "negativePrompts": [
+        "a photo of an intact electrical outlet",
+        "a photo of a new power socket"
+      ]
+    },
+    {
+      "code": "exposed_conductor",
+      "name": "sign:exposed_conductor",
+      "displayNameVi": "Lõi dây điện nhìn thấy",
+      "definition": "Đoạn lõi dây không có vỏ bọc nhìn thấy; có thể đang lắp đặt, chưa kết luận nguy hiểm hay hỏng.",
+      "positivePrompts": [
+        "a photo of exposed copper wires",
+        "a photo of electrical cable with damaged insulation"
+      ],
+      "negativePrompts": [
+        "a photo of insulated electrical cable",
+        "a photo of a power plug",
+        "a photo of a rope"
+      ]
+    },
+    {
+      "code": "visible_water",
+      "name": "sign:visible_water",
+      "displayNameVi": "Vùng nước nhìn thấy",
+      "definition": "Nước/tia nước/vũng nước trong vùng nguồn gán nhãn; không tự kết luận ống vỡ hoặc nguồn rò.",
+      "positivePrompts": [
+        "a photo of water spraying from a pipe",
+        "a photo of a water puddle",
+        "a photo of a leaking pipe"
+      ],
+      "negativePrompts": [
+        "a photo of a dry road",
+        "a photo of a dry pipe",
+        "a photo of a dry wall"
+      ]
+    },
+    {
+      "code": "peeling_surface",
+      "name": "sign:peeling_surface",
+      "displayNameVi": "Bong/tróc bề mặt",
+      "definition": "Vùng bong hoặc tróc lớp phủ nhìn thấy; không suy nguyên nhân ẩm.",
+      "positivePrompts": [
+        "a photo of peeling paint",
+        "a photo of flaking wall paint"
+      ],
+      "negativePrompts": [
+        "a photo of an intact painted wall",
+        "a photo of a wallpaper pattern",
+        "a photo of a clean baseboard"
+      ]
+    },
+    {
+      "code": "broken_part",
+      "name": "sign:broken_part",
+      "displayNameVi": "Phần gãy/vỡ nhìn thấy",
+      "definition": "Khung bao vùng vật liệu gãy/vỡ hoặc mất phần nhìn thấy; không bao toàn thiết bị nguyên vẹn.",
+      "positivePrompts": [
+        "a photo of broken tiles",
+        "a photo of shattered window glass",
+        "a photo of a damaged ceiling with a hole"
+      ],
+      "negativePrompts": [
+        "a photo of intact tiles",
+        "a photo of an intact glass window",
+        "a photo of an intact ceiling"
+      ]
+    }
+  ],
+  "sourceMappings": {
+    "source-0": {
+      "Dirty Carpet": "surface_soiling",
+      "Baseboard Water Damage": "stain_or_discoloration",
+      "Ceiling Water Damage": "stain_or_discoloration",
+      "Tile Water Damage": "stain_or_discoloration",
+      "Waterline Damage": "visible_water",
+      "Toilet Leak": "visible_water",
+      "Needs Paint-Refinished": "peeling_surface",
+      "Broken Tile": "broken_part",
+      "Broken Windows": "broken_part",
+      "Ceiling Damage": "broken_part"
+    },
+    "source-1": {
+      "Muddy-Floor": "surface_soiling",
+      "Stain": "stain_or_discoloration"
+    },
+    "source-2": {
+      "burnt-outlet": "scorched_outlet",
+      "damaged-socket": "socket_damage_or_displacement",
+      "exposed-wires": "exposed_conductor"
+    },
+    "source-3": {
+      "crack": "crack",
+      "damp": "stain_or_discoloration",
+      "fungus": "mold_like_growth"
+    },
+    "source-4": {
+      "water leak": "visible_water"
+    }
+  },
+  "notes": [
+    "No underlying fault diagnoses inferred from single photos.",
+    "Source classes ignored for training are explicitly excluded, not negatives.",
+    "New label names describe visible evidence and preserve source geometry semantics.",
+    "Plant/gardening dataset not present in downloaded archives.",
+    "AI alignment is heuristic, not verification or calibrated probability."
+  ]
+}

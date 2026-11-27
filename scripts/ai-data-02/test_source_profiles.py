@@ -32,6 +32,13 @@ class ProfileTests(unittest.TestCase):
                 'licenseStatus': 'VERIFIED', 'licenseType': 'licensed', 'licenseConfirmed': True,
                 'licenseEvidence': 'Generated fixture rights evidence; never applies to real images'}
 
+    def test_imported_roboflow_corpus_retains_exact_source_identity(self):
+        row=dict(self.s.rows['i0'],corpus='roboflow-dirty-air-filter-v2')
+        self.assertEqual(identity(row),identity(self.s.rows['i0']))
+        claim=json.loads(row['source_claim_json']);claim['url']='https://example.com/wrong';row['source_claim_json']=canonical(claim)
+        self.assertIsNone(identity(row))
+        self.assertIsNone(identity(dict(self.s.rows['i0'],corpus='user_synthetic_zip')))
+
     def test_one_profile_inherited_without_bulk_verification(self):
         payload = self.profile_payload(); payload['licenseEvidence'] = '  '+payload['licenseEvidence']+'  '
         saved = self.s.source_profiles.save(payload)

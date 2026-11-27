@@ -156,6 +156,26 @@ describe('Diagnosis target and service ranking', () => {
     expect(res.reason).toBe('image_uncertain');
     expect(res.suggestedCategoryId).toBeNull();
   });
+  it('publishes ambiguous AI target options mapped to active IDs without preselecting', async () => {
+    ai.diagnoseIncident.mockResolvedValue({
+      engine: 'model',
+      confidence: 0.85,
+      suggestedCategoryId: 'sua-dien',
+      suggestedTargetId: null,
+      targetCandidates: [
+        { targetId: 'o-cam-dien', similarity: 0.303 },
+        { targetId: 'unknown-slug', similarity: 0.302 },
+        { targetId: 'cong-tac-dien', similarity: 0.301 },
+      ],
+    });
+    const result = await resolveDiagnosis(prisma, ai, { imageUrl: 'https://img.test/1.jpg' });
+    expect(result.suggestedTargetId).toBeNull();
+    expect(result.aiTargetOptions.map((t) => t.id)).toEqual(['tgt-2', 'tgt-1']);
+  });
+  it('does not repeat options once the AI or the user picked a target', async () => {
+    const picked = await resolveDiagnosis(prisma, ai, { imageUrl: 'https://img.test/1.jpg' });
+    expect(picked.aiTargetOptions).toEqual([]);
+  });
   it('canonicalizes a fallback AI slug before the UI confirms it', async () => {
     ai.diagnoseIncident.mockResolvedValue({
       engine: 'model',

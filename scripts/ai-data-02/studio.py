@@ -8,14 +8,16 @@ from PIL import Image,ImageOps
 from core import Studio,REPO,array,canonical,digest,read_asset,atomic,now
 from exporter import export
 from selection import filtered_ids
+from grounding_setup import DEFAULT_MANIFEST as GROUNDING_MANIFEST
+from grounding_catalog import make_scope,PROMPTS
 from autolabel import request_run, load_request, read_report, run_dir, export_pseudo
 
-def server(store,port=8767):
+def server(store,port=8767,*,auto_inspect=True):
     token=secrets.token_urlsafe(32);job={'process':None};job_lock=threading.Lock()
     def launch_auto(request):
         folder=run_dir(store.state,request['runId'])
         (folder/'STOP').unlink(missing_ok=True)
-        atomic(store.state/'auto-active.json',{'runId':request['runId']})
+        atomic(store.state/('grounding-active.json' if request.get('inspectionOnly') else 'auto-active.json'),{'runId':request['runId']})
         atomic(folder/'progress.json',{'runId':request['runId'],'status':'STARTING','requested':len(request['imageIds']),'processed':0})
         log=(folder/'worker.log').open('a')
         try:job['process']=subprocess.Popen([sys.executable,str(Path(__file__).with_name('autolabel.py')),'--inventory',str(store.inventory),'--state',str(store.state),'--run-id',request['runId']],stdout=log,stderr=log,cwd=REPO,start_new_session=True)
@@ -33,11 +35,11 @@ def server(store,port=8767):
             u=urlparse(self.path);q={k:v[0] for k,v in parse_qs(u.query).items()}
             try:
                 if u.path=='/':return self.send(200,Path(__file__).with_name('studio.html').read_bytes(),'text/html; charset=utf-8')
-                if u.path=='/api/config':return self.send(200,{'token':token,'singleReviewAction':True,'autoLabeling':True,'categories':store.catalog['categories'],'targets':list(store.targets.values()),'signs':store.signs,'taxonomy':store.taxonomy.config(),'session':store.session,'pilot':store.pilot,'sources':sorted({r['corpus'] for r in store.rows.values()})})
+                if u.path=='/api/config':return self.send(200,{'token':token,'runtimeVersion':'studio-hybrid-auto-v1','singleReviewAction':True,'autoLabeling':True,'groundingSearch':json.loads(PROMPTS.read_text()),'groundingDino':{'multiservice':True,'autoInspect':auto_inspect,'available':GROUNDING_MANIFEST.is_file(),'manifest':str(GROUNDING_MANIFEST),'scope':'Dấu hiệu quan sát theo thiết bị / danh mục'},'categories':store.catalog['categories'],'targets':list(store.targets.values()),'signs':store.signs,'taxonomy':store.taxonomy.config(),'session':store.session,'pilot':store.pilot,'sources':sorted({r['corpus'] for r in store.rows.values()})})
                 if u.path=='/api/auto-job':
                     pointer=store.state/'auto-active.json'
-                    if not pointer.exists():return self.send(200,{'status':'IDLE'})
-                    run_id=json.loads(pointer.read_text())['runId'];folder=run_dir(store.state,run_id)
+                    if not q.get('runId') and not pointer.exists():return self.send(200,{'status':'IDLE'})
+                    run_id=q.get('runId') or json.loads(pointer.read_text())['runId'];folder=run_dir(store.state,run_id)
                     progress=json.loads((folder/'progress.json').read_text())
                     if job.get('autoRunId')==run_id and job['process'] and job['process'].poll() is None:
                         batch_path=store.state/'batch-progress.json'
@@ -103,7 +105,13 @@ def server(store,port=8767):
                         if job['process'] and job['process'].poll() is None:raise ValueError('A batch is running')
                         if p.get('scope') not in ['selected','filtered']:raise ValueError('Choose selected or filtered scope')
                         ids=p.get('imageIds') if p.get('scope')=='selected' else filtered_ids(store,p.get('filters',{}))
-                        result=launch_auto(request_run(store,ids,p.get('signManifest') or None))
+                        manifest=str(make_scope(store,GROUNDING_MANIFEST,target_id=p.get('filters',{}).get('target') or None,category_id=p.get('filters',{}).get('category') or None)) if p.get('engine')=='grounding-dino' else p.get('signManifest') or None
+                        result=launch_auto(request_run(store,ids,manifest))
+                elif route=='/api/grounding-image':
+                    with job_lock:
+                        if job['process'] and job['process'].poll() is None:raise ValueError('A batch is running')
+                        manifest=make_scope(store,GROUNDING_MANIFEST,target_id=p.get('targetId') or None,category_id=p.get('categoryId') or None)
+                        result=launch_auto(request_run(store,[p['imageId']],str(manifest),include_reviewed=True))
                 elif route=='/api/auto-resume':
                     with job_lock:
                         if job['process'] and job['process'].poll() is None:raise ValueError('A batch is running')

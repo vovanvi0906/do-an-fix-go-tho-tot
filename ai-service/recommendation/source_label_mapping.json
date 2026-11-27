@@ -1,0 +1,186 @@
+{
+  "schema": "fixgo.source-label-service-mapping.v1",
+  "approvedDate": "2026-11-27",
+  "catalogCapturedAt": "2026-11-27T07:12:19.255Z",
+  "requiresCustomerConfirmation": true,
+  "labels": [
+    {
+      "sourceLabel": "Bathtub",
+      "mode": "unsupported",
+      "question": null,
+      "targetIds": [],
+      "services": []
+    },
+    {
+      "sourceLabel": "Clogged Drain",
+      "mode": "confirm_context",
+      "question": "Chỗ thoát nước bị tắc là phễu sàn, chậu rửa, ống thoát hay cống?",
+      "targetIds": [
+        "3a9061ae-55b0-4130-b48c-7b6f1c281247",
+        "4f2dd034-f575-49b6-a913-cea3a620b618",
+        "f27226de-570a-4c1e-84b5-dc419fe9c32e",
+        "d9924692-19d1-4185-9e35-b381953c42a3"
+      ],
+      "services": [
+        {
+          "id": "326dd83f-f690-4f85-9229-96c52d543e37",
+          "slug": "thong-tac-pheu-thoat-san",
+          "name": "Thông tắc phễu thoát sàn",
+          "categoryId": "2a367f64-e8b2-4b94-8227-f5058c842af8",
+          "targetId": "3a9061ae-55b0-4130-b48c-7b6f1c281247"
+        },
+        {
+          "id": "e3dfe74b-78b9-40f8-8ef3-502f999df5ed",
+          "slug": "thong-tac-lavabo-chau-rua",
+          "name": "Thông tắc lavabo / chậu rửa",
+          "categoryId": "2a367f64-e8b2-4b94-8227-f5058c842af8",
+          "targetId": "4f2dd034-f575-49b6-a913-cea3a620b618"
+        },
+        {
+          "id": "67d739f0-012e-42f0-bceb-b8e19ca44883",
+          "slug": "thong-tac-ong-thoat-nuoc",
+          "name": "Thông tắc ống thoát nước",
+          "categoryId": "2a367f64-e8b2-4b94-8227-f5058c842af8",
+          "targetId": "f27226de-570a-4c1e-84b5-dc419fe9c32e"
+        },
+        {
+          "id": "824ceac4-511d-426e-b47c-df1bc0a46a3b",
+          "slug": "thong-tac-duong-cong",
+          "name": "Thông tắc đường cống",
+          "categoryId": "2a367f64-e8b2-4b94-8227-f5058c842af8",
+          "targetId": "d9924692-19d1-4185-9e35-b381953c42a3"
+        }
+      ]
+    },
+    {
+      "sourceLabel": "Clogged Toilet",
+      "mode": "suggest",
+      "question": null,
+      "targetIds": [
+        "78e95d0e-4ea5-43d1-b0fe-9b3d9be8b3c3"
+      ],
+      "services": [
+        {
+          "id": "ffc8c9d2-30f6-4201-9536-a86a685eae76",
+          "slug": "thong-tac-bon-cau",
+          "name": "Thông tắc bồn cầu",
+          "categoryId": "2a367f64-e8b2-4b94-8227-f5058c842af8",
+          "targetId": "78e95d0e-4ea5-43d1-b0fe-9b3d9be8b3c3"
+        }
+      ]
+    },
+    {
+      "sourceLabel": "Dirty Air Filter",
+      "mode": "confirm_context",
+      "question": "Bộ lọc này thuộc thiết bị nào? Nếu là máy lạnh, đó là loại treo tường hay âm trần?",
+      "targetIds": [
+        "3d946ff9-d116-4d07-9f38-c175669f74ed"
+      ],
+      "services": [
+        {
+          "id": "ec3baa05-0022-4ee2-a0c5-aff4b4bfc95c",
+          "slug": "ve-sinh-may-lanh-treo-tuong",
+          "name": "Vệ sinh máy lạnh treo tường",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "targetId": "3d946ff9-d116-4d07-9f38-c175669f74ed"
+        },
+        {
+          "id": "538c4c37-07b7-4faa-beea-2b63dc30dfd6",
+          "slug": "ve-sinh-may-lanh-am-tran",
+          "name": "Vệ sinh máy lạnh âm trần",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "targetId": "3d946ff9-d116-4d07-9f38-c175669f74ed"
+        }
+      ]
+    },
+    {
+      "sourceLabel": "Improper wiring for water heater",
+      "mode": "confirm_context",
+      "question": "Bạn muốn đặt kiểm tra an toàn điện và tiếp địa cho bình nóng lạnh điện?",
+      "targetIds": [
+        "8c5b11b7-adfe-4c5d-a3b6-fd7afbf53636"
+      ],
+      "services": [
+        {
+          "id": "a3e271f7-9c70-4575-acd2-020db254137f",
+          "slug": "kiem-tra-an-toan-dien-va-tiep-dia",
+          "name": "Kiểm tra an toàn điện và tiếp địa",
+          "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+          "targetId": "8c5b11b7-adfe-4c5d-a3b6-fd7afbf53636"
+        }
+      ]
+    },
+    {
+      "sourceLabel": "Improper wiring on panel box",
+      "mode": "confirm_context",
+      "question": "Bạn muốn đặt bảo trì và kiểm tra tủ điện?",
+      "targetIds": [
+        "470acb27-41b1-4d36-9ee3-84b9bbc857de"
+      ],
+      "services": [
+        {
+          "id": "3f8a3563-ea71-4611-bc0f-65ae335dea67",
+          "slug": "bao-tri-tu-dien",
+          "name": "Bảo trì tủ điện",
+          "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+          "targetId": "470acb27-41b1-4d36-9ee3-84b9bbc857de"
+        }
+      ]
+    },
+    {
+      "sourceLabel": "Laundry Units",
+      "mode": "choose_need",
+      "question": "Đây là máy giặt hay máy sấy, và bạn cần dịch vụ gì?",
+      "targetIds": [
+        "1746c918-2fb7-41ac-a111-5c3e807616bf",
+        "eaa18ae1-41b8-4588-bcdb-96192e5a2da8"
+      ],
+      "services": []
+    },
+    {
+      "sourceLabel": "Opossum",
+      "mode": "unsupported",
+      "question": null,
+      "targetIds": [],
+      "services": []
+    },
+    {
+      "sourceLabel": "Scorpion",
+      "mode": "unsupported",
+      "question": null,
+      "targetIds": [],
+      "services": []
+    },
+    {
+      "sourceLabel": "Spider",
+      "mode": "unsupported",
+      "question": null,
+      "targetIds": [],
+      "services": []
+    },
+    {
+      "sourceLabel": "Termites",
+      "mode": "unsupported",
+      "question": null,
+      "targetIds": [],
+      "services": []
+    },
+    {
+      "sourceLabel": "Water Heater Thermostat",
+      "mode": "confirm_need",
+      "question": "Đây có phải bộ điều nhiệt của bình nóng lạnh điện và bạn muốn sửa bộ phận này?",
+      "targetIds": [
+        "8c5b11b7-adfe-4c5d-a3b6-fd7afbf53636"
+      ],
+      "services": [
+        {
+          "id": "a449dbb5-556d-4b74-ae4c-b6e4f06d4f7d",
+          "slug": "sua-bo-dieu-nhiet",
+          "name": "Sửa bộ điều nhiệt",
+          "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+          "targetId": "8c5b11b7-adfe-4c5d-a3b6-fd7afbf53636"
+        }
+      ]
+    }
+  ]
+}

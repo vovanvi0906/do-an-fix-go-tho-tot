@@ -7,7 +7,8 @@ FIELDS = ['sourceEvidence', 'licenseStatus', 'licenseType', 'licenseEvidence', '
 
 
 def identity(row):
-    if row.get('corpus') != 'raw_source':
+    corpus=row.get('corpus','')
+    if corpus != 'raw_source' and not corpus.startswith('roboflow-'):
         return None
     claim = json.loads(row.get('source_claim_json') or '{}')
     workspace, project, version = claim.get('workspace'), claim.get('project'), claim.get('version')

@@ -9,7 +9,7 @@ if __name__ == '__main__':
     fixture = make_fixture()
     http = None
     try:
-        http = server(fixture.s, 8768)
+        http = server(fixture.s, 8768,auto_inspect=False)
         thread = threading.Thread(target=http.serve_forever, daemon=True)
         thread.start()
         subprocess.run(['node', str(Path(__file__).with_suffix('.cjs'))], check=True)

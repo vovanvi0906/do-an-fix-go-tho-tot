@@ -10,6 +10,12 @@ const env = { ...process.env };
 for (const key of ["AI_FACE_SERVICE_TOKEN", "FACE_MODEL_DIR"]) {
   if (env[key] === undefined && local[key] !== undefined) env[key] = local[key];
 }
+// Pin the same evaluated sign release used by the normal API startup.
+// Explicit shell overrides remain available for rollback/testing.
+env.MULTISERVICE_OBSERVER_ENABLED ??= "true";
+env.MULTISERVICE_OBSERVER_MANIFEST ??= resolve(
+  root, "ai-service/weights/multiservice-observer-v2-gated/release.json",
+);
 env.BACKEND_API_URL = "http://127.0.0.1:3000/api";
 const child = spawn(
   resolve(root, "ai-service/.venv/bin/python"),

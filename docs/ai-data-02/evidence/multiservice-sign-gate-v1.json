@@ -1,0 +1,157 @@
+{
+  "createdAtUtc": "2026-11-26T15:10:13.735985+00:00",
+  "modelVersion": "fixgo-multiservice-observer-v2-gated",
+  "releaseSha256": "2bbe78ba3306d0ff8222d08a118dac50d1a24757706c66a7f8ad23858e747734",
+  "baseRelease": "fixgo-multiservice-observer-v2-tested",
+  "weightsAndThresholdsUnchanged": true,
+  "gate": {
+    "minPositiveImages": 20,
+    "minPrecision": 0.6,
+    "minRecall": 0.6,
+    "version": "v2",
+    "eligibleSuites": [
+      "clean",
+      "reservedCrack"
+    ]
+  },
+  "enabledSigns": [
+    "crack"
+  ],
+  "decisions": {
+    "broken_part": {
+      "enabled": false,
+      "reason": "insufficient_held_out_positives",
+      "evidence": [
+        {
+          "suite": "clean",
+          "positiveImages": "5",
+          "TP": "1",
+          "FP": "0",
+          "FN": "5",
+          "precision": "1.0",
+          "recall": "0.16666666666666666",
+          "negativeScopeImages": "8",
+          "negativeScopeImagesWithAlerts": "0"
+        }
+      ]
+    },
+    "exposed_conductor": {
+      "enabled": false,
+      "reason": "insufficient_held_out_positives",
+      "evidence": [
+        {
+          "suite": "clean",
+          "positiveImages": "0",
+          "TP": "0",
+          "FP": "0",
+          "FN": "0",
+          "precision": "",
+          "recall": "",
+          "negativeScopeImages": "8",
+          "negativeScopeImagesWithAlerts": "0"
+        }
+      ]
+    },
+    "mold_like_growth": {
+      "enabled": false,
+      "reason": "no_held_out_evaluation",
+      "evidence": []
+    },
+    "peeling_surface": {
+      "enabled": false,
+      "reason": "insufficient_held_out_positives",
+      "evidence": [
+        {
+          "suite": "clean",
+          "positiveImages": "6",
+          "TP": "0",
+          "FP": "0",
+          "FN": "6",
+          "precision": "",
+          "recall": "0.0",
+          "negativeScopeImages": "9",
+          "negativeScopeImagesWithAlerts": "0"
+        }
+      ]
+    },
+    "scorched_outlet": {
+      "enabled": false,
+      "reason": "no_held_out_evaluation",
+      "evidence": []
+    },
+    "socket_damage_or_displacement": {
+      "enabled": false,
+      "reason": "insufficient_held_out_positives",
+      "evidence": [
+        {
+          "suite": "clean",
+          "positiveImages": "1",
+          "TP": "0",
+          "FP": "0",
+          "FN": "1",
+          "precision": "",
+          "recall": "0.0",
+          "negativeScopeImages": "9",
+          "negativeScopeImagesWithAlerts": "0"
+        }
+      ]
+    },
+    "stain_or_discoloration": {
+      "enabled": false,
+      "reason": "insufficient_held_out_positives",
+      "evidence": [
+        {
+          "suite": "clean",
+          "positiveImages": "3",
+          "TP": "0",
+          "FP": "1",
+          "FN": "6",
+          "precision": "0.0",
+          "recall": "0.0",
+          "negativeScopeImages": "8",
+          "negativeScopeImagesWithAlerts": "0"
+        }
+      ]
+    },
+    "surface_soiling": {
+      "enabled": false,
+      "reason": "no_held_out_evaluation",
+      "evidence": []
+    },
+    "visible_water": {
+      "enabled": false,
+      "reason": "no_held_out_evaluation",
+      "evidence": []
+    },
+    "crack": {
+      "enabled": true,
+      "reason": "passed_held_out_gate",
+      "evidence": [
+        {
+          "suite": "clean",
+          "positiveImages": "3",
+          "TP": "2",
+          "FP": "3",
+          "FN": "1",
+          "precision": "0.4",
+          "recall": "0.6666666666666666",
+          "negativeScopeImages": "8",
+          "negativeScopeImagesWithAlerts": "1"
+        },
+        {
+          "suite": "reservedCrack",
+          "positiveImages": "59",
+          "TP": "50",
+          "FP": "22",
+          "FN": "9",
+          "precision": "0.6944444444444444",
+          "recall": "0.847457627118644",
+          "negativeScopeImages": "0",
+          "negativeScopeImagesWithAlerts": "0"
+        }
+      ]
+    }
+  },
+  "productionValidated": false,
+  "testExposed": true
+}

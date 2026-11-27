@@ -29,7 +29,7 @@ def main():
         return SimpleNamespace(pid=12345,poll=lambda:0)
     try:
         studio.subprocess=SimpleNamespace(Popen=fake_worker)
-        http=studio.server(fixture.s,8768)
+        http=studio.server(fixture.s,8768,auto_inspect=False)
         thread=threading.Thread(target=http.serve_forever,daemon=True);thread.start()
         subprocess.run(['node',str(Path(__file__).with_suffix('.cjs'))],check=True)
         assert set(fixture.s.studio_latest)=={'i3'}, 'Automation changed human journal'

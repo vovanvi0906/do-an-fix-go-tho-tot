@@ -21,7 +21,7 @@ State mặc định: `/home/vanvi/.local/share/fixgo-dataset-studio/`. Pilot 50 
 
 ## Gán nhãn tự động toàn tập
 
-Bấm **Tự động gán nhãn** để chạy toàn bộ ảnh đang lọc (mọi trang) hoặc ảnh đã chọn, tối đa 50.000 ID; không đụng bản duyệt/bản nháp. Có cache/resume, nhóm trùng và hàng đợi lỗi/mâu thuẫn, export YOLO nhãn AI riêng. Model mặc định chỉ hỗ trợ thiết bị; cần checkpoint dấu hiệu thật để tự gán cháy/nứt. Xem [AUTO-LABELING.md](AUTO-LABELING.md). Backend mới cần khởi động lại Studio sau khi lưu tiến độ.
+Bấm **Tự động gán nhãn** để chạy toàn bộ ảnh đang lọc (mọi trang) hoặc ảnh đã chọn, tối đa 50.000 ID; không đụng bản duyệt/bản nháp. Có cache/resume, nhóm trùng và hàng đợi lỗi/mâu thuẫn, export YOLO nhãn AI riêng. Đã cấu hình Grounding DINO Tiny tìm dấu hiệu theo sáu nhóm dịch vụ; xem [MULTISERVICE-SIGNS.md](MULTISERVICE-SIGNS.md); có nút AI khoanh ngay trong editor. Bộ CLIP/YOLO cũ chỉ nhận thiết bị. Xem [GROUNDING-DINO.md](GROUNDING-DINO.md). Xem [AUTO-LABELING.md](AUTO-LABELING.md). Backend mới cần khởi động lại Studio sau khi lưu tiến độ.
 
 ## Luồng duyệt nhanh
 

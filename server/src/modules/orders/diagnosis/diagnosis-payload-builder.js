@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { STATUS, DECISION_SOURCE, REASON_CODES, MODEL_VERSION } from './diagnosis-constants';
+import { emptyObservableEvidence } from './observable-evidence';
 
 export function createInitialResult(imageUrl, description, categories) {
   return {
@@ -35,9 +36,11 @@ export function createInitialResult(imageUrl, description, categories) {
     modelVersion: MODEL_VERSION,
     reasonCodes: [REASON_CODES.CATEGORY_REQUIRED],
     observableSigns: [],
+    observableAnalysis: emptyObservableEvidence(),
     reportedSymptoms: [],
     questions: [],
     availableCategories: categories.map((c) => ({ id: c.id, name: c.name, basePrice: Number(c.basePrice) })),
+    aiTargetOptions: [],
     availableTargets: [],
     availableServices: [],
     issueDescription: description,

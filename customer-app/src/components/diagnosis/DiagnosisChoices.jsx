@@ -75,7 +75,7 @@ export default function DiagnosisChoices({ result, imageUrl, description = '', o
           <Pressable accessibilityRole="button" nativeID={`visual-service-${item.id}`} disabled={busy} onPress={()=>answer({ categoryId:item.categoryId, targetId:item.targetId, serviceId:item.id })} style={{ paddingVertical:12 }}><Text>Chọn dịch vụ này</Text></Pressable>
         </View>)}
       </View>}
-      {!!result?.suggestedCategoryId && <TargetCandidateSection result={result} onSelectTarget={id => answer({ categoryId: result?.suggestedCategoryId, targetId: id })}
+      {!!result?.suggestedCategoryId && <TargetCandidateSection key={`${imageUrl || result?.imageUrl}:${result?.suggestedCategoryId}`} result={result} onSelectTarget={id => answer({ categoryId: result?.suggestedCategoryId, targetId: id })}
         onSelectCategory={selectCategory} busy={busy} />}
       {targetId && <>
         <Text style={{ fontWeight: '600' }}>Bạn đã xác nhận: {result?.target?.name}</Text>

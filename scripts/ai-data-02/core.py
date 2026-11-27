@@ -54,7 +54,18 @@ class Studio(SourceStore):
         d=json.loads(p.read_text());payload={k:v for k,v in d.items() if k!='cacheHash'}
         if digest(canonical(payload).encode())!=d.get('cacheHash') or d.get('contentHash')!=self.rows[i]['sha256']:raise ValueError('AI cache hash/source mismatch')
         active=self.state/'active-model-profile.json'
-        if active.exists() and d.get('profileHash')!=json.loads(active.read_text()).get('profileHash'):return None
+        if active.exists():
+            current=json.loads(active.read_text())
+            if d.get('profileHash')!=current.get('profileHash'):
+                own=d.get('modelProfile') or {};scope_file=Path((own.get('signDetector') or {}).get('manifestPath',''))
+                compatible=(current.get('runtimeEngine')==own.get('runtimeEngine')=='grounding-dino' and own.get('compatibilityKey') and
+                            own['compatibilityKey']==current.get('compatibilityKey') and not scope_file.is_symlink() and scope_file.is_file() and
+                            scope_file.resolve().is_relative_to((self.state/'grounding-scopes').resolve()) and
+                            digest(scope_file.read_bytes())==own.get('signDetector',{}).get('manifestSha256') and
+                            own.get('profileHash')==d.get('profileHash')==digest(canonical({k:v for k,v in own.items() if k!='profileHash'}).encode()))
+                if not compatible:return None
+                from batch import valid_cache
+                if not valid_cache(p,self.rows[i],own):return None
         return d
     def status(self,i):
         if i in self.studio_latest:return self.studio_latest[i]['reviewStatus']
@@ -97,7 +108,8 @@ class Studio(SourceStore):
             payload=read_asset(r['path'])
             if digest(payload)!=r['sha256'] or p.get('contentHash')!=r['sha256']:raise ValueError('Source changed; review invalidated')
             reviewer=p.get('reviewer','');note=p.get('note','');status=p.get('reviewStatus')
-            if not isinstance(reviewer,str) or not 2<=len(reviewer.strip())<=200 or not isinstance(note,str) or not 3<=len(note.strip())<=4000:raise ValueError('Actual reviewer and review note required')
+            if not isinstance(reviewer,str) or not 2<=len(reviewer.strip())<=200:raise ValueError('Tên người kiểm duyệt cần từ 2 đến 200 ký tự, ví dụ Vanvi.')
+            if not isinstance(note,str) or not 3<=len(note.strip())<=4000:raise ValueError('Ghi chú kiểm duyệt cần từ 3 đến 4000 ký tự.')
             if status not in ['NEEDS_REVIEW','HUMAN_VERIFIED','REJECTED']:raise ValueError('AI/source statuses cannot be submitted as human verification')
             boxes=copy.deepcopy(self.validate_boxes(p.get('boxes',[]),r))
             for b in boxes:b['annotationSource']='HUMAN_LOCAL_REVIEW'
