@@ -1,0 +1,120 @@
+{
+  "reviewLedger": "/home/vanvi/Work/datasetai/02-curated/fixgo-priority-review-v1/visual-review-events.jsonl",
+  "reviewHead": "31a6276e78e1d270f54db818e27fed49c981ccb5926650b363048a77b6b88373",
+  "labelStatus": "AI_VISUAL_REVIEW_NOT_EXPERT_GROUND_TRUTH",
+  "reviewedImages": 216,
+  "byScope": {
+    "broken_part": {
+      "accepted": 24,
+      "quarantined": 6
+    },
+    "exposed_conductor": {
+      "accepted": 21,
+      "quarantined": 137
+    },
+    "socket_damage_or_displacement": {
+      "accepted": 4,
+      "quarantined": 24
+    }
+  },
+  "quarantineReasons": {
+    "VISIBLE_STOCK_WATERMARK_QUARANTINE_NOT_TRAINING": 94,
+    "SHEATH_BREACH_INNER_INSULATION_ONLY_NO_METAL_CORE_CANDIDATE_FOR_INSULATION_DAMAGE_SCOPE": 9,
+    "STAGED_STRIPPED_WIRE_ENDS_NOT_CONFIRMED_DAMAGE": 8,
+    "CUT_CABLE_END_NOT_CONFIRMED_INSULATION_FAULT": 7,
+    "OPEN_INSTALLATION_CUT_WIRES_NOT_CONFIRMED_FAULT": 5,
+    "PROMINENT_TEXT_OVERLAY_NOT_TRAINING": 4,
+    "NEAR_DUPLICATE_OF_P_E019_SAME_SCENE": 3,
+    "INTACT_LIFTED_TILES_NOT_CONFIRMED_MATERIAL_BREAKAGE": 1,
+    "PROMINENT_BRAND_OVERLAY_AND_MIXED_CRACK_CHIP_GEOMETRY": 1,
+    "COMPOSITE_INSET_AND_LIFTED_TILE_NOT_CLEAR_MATERIAL_BREAKAGE": 1,
+    "LIFTED_TILES_AND_LOOSE_DEBRIS_UNCERTAIN_BREAKAGE_GEOMETRY": 1,
+    "MIXED_OLD_INSTALLATION_MULTIPLE_UNLINKED_FIXTURES_UNCERTAIN_DAMAGE": 1,
+    "NEAR_DUPLICATE_OF_P_S010_SAME_SCENE": 1,
+    "MISSING_FACEPLATE_MAY_BE_INSTALLATION_NOT_CONFIRMED_DAMAGE": 1,
+    "BURNT_DETACHED_SOCKET_MIXED_GEOMETRY_AND_HAND_OCCLUSION": 1,
+    "PROMINENT_BRAND_OVERLAY_AND_SWITCH_NOT_SOCKET": 1,
+    "NEAR_DUPLICATE_OF_P_S007_SAME_SCENE": 1,
+    "OPEN_INSTALLATION_NOT_CONFIRMED_FAULT": 1,
+    "FRAYED_OUTER_BRAID_NO_CLEAR_METAL_CORE": 1,
+    "PROMINENT_TEXT_OVERLAY_AND_STAGED_STRIPPED_WIRE": 1,
+    "VISIBLE_STOCK_WATERMARK_AND_BRAID_VERSUS_CONDUCTOR_AMBIGUITY": 1,
+    "DARK_DISTANT_INSTALLATION_NO_LOCAL_METAL_CORE_EVIDENCE": 1,
+    "SLIDE_COMPOSITE_WITH_TEXT_NOT_TRAINING": 1,
+    "MULTI_PANEL_COLLAGE_NOT_TRAINING": 1,
+    "SHIELD_FOIL_VERSUS_CORE_AMBIGUOUS_UNCERTAIN": 1,
+    "LOW_RESOLUTION_OR_UNCLEAR_CONDUCTOR_EVIDENCE": 1,
+    "SLIDE_COMPOSITE_WITH_TEXT_AND_NEAR_DUPLICATE_OF_P_E019": 1,
+    "LIKELY_SYNTHETIC_GENERATED_IMAGE_NOT_TRAINING": 1,
+    "NOT_ELECTRICAL_CABLE_STEEL_WIRE_ROPE": 1,
+    "BRAND_LOGO_PRODUCT_PHOTO_STAGED_STRIPPED_ENDS": 1,
+    "STAGED_FIRE_SCENE_MIXED_WITH_BURN_SCOPE": 1,
+    "POSSIBLE_SAME_SERIES_AS_VAL_P_E145_CROSS_SPLIT_LEAK_RISK": 1,
+    "BARE_CONDUCTOR_NO_INSULATION_CONTEXT": 1,
+    "NOT_CABLE_FIRE_SCENE_WITH_WATERMARK": 1,
+    "LIKELY_SYNTHETIC_GENERATED_IMAGE_NEAR_DUPLICATE_OF_P_E052": 1,
+    "NEAR_DUPLICATE_OF_P_E045_CUT_FRAYED_ENDS": 1,
+    "NEAR_DUPLICATE_SERIES_OF_P_E106_CROSS_SPLIT_LEAK_RISK": 1,
+    "NEAR_DUPLICATE_OF_P_E126_SHEATH_ONLY": 1,
+    "ANNOTATION_CIRCLE_EMOJI_AND_SITE_TEXT_OVERLAY": 1,
+    "NEAR_DUPLICATE_OF_P_E017_SAME_SCENE": 1,
+    "DUPLICATE_OF_P_E056_STAGED_STRIPPED_ENDS": 1,
+    "NEAR_DUPLICATE_OF_P_E016_CUT_FRAYED_ENDS": 1,
+    "TEXT_ARROW_ANNOTATION_OVERLAY": 1,
+    "REPAIR_SCENE_STRIPPED_END_NOT_DAMAGE_BURN_CONTEXT_OTHER_SCOPE": 1
+  },
+  "scopePacks": "/home/vanvi/Work/datasetai/02-curated/fixgo-priority-scopes-v2",
+  "packs": {
+    "broken_part": {
+      "counts": {
+        "train_positive": 14,
+        "val_positive": 6,
+        "train_negative": 1
+      },
+      "developmentMinimumMet": false,
+      "geometryQA": "PENDING",
+      "productionReady": false
+    },
+    "crack": {
+      "counts": {
+        "val_positive": 1,
+        "train_positive": 2
+      },
+      "developmentMinimumMet": false,
+      "geometryQA": "PENDING",
+      "productionReady": false
+    },
+    "peeling_surface": {
+      "counts": {
+        "train_positive": 1
+      },
+      "developmentMinimumMet": false,
+      "geometryQA": "PENDING",
+      "productionReady": false
+    },
+    "socket_damage_or_displacement": {
+      "counts": {
+        "train_positive": 4
+      },
+      "developmentMinimumMet": false,
+      "geometryQA": "PENDING",
+      "productionReady": false
+    },
+    "exposed_conductor": {
+      "counts": {
+        "train_positive": 14,
+        "val_positive": 7
+      },
+      "developmentMinimumMet": false,
+      "geometryQA": "PENDING",
+      "productionReady": false
+    }
+  },
+  "trainingDecision": "NOT_TRAINED: no priority pack meets development minimum (>=20 train positives, >=5 val positives, scoped negatives). Training on these counts would not give a trustworthy comparison.",
+  "policy": [
+    "Stock watermark/text overlay -> quarantine, never training.",
+    "Staged stripped ends, cut cable ends and open installations are not damage.",
+    "Sheath breach without visible metal is kept apart as a candidate for a future insulation-damage scope.",
+    "Near-duplicate scenes across train/val are quarantined to prevent leakage."
+  ]
+}

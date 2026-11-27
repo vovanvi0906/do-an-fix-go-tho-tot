@@ -1,0 +1,128 @@
+{
+  "schema": "fixgo.multiservice-observer-activation.v1",
+  "observedAtUtc": "2026-11-26T12:15:05.275639+00:00",
+  "modelVersion": "fixgo-multiservice-observer-v2",
+  "releaseSha256": "d373e0b23fcc907626ad86af675fe4d2b05dae6da185fb0287b62ad1f0756df8",
+  "releasePath": "/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/weights/multiservice-observer-v2/release.json",
+  "activationScope": "Default observable-sign research pilot in AI API, backend payload and customer UI. Not a full replacement of category/device recognition or production approval.",
+  "productionValidated": false,
+  "qualityStatus": "PILOT_AI_UNVERIFIED",
+  "enabledSigns": [
+    "broken_part",
+    "exposed_conductor",
+    "peeling_surface",
+    "socket_damage_or_displacement",
+    "stain_or_discoloration",
+    "crack"
+  ],
+  "disabledSigns": [
+    "mold_like_growth",
+    "scorched_outlet",
+    "surface_soiling",
+    "visible_water"
+  ],
+  "gardening": "NO_DOMAIN_DATASET",
+  "tests": {
+    "python": 36,
+    "backend": 71,
+    "customerUI": 13,
+    "ASGIRealImages": 5,
+    "backendRealResponseReplay": 5,
+    "liveRealImagesWithCLIP": 5,
+    "backendBuild": "194 files compiled",
+    "backendLiveResponseReplay": 5
+  },
+  "mainCategoryAndDeviceWeightsUnchanged": true,
+  "reservedTestUnexposed": true,
+  "liveSmoke": "/home/vanvi/Work/datasetai/04-training/multiservice-observer-v2/live-smoke.json",
+  "backendSmoke": "/home/vanvi/Work/datasetai/04-training/multiservice-observer-v2/backend-smoke.json",
+  "rejectedSpecialists": [
+    {
+      "code": "burn_mark",
+      "operatingPoint": {
+        "confidence": 0.6,
+        "IoU": 0.5,
+        "TP": 1,
+        "FP": 27,
+        "FN": 2,
+        "precision": 0.03571428571428571,
+        "recall": 0.3333333333333333,
+        "F1": 0.06451612903225806,
+        "negativeImages": 3,
+        "negativeImagesWithAlerts": 3,
+        "perClass": {
+          "sign:burn_mark": {
+            "TP": 1,
+            "FP": 27,
+            "FN": 2,
+            "precision": 0.03571428571428571,
+            "recall": 0.3333333333333333,
+            "F1": 0.06451612903225806
+          }
+        }
+      },
+      "activated": false
+    },
+    {
+      "code": "surface_soiling",
+      "operatingPoint": {
+        "confidence": 0.6,
+        "IoU": 0.5,
+        "TP": 1,
+        "FP": 2,
+        "FN": 0,
+        "precision": 0.3333333333333333,
+        "recall": 1.0,
+        "F1": 0.5,
+        "negativeImages": 3,
+        "negativeImagesWithAlerts": 1,
+        "perClass": {
+          "sign:surface_soiling": {
+            "TP": 1,
+            "FP": 2,
+            "FN": 0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "F1": 0.5
+          }
+        }
+      },
+      "activated": false
+    },
+    {
+      "code": "water_spray",
+      "operatingPoint": {
+        "confidence": 0.1,
+        "IoU": 0.5,
+        "TP": 1,
+        "FP": 6,
+        "FN": 4,
+        "precision": 0.14285714285714285,
+        "recall": 0.2,
+        "F1": 0.16666666666666666,
+        "negativeImages": 12,
+        "negativeImagesWithAlerts": 2,
+        "perClass": {
+          "sign:water_spray": {
+            "TP": 1,
+            "FP": 6,
+            "FN": 4,
+            "precision": 0.14285714285714285,
+            "recall": 0.2,
+            "F1": 0.16666666666666666
+          }
+        }
+      },
+      "activated": false
+    }
+  ],
+  "runtimeObserved": {
+    "aiService": "http://127.0.0.1:8000",
+    "backendRunning": false,
+    "customerUIRunning": false,
+    "catalog": "Cached CLIP with static 70-target fallback because backend was not running.",
+    "aiServiceRssKiB": 1673832,
+    "dockerMemoryLimit": "2300m",
+    "dockerActuallyStarted": false
+  }
+}

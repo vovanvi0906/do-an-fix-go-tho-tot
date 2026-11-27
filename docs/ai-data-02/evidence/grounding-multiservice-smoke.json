@@ -1,0 +1,508 @@
+{
+  "kind": "real_multiservice_scope_smoke_not_accuracy",
+  "state": "/tmp/fixgo-grounding-multiservice-h0exb195",
+  "runs": [
+    {
+      "runId": "auto-49de89db92884e0a",
+      "modelProfile": {
+        "adapterSha256": "9ec38495ec5ff9da6585754f13096d1760a8d0fd3d3a0e02b599891f41811170",
+        "adapterVersion": "grounding-dino-v1",
+        "catalogSha256": "aa8d65afc97b6a11e2676c950d52fd5a4ca1de9cdb862570ee545974d239b277",
+        "cpuThreads": 2,
+        "groundingAdapterSha256": "7d9558f45b241b6527c1f83c2cb208c3129268dce58ae235fa5e4d53796417ae",
+        "groundingCatalogCodeSha256": "1370981bc3a45a70913e8dc96c4ad83213f8d878b92b2f3632bef0b49a563dfe",
+        "models": {
+          "groundingDino": {
+            "path": "/home/vanvi/.cache/huggingface/hub/models--IDEA-Research--grounding-dino-tiny/snapshots/a2bb814dd30d776dcf7e30523b00659f4f141c71/model.safetensors",
+            "sha256": "1a2412ef99bd74bcd3c2a246fa1e48581f8889a1300c9051974741314fc042f3"
+          }
+        },
+        "ontologySha256": "5c9817cd3e3594aa9ae2c104390f078fbc59df28d6038410f62c10b94f3c2e78",
+        "packageVersions": {
+          "torch": "2.14.1",
+          "transformers": "5.20.2"
+        },
+        "profileHash": "10ebbabb85beb7f45729eee694f5a259ff575ad8d55422b748f0e04019516cdb",
+        "runtimeEngine": "grounding-dino",
+        "schema": "fixgo.studio.model-profile.v1",
+        "signDetector": {
+          "backend": "grounding-dino",
+          "broadSceneTargetIds": [],
+          "categoryId": null,
+          "classes": [
+            {
+              "kind": "object",
+              "name": "object:may-giat-may-giat-say",
+              "prompts": [
+                "washing machine"
+              ],
+              "targetId": "eaa18ae1-41b8-4588-bcdb-96192e5a2da8"
+            },
+            {
+              "code": "broken_part",
+              "kind": "sign",
+              "name": "sign:broken_part",
+              "prompts": [
+                "broken part",
+                "broken component"
+              ],
+              "targetIds": [
+                "eaa18ae1-41b8-4588-bcdb-96192e5a2da8"
+              ]
+            },
+            {
+              "code": "burn_mark",
+              "kind": "sign",
+              "name": "sign:burn_mark",
+              "prompts": [
+                "burn mark",
+                "scorched plastic",
+                "charred area"
+              ],
+              "targetIds": [
+                "eaa18ae1-41b8-4588-bcdb-96192e5a2da8"
+              ]
+            },
+            {
+              "code": "surface_soiling",
+              "kind": "sign",
+              "name": "sign:surface_soiling",
+              "prompts": [
+                "dirt buildup",
+                "dust buildup"
+              ],
+              "targetIds": [
+                "eaa18ae1-41b8-4588-bcdb-96192e5a2da8"
+              ]
+            },
+            {
+              "code": "wet_surface",
+              "kind": "sign",
+              "name": "sign:wet_surface",
+              "prompts": [
+                "wet surface",
+                "puddle of water"
+              ],
+              "targetIds": [
+                "eaa18ae1-41b8-4588-bcdb-96192e5a2da8"
+              ]
+            }
+          ],
+          "device": "cpu",
+          "explicitTarget": true,
+          "files": {
+            "README.md": "cf46f74c7b6850f1d5cbe406028324d8798148726016d46a69a365b4a2d3e89f",
+            "added_tokens.json": "909e96cb32d92ce728a01bc99850cbba26196d74115c17ebeb019275412588f2",
+            "config.json": "eec82c5ab66e16df12a9a212e68ac011779927c2536cf9078658e35d85f0c67a",
+            "model.safetensors": "1a2412ef99bd74bcd3c2a246fa1e48581f8889a1300c9051974741314fc042f3",
+            "preprocessor_config.json": "8454179ba95e2ad22947835aad7b45862a601fc0055ab88bf1ee70892d3aea60",
+            "special_tokens_map.json": "b6d346be366a7d1d48332dbc9fdf3bf8960b5d879522b7799ddba59e76237ee3",
+            "tokenizer.json": "d241a60d5e8f04cc1b2b3e9ef7a4921b27bf526d9f6050ab90f9267a1f9e5c66",
+            "tokenizer_config.json": "d40ab645b68211910b9170d22433d43186a6ec8ee6fd10ba170524b25bf4fb56",
+            "vocab.txt": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3"
+          },
+          "longestEdge": 1024,
+          "manifestPath": "/tmp/fixgo-grounding-multiservice-h0exb195/grounding-scopes/e70e8885429522e343ac87de6fc446312715a3c6fe8aa8c674723b7b28e58e0f.json",
+          "manifestSha256": "043d9a87e589719fe766dbc6d05f5f1087ddc291f9d83266c2bd6af4ec931ba3",
+          "maxUnscopedObjects": 8,
+          "maximumSignObjectAreaRatio": 0.8,
+          "modelDirectory": "/home/vanvi/.cache/huggingface/hub/models--IDEA-Research--grounding-dino-tiny/snapshots/a2bb814dd30d776dcf7e30523b00659f4f141c71",
+          "nestedObjectContainment": 0.95,
+          "nmsIou": 0.5,
+          "objectThreshold": 0.3,
+          "path": "/home/vanvi/.cache/huggingface/hub/models--IDEA-Research--grounding-dino-tiny/snapshots/a2bb814dd30d776dcf7e30523b00659f4f141c71/model.safetensors",
+          "promptCatalogSha256": "ae965905126ed062873898169c3c2e4f80eefc1c86dc58b7e3cb67ec579bfe21",
+          "repository": "IDEA-Research/grounding-dino-tiny",
+          "revision": "a2bb814dd30d776dcf7e30523b00659f4f141c71",
+          "schema": "fixgo.studio.grounding-dino.v1",
+          "scopeApproval": "Search hints only; no approved fault/service diagnosis rules.",
+          "scopeBuilderSha256": "1370981bc3a45a70913e8dc96c4ad83213f8d878b92b2f3632bef0b49a563dfe",
+          "scopeMode": "catalog-adaptive",
+          "sha256": "1a2412ef99bd74bcd3c2a246fa1e48581f8889a1300c9051974741314fc042f3",
+          "shortestEdge": 640,
+          "signThreshold": 0.3,
+          "task": "detect",
+          "textThreshold": 0.2,
+          "unsupportedTargetIds": [],
+          "warning": "Open-vocabulary proposals only; burn localization is unvalidated, not human ground truth."
+        }
+      },
+      "progress": {
+        "cacheHits": 0,
+        "cpuThreads": 2,
+        "elapsedSeconds": 20.686,
+        "errors": [],
+        "exactDuplicateReuse": 0,
+        "failed": 0,
+        "finishedAt": "2026-11-25T11:17:18.245264+00:00",
+        "groundTruthCreated": 0,
+        "lastImageId": "img-21436",
+        "peakRssMiB": 2292.9,
+        "processed": 1,
+        "profileHash": "10ebbabb85beb7f45729eee694f5a259ff575ad8d55422b748f0e04019516cdb",
+        "requested": 1,
+        "rssLimitMiB": 3072,
+        "runId": "auto-49de89db92884e0a",
+        "startedAt": "2026-11-25T11:16:57.558512+00:00",
+        "status": "COMPLETED",
+        "succeeded": 1,
+        "summary": {
+          "duplicateOrGroupCandidates": 0,
+          "failed": 0,
+          "hasSignModel": true,
+          "humanVerifiedCreated": 0,
+          "needsReview": 1,
+          "proposed": 0,
+          "requested": 1
+        }
+      },
+      "records": [
+        {
+          "boxes": [
+            {
+              "annotationSource": "AI",
+              "id": "grounding-0",
+              "kind": "object",
+              "label": "eaa18ae1-41b8-4588-bcdb-96192e5a2da8",
+              "objectId": null,
+              "xyxy": [
+                0.248069429397583,
+                0.019637465476989746,
+                0.7356979846954346,
+                0.9860154151916504
+              ]
+            },
+            {
+              "annotationSource": "AI",
+              "id": "grounding-2",
+              "kind": "sign",
+              "label": "broken_part",
+              "objectId": "grounding-0",
+              "xyxy": [
+                0.33294143676757815,
+                0.29805865287780764,
+                0.5702700614929199,
+                0.6736009120941162
+              ]
+            },
+            {
+              "annotationSource": "AI",
+              "id": "grounding-4",
+              "kind": "sign",
+              "label": "burn_mark",
+              "objectId": "grounding-0",
+              "xyxy": [
+                0.2978079319000244,
+                0.24982385635375975,
+                0.6032543659210206,
+                0.7447818756103516
+              ]
+            },
+            {
+              "annotationSource": "AI",
+              "id": "grounding-8",
+              "kind": "sign",
+              "label": "wet_surface",
+              "objectId": "grounding-0",
+              "xyxy": [
+                0.33475944995880125,
+                0.29969239234924316,
+                0.5662087440490723,
+                0.6728267669677734
+              ]
+            }
+          ],
+          "bucket": "NEEDS_REVIEW",
+          "cacheHash": "03f54dc0d30c8aae826a499d3f00458210400a4478d083e4378a32b6b0992550",
+          "contentHash": "4401b6cd51bdf321a74a5cc3f6259560caf7d2119b7dd6b063e1264adc315eba",
+          "duplicateCandidate": false,
+          "group": {
+            "component": "img-21436",
+            "splitReason": "seeded_group_split"
+          },
+          "humanVerified": false,
+          "imageId": "img-21436",
+          "issues": [
+            "SIGN_OBJECT_ASSOCIATION_UNCERTAIN"
+          ],
+          "modelProfileHash": "10ebbabb85beb7f45729eee694f5a259ff575ad8d55422b748f0e04019516cdb",
+          "outcome": "UNKNOWN",
+          "representativeId": "img-21436",
+          "reviewStatus": "AI_PROPOSED",
+          "searchScope": {
+            "scopeWarnings": [],
+            "signCodesSearched": [
+              "broken_part",
+              "burn_mark",
+              "surface_soiling",
+              "wet_surface"
+            ],
+            "targetIdsSearched": [
+              "eaa18ae1-41b8-4588-bcdb-96192e5a2da8"
+            ]
+          },
+          "signCoverage": "MODEL_PROPOSED_NOT_VERIFIED",
+          "sourcePath": "/home/vanvi/Work/datasetai/01-raw/thietbigiadinh/valid/images/washing-machine-png1_jpg.rf.a424b000b2bd50a66f92b2846e96dc3b.jpg",
+          "split": "train",
+          "targetCandidates": [
+            {
+              "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+              "confidence": 0.7269540429115295,
+              "model": "Grounding DINO Tiny",
+              "modelVersion": "1a2412ef99bd74bcd3c2a246fa1e48581f8889a1300c9051974741314fc042f3",
+              "provenance": "REAL_OFFLINE_GROUNDING_DINO",
+              "scoreType": "Grounding DINO text score, not calibrated defect probability",
+              "targetId": "eaa18ae1-41b8-4588-bcdb-96192e5a2da8",
+              "targetName": "Máy giặt / Máy giặt sấy"
+            }
+          ],
+          "technicalStatus": "SUCCESS",
+          "warnings": [
+            "SIGN_SPANS_WHOLE_OBJECT"
+          ]
+        }
+      ]
+    },
+    {
+      "runId": "auto-657278836f794b3b",
+      "modelProfile": {
+        "adapterSha256": "9ec38495ec5ff9da6585754f13096d1760a8d0fd3d3a0e02b599891f41811170",
+        "adapterVersion": "grounding-dino-v1",
+        "catalogSha256": "aa8d65afc97b6a11e2676c950d52fd5a4ca1de9cdb862570ee545974d239b277",
+        "cpuThreads": 2,
+        "groundingAdapterSha256": "7d9558f45b241b6527c1f83c2cb208c3129268dce58ae235fa5e4d53796417ae",
+        "groundingCatalogCodeSha256": "1370981bc3a45a70913e8dc96c4ad83213f8d878b92b2f3632bef0b49a563dfe",
+        "models": {
+          "groundingDino": {
+            "path": "/home/vanvi/.cache/huggingface/hub/models--IDEA-Research--grounding-dino-tiny/snapshots/a2bb814dd30d776dcf7e30523b00659f4f141c71/model.safetensors",
+            "sha256": "1a2412ef99bd74bcd3c2a246fa1e48581f8889a1300c9051974741314fc042f3"
+          }
+        },
+        "ontologySha256": "5c9817cd3e3594aa9ae2c104390f078fbc59df28d6038410f62c10b94f3c2e78",
+        "packageVersions": {
+          "torch": "2.14.1",
+          "transformers": "5.20.2"
+        },
+        "profileHash": "064aaff5c07ee454147f0ac0924220cd9c18b0b4be685bc741f650a2be9775f3",
+        "runtimeEngine": "grounding-dino",
+        "schema": "fixgo.studio.model-profile.v1",
+        "signDetector": {
+          "backend": "grounding-dino",
+          "broadSceneTargetIds": [],
+          "categoryId": null,
+          "classes": [
+            {
+              "kind": "object",
+              "name": "object:voi-nuoc-voi-sen",
+              "prompts": [
+                "water faucet",
+                "shower head"
+              ],
+              "targetId": "520cae18-9d24-4109-850f-1752f26f05ee"
+            },
+            {
+              "code": "broken_part",
+              "kind": "sign",
+              "name": "sign:broken_part",
+              "prompts": [
+                "broken part",
+                "broken component"
+              ],
+              "targetIds": [
+                "520cae18-9d24-4109-850f-1752f26f05ee"
+              ]
+            },
+            {
+              "code": "crack",
+              "kind": "sign",
+              "name": "sign:crack",
+              "prompts": [
+                "crack",
+                "cracked surface"
+              ],
+              "targetIds": [
+                "520cae18-9d24-4109-850f-1752f26f05ee"
+              ]
+            },
+            {
+              "code": "water_dripping",
+              "kind": "sign",
+              "name": "sign:water_dripping",
+              "prompts": [
+                "water droplets",
+                "dripping water"
+              ],
+              "targetIds": [
+                "520cae18-9d24-4109-850f-1752f26f05ee"
+              ]
+            },
+            {
+              "code": "water_spray",
+              "kind": "sign",
+              "name": "sign:water_spray",
+              "prompts": [
+                "spraying water",
+                "water jet"
+              ],
+              "targetIds": [
+                "520cae18-9d24-4109-850f-1752f26f05ee"
+              ]
+            },
+            {
+              "code": "wet_surface",
+              "kind": "sign",
+              "name": "sign:wet_surface",
+              "prompts": [
+                "wet surface",
+                "puddle of water"
+              ],
+              "targetIds": [
+                "520cae18-9d24-4109-850f-1752f26f05ee"
+              ]
+            }
+          ],
+          "device": "cpu",
+          "explicitTarget": true,
+          "files": {
+            "README.md": "cf46f74c7b6850f1d5cbe406028324d8798148726016d46a69a365b4a2d3e89f",
+            "added_tokens.json": "909e96cb32d92ce728a01bc99850cbba26196d74115c17ebeb019275412588f2",
+            "config.json": "eec82c5ab66e16df12a9a212e68ac011779927c2536cf9078658e35d85f0c67a",
+            "model.safetensors": "1a2412ef99bd74bcd3c2a246fa1e48581f8889a1300c9051974741314fc042f3",
+            "preprocessor_config.json": "8454179ba95e2ad22947835aad7b45862a601fc0055ab88bf1ee70892d3aea60",
+            "special_tokens_map.json": "b6d346be366a7d1d48332dbc9fdf3bf8960b5d879522b7799ddba59e76237ee3",
+            "tokenizer.json": "d241a60d5e8f04cc1b2b3e9ef7a4921b27bf526d9f6050ab90f9267a1f9e5c66",
+            "tokenizer_config.json": "d40ab645b68211910b9170d22433d43186a6ec8ee6fd10ba170524b25bf4fb56",
+            "vocab.txt": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3"
+          },
+          "longestEdge": 1024,
+          "manifestPath": "/tmp/fixgo-grounding-multiservice-h0exb195/grounding-scopes/00431aa13f33d7e31cc4015fd94f410901adeadfecefcb2e7fe73c803f18b990.json",
+          "manifestSha256": "9aead1e0cea1824b15d8b08fad8ad851898df8bef2375ee830c403d1d23d9da6",
+          "maxUnscopedObjects": 8,
+          "maximumSignObjectAreaRatio": 0.8,
+          "modelDirectory": "/home/vanvi/.cache/huggingface/hub/models--IDEA-Research--grounding-dino-tiny/snapshots/a2bb814dd30d776dcf7e30523b00659f4f141c71",
+          "nestedObjectContainment": 0.95,
+          "nmsIou": 0.5,
+          "objectThreshold": 0.3,
+          "path": "/home/vanvi/.cache/huggingface/hub/models--IDEA-Research--grounding-dino-tiny/snapshots/a2bb814dd30d776dcf7e30523b00659f4f141c71/model.safetensors",
+          "promptCatalogSha256": "ae965905126ed062873898169c3c2e4f80eefc1c86dc58b7e3cb67ec579bfe21",
+          "repository": "IDEA-Research/grounding-dino-tiny",
+          "revision": "a2bb814dd30d776dcf7e30523b00659f4f141c71",
+          "schema": "fixgo.studio.grounding-dino.v1",
+          "scopeApproval": "Search hints only; no approved fault/service diagnosis rules.",
+          "scopeBuilderSha256": "1370981bc3a45a70913e8dc96c4ad83213f8d878b92b2f3632bef0b49a563dfe",
+          "scopeMode": "catalog-adaptive",
+          "sha256": "1a2412ef99bd74bcd3c2a246fa1e48581f8889a1300c9051974741314fc042f3",
+          "shortestEdge": 640,
+          "signThreshold": 0.3,
+          "task": "detect",
+          "textThreshold": 0.2,
+          "unsupportedTargetIds": [],
+          "warning": "Open-vocabulary proposals only; burn localization is unvalidated, not human ground truth."
+        }
+      },
+      "progress": {
+        "cacheHits": 0,
+        "cpuThreads": 2,
+        "elapsedSeconds": 23.527,
+        "errors": [],
+        "exactDuplicateReuse": 0,
+        "failed": 0,
+        "finishedAt": "2026-11-25T11:17:44.718452+00:00",
+        "groundTruthCreated": 0,
+        "lastImageId": "img-19564",
+        "peakRssMiB": 2302.42,
+        "processed": 1,
+        "profileHash": "064aaff5c07ee454147f0ac0924220cd9c18b0b4be685bc741f650a2be9775f3",
+        "requested": 1,
+        "rssLimitMiB": 3072,
+        "runId": "auto-657278836f794b3b",
+        "startedAt": "2026-11-25T11:17:21.191055+00:00",
+        "status": "COMPLETED",
+        "succeeded": 1,
+        "summary": {
+          "duplicateOrGroupCandidates": 0,
+          "failed": 0,
+          "hasSignModel": true,
+          "humanVerifiedCreated": 0,
+          "needsReview": 1,
+          "proposed": 0,
+          "requested": 1
+        }
+      },
+      "records": [
+        {
+          "boxes": [
+            {
+              "annotationSource": "AI",
+              "id": "grounding-0",
+              "kind": "object",
+              "label": "520cae18-9d24-4109-850f-1752f26f05ee",
+              "objectId": null,
+              "xyxy": [
+                0.21973671913146972,
+                0.026289358735084534,
+                0.6520218849182129,
+                0.3567115068435669
+              ]
+            }
+          ],
+          "bucket": "NEEDS_REVIEW",
+          "cacheHash": "cb54c505646e111669f74a2d2cc785701ae5a61386a3cf31a7630a0318c0f336",
+          "contentHash": "9c1a68313431499f8a52f9d17a7e5dddfdad2e89731a25e77321f89d6907336d",
+          "duplicateCandidate": false,
+          "group": {
+            "component": "img-19564",
+            "splitReason": "prior_evaluation_exposure_development_only"
+          },
+          "humanVerified": false,
+          "imageId": "img-19564",
+          "issues": [
+            "SIGN_OBJECT_ASSOCIATION_UNCERTAIN"
+          ],
+          "modelProfileHash": "064aaff5c07ee454147f0ac0924220cd9c18b0b4be685bc741f650a2be9775f3",
+          "outcome": "UNKNOWN",
+          "representativeId": "img-19564",
+          "reviewStatus": "AI_PROPOSED",
+          "searchScope": {
+            "scopeWarnings": [],
+            "signCodesSearched": [
+              "broken_part",
+              "crack",
+              "water_dripping",
+              "water_spray",
+              "wet_surface"
+            ],
+            "targetIdsSearched": [
+              "520cae18-9d24-4109-850f-1752f26f05ee"
+            ]
+          },
+          "signCoverage": "MODEL_PROPOSED_NOT_VERIFIED",
+          "sourcePath": "/home/vanvi/Work/datasetai/01-raw/suanuoc/train/images/running7_jpg.rf.72aed1cbc86621c9f93b34043b76304e.jpg",
+          "split": "val",
+          "targetCandidates": [
+            {
+              "categoryId": "2a367f64-e8b2-4b94-8227-f5058c842af8",
+              "confidence": 0.3767344057559967,
+              "model": "Grounding DINO Tiny",
+              "modelVersion": "1a2412ef99bd74bcd3c2a246fa1e48581f8889a1300c9051974741314fc042f3",
+              "provenance": "REAL_OFFLINE_GROUNDING_DINO",
+              "scoreType": "Grounding DINO text score, not calibrated defect probability",
+              "targetId": "520cae18-9d24-4109-850f-1752f26f05ee",
+              "targetName": "Vòi nước / Vòi sen"
+            }
+          ],
+          "technicalStatus": "SUCCESS",
+          "warnings": [
+            "NO_SIGN_DETECTED_NOT_A_NORMAL_LABEL"
+          ]
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Development/model-exposed images only; no independent GT",
+    "Image target scope explicitly selected for washer and faucet",
+    "Model can propose incorrect signs; both samples require review",
+    "No image-source edits, human approval, dataset export or training"
+  ]
+}

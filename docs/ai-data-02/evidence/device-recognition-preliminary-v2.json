@@ -1,0 +1,3643 @@
+{
+ "schema": "fixgo.device-recognition-preliminary.v2",
+ "runAtUtc": "2026-11-27",
+ "change": "Target auto-select requires CLIP cosine margin >= 0.01 (fixed a priori from CLIP logit scale 100, not tuned on this set); near ties return up to 3 options. Non-visual service task kiem-tra-khao-sat-su-co-dien excluded from pixel matching.",
+ "sameCasesAs": "device-recognition-preliminary-v1.json",
+ "comparisonReal75": {
+  "before": {
+   "autoPick": 47,
+   "autoCorrect": 18,
+   "autoWrong": 29,
+   "ambiguousOptions": 0,
+   "nonVisualTargetInTop3": 5
+  },
+  "after": {
+   "autoPick": 23,
+   "autoCorrect": 14,
+   "autoWrong": 9,
+   "ambiguousOptions": 24,
+   "correctInOptions": 11,
+   "nonVisualTargetInTop3": 0
+  },
+  "categoryCorrectUnchanged": 34
+ },
+ "comparisonSynthetic80": {
+  "before": {
+   "autoPick": 55,
+   "autoCorrect": 15,
+   "autoWrong": 40
+  },
+  "after": {
+   "autoPick": 22,
+   "autoCorrect": 6,
+   "autoWrong": 16,
+   "ambiguousOptions": 33,
+   "correctInOptions": 14
+  }
+ },
+ "warning": [
+  "Same preliminary AI-labeled cases now used twice; treat as exposed, do not tune thresholds on them.",
+  "Category errors (walls/floors -> water pipes, LED bulbs) are not addressed by this change."
+ ],
+ "results": [
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D001",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-c484304e16644602ed942e.jpg",
+   "accept": [
+    "cua-kinh-cua-so-ban-cong"
+   ],
+   "http": 200,
+   "ms": 776,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D004",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-fe7658fe95e7acec190fd4.jpg",
+   "accept": [
+    "day-dien-cap-dien"
+   ],
+   "http": 200,
+   "ms": 283,
+   "predCat": "sua-dien",
+   "predTarget": "day-dien-cap-dien",
+   "top3": [
+    "day-dien-cap-dien",
+    "nguon-cap-cho-thiet-bi-co-dinh",
+    "he-thong-dien-toan-nha"
+   ],
+   "catOk": true,
+   "top1": true,
+   "top3ok": true,
+   "abstain": false,
+   "conf": 0.7114,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D006",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-62d7cd9bdae97160b45beb.jpg",
+   "accept": [
+    "san-nha-tuong-tran-noi-that"
+   ],
+   "http": 200,
+   "ms": 251,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D007",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-62261bd3ba0f38911efcf1.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 218,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "cong-tac-dien",
+    "o-cam-dien",
+    "nguon-cap-cho-thiet-bi-co-dinh"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": true,
+   "conf": 0.757,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D009",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-f75cf92c9c0c8f6c1a6d00.jpg",
+   "accept": [
+    "pheu-thoat-san-khu-vuc-phong-tam"
+   ],
+   "http": 200,
+   "ms": 334,
+   "predCat": "sua-nuoc",
+   "predTarget": null,
+   "top3": [
+    "bon-cau-ket-nuoc",
+    "pheu-thoat-san-khu-vuc-phong-tam",
+    "duong-ong-cap-thoat-nuoc"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": true,
+   "conf": 0.9006,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D010",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-d0afeb44d2e2a08b799191.jpg",
+   "accept": [
+    "o-cam-dien",
+    "o-cam-thong-minh-hen-gio"
+   ],
+   "http": 200,
+   "ms": 268,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "o-cam-thong-minh-hen-gio",
+    "o-cam-dien",
+    "nguon-dien-adapter-bo-nguon"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": true,
+   "conf": 0.599,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D011",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-5881deb3885c70bd125098.jpg",
+   "accept": [
+    "duong-ong-cap-thoat-nuoc"
+   ],
+   "http": 200,
+   "ms": 237,
+   "predCat": "sua-nuoc",
+   "predTarget": "duong-ong-cap-thoat-nuoc",
+   "top3": [
+    "duong-ong-cap-thoat-nuoc",
+    "voi-nuoc-voi-sen",
+    "bon-nuoc-may-bom-phao-nuoc"
+   ],
+   "catOk": true,
+   "top1": true,
+   "top3ok": true,
+   "abstain": false,
+   "conf": 0.9646,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D013",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-fb7a7af25ae57a1dce2151.jpg",
+   "accept": [
+    "tu-dien-bang-dien"
+   ],
+   "http": 200,
+   "ms": 434,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "he-thong-dien-toan-nha",
+    "thiet-bi-chong-ro-chong-giat",
+    "tu-dien-bang-dien"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": true,
+   "conf": 0.5563,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D014",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-5e89f2d7ae9c18173a3d01.jpg",
+   "accept": [
+    "san-nha-tuong-tran-noi-that"
+   ],
+   "http": 200,
+   "ms": 285,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D016",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-2a2c9f393972e4d9c538bc.jpg",
+   "accept": [
+    "bon-cau-ket-nuoc",
+    "nha-ve-sinh-phong-tam"
+   ],
+   "http": 200,
+   "ms": 313,
+   "predCat": "sua-nuoc",
+   "predTarget": "bon-cau-ket-nuoc",
+   "top3": [
+    "bon-cau-ket-nuoc",
+    "voi-nuoc-voi-sen",
+    "pheu-thoat-san-khu-vuc-phong-tam"
+   ],
+   "catOk": true,
+   "top1": true,
+   "top3ok": true,
+   "abstain": false,
+   "conf": 0.5706,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D018",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-43c2e8c46af4fa7e2d63e8.jpg",
+   "accept": [
+    "bon-cau-ket-nuoc",
+    "nha-ve-sinh-phong-tam"
+   ],
+   "http": 200,
+   "ms": 301,
+   "predCat": "sua-nuoc",
+   "predTarget": "bon-cau-ket-nuoc",
+   "top3": [
+    "bon-cau-ket-nuoc",
+    "pheu-thoat-san-khu-vuc-phong-tam",
+    "voi-nuoc-voi-sen"
+   ],
+   "catOk": true,
+   "top1": true,
+   "top3ok": true,
+   "abstain": false,
+   "conf": 0.5426,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D019",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-47744687cff2d437714708.jpg",
+   "accept": [
+    "day-dien-cap-dien"
+   ],
+   "http": 200,
+   "ms": 317,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "day-dien-cap-dien",
+    "nguon-cap-cho-thiet-bi-co-dinh",
+    "bong-den-den-led"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": true,
+   "conf": 0.8991,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D021",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-cde0df682b330a120748f2.jpg",
+   "accept": [
+    "san-nha-tuong-tran-noi-that"
+   ],
+   "http": 200,
+   "ms": 279,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D023",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-380259bc56e1fa01885338.jpg",
+   "accept": [
+    "san-nha-tuong-tran-noi-that"
+   ],
+   "http": 200,
+   "ms": 274,
+   "predCat": "sua-nuoc",
+   "predTarget": "duong-ong-cap-thoat-nuoc",
+   "top3": [
+    "duong-ong-cap-thoat-nuoc",
+    "bon-cau-ket-nuoc",
+    "voi-nuoc-voi-sen"
+   ],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": false,
+   "conf": 0.5283,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack",
+    "crack"
+   ]
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D027",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-ab46b4a50f5c1bb12acf25.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 359,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "day-dien-cap-dien",
+    "he-thong-dien-toan-nha",
+    "nguon-cap-cho-thiet-bi-co-dinh"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.7331,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D028",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-50a9b6317716b893e383a0.jpg",
+   "accept": [
+    "tu-dien-bang-dien"
+   ],
+   "http": 200,
+   "ms": 319,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D029",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-672d857561a4e53a68840d.jpg",
+   "accept": [
+    "san-nha-tuong-tran-noi-that"
+   ],
+   "http": 200,
+   "ms": 274,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D030",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-a073519d128f947af6443e.jpg",
+   "accept": [
+    "hop-noi-dien-hop-ky-thuat"
+   ],
+   "http": 200,
+   "ms": 260,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "he-thong-dien-toan-nha",
+    "hop-noi-dien-hop-ky-thuat",
+    "day-dien-cap-dien"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": true,
+   "conf": 0.7511,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D031",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-8160c83abf9749e06ac811.jpg",
+   "accept": [
+    "day-dien-cap-dien"
+   ],
+   "http": 200,
+   "ms": 341,
+   "predCat": "sua-dien",
+   "predTarget": "day-dien-cap-dien",
+   "top3": [
+    "day-dien-cap-dien",
+    "he-thong-dien-toan-nha",
+    "nguon-cap-cho-thiet-bi-co-dinh"
+   ],
+   "catOk": true,
+   "top1": true,
+   "top3ok": true,
+   "abstain": false,
+   "conf": 0.5087,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D032",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-73034d1e5152d9eb34fc8c.jpg",
+   "accept": [
+    "bon-cau-ket-nuoc",
+    "nha-ve-sinh-phong-tam"
+   ],
+   "http": 200,
+   "ms": 259,
+   "predCat": "sua-nuoc",
+   "predTarget": null,
+   "top3": [
+    "bon-cau-ket-nuoc",
+    "pheu-thoat-san-khu-vuc-phong-tam",
+    "lavabo-chau-rua-bon-rua"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": true,
+   "conf": 0.7498,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D033",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-d94999bff2ab3aef954afd.jpg",
+   "accept": [
+    "san-nha-tuong-tran-noi-that"
+   ],
+   "http": 200,
+   "ms": 271,
+   "predCat": "sua-nuoc",
+   "predTarget": "duong-ong-cap-thoat-nuoc",
+   "top3": [
+    "duong-ong-cap-thoat-nuoc",
+    "bon-cau-ket-nuoc",
+    "voi-nuoc-voi-sen"
+   ],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": false,
+   "conf": 0.7082,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D034",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-6513bdad6f27c802f62b0a.jpg",
+   "accept": [
+    "day-dien-cap-dien"
+   ],
+   "http": 200,
+   "ms": 266,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "day-dien-cap-dien",
+    "he-thong-dien-toan-nha",
+    "nguon-cap-cho-thiet-bi-co-dinh"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": true,
+   "conf": 0.6884,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D035",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-3271a227ecb269a3eab6ca.jpg",
+   "accept": [
+    "hop-noi-dien-hop-ky-thuat"
+   ],
+   "http": 200,
+   "ms": 285,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D036",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-7a0e644fe97edbcdc5318f.jpg",
+   "accept": [
+    "san-nha-tuong-tran-noi-that"
+   ],
+   "http": 200,
+   "ms": 229,
+   "predCat": "sua-nuoc",
+   "predTarget": null,
+   "top3": [
+    "duong-ong-cap-thoat-nuoc",
+    "voi-nuoc-voi-sen",
+    "pheu-thoat-san-khu-vuc-phong-tam"
+   ],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.5516,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D037",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-685cb12ea160e1b6e620fc.jpg",
+   "accept": [
+    "san-nha-tuong-tran-noi-that"
+   ],
+   "http": 200,
+   "ms": 231,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D038",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-2f829fbd28b2a46ab86773.jpg",
+   "accept": [
+    "san-nha-tuong-tran-noi-that"
+   ],
+   "http": 200,
+   "ms": 233,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D039",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-a7703ca6f5035c935d2a1e.jpg",
+   "accept": [
+    "nha-ve-sinh-phong-tam",
+    "bon-cau-ket-nuoc"
+   ],
+   "http": 200,
+   "ms": 500,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D041",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-d14d3b101e4710042b5db8.jpg",
+   "accept": [
+    "san-nha-tuong-tran-noi-that",
+    "nha-o-can-ho"
+   ],
+   "http": 200,
+   "ms": 269,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D043",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-246e9c6a7c73c2e992446b.jpg",
+   "accept": [
+    "san-nha-tuong-tran-noi-that"
+   ],
+   "http": 200,
+   "ms": 265,
+   "predCat": "sua-nuoc",
+   "predTarget": "duong-ong-cap-thoat-nuoc",
+   "top3": [
+    "duong-ong-cap-thoat-nuoc",
+    "bon-cau-ket-nuoc",
+    "voi-nuoc-voi-sen"
+   ],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": false,
+   "conf": 0.7589,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D044",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-2defeed1fa36a77fd6a6ea.jpg",
+   "accept": [
+    "san-nha-tuong-tran-noi-that"
+   ],
+   "http": 200,
+   "ms": 236,
+   "predCat": "dien-lanh",
+   "predTarget": "may-lanh-dieu-hoa",
+   "top3": [
+    "may-lanh-dieu-hoa",
+    "tu-lanh-tu-lanh-side-by-side",
+    "tu-dong-tu-mat"
+   ],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": false,
+   "conf": 0.5223,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D047",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-467a28748ae025e2936ad0.jpg",
+   "accept": [
+    "o-cam-dien",
+    "o-cam-thong-minh-hen-gio"
+   ],
+   "http": 200,
+   "ms": 221,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "thiet-bi-chong-ro-chong-giat",
+    "nguon-cap-cho-thiet-bi-co-dinh",
+    "aptomat-cb-mcb"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.5702,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D050",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-62e6995da5dd11828867af.jpg",
+   "accept": [
+    "duong-ong-cap-thoat-nuoc"
+   ],
+   "http": 200,
+   "ms": 236,
+   "predCat": "sua-nuoc",
+   "predTarget": "voi-nuoc-voi-sen",
+   "top3": [
+    "voi-nuoc-voi-sen",
+    "duong-ong-cap-thoat-nuoc",
+    "pheu-thoat-san-khu-vuc-phong-tam"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": false,
+   "conf": 0.9583,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D052",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-7ae74353db6dac9562c277.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 334,
+   "predCat": "thiet-bi",
+   "predTarget": "bep-tu-bep-hong-ngoai",
+   "top3": [
+    "bep-tu-bep-hong-ngoai",
+    "bep-gas-bep-gas-am",
+    "lo-vi-song"
+   ],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": false,
+   "conf": 0.8307,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D053",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-d884c2829132286a5d7945.jpg",
+   "accept": [
+    "san-nha-tuong-tran-noi-that"
+   ],
+   "http": 200,
+   "ms": 242,
+   "predCat": "sua-nuoc",
+   "predTarget": null,
+   "top3": [
+    "duong-ong-cap-thoat-nuoc",
+    "pheu-thoat-san-khu-vuc-phong-tam",
+    "bon-cau-ket-nuoc"
+   ],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.5589,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D054",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-d2c1b923df7ba0d89d6fa3.jpg",
+   "accept": [
+    "san-nha-tuong-tran-noi-that"
+   ],
+   "http": 200,
+   "ms": 241,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D057",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-482902e12a24be21cd8b6e.jpg",
+   "accept": [
+    "bon-cau-ket-nuoc",
+    "nha-ve-sinh-phong-tam"
+   ],
+   "http": 200,
+   "ms": 243,
+   "predCat": "sua-nuoc",
+   "predTarget": "bon-cau-ket-nuoc",
+   "top3": [
+    "bon-cau-ket-nuoc",
+    "duong-ong-cap-thoat-nuoc",
+    "pheu-thoat-san-khu-vuc-phong-tam"
+   ],
+   "catOk": true,
+   "top1": true,
+   "top3ok": true,
+   "abstain": false,
+   "conf": 0.9639,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D060",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-45e1ebc4ae6c2fb7588ed3.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 279,
+   "predCat": "sua-dien",
+   "predTarget": "aptomat-cb-mcb",
+   "top3": [
+    "aptomat-cb-mcb",
+    "he-thong-dien-toan-nha",
+    "thiet-bi-chong-ro-chong-giat"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": false,
+   "abstain": false,
+   "conf": 0.8963,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D061",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-bd3eff70211a256d7793ab.jpg",
+   "accept": [
+    "o-cam-dien",
+    "o-cam-thong-minh-hen-gio"
+   ],
+   "http": 200,
+   "ms": 248,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "day-dien-cap-dien",
+    "nguon-cap-cho-thiet-bi-co-dinh",
+    "aptomat-cb-mcb"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.8385,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D062",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-0af24062d6015083b5bff1.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 220,
+   "predCat": "sua-dien",
+   "predTarget": "o-cam-dien",
+   "top3": [
+    "o-cam-dien",
+    "o-cam-thong-minh-hen-gio",
+    "cong-tac-dien"
+   ],
+   "catOk": true,
+   "top1": true,
+   "top3ok": true,
+   "abstain": false,
+   "conf": 0.5954,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D064",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-4dee7299894bbe550a9d8a.jpg",
+   "accept": [
+    "day-dien-cap-dien"
+   ],
+   "http": 200,
+   "ms": 264,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D065",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-ef585b2181a76a2b2e9696.jpg",
+   "accept": [
+    "san-nha-tuong-tran-noi-that"
+   ],
+   "http": 200,
+   "ms": 240,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D066",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-c0d1f72e09fcb4119f4a22.jpg",
+   "accept": [
+    "san-nha-tuong-tran-noi-that"
+   ],
+   "http": 200,
+   "ms": 238,
+   "predCat": "dien-lanh",
+   "predTarget": null,
+   "top3": [
+    "may-lam-mat-quat-dieu-hoa",
+    "may-lanh-dieu-hoa",
+    "tu-dong-tu-mat"
+   ],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.8034,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D067",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-0ee158a5138c9f15a3ef54.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 227,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "o-cam-thong-minh-hen-gio",
+    "o-cam-dien",
+    "cong-tac-thong-minh-relay"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": true,
+   "conf": 0.5875,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D068",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-f8c52620f2410f6d08f0bc.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 210,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D070",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-dcead9e88e60d32f540be8.jpg",
+   "accept": [
+    "o-cam-dien",
+    "cong-tac-dien"
+   ],
+   "http": 200,
+   "ms": 226,
+   "predCat": "thiet-bi",
+   "predTarget": null,
+   "top3": [
+    "lo-vi-song",
+    "binh-nong-lanh-dien",
+    "lo-nuong-noi-chien-khong-dau"
+   ],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.5372,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D071",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-0eb4596ac279220e42f7c8.jpg",
+   "accept": [
+    "day-dien-cap-dien"
+   ],
+   "http": 200,
+   "ms": 337,
+   "predCat": "sua-dien",
+   "predTarget": "day-dien-cap-dien",
+   "top3": [
+    "day-dien-cap-dien",
+    "he-thong-dien-toan-nha",
+    "nguon-cap-cho-thiet-bi-co-dinh"
+   ],
+   "catOk": true,
+   "top1": true,
+   "top3ok": true,
+   "abstain": false,
+   "conf": 0.8943,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D075",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-2f5359e79f2e137c143ca8.jpg",
+   "accept": [
+    "day-dien-cap-dien"
+   ],
+   "http": 200,
+   "ms": 211,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "tiep-dia-chong-set",
+    "day-dien-cap-dien",
+    "nguon-cap-cho-thiet-bi-co-dinh"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": true,
+   "conf": 0.5093,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D076",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-02213cbd842e8cbc58862b.jpg",
+   "accept": [
+    "tu-dien-bang-dien"
+   ],
+   "http": 200,
+   "ms": 255,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "he-thong-dien-toan-nha",
+    "day-dien-cap-dien",
+    "thiet-bi-chong-ro-chong-giat"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.8029,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D077",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-d3defc7265a73fc9047eba.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 256,
+   "predCat": "sua-dien",
+   "predTarget": "o-cam-dien",
+   "top3": [
+    "o-cam-dien",
+    "o-cam-thong-minh-hen-gio",
+    "day-dien-cap-dien"
+   ],
+   "catOk": true,
+   "top1": true,
+   "top3ok": true,
+   "abstain": false,
+   "conf": 0.6633,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D079",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-9957f4e43c9ec959ec0e0a.jpg",
+   "accept": [
+    "nha-ve-sinh-phong-tam",
+    "bon-cau-ket-nuoc"
+   ],
+   "http": 200,
+   "ms": 280,
+   "predCat": "sua-nuoc",
+   "predTarget": "bon-cau-ket-nuoc",
+   "top3": [
+    "bon-cau-ket-nuoc",
+    "voi-nuoc-voi-sen",
+    "pheu-thoat-san-khu-vuc-phong-tam"
+   ],
+   "catOk": true,
+   "top1": true,
+   "top3ok": true,
+   "abstain": false,
+   "conf": 0.6928,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D081",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-e2b3d7007b1819627ec0fb.jpg",
+   "accept": [
+    "san-nha-tuong-tran-noi-that"
+   ],
+   "http": 200,
+   "ms": 234,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D082",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-68d92c96a0e341c3a841b7.jpg",
+   "accept": [
+    "san-nha-tuong-tran-noi-that"
+   ],
+   "http": 200,
+   "ms": 230,
+   "predCat": "dien-lanh",
+   "predTarget": "may-lanh-dieu-hoa",
+   "top3": [
+    "may-lanh-dieu-hoa",
+    "tu-lanh-tu-lanh-side-by-side",
+    "may-lam-mat-quat-dieu-hoa"
+   ],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": false,
+   "conf": 0.698,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D085",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-4e255b08704767310b9fee.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 215,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "o-cam-thong-minh-hen-gio",
+    "o-cam-dien",
+    "cong-tac-dien"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": true,
+   "conf": 0.5992,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D086",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-6e1f5a0c5c9e2149141d90.jpg",
+   "accept": [
+    "san-nha-tuong-tran-noi-that"
+   ],
+   "http": 200,
+   "ms": 234,
+   "predCat": "sua-nuoc",
+   "predTarget": null,
+   "top3": [
+    "duong-ong-cap-thoat-nuoc",
+    "be-tu-hoai-ho-ga-cong-thoat",
+    "voi-nuoc-voi-sen"
+   ],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.6804,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D087",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-d2b80575b32f9a43c0d1f8.jpg",
+   "accept": [
+    "nha-o-can-ho",
+    "san-nha-tuong-tran-noi-that"
+   ],
+   "http": 200,
+   "ms": 232,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D093",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-87be2986718264b34955bd.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 203,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "he-thong-dien-toan-nha",
+    "day-dien-cap-dien",
+    "nguon-cap-cho-thiet-bi-co-dinh"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.6746,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D094",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-086b8642b17ade591acd5e.jpg",
+   "accept": [
+    "cong-tac-dien",
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 202,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D095",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-3eddb8ec211fbdb9ccc9ed.jpg",
+   "accept": [
+    "san-nha-tuong-tran-noi-that"
+   ],
+   "http": 200,
+   "ms": 230,
+   "predCat": "giup-viec",
+   "predTarget": "san-nha-tuong-tran-noi-that",
+   "top3": [
+    "san-nha-tuong-tran-noi-that",
+    "van-phong-cua-hang",
+    "nha-ve-sinh-phong-tam"
+   ],
+   "catOk": true,
+   "top1": true,
+   "top3ok": true,
+   "abstain": false,
+   "conf": 0.5532,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D097",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-18b9b3368ac25a71bcabcb.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 200,
+   "predCat": "sua-dien",
+   "predTarget": "o-cam-dien",
+   "top3": [
+    "o-cam-dien",
+    "o-cam-thong-minh-hen-gio",
+    "cong-tac-thong-minh-relay"
+   ],
+   "catOk": true,
+   "top1": true,
+   "top3ok": true,
+   "abstain": false,
+   "conf": 0.5955,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D098",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-cc4b77040120cf364c6e47.jpg",
+   "accept": [
+    "san-nha-tuong-tran-noi-that"
+   ],
+   "http": 200,
+   "ms": 229,
+   "predCat": "sua-nuoc",
+   "predTarget": "duong-ong-cap-thoat-nuoc",
+   "top3": [
+    "duong-ong-cap-thoat-nuoc",
+    "pheu-thoat-san-khu-vuc-phong-tam",
+    "voi-nuoc-voi-sen"
+   ],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": false,
+   "conf": 0.9184,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D099",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-a91c5044628fd1ee1873b1.jpg",
+   "accept": [
+    "san-nha-tuong-tran-noi-that"
+   ],
+   "http": 200,
+   "ms": 230,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D100",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-c2dbc7e33105cd8510dee3.jpg",
+   "accept": [
+    "san-nha-tuong-tran-noi-that"
+   ],
+   "http": 200,
+   "ms": 237,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D101",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-3ee0661eee384b2c5fbf5e.jpg",
+   "accept": [
+    "san-nha-tuong-tran-noi-that"
+   ],
+   "http": 200,
+   "ms": 235,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D102",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-c61acab71f4ab2168bbe43.jpg",
+   "accept": [
+    "san-nha-tuong-tran-noi-that"
+   ],
+   "http": 200,
+   "ms": 227,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D103",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-fa14436bb1749510b96613.jpg",
+   "accept": [
+    "san-nha-tuong-tran-noi-that"
+   ],
+   "http": 200,
+   "ms": 229,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D104",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-68ff1783f97167e1e0d197.jpg",
+   "accept": [
+    "aptomat-cb-mcb",
+    "tu-dien-bang-dien"
+   ],
+   "http": 200,
+   "ms": 206,
+   "predCat": "thiet-bi",
+   "predTarget": null,
+   "top3": [
+    "bep-gas-bep-gas-am",
+    "ban-ui-ban-la-hoi-nuoc",
+    "bep-tu-bep-hong-ngoai"
+   ],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.5911,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D105",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-728a0b0f75b0c8b60e9008.jpg",
+   "accept": [
+    "nha-ve-sinh-phong-tam",
+    "bon-cau-ket-nuoc"
+   ],
+   "http": 200,
+   "ms": 228,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D106",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-bf92b2f0ac77c16f271a47.jpg",
+   "accept": [
+    "o-cam-dien",
+    "hop-noi-dien-hop-ky-thuat"
+   ],
+   "http": 200,
+   "ms": 209,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D107",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-fbdd1a1a75bc2eb2847cb8.jpg",
+   "accept": [
+    "day-dien-cap-dien",
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 216,
+   "predCat": "sua-dien",
+   "predTarget": "day-dien-cap-dien",
+   "top3": [
+    "day-dien-cap-dien",
+    "he-thong-dien-toan-nha",
+    "nguon-cap-cho-thiet-bi-co-dinh"
+   ],
+   "catOk": true,
+   "top1": true,
+   "top3ok": true,
+   "abstain": false,
+   "conf": 0.9178,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D108",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-13cf2432a5aa6486336fec.jpg",
+   "accept": [
+    "o-cam-dien",
+    "o-cam-thong-minh-hen-gio"
+   ],
+   "http": 200,
+   "ms": 232,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "nguon-dien-adapter-bo-nguon",
+    "aptomat-cb-mcb",
+    "thiet-bi-chong-ro-chong-giat"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.5337,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D110",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-f8469b331264d209ca01e7.jpg",
+   "accept": [
+    "san-nha-tuong-tran-noi-that"
+   ],
+   "http": 200,
+   "ms": 239,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D112",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-21b92e17900483874b47af.jpg",
+   "accept": [
+    "o-cam-dien",
+    "o-cam-thong-minh-hen-gio"
+   ],
+   "http": 200,
+   "ms": 211,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "day-dien-cap-dien",
+    "he-thong-dien-toan-nha",
+    "hop-noi-dien-hop-ky-thuat"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.7013,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D113",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-568f7cd14335eb8dd6249b.jpg",
+   "accept": [
+    "san-nha-tuong-tran-noi-that"
+   ],
+   "http": 200,
+   "ms": 237,
+   "predCat": "giup-viec",
+   "predTarget": "san-nha-tuong-tran-noi-that",
+   "top3": [
+    "san-nha-tuong-tran-noi-that",
+    "van-phong-cua-hang",
+    "nha-ve-sinh-phong-tam"
+   ],
+   "catOk": true,
+   "top1": true,
+   "top3ok": true,
+   "abstain": false,
+   "conf": 0.6208,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D115",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-a938cbdbaeb3bea9fd5a21.jpg",
+   "accept": [
+    "cua-kinh-cua-so-ban-cong"
+   ],
+   "http": 200,
+   "ms": 236,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "real_roboflow_ai_labeled",
+   "id": "D116",
+   "path": "/home/vanvi/Work/datasetai/02-curated/multiservice-source-audit-v1/images/multi-6d4a752dc7ddaf726a109d.jpg",
+   "accept": [
+    "nha-ve-sinh-phong-tam",
+    "bon-cau-ket-nuoc"
+   ],
+   "http": 200,
+   "ms": 229,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "doorbell_01_bo_chuong_cu.png",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_doorbell_dataset_20/fixgo_doorbell_dataset_20/doorbell_01_bo_chuong_cu.png",
+   "accept": [
+    "chuong-cua-nut-nhan"
+   ],
+   "http": 200,
+   "ms": 218,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "doorbell_02_chuong_khong_day.png",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_doorbell_dataset_20/fixgo_doorbell_dataset_20/doorbell_02_chuong_khong_day.png",
+   "accept": [
+    "chuong-cua-nut-nhan"
+   ],
+   "http": 200,
+   "ms": 213,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "doorbell_03_chuong_camera.png",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_doorbell_dataset_20/fixgo_doorbell_dataset_20/doorbell_03_chuong_camera.png",
+   "accept": [
+    "chuong-cua-nut-nhan"
+   ],
+   "http": 200,
+   "ms": 212,
+   "predCat": "thiet-bi",
+   "predTarget": "may-hut-bui-robot-hut-bui",
+   "top3": [
+    "may-hut-bui-robot-hut-bui",
+    "may-loc-khong-khi-may-hut-am",
+    "lo-nuong-noi-chien-khong-dau"
+   ],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": false,
+   "conf": 0.553,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "doorbell_04_nut_nhan_cu.png",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_doorbell_dataset_20/fixgo_doorbell_dataset_20/doorbell_04_nut_nhan_cu.png",
+   "accept": [
+    "chuong-cua-nut-nhan"
+   ],
+   "http": 200,
+   "ms": 209,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "cong-tac-dien",
+    "chuong-cua-nut-nhan",
+    "o-cam-dien"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": true,
+   "conf": 0.5328,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "doorbell_05_nut_nhan_tron.png",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_doorbell_dataset_20/fixgo_doorbell_dataset_20/doorbell_05_nut_nhan_tron.png",
+   "accept": [
+    "chuong-cua-nut-nhan"
+   ],
+   "http": 200,
+   "ms": 209,
+   "predCat": "thiet-bi",
+   "predTarget": "may-hut-bui-robot-hut-bui",
+   "top3": [
+    "may-hut-bui-robot-hut-bui",
+    "may-loc-khong-khi-may-hut-am",
+    "binh-nong-lanh-dien"
+   ],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": false,
+   "conf": 0.533,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "doorbell_06_vo_nut_vo.png",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_doorbell_dataset_20/fixgo_doorbell_dataset_20/doorbell_06_vo_nut_vo.png",
+   "accept": [
+    "chuong-cua-nut-nhan"
+   ],
+   "http": 200,
+   "ms": 216,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "cong-tac-dien",
+    "o-cam-dien",
+    "aptomat-cb-mcb"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.5572,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "doorbell_07_bam_ban.png",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_doorbell_dataset_20/fixgo_doorbell_dataset_20/doorbell_07_bam_ban.png",
+   "accept": [
+    "chuong-cua-nut-nhan"
+   ],
+   "http": 200,
+   "ms": 209,
+   "predCat": "sua-dien",
+   "predTarget": "cong-tac-dien",
+   "top3": [
+    "cong-tac-dien",
+    "o-cam-dien",
+    "chuong-cua-nut-nhan"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": false,
+   "conf": 0.7574,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "doorbell_08_nut_bong_tuong.png",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_doorbell_dataset_20/fixgo_doorbell_dataset_20/doorbell_08_nut_bong_tuong.png",
+   "accept": [
+    "chuong-cua-nut-nhan"
+   ],
+   "http": 200,
+   "ms": 212,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "cong-tac-dien",
+    "o-cam-dien",
+    "o-cam-thong-minh-hen-gio"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.6194,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "doorbell_09_lo_day_dien.png",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_doorbell_dataset_20/fixgo_doorbell_dataset_20/doorbell_09_lo_day_dien.png",
+   "accept": [
+    "chuong-cua-nut-nhan"
+   ],
+   "http": 200,
+   "ms": 253,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "tu-dien-bang-dien",
+    "thiet-bi-chong-ro-chong-giat",
+    "aptomat-cb-mcb"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.9203,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "doorbell_10_oxy_hoa_dau_noi.png",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_doorbell_dataset_20/fixgo_doorbell_dataset_20/doorbell_10_oxy_hoa_dau_noi.png",
+   "accept": [
+    "chuong-cua-nut-nhan"
+   ],
+   "http": 200,
+   "ms": 215,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "aptomat-cb-mcb",
+    "nguon-cap-cho-thiet-bi-co-dinh",
+    "day-dien-cap-dien"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.7745,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "doorbell_11_am_nuoc.png",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_doorbell_dataset_20/fixgo_doorbell_dataset_20/doorbell_11_am_nuoc.png",
+   "accept": [
+    "chuong-cua-nut-nhan"
+   ],
+   "http": 200,
+   "ms": 247,
+   "predCat": "sua-dien",
+   "predTarget": "cong-tac-dien",
+   "top3": [
+    "cong-tac-dien",
+    "o-cam-dien",
+    "chuong-cua-nut-nhan"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": false,
+   "conf": 0.7348,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "doorbell_12_ri_set.png",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_doorbell_dataset_20/fixgo_doorbell_dataset_20/doorbell_12_ri_set.png",
+   "accept": [
+    "chuong-cua-nut-nhan"
+   ],
+   "http": 200,
+   "ms": 246,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "cong-tac-dien",
+    "chuong-cua-nut-nhan",
+    "dien-cua-cuon-cong-tu-dong"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": true,
+   "conf": 0.5749,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "doorbell_13_chay_xem.png",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_doorbell_dataset_20/fixgo_doorbell_dataset_20/doorbell_13_chay_xem.png",
+   "accept": [
+    "chuong-cua-nut-nhan"
+   ],
+   "http": 200,
+   "ms": 253,
+   "predCat": "sua-dien",
+   "predTarget": "cong-tac-dien",
+   "top3": [
+    "cong-tac-dien",
+    "o-cam-dien",
+    "chuong-cua-nut-nhan"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": false,
+   "conf": 0.851,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "doorbell_14_mang_nhen_bui.png",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_doorbell_dataset_20/fixgo_doorbell_dataset_20/doorbell_14_mang_nhen_bui.png",
+   "accept": [
+    "chuong-cua-nut-nhan"
+   ],
+   "http": 200,
+   "ms": 261,
+   "predCat": "sua-dien",
+   "predTarget": "cong-tac-dien",
+   "top3": [
+    "cong-tac-dien",
+    "o-cam-dien",
+    "chuong-cua-nut-nhan"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": false,
+   "conf": 0.7804,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "doorbell_15_nut_moi.png",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_doorbell_dataset_20/fixgo_doorbell_dataset_20/doorbell_15_nut_moi.png",
+   "accept": [
+    "chuong-cua-nut-nhan"
+   ],
+   "http": 200,
+   "ms": 263,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "doorbell_16_pin_ri_set.png",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_doorbell_dataset_20/fixgo_doorbell_dataset_20/doorbell_16_pin_ri_set.png",
+   "accept": [
+    "chuong-cua-nut-nhan"
+   ],
+   "http": 200,
+   "ms": 257,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "doorbell_17_vo_nut_nut.png",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_doorbell_dataset_20/fixgo_doorbell_dataset_20/doorbell_17_vo_nut_nut.png",
+   "accept": [
+    "chuong-cua-nut-nhan"
+   ],
+   "http": 200,
+   "ms": 262,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "cong-tac-dien",
+    "o-cam-dien",
+    "chuong-cua-nut-nhan"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": true,
+   "conf": 0.4977,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "doorbell_18_nut_lech.png",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_doorbell_dataset_20/fixgo_doorbell_dataset_20/doorbell_18_nut_lech.png",
+   "accept": [
+    "chuong-cua-nut-nhan"
+   ],
+   "http": 200,
+   "ms": 261,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "doorbell_19_bo_phat_chuong.png",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_doorbell_dataset_20/fixgo_doorbell_dataset_20/doorbell_19_bo_phat_chuong.png",
+   "accept": [
+    "chuong-cua-nut-nhan"
+   ],
+   "http": 200,
+   "ms": 256,
+   "predCat": "dien-lanh",
+   "predTarget": "may-lanh-dieu-hoa",
+   "top3": [
+    "may-lanh-dieu-hoa",
+    "may-lam-mat-quat-dieu-hoa",
+    "tu-lanh-tu-lanh-side-by-side"
+   ],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": false,
+   "conf": 0.8952,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "doorbell_20_nut_dong_co.png",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_doorbell_dataset_20/fixgo_doorbell_dataset_20/doorbell_20_nut_dong_co.png",
+   "accept": [
+    "chuong-cua-nut-nhan"
+   ],
+   "http": 200,
+   "ms": 260,
+   "predCat": "thiet-bi",
+   "predTarget": null,
+   "top3": [
+    "bep-gas-bep-gas-am",
+    "may-loc-khong-khi-may-hut-am",
+    "binh-nong-lanh-dien"
+   ],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.6508,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "ev_charger_01.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_ev_charger_20_images/ev_charger_01.jpg",
+   "accept": [
+    "bo-sac-xe-dien-o-cam-sac"
+   ],
+   "http": 200,
+   "ms": 270,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "ev_charger_02.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_ev_charger_20_images/ev_charger_02.jpg",
+   "accept": [
+    "bo-sac-xe-dien-o-cam-sac"
+   ],
+   "http": 200,
+   "ms": 266,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "o-cam-thong-minh-hen-gio",
+    "o-cam-dien",
+    "nguon-cap-cho-thiet-bi-co-dinh"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.5732,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "ev_charger_03.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_ev_charger_20_images/ev_charger_03.jpg",
+   "accept": [
+    "bo-sac-xe-dien-o-cam-sac"
+   ],
+   "http": 200,
+   "ms": 267,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "o-cam-thong-minh-hen-gio",
+    "o-cam-dien",
+    "cong-tac-dien"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.5567,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "ev_charger_04.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_ev_charger_20_images/ev_charger_04.jpg",
+   "accept": [
+    "bo-sac-xe-dien-o-cam-sac"
+   ],
+   "http": 200,
+   "ms": 270,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "o-cam-dien",
+    "o-cam-thong-minh-hen-gio",
+    "nguon-cap-cho-thiet-bi-co-dinh"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.5469,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "ev_charger_05.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_ev_charger_20_images/ev_charger_05.jpg",
+   "accept": [
+    "bo-sac-xe-dien-o-cam-sac"
+   ],
+   "http": 200,
+   "ms": 271,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "nguon-dien-adapter-bo-nguon",
+    "tiep-dia-chong-set",
+    "aptomat-cb-mcb"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.5407,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "ev_charger_06.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_ev_charger_20_images/ev_charger_06.jpg",
+   "accept": [
+    "bo-sac-xe-dien-o-cam-sac"
+   ],
+   "http": 200,
+   "ms": 272,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "may-bom-nuoc-phan-dien",
+    "tiep-dia-chong-set",
+    "nguon-cap-cho-thiet-bi-co-dinh"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.6323,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "ev_charger_07.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_ev_charger_20_images/ev_charger_07.jpg",
+   "accept": [
+    "bo-sac-xe-dien-o-cam-sac"
+   ],
+   "http": 200,
+   "ms": 267,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "nguon-cap-cho-thiet-bi-co-dinh",
+    "aptomat-cb-mcb",
+    "nguon-dien-adapter-bo-nguon"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.7994,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "ev_charger_08.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_ev_charger_20_images/ev_charger_08.jpg",
+   "accept": [
+    "bo-sac-xe-dien-o-cam-sac"
+   ],
+   "http": 200,
+   "ms": 270,
+   "predCat": "sua-dien",
+   "predTarget": "aptomat-cb-mcb",
+   "top3": [
+    "aptomat-cb-mcb",
+    "nguon-dien-adapter-bo-nguon",
+    "o-cam-dien"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": false,
+   "abstain": false,
+   "conf": 0.5877,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "ev_charger_09.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_ev_charger_20_images/ev_charger_09.jpg",
+   "accept": [
+    "bo-sac-xe-dien-o-cam-sac"
+   ],
+   "http": 200,
+   "ms": 268,
+   "predCat": "sua-dien",
+   "predTarget": "o-cam-dien",
+   "top3": [
+    "o-cam-dien",
+    "o-cam-thong-minh-hen-gio",
+    "cong-tac-dien"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": false,
+   "abstain": false,
+   "conf": 0.8098,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "ev_charger_10.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_ev_charger_20_images/ev_charger_10.jpg",
+   "accept": [
+    "bo-sac-xe-dien-o-cam-sac"
+   ],
+   "http": 200,
+   "ms": 286,
+   "predCat": "thiet-bi",
+   "predTarget": null,
+   "top3": [
+    "bep-gas-bep-gas-am",
+    "lo-vi-song",
+    "lo-nuong-noi-chien-khong-dau"
+   ],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.6243,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "ev_charger_11.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_ev_charger_20_images/ev_charger_11.jpg",
+   "accept": [
+    "bo-sac-xe-dien-o-cam-sac"
+   ],
+   "http": 200,
+   "ms": 265,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "ev_charger_12.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_ev_charger_20_images/ev_charger_12.jpg",
+   "accept": [
+    "bo-sac-xe-dien-o-cam-sac"
+   ],
+   "http": 200,
+   "ms": 266,
+   "predCat": "thiet-bi",
+   "predTarget": null,
+   "top3": [
+    "lo-nuong-noi-chien-khong-dau",
+    "bep-gas-bep-gas-am",
+    "may-rua-chen-may-rua-bat"
+   ],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.5265,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "ev_charger_13.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_ev_charger_20_images/ev_charger_13.jpg",
+   "accept": [
+    "bo-sac-xe-dien-o-cam-sac"
+   ],
+   "http": 200,
+   "ms": 270,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "ev_charger_14.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_ev_charger_20_images/ev_charger_14.jpg",
+   "accept": [
+    "bo-sac-xe-dien-o-cam-sac"
+   ],
+   "http": 200,
+   "ms": 267,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "nguon-dien-adapter-bo-nguon",
+    "nguon-cap-cho-thiet-bi-co-dinh",
+    "day-dien-cap-dien"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.5442,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "ev_charger_15.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_ev_charger_20_images/ev_charger_15.jpg",
+   "accept": [
+    "bo-sac-xe-dien-o-cam-sac"
+   ],
+   "http": 200,
+   "ms": 267,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "ev_charger_16.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_ev_charger_20_images/ev_charger_16.jpg",
+   "accept": [
+    "bo-sac-xe-dien-o-cam-sac"
+   ],
+   "http": 200,
+   "ms": 265,
+   "predCat": "thiet-bi",
+   "predTarget": null,
+   "top3": [
+    "may-hut-bui-robot-hut-bui",
+    "ban-ui-ban-la-hoi-nuoc",
+    "lo-vi-song"
+   ],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.5602,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "ev_charger_17.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_ev_charger_20_images/ev_charger_17.jpg",
+   "accept": [
+    "bo-sac-xe-dien-o-cam-sac"
+   ],
+   "http": 200,
+   "ms": 270,
+   "predCat": "thiet-bi",
+   "predTarget": null,
+   "top3": [
+    "may-hut-bui-robot-hut-bui",
+    "bep-gas-bep-gas-am",
+    "lo-nuong-noi-chien-khong-dau"
+   ],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.574,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "ev_charger_18.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_ev_charger_20_images/ev_charger_18.jpg",
+   "accept": [
+    "bo-sac-xe-dien-o-cam-sac"
+   ],
+   "http": 200,
+   "ms": 274,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "aptomat-cb-mcb",
+    "may-bom-nuoc-phan-dien",
+    "o-cam-dien"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.6199,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "ev_charger_19.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_ev_charger_20_images/ev_charger_19.jpg",
+   "accept": [
+    "bo-sac-xe-dien-o-cam-sac"
+   ],
+   "http": 200,
+   "ms": 278,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "ev_charger_20.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_ev_charger_20_images/ev_charger_20.jpg",
+   "accept": [
+    "bo-sac-xe-dien-o-cam-sac"
+   ],
+   "http": 200,
+   "ms": 272,
+   "predCat": "sua-dien",
+   "predTarget": "o-cam-dien",
+   "top3": [
+    "o-cam-dien",
+    "o-cam-thong-minh-hen-gio",
+    "cong-tac-dien"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": false,
+   "abstain": false,
+   "conf": 0.5431,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "led_20261125_001.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_sua_dien_bong_den_led_20_images_bbox_STAGING/images/led_20261125_001.jpg",
+   "accept": [
+    "bong-den-den-led"
+   ],
+   "http": 200,
+   "ms": 290,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "led_20261125_002.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_sua_dien_bong_den_led_20_images_bbox_STAGING/images/led_20261125_002.jpg",
+   "accept": [
+    "bong-den-den-led"
+   ],
+   "http": 200,
+   "ms": 295,
+   "predCat": "dien-lanh",
+   "predTarget": "tu-lanh-tu-lanh-side-by-side",
+   "top3": [
+    "tu-lanh-tu-lanh-side-by-side",
+    "may-lanh-dieu-hoa",
+    "tu-dong-tu-mat"
+   ],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": false,
+   "conf": 0.4939,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "led_20261125_003.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_sua_dien_bong_den_led_20_images_bbox_STAGING/images/led_20261125_003.jpg",
+   "accept": [
+    "bong-den-den-led"
+   ],
+   "http": 200,
+   "ms": 279,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "led_20261125_004.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_sua_dien_bong_den_led_20_images_bbox_STAGING/images/led_20261125_004.jpg",
+   "accept": [
+    "bong-den-den-led"
+   ],
+   "http": 200,
+   "ms": 290,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "led_20261125_005.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_sua_dien_bong_den_led_20_images_bbox_STAGING/images/led_20261125_005.jpg",
+   "accept": [
+    "bong-den-den-led"
+   ],
+   "http": 200,
+   "ms": 304,
+   "predCat": "thiet-bi",
+   "predTarget": null,
+   "top3": [
+    "may-hut-mui",
+    "bep-tu-bep-hong-ngoai",
+    "bep-gas-bep-gas-am"
+   ],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.6498,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "led_20261125_006.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_sua_dien_bong_den_led_20_images_bbox_STAGING/images/led_20261125_006.jpg",
+   "accept": [
+    "bong-den-den-led"
+   ],
+   "http": 200,
+   "ms": 258,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "led_20261125_007.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_sua_dien_bong_den_led_20_images_bbox_STAGING/images/led_20261125_007.jpg",
+   "accept": [
+    "bong-den-den-led"
+   ],
+   "http": 200,
+   "ms": 258,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "led_20261125_008.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_sua_dien_bong_den_led_20_images_bbox_STAGING/images/led_20261125_008.jpg",
+   "accept": [
+    "bong-den-den-led"
+   ],
+   "http": 200,
+   "ms": 265,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "led_20261125_009.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_sua_dien_bong_den_led_20_images_bbox_STAGING/images/led_20261125_009.jpg",
+   "accept": [
+    "bong-den-den-led"
+   ],
+   "http": 200,
+   "ms": 258,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "led_20261125_010.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_sua_dien_bong_den_led_20_images_bbox_STAGING/images/led_20261125_010.jpg",
+   "accept": [
+    "bong-den-den-led"
+   ],
+   "http": 200,
+   "ms": 259,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "led_20261125_011.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_sua_dien_bong_den_led_20_images_bbox_STAGING/images/led_20261125_011.jpg",
+   "accept": [
+    "bong-den-den-led"
+   ],
+   "http": 200,
+   "ms": 261,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "led_20261125_012.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_sua_dien_bong_den_led_20_images_bbox_STAGING/images/led_20261125_012.jpg",
+   "accept": [
+    "bong-den-den-led"
+   ],
+   "http": 200,
+   "ms": 258,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "led_20261125_013.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_sua_dien_bong_den_led_20_images_bbox_STAGING/images/led_20261125_013.jpg",
+   "accept": [
+    "bong-den-den-led"
+   ],
+   "http": 200,
+   "ms": 256,
+   "predCat": "thiet-bi",
+   "predTarget": "may-hut-mui",
+   "top3": [
+    "may-hut-mui",
+    "quat-dien-quat-dung-quat-ban",
+    "bep-tu-bep-hong-ngoai"
+   ],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": false,
+   "conf": 0.5854,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "led_20261125_014.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_sua_dien_bong_den_led_20_images_bbox_STAGING/images/led_20261125_014.jpg",
+   "accept": [
+    "bong-den-den-led"
+   ],
+   "http": 200,
+   "ms": 258,
+   "predCat": "dien-lanh",
+   "predTarget": "tu-lanh-tu-lanh-side-by-side",
+   "top3": [
+    "tu-lanh-tu-lanh-side-by-side",
+    "may-lanh-dieu-hoa",
+    "may-lam-mat-quat-dieu-hoa"
+   ],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": false,
+   "conf": 0.5386,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "led_20261125_015.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_sua_dien_bong_den_led_20_images_bbox_STAGING/images/led_20261125_015.jpg",
+   "accept": [
+    "bong-den-den-led"
+   ],
+   "http": 200,
+   "ms": 260,
+   "predCat": "dien-lanh",
+   "predTarget": "may-lanh-dieu-hoa",
+   "top3": [
+    "may-lanh-dieu-hoa",
+    "may-lam-mat-quat-dieu-hoa",
+    "may-say-quan-ao"
+   ],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": false,
+   "conf": 0.8131,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "led_20261125_016.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_sua_dien_bong_den_led_20_images_bbox_STAGING/images/led_20261125_016.jpg",
+   "accept": [
+    "bong-den-den-led"
+   ],
+   "http": 200,
+   "ms": 254,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "led_20261125_017.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_sua_dien_bong_den_led_20_images_bbox_STAGING/images/led_20261125_017.jpg",
+   "accept": [
+    "bong-den-den-led"
+   ],
+   "http": 200,
+   "ms": 256,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "led_20261125_018.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_sua_dien_bong_den_led_20_images_bbox_STAGING/images/led_20261125_018.jpg",
+   "accept": [
+    "bong-den-den-led"
+   ],
+   "http": 200,
+   "ms": 260,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "led_20261125_019.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_sua_dien_bong_den_led_20_images_bbox_STAGING/images/led_20261125_019.jpg",
+   "accept": [
+    "bong-den-den-led"
+   ],
+   "http": 200,
+   "ms": 258,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "led_20261125_020.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_sua_dien_bong_den_led_20_images_bbox_STAGING/images/led_20261125_020.jpg",
+   "accept": [
+    "bong-den-den-led"
+   ],
+   "http": 200,
+   "ms": 264,
+   "predCat": "dien-lanh",
+   "predTarget": "may-lanh-dieu-hoa",
+   "top3": [
+    "may-lanh-dieu-hoa",
+    "may-lam-mat-quat-dieu-hoa",
+    "tu-lanh-tu-lanh-side-by-side"
+   ],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": false,
+   "conf": 0.8535,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "outlet_burn_001.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_suadien_o_cam_burnmark_20_bbox_proposed_STAGING/images/outlet_burn_001.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 346,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "o-cam-dien",
+    "cong-tac-dien",
+    "o-cam-thong-minh-hen-gio"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": true,
+   "conf": 0.5506,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "outlet_burn_002.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_suadien_o_cam_burnmark_20_bbox_proposed_STAGING/images/outlet_burn_002.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 332,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "cong-tac-dien",
+    "o-cam-dien",
+    "o-cam-thong-minh-hen-gio"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": true,
+   "conf": 0.7893,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "outlet_burn_003.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_suadien_o_cam_burnmark_20_bbox_proposed_STAGING/images/outlet_burn_003.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 313,
+   "predCat": "sua-dien",
+   "predTarget": "o-cam-dien",
+   "top3": [
+    "o-cam-dien",
+    "o-cam-thong-minh-hen-gio",
+    "cong-tac-dien"
+   ],
+   "catOk": true,
+   "top1": true,
+   "top3ok": true,
+   "abstain": false,
+   "conf": 0.874,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "outlet_burn_004.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_suadien_o_cam_burnmark_20_bbox_proposed_STAGING/images/outlet_burn_004.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 307,
+   "predCat": "sua-dien",
+   "predTarget": "o-cam-dien",
+   "top3": [
+    "o-cam-dien",
+    "cong-tac-dien",
+    "o-cam-thong-minh-hen-gio"
+   ],
+   "catOk": true,
+   "top1": true,
+   "top3ok": true,
+   "abstain": false,
+   "conf": 0.5898,
+   "obs": "proposed",
+   "obsCodes": [
+    "crack"
+   ]
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "outlet_burn_005.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_suadien_o_cam_burnmark_20_bbox_proposed_STAGING/images/outlet_burn_005.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 348,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "o-cam-dien",
+    "cong-tac-dien",
+    "o-cam-thong-minh-hen-gio"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": true,
+   "conf": 0.9134,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "outlet_burn_006.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_suadien_o_cam_burnmark_20_bbox_proposed_STAGING/images/outlet_burn_006.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 331,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "o-cam-dien",
+    "cong-tac-dien",
+    "o-cam-thong-minh-hen-gio"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": true,
+   "conf": 0.832,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "outlet_burn_007.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_suadien_o_cam_burnmark_20_bbox_proposed_STAGING/images/outlet_burn_007.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 286,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "o-cam-dien",
+    "o-cam-thong-minh-hen-gio",
+    "cong-tac-dien"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": true,
+   "conf": 0.8831,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "outlet_burn_008.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_suadien_o_cam_burnmark_20_bbox_proposed_STAGING/images/outlet_burn_008.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 246,
+   "predCat": "sua-dien",
+   "predTarget": "o-cam-dien",
+   "top3": [
+    "o-cam-dien",
+    "cong-tac-dien",
+    "o-cam-thong-minh-hen-gio"
+   ],
+   "catOk": true,
+   "top1": true,
+   "top3ok": true,
+   "abstain": false,
+   "conf": 0.814,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "outlet_burn_009.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_suadien_o_cam_burnmark_20_bbox_proposed_STAGING/images/outlet_burn_009.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 249,
+   "predCat": "sua-dien",
+   "predTarget": "o-cam-dien",
+   "top3": [
+    "o-cam-dien",
+    "cong-tac-dien",
+    "o-cam-thong-minh-hen-gio"
+   ],
+   "catOk": true,
+   "top1": true,
+   "top3ok": true,
+   "abstain": false,
+   "conf": 0.5768,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "outlet_burn_010.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_suadien_o_cam_burnmark_20_bbox_proposed_STAGING/images/outlet_burn_010.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 254,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "o-cam-dien",
+    "o-cam-thong-minh-hen-gio",
+    "cong-tac-dien"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": true,
+   "conf": 0.9199,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "outlet_burn_011.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_suadien_o_cam_burnmark_20_bbox_proposed_STAGING/images/outlet_burn_011.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 217,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "o-cam-dien",
+    "o-cam-thong-minh-hen-gio",
+    "cong-tac-dien"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": true,
+   "conf": 0.8546,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "outlet_burn_012.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_suadien_o_cam_burnmark_20_bbox_proposed_STAGING/images/outlet_burn_012.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 216,
+   "predCat": "thiet-bi",
+   "predTarget": null,
+   "top3": [
+    "lo-vi-song",
+    "lo-nuong-noi-chien-khong-dau",
+    "bep-gas-bep-gas-am"
+   ],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": 0.5554,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "outlet_burn_013.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_suadien_o_cam_burnmark_20_bbox_proposed_STAGING/images/outlet_burn_013.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 217,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "o-cam-dien",
+    "cong-tac-dien",
+    "o-cam-thong-minh-hen-gio"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": true,
+   "conf": 0.9765,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "outlet_burn_014.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_suadien_o_cam_burnmark_20_bbox_proposed_STAGING/images/outlet_burn_014.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 218,
+   "predCat": "sua-dien",
+   "predTarget": "o-cam-dien",
+   "top3": [
+    "o-cam-dien",
+    "cong-tac-dien",
+    "o-cam-thong-minh-hen-gio"
+   ],
+   "catOk": true,
+   "top1": true,
+   "top3ok": true,
+   "abstain": false,
+   "conf": 0.9476,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "outlet_burn_015.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_suadien_o_cam_burnmark_20_bbox_proposed_STAGING/images/outlet_burn_015.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 217,
+   "predCat": "sua-dien",
+   "predTarget": "o-cam-dien",
+   "top3": [
+    "o-cam-dien",
+    "o-cam-thong-minh-hen-gio",
+    "cong-tac-dien"
+   ],
+   "catOk": true,
+   "top1": true,
+   "top3ok": true,
+   "abstain": false,
+   "conf": 0.9231,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "outlet_burn_016.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_suadien_o_cam_burnmark_20_bbox_proposed_STAGING/images/outlet_burn_016.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 219,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "o-cam-dien",
+    "cong-tac-dien",
+    "o-cam-thong-minh-hen-gio"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": true,
+   "conf": 0.8382,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "outlet_burn_017.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_suadien_o_cam_burnmark_20_bbox_proposed_STAGING/images/outlet_burn_017.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 221,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "o-cam-dien",
+    "cong-tac-dien",
+    "o-cam-thong-minh-hen-gio"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": true,
+   "conf": 0.8091,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "outlet_burn_018.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_suadien_o_cam_burnmark_20_bbox_proposed_STAGING/images/outlet_burn_018.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 221,
+   "predCat": "sua-dien",
+   "predTarget": null,
+   "top3": [
+    "cong-tac-dien",
+    "o-cam-dien",
+    "o-cam-thong-minh-hen-gio"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": true,
+   "conf": 0.9472,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "outlet_burn_019.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_suadien_o_cam_burnmark_20_bbox_proposed_STAGING/images/outlet_burn_019.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 218,
+   "predCat": null,
+   "predTarget": null,
+   "top3": [],
+   "catOk": false,
+   "top1": false,
+   "top3ok": false,
+   "abstain": true,
+   "conf": null,
+   "obs": "no_detection",
+   "obsCodes": []
+  },
+  {
+   "suite": "synthetic_chatgpt",
+   "id": "outlet_burn_020.jpg",
+   "path": "~/Downloads/data/suadien(zip)/fixgo_suadien_o_cam_burnmark_20_bbox_proposed_STAGING/images/outlet_burn_020.jpg",
+   "accept": [
+    "o-cam-dien"
+   ],
+   "http": 200,
+   "ms": 220,
+   "predCat": "sua-dien",
+   "predTarget": "cong-tac-dien",
+   "top3": [
+    "cong-tac-dien",
+    "o-cam-dien",
+    "aptomat-cb-mcb"
+   ],
+   "catOk": true,
+   "top1": false,
+   "top3ok": true,
+   "abstain": false,
+   "conf": 0.8302,
+   "obs": "no_detection",
+   "obsCodes": []
+  }
+ ]
+}

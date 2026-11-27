@@ -1,0 +1,10 @@
+{
+  "scripts/ai-data-01/README.md": "1be576da06dd213a7658331b11fe36305262d6b026eafd7f4afdb6845befde85",
+  "scripts/ai-data-01/audit.py": "4b5c9715ab8f85074501575af69366860c19265ec6f447a56b2ee2f6249d6317",
+  "scripts/ai-data-01/common.py": "2a3dd96d7ce339e3d5896686048f0ea304adbd6a1a7e39e7bbb7b0839a79a72d",
+  "scripts/ai-data-01/plan_reuse.py": "d9b701cb09f09242ba8b5f399a3e844adca23a5143c0a608478f20bfe9d0e5bd",
+  "scripts/ai-data-01/review.html": "378f3273e89a6675859a2f451f815af7bdf9f179dfb4dddf79aee76f54dd24e5",
+  "scripts/ai-data-01/review.py": "b6c97c4c569d417d41397b7c848e9db9267fd38badc4c257dd93c6fb10305af6",
+  "scripts/ai-data-01/snapshot_catalog_readonly.cjs": "68c5a6af9b51a79f7c7b6a5b94372b6f72f51b86b3f5c178654061089b2a615d",
+  "scripts/ai-data-01/test_tools.py": "3da43e37a5b5f7fb841dc0706b2cbc5ba28ed98ccabcdd9bc2e85eb7885517c1"
+}

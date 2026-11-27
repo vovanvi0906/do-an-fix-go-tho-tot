@@ -3,6 +3,7 @@ import { View, Text, Pressable, Modal, FlatList, TextInput } from 'react-native'
 export default function SymptomQuestionSection({ questions, onAnswerQuestion, busy }) {
   const [expanded, setExpanded] = useState(null);
   const [search, setSearch] = useState('');
+  const [uncertain, setUncertain] = useState(false);
   if (!questions?.length) return <Text>Chưa có triệu chứng được duyệt cho thiết bị này. Bạn có thể chọn dịch vụ thủ công.</Text>;
   const choose = (q, opt) => <Pressable key={opt.value} nativeID={`diagnosis-choice-${opt.value}`} disabled={busy}
     onPress={() => { setExpanded(null); onAnswerQuestion(q.id, opt.value); }}
@@ -12,8 +13,15 @@ export default function SymptomQuestionSection({ questions, onAnswerQuestion, bu
   </Pressable>;
   return <View nativeID="symptom-questions-container" style={{ marginVertical: 8 }}>
     {questions.map(q => <View key={q.id}>
+      {!!q.options?.some(opt => opt.kind === 'VISUAL_OBSERVABLE') && <View>
+        <Text style={{ fontWeight: '600' }}>Bạn trực tiếp nhìn thấy dấu hiệu nào?</Text>
+        <Text>Chỉ chọn điều bạn quan sát được. Bạn có thể sửa gợi ý của AI bằng lựa chọn này.</Text>
+        {q.options.filter(opt => opt.kind === 'VISUAL_OBSERVABLE').slice(0, 4).map(opt => choose(q, opt))}
+        <Pressable accessibilityRole="button" disabled={busy} onPress={() => setUncertain(v => !v)} style={{ padding: 12 }}><Text>Không thấy rõ / chưa xác định</Text></Pressable>
+        {uncertain && <Text>Không cần đoán dấu hiệu. Bạn mô tả tình trạng ở ô phía trên hoặc chọn biểu hiện hoạt động bên dưới.</Text>}
+      </View>}
       <Text style={{ fontWeight: '600' }}>{q.label}</Text>
-      {q.options?.slice(0, 3).map(opt => choose(q, opt))}
+      {q.options?.filter(opt => opt.kind !== 'VISUAL_OBSERVABLE').slice(0, 3).map(opt => choose(q, opt))}
       {q.options?.length > 3 && <Pressable disabled={busy} onPress={() => { setSearch(''); setExpanded(q); }} style={{ padding: 12 }}><Text>Xem thêm triệu chứng</Text></Pressable>}
     </View>)}
     <Modal visible={!!expanded} onRequestClose={() => setExpanded(null)} animationType="slide">

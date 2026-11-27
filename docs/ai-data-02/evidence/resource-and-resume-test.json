@@ -1,0 +1,42 @@
+{
+  "512": {
+    "exitCode": 70,
+    "progress": {
+      "cacheHits": 0,
+      "cpuThreads": 2,
+      "error": "RSS_LIMIT_EXCEEDED",
+      "errors": [],
+      "failed": 0,
+      "groundTruthCreated": 0,
+      "observedRssMiB": 777.23828125,
+      "processed": 0,
+      "profileHash": "2bec234e3c01a70c92723363354ef279839208a6623e3dba9c5048a0ca99fcc6",
+      "requested": 1,
+      "rssLimitMiB": 512,
+      "startedAt": "2026-11-25T04:57:54.844635+00:00",
+      "status": "FAILED",
+      "succeeded": 0
+    }
+  },
+  "3072": {
+    "exitCode": 0,
+    "progress": {
+      "cacheHits": 0,
+      "cpuThreads": 2,
+      "elapsedSeconds": 7.451,
+      "errors": [],
+      "failed": 0,
+      "finishedAt": "2026-11-25T04:58:03.731796+00:00",
+      "groundTruthCreated": 0,
+      "lastImageId": "img-09584",
+      "peakRssMiB": 1533.83,
+      "processed": 1,
+      "profileHash": "2bec234e3c01a70c92723363354ef279839208a6623e3dba9c5048a0ca99fcc6",
+      "requested": 1,
+      "rssLimitMiB": 3072,
+      "startedAt": "2026-11-25T04:57:56.280736+00:00",
+      "status": "COMPLETED",
+      "succeeded": 1
+    }
+  }
+}

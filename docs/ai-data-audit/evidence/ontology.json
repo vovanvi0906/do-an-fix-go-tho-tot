@@ -1,0 +1,54 @@
+{
+  "signs": {
+    "water_dripping": {
+      "name": "Nước nhỏ giọt",
+      "evidenceRule": "Thấy giọt/tia ngắt quãng rõ vị trí; không coi vòi xả bình thường là lỗi rò.",
+      "negativeExample": "Vòi đang được mở để sử dụng, ảnh không thấy giọt."
+    },
+    "wet_surface": {
+      "name": "Bề mặt ướt",
+      "evidenceRule": "Thấy vùng ẩm/nước trên bề mặt; không suy nguồn nước hay nguyên nhân.",
+      "negativeExample": "Vết ố khô, bóng phản chiếu hoặc bề mặt sáng."
+    },
+    "crack": {
+      "name": "Vết nứt",
+      "evidenceRule": "Thấy đường đứt/nứt vật liệu; không nhầm mối nối hoặc bóng.",
+      "negativeExample": "Mối ghép, rãnh thiết kế, bóng đổ."
+    },
+    "burn_mark": {
+      "name": "Vết cháy/xém",
+      "evidenceRule": "Thấy vùng cháy/xém có bằng chứng ảnh; không suy chập điện hoặc nguyên nhân.",
+      "negativeExample": "Bụi, vết bẩn tối, màu vật liệu bình thường."
+    },
+    "water_spray": {
+      "name": "Tia nước nhìn thấy",
+      "evidenceRule": "Thấy tia nước; ghi vị trí và bối cảnh, không tự kết luận ống vỡ.",
+      "negativeExample": "Ảnh chỉ có ống hoặc vòi, không thấy tia nước."
+    },
+    "stain_or_discoloration": {
+      "name": "Vết ố/đổi màu",
+      "evidenceRule": "Vùng đổi màu nhìn thấy, không suy là ướt hoặc do rò nước.",
+      "negativeExample": "Màu sơn/vật liệu hoặc bóng đổ."
+    },
+    "broken_part": {
+      "name": "Chi tiết gãy/vỡ",
+      "evidenceRule": "Thấy phần gãy/vỡ thật, không dùng tên lỗi nguồn làm bằng chứng.",
+      "negativeExample": "Ảnh quảng cáo thiết bị nguyên vẹn."
+    },
+    "surface_soiling": {
+      "name": "Bụi/bẩn bám",
+      "evidenceRule": "Thấy chất bẩn bám trên bề mặt.",
+      "negativeExample": "Nhiễu ảnh hoặc màu vật liệu."
+    },
+    "bird_droppings": {
+      "name": "Vết giống phân chim",
+      "evidenceRule": "Thấy vết phù hợp, chưa kết luận nguyên nhân/vệ sinh nếu chưa rõ.",
+      "negativeExample": "Vết sơn hoặc phản sáng."
+    },
+    "leaf_debris": {
+      "name": "Lá/rác lá bám",
+      "evidenceRule": "Thấy lá/rác lá trên bề mặt, không suy bệnh cây.",
+      "negativeExample": "Cây/lá thuộc cảnh nền không phải rác bám."
+    }
+  }
+}

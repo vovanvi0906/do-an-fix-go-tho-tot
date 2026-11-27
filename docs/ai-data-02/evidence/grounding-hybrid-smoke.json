@@ -1,0 +1,1187 @@
+{
+  "kind": "real-local-inference-smoke-not-independent-evaluation",
+  "imageId": "zip-35238263b8d8ad54",
+  "contentHash": "5e9d6a334de50050dd2c18762c2c16227e5815e8dd24c93ab169dd8094aaf36e",
+  "profileHash": "957950aab7b0607315d47ca2ca53bbfe5d0d14acc5f1689e3bae9fd64df9d6d5",
+  "modelProfile": {
+    "adapterSha256": "27bebaef2a5657f14acaaa34954d261ca703d4c9338f18f04c5c614c7ed14eff",
+    "adapterVersion": "grounding-dino-v1",
+    "catalogSha256": "aa8d65afc97b6a11e2676c950d52fd5a4ca1de9cdb862570ee545974d239b277",
+    "compatibilityKey": "c1c9a2acc4c60d1fd51c8e7cb2bfe75dad95278c4158f92e1ac152d172e2ef1c",
+    "cpuThreads": 2,
+    "groundingAdapterSha256": "abaa09f71069f314118c02278e556b67efd2de2934d7972fda32c3c01ca6e2d9",
+    "groundingCatalogCodeSha256": "cf0ddfc588e27b17771902d8f73f8adb29d2977fbe2e9addc9ffc17ba4198205",
+    "models": {
+      "groundingDino": {
+        "path": "/home/vanvi/.cache/huggingface/hub/models--IDEA-Research--grounding-dino-tiny/snapshots/a2bb814dd30d776dcf7e30523b00659f4f141c71/model.safetensors",
+        "sha256": "1a2412ef99bd74bcd3c2a246fa1e48581f8889a1300c9051974741314fc042f3"
+      }
+    },
+    "ontologySha256": "5c9817cd3e3594aa9ae2c104390f078fbc59df28d6038410f62c10b94f3c2e78",
+    "packageVersions": {
+      "torch": "2.14.1",
+      "transformers": "5.20.2",
+      "ultralytics": "8.4.188"
+    },
+    "profileHash": "957950aab7b0607315d47ca2ca53bbfe5d0d14acc5f1689e3bae9fd64df9d6d5",
+    "runtimeEngine": "grounding-dino",
+    "schema": "fixgo.studio.model-profile.v1",
+    "signDetector": {
+      "backend": "grounding-dino",
+      "broadSceneTargetIds": [
+        "481e60aa-a20b-466e-8ae0-c581284e67ee",
+        "9e70ad4f-39e3-44f9-90d6-cb70c8ce9fbe",
+        "cc0ab115-0758-4fd3-a4ad-b10a68cd0cdb",
+        "cc357a32-647e-4598-9c0c-86c6d62f2427"
+      ],
+      "categoryId": null,
+      "classes": [
+        {
+          "kind": "object",
+          "name": "object:may-nuoc-uong-nong-lanh",
+          "prompts": [
+            "water dispenser"
+          ],
+          "targetId": "043e30bc-6493-4f96-82b6-e6a2f26e4bf2"
+        },
+        {
+          "kind": "object",
+          "name": "object:hang-rao-cay-bon-hoa-vuon-rau",
+          "prompts": [
+            "hedge",
+            "flower bed",
+            "vegetable garden"
+          ],
+          "targetId": "059da690-c6be-46a8-83d5-d96e250cbe4f"
+        },
+        {
+          "kind": "object",
+          "name": "object:khu-vuc-bep-thiet-bi-bep-ben-ngoai",
+          "prompts": [
+            "kitchen counter",
+            "kitchen appliance"
+          ],
+          "targetId": "07174301-9fd2-4a3e-b3da-2b43303663e6"
+        },
+        {
+          "kind": "object",
+          "name": "object:may-say-quan-ao",
+          "prompts": [
+            "clothes dryer"
+          ],
+          "targetId": "1746c918-2fb7-41ac-a111-5c3e807616bf"
+        },
+        {
+          "kind": "object",
+          "name": "object:nguon-dien-adapter-bo-nguon",
+          "prompts": [
+            "power adapter",
+            "power supply"
+          ],
+          "targetId": "199c79fa-7e5d-424f-bb45-f2fd9242024f"
+        },
+        {
+          "kind": "object",
+          "name": "object:cong-tac-thong-minh-relay",
+          "prompts": [
+            "electrical switch",
+            "relay"
+          ],
+          "targetId": "1c1b61c3-be55-4d27-8a32-46410e2a2017"
+        },
+        {
+          "kind": "object",
+          "name": "object:o-cam-thong-minh-hen-gio",
+          "prompts": [
+            "smart power plug",
+            "electrical outlet"
+          ],
+          "targetId": "215bc4ef-6d9d-49ec-841f-4a9fb91868f5"
+        },
+        {
+          "kind": "object",
+          "name": "object:sofa-nem-tham-rem",
+          "prompts": [
+            "sofa",
+            "mattress",
+            "carpet",
+            "curtain"
+          ],
+          "targetId": "2e1b524a-80c8-409d-aa30-e4c8ca71bfbd"
+        },
+        {
+          "kind": "object",
+          "name": "object:den-ngoai-troi-san-vuon",
+          "prompts": [
+            "outdoor light",
+            "garden lamp"
+          ],
+          "targetId": "2f246a0e-3617-4083-83da-2713460741cb"
+        },
+        {
+          "kind": "object",
+          "name": "object:dien-cua-cuon-cong-tu-dong",
+          "prompts": [
+            "roller shutter",
+            "automatic gate"
+          ],
+          "targetId": "2fe406ed-6aae-4f00-b90f-b262e69645e5"
+        },
+        {
+          "kind": "object",
+          "name": "object:may-loc-khong-khi-may-hut-am",
+          "prompts": [
+            "air purifier",
+            "dehumidifier"
+          ],
+          "targetId": "31a46f93-b19d-46e0-89ec-de97705944e4"
+        },
+        {
+          "kind": "object",
+          "name": "object:tham-co-bai-co",
+          "prompts": [
+            "lawn",
+            "grass"
+          ],
+          "targetId": "32acffd8-6255-49b1-8035-eb34a5dff180"
+        },
+        {
+          "kind": "object",
+          "name": "object:van-phong-cua-hang",
+          "prompts": [
+            "office interior",
+            "shop interior"
+          ],
+          "targetId": "349b1f3b-5664-4ba4-a3c4-567c16c58ca0"
+        },
+        {
+          "kind": "object",
+          "name": "object:bo-sac-xe-dien-o-cam-sac",
+          "prompts": [
+            "electric vehicle charger",
+            "charging socket"
+          ],
+          "targetId": "34f7d2f7-e63f-4081-b968-2b8275cab527"
+        },
+        {
+          "kind": "object",
+          "name": "object:day-dien-cap-dien",
+          "prompts": [
+            "electrical cable",
+            "electrical wire"
+          ],
+          "targetId": "36d41107-3c4a-4a4e-9aa1-22cba07aed57"
+        },
+        {
+          "kind": "object",
+          "name": "object:pheu-thoat-san-khu-vuc-phong-tam",
+          "prompts": [
+            "floor drain",
+            "shower floor"
+          ],
+          "targetId": "3a9061ae-55b0-4130-b48c-7b6f1c281247"
+        },
+        {
+          "kind": "object",
+          "name": "object:may-lanh-dieu-hoa",
+          "prompts": [
+            "air conditioner"
+          ],
+          "targetId": "3d946ff9-d116-4d07-9f38-c175669f74ed"
+        },
+        {
+          "kind": "object",
+          "name": "object:may-hut-mui",
+          "prompts": [
+            "kitchen range hood"
+          ],
+          "targetId": "42c03e7a-0da1-446a-ae1e-db7783716016"
+        },
+        {
+          "kind": "object",
+          "name": "object:may-rua-chen-may-rua-bat",
+          "prompts": [
+            "dishwasher"
+          ],
+          "targetId": "44c6d84b-0c8c-44f0-855b-36aff9d8222a"
+        },
+        {
+          "kind": "object",
+          "name": "object:tu-dien-bang-dien",
+          "prompts": [
+            "electrical panel",
+            "electrical cabinet"
+          ],
+          "targetId": "470acb27-41b1-4d36-9ee3-84b9bbc857de"
+        },
+        {
+          "kind": "object",
+          "name": "object:bon-nuoc-may-bom-phao-nuoc",
+          "prompts": [
+            "water tank",
+            "water pump",
+            "float valve"
+          ],
+          "targetId": "47c02e77-5604-49ae-8ca7-a38f619acd0d"
+        },
+        {
+          "kind": "object",
+          "name": "object:he-thong-dien-toan-nha",
+          "prompts": [
+            "electrical wiring",
+            "electrical panel"
+          ],
+          "targetId": "481e60aa-a20b-466e-8ae0-c581284e67ee"
+        },
+        {
+          "kind": "object",
+          "name": "object:aptomat-cb-mcb",
+          "prompts": [
+            "circuit breaker"
+          ],
+          "targetId": "484e7b6f-469e-4b22-acd8-bae2b7ea60a1"
+        },
+        {
+          "kind": "object",
+          "name": "object:quat-tran-quat-treo-tuong",
+          "prompts": [
+            "ceiling fan",
+            "wall fan"
+          ],
+          "targetId": "492a7d40-96f6-4b1a-8146-34956f8a95f8"
+        },
+        {
+          "kind": "object",
+          "name": "object:lavabo-chau-rua-bon-rua",
+          "prompts": [
+            "sink",
+            "wash basin"
+          ],
+          "targetId": "4f2dd034-f575-49b6-a913-cea3a620b618"
+        },
+        {
+          "kind": "object",
+          "name": "object:voi-nuoc-voi-sen",
+          "prompts": [
+            "water faucet",
+            "shower head"
+          ],
+          "targetId": "520cae18-9d24-4109-850f-1752f26f05ee"
+        },
+        {
+          "kind": "object",
+          "name": "object:tu-lanh-tu-lanh-side-by-side",
+          "prompts": [
+            "refrigerator"
+          ],
+          "targetId": "521d7ce8-9e72-492e-b0cd-4eb88508f58d"
+        },
+        {
+          "kind": "object",
+          "name": "object:cam-bien-thiet-bi-tu-dong",
+          "prompts": [
+            "motion sensor",
+            "electrical sensor"
+          ],
+          "targetId": "56725529-2a0c-4bdf-a437-4f18d98b5939"
+        },
+        {
+          "kind": "object",
+          "name": "object:hop-noi-dien-hop-ky-thuat",
+          "prompts": [
+            "electrical junction box"
+          ],
+          "targetId": "56d03ad1-b3a0-469a-bf79-ec9e83d23e08"
+        },
+        {
+          "kind": "object",
+          "name": "object:tu-dong-tu-mat",
+          "prompts": [
+            "freezer",
+            "refrigerated cabinet"
+          ],
+          "targetId": "5e8f3e42-a1e4-47e3-8e76-8c774d04d5ea"
+        },
+        {
+          "kind": "object",
+          "name": "object:nha-ve-sinh-phong-tam",
+          "prompts": [
+            "bathroom",
+            "toilet"
+          ],
+          "targetId": "5ef7b978-d4dc-4287-b119-19926b473bac"
+        },
+        {
+          "kind": "object",
+          "name": "object:noi-com-dien-noi-ap-suat-dien",
+          "prompts": [
+            "rice cooker",
+            "electric pressure cooker"
+          ],
+          "targetId": "65f531cd-165d-4feb-b69f-922398fde6db"
+        },
+        {
+          "kind": "object",
+          "name": "object:den-trang-tri-den-chum",
+          "prompts": [
+            "chandelier",
+            "decorative lamp"
+          ],
+          "targetId": "667cd41a-d6ab-42fa-808c-08898ba947dc"
+        },
+        {
+          "kind": "object",
+          "name": "object:dien-mat-troi-inverter",
+          "prompts": [
+            "solar panel",
+            "solar inverter"
+          ],
+          "targetId": "72afafec-8d91-4ed9-b153-238d314ddfdf"
+        },
+        {
+          "kind": "object",
+          "name": "object:bon-cau-ket-nuoc",
+          "prompts": [
+            "toilet",
+            "toilet tank"
+          ],
+          "targetId": "78e95d0e-4ea5-43d1-b0fe-9b3d9be8b3c3"
+        },
+        {
+          "kind": "object",
+          "name": "object:bep-tu-bep-hong-ngoai",
+          "prompts": [
+            "induction cooktop",
+            "electric stove"
+          ],
+          "targetId": "79d5736c-c8e1-4514-a9ce-e01899beffa9"
+        },
+        {
+          "kind": "object",
+          "name": "object:may-xay-may-ep-may-danh-trung",
+          "prompts": [
+            "blender",
+            "juicer",
+            "electric mixer"
+          ],
+          "targetId": "812864e5-2682-4d13-bbd4-5c22aba656cd"
+        },
+        {
+          "kind": "object",
+          "name": "object:may-loc-nuoc-ro-nano",
+          "prompts": [
+            "water purifier",
+            "water filter"
+          ],
+          "targetId": "82430f58-a332-4d4f-aa99-5c27f888a0e7"
+        },
+        {
+          "kind": "object",
+          "name": "object:bep-gas-bep-gas-am",
+          "prompts": [
+            "gas stove"
+          ],
+          "targetId": "863b2a1d-05f2-4792-beaa-4073e6197141"
+        },
+        {
+          "kind": "object",
+          "name": "object:binh-nong-lanh-dien",
+          "prompts": [
+            "electric water heater"
+          ],
+          "targetId": "8c5b11b7-adfe-4c5d-a3b6-fd7afbf53636"
+        },
+        {
+          "kind": "object",
+          "name": "object:may-lam-mat-quat-dieu-hoa",
+          "prompts": [
+            "evaporative air cooler"
+          ],
+          "targetId": "8e1a07e4-134d-4214-8841-ad2969a584fa"
+        },
+        {
+          "kind": "object",
+          "name": "object:den-su-co-den-thoat-hiem",
+          "prompts": [
+            "emergency light",
+            "exit sign"
+          ],
+          "targetId": "8e1b308f-a8cd-4de8-9a30-6db52cfdb32c"
+        },
+        {
+          "kind": "object",
+          "name": "object:cua-kinh-cua-so-ban-cong",
+          "prompts": [
+            "glass door",
+            "window",
+            "balcony"
+          ],
+          "targetId": "8ea8b042-3418-4ec9-8cd7-5c71b899a183"
+        },
+        {
+          "kind": "object",
+          "name": "object:thiet-bi-do-dien-cong-to-dien",
+          "prompts": [
+            "electric meter"
+          ],
+          "targetId": "93797cd8-e539-456e-a38f-f76316e84107"
+        },
+        {
+          "kind": "object",
+          "name": "object:thiet-bi-chong-ro-chong-giat",
+          "prompts": [
+            "residual current circuit breaker"
+          ],
+          "targetId": "9a3f2d63-e61b-4d6c-8ff0-15e179c15d02"
+        },
+        {
+          "kind": "object",
+          "name": "object:quat-thong-gio-quat-hut",
+          "prompts": [
+            "exhaust fan",
+            "ventilation fan"
+          ],
+          "targetId": "9b5276c6-9692-46be-a8ad-f3e1afdac569"
+        },
+        {
+          "kind": "object",
+          "name": "object:nguon-cap-cho-thiet-bi-co-dinh",
+          "prompts": [
+            "power supply",
+            "electrical cable"
+          ],
+          "targetId": "9e70ad4f-39e3-44f9-90d6-cb70c8ce9fbe"
+        },
+        {
+          "kind": "object",
+          "name": "object:ban-ui-ban-la-hoi-nuoc",
+          "prompts": [
+            "clothes iron",
+            "steam iron"
+          ],
+          "targetId": "a265bdb4-3c9f-4d0a-bcba-1f0722c8b420"
+        },
+        {
+          "kind": "object",
+          "name": "object:lo-nuong-noi-chien-khong-dau",
+          "prompts": [
+            "oven",
+            "air fryer"
+          ],
+          "targetId": "a289a9b0-6cb9-4d94-b3a3-3ff6dd55e1f7"
+        },
+        {
+          "kind": "object",
+          "name": "object:quat-dien-quat-dung-quat-ban",
+          "prompts": [
+            "electric fan",
+            "pedestal fan",
+            "table fan"
+          ],
+          "targetId": "a9f91e3c-16d5-484d-92bf-68c526ac9606"
+        },
+        {
+          "kind": "object",
+          "name": "object:tiep-dia-chong-set",
+          "prompts": [
+            "grounding rod",
+            "lightning rod"
+          ],
+          "targetId": "aa15b0ce-a9e6-4faf-9c87-1d5102d339f5"
+        },
+        {
+          "kind": "object",
+          "name": "object:may-hut-bui-robot-hut-bui",
+          "prompts": [
+            "vacuum cleaner",
+            "robot vacuum cleaner"
+          ],
+          "targetId": "ac770808-e06b-4f11-8c0d-ea2c5ca4ab55"
+        },
+        {
+          "kind": "object",
+          "name": "object:bong-den-den-led",
+          "prompts": [
+            "light bulb",
+            "led light"
+          ],
+          "targetId": "b45c19d2-93d2-43ac-8330-87d223d941b4"
+        },
+        {
+          "kind": "object",
+          "name": "object:chuong-cua-nut-nhan",
+          "prompts": [
+            "doorbell",
+            "push button"
+          ],
+          "targetId": "b5e21dc2-ed41-4aaa-9f0f-8f5f5aaf025c"
+        },
+        {
+          "kind": "object",
+          "name": "object:may-bom-nuoc-phan-dien",
+          "prompts": [
+            "water pump"
+          ],
+          "targetId": "bc70283c-4093-4574-aa3f-f5ef1fcdb353"
+        },
+        {
+          "kind": "object",
+          "name": "object:lo-vi-song",
+          "prompts": [
+            "microwave oven"
+          ],
+          "targetId": "c3e13154-aeb8-4c3f-a6d3-6fa4f20566df"
+        },
+        {
+          "kind": "object",
+          "name": "object:o-cam-dien",
+          "prompts": [
+            "electrical outlet",
+            "wall socket"
+          ],
+          "targetId": "ca1e389e-6302-4a19-a086-5c815a836473"
+        },
+        {
+          "kind": "object",
+          "name": "object:he-thong-tuoi-san-vuon-tong-the",
+          "prompts": [
+            "garden sprinkler",
+            "irrigation pipe"
+          ],
+          "targetId": "cc0ab115-0758-4fd3-a4ad-b10a68cd0cdb"
+        },
+        {
+          "kind": "object",
+          "name": "object:he-thong-dien-phong",
+          "prompts": [
+            "electrical wiring",
+            "electrical panel"
+          ],
+          "targetId": "cc357a32-647e-4598-9c0c-86c6d62f2427"
+        },
+        {
+          "kind": "object",
+          "name": "object:nha-o-can-ho",
+          "prompts": [
+            "room interior"
+          ],
+          "targetId": "cf864eb2-ba2a-4dd8-8b8f-d13602981783"
+        },
+        {
+          "kind": "object",
+          "name": "object:be-tu-hoai-ho-ga-cong-thoat",
+          "prompts": [
+            "manhole",
+            "drain"
+          ],
+          "targetId": "d9924692-19d1-4185-9e35-b381953c42a3"
+        },
+        {
+          "kind": "object",
+          "name": "object:cay-bong-mat-cay-lon",
+          "prompts": [
+            "tree"
+          ],
+          "targetId": "e6e9a725-4058-4af4-83b7-a35fc91af354"
+        },
+        {
+          "kind": "object",
+          "name": "object:may-giat-may-giat-say",
+          "prompts": [
+            "washing machine"
+          ],
+          "targetId": "eaa18ae1-41b8-4588-bcdb-96192e5a2da8"
+        },
+        {
+          "kind": "object",
+          "name": "object:on-ap-ups-bo-luu-dien",
+          "prompts": [
+            "voltage stabilizer",
+            "uninterruptible power supply"
+          ],
+          "targetId": "ec503642-d273-4742-bf35-e8b3d509e7e5"
+        },
+        {
+          "kind": "object",
+          "name": "object:san-nha-tuong-tran-noi-that",
+          "prompts": [
+            "floor",
+            "wall",
+            "ceiling"
+          ],
+          "targetId": "ee850727-ccde-4173-8b16-41e7be8065ca"
+        },
+        {
+          "kind": "object",
+          "name": "object:duong-ong-cap-thoat-nuoc",
+          "prompts": [
+            "water pipe",
+            "drain pipe"
+          ],
+          "targetId": "f27226de-570a-4c1e-84b5-dc419fe9c32e"
+        },
+        {
+          "kind": "object",
+          "name": "object:cong-tac-dien",
+          "prompts": [
+            "electrical switch"
+          ],
+          "targetId": "f2b5a73e-b1e3-45c2-97c1-a09015ad18b6"
+        },
+        {
+          "kind": "object",
+          "name": "object:may-pha-ca-phe-am-sieu-toc",
+          "prompts": [
+            "coffee machine",
+            "electric kettle"
+          ],
+          "targetId": "f37e014f-c25d-4bcf-a5de-af804d32bd40"
+        },
+        {
+          "kind": "object",
+          "name": "object:cay-canh-chau-cay",
+          "prompts": [
+            "potted plant"
+          ],
+          "targetId": "fbcd5b31-5530-43ba-b35b-a32d25479477"
+        },
+        {
+          "code": "bird_droppings",
+          "kind": "sign",
+          "name": "sign:bird_droppings",
+          "prompts": [
+            "bird droppings"
+          ],
+          "targetIds": [
+            "07174301-9fd2-4a3e-b3da-2b43303663e6",
+            "2e1b524a-80c8-409d-aa30-e4c8ca71bfbd",
+            "349b1f3b-5664-4ba4-a3c4-567c16c58ca0",
+            "5ef7b978-d4dc-4287-b119-19926b473bac",
+            "8ea8b042-3418-4ec9-8cd7-5c71b899a183",
+            "cf864eb2-ba2a-4dd8-8b8f-d13602981783",
+            "ee850727-ccde-4173-8b16-41e7be8065ca"
+          ]
+        },
+        {
+          "code": "broken_part",
+          "kind": "sign",
+          "name": "sign:broken_part",
+          "prompts": [
+            "broken part",
+            "broken component"
+          ],
+          "targetIds": [
+            "043e30bc-6493-4f96-82b6-e6a2f26e4bf2",
+            "059da690-c6be-46a8-83d5-d96e250cbe4f",
+            "1746c918-2fb7-41ac-a111-5c3e807616bf",
+            "199c79fa-7e5d-424f-bb45-f2fd9242024f",
+            "1c1b61c3-be55-4d27-8a32-46410e2a2017",
+            "215bc4ef-6d9d-49ec-841f-4a9fb91868f5",
+            "2f246a0e-3617-4083-83da-2713460741cb",
+            "2fe406ed-6aae-4f00-b90f-b262e69645e5",
+            "31a46f93-b19d-46e0-89ec-de97705944e4",
+            "32acffd8-6255-49b1-8035-eb34a5dff180",
+            "34f7d2f7-e63f-4081-b968-2b8275cab527",
+            "36d41107-3c4a-4a4e-9aa1-22cba07aed57",
+            "3a9061ae-55b0-4130-b48c-7b6f1c281247",
+            "3d946ff9-d116-4d07-9f38-c175669f74ed",
+            "42c03e7a-0da1-446a-ae1e-db7783716016",
+            "44c6d84b-0c8c-44f0-855b-36aff9d8222a",
+            "470acb27-41b1-4d36-9ee3-84b9bbc857de",
+            "47c02e77-5604-49ae-8ca7-a38f619acd0d",
+            "481e60aa-a20b-466e-8ae0-c581284e67ee",
+            "484e7b6f-469e-4b22-acd8-bae2b7ea60a1",
+            "492a7d40-96f6-4b1a-8146-34956f8a95f8",
+            "4f2dd034-f575-49b6-a913-cea3a620b618",
+            "520cae18-9d24-4109-850f-1752f26f05ee",
+            "521d7ce8-9e72-492e-b0cd-4eb88508f58d",
+            "56725529-2a0c-4bdf-a437-4f18d98b5939",
+            "56d03ad1-b3a0-469a-bf79-ec9e83d23e08",
+            "5e8f3e42-a1e4-47e3-8e76-8c774d04d5ea",
+            "65f531cd-165d-4feb-b69f-922398fde6db",
+            "667cd41a-d6ab-42fa-808c-08898ba947dc",
+            "72afafec-8d91-4ed9-b153-238d314ddfdf",
+            "78e95d0e-4ea5-43d1-b0fe-9b3d9be8b3c3",
+            "79d5736c-c8e1-4514-a9ce-e01899beffa9",
+            "812864e5-2682-4d13-bbd4-5c22aba656cd",
+            "82430f58-a332-4d4f-aa99-5c27f888a0e7",
+            "863b2a1d-05f2-4792-beaa-4073e6197141",
+            "8c5b11b7-adfe-4c5d-a3b6-fd7afbf53636",
+            "8e1a07e4-134d-4214-8841-ad2969a584fa",
+            "8e1b308f-a8cd-4de8-9a30-6db52cfdb32c",
+            "93797cd8-e539-456e-a38f-f76316e84107",
+            "9a3f2d63-e61b-4d6c-8ff0-15e179c15d02",
+            "9b5276c6-9692-46be-a8ad-f3e1afdac569",
+            "9e70ad4f-39e3-44f9-90d6-cb70c8ce9fbe",
+            "a265bdb4-3c9f-4d0a-bcba-1f0722c8b420",
+            "a289a9b0-6cb9-4d94-b3a3-3ff6dd55e1f7",
+            "a9f91e3c-16d5-484d-92bf-68c526ac9606",
+            "aa15b0ce-a9e6-4faf-9c87-1d5102d339f5",
+            "ac770808-e06b-4f11-8c0d-ea2c5ca4ab55",
+            "b45c19d2-93d2-43ac-8330-87d223d941b4",
+            "b5e21dc2-ed41-4aaa-9f0f-8f5f5aaf025c",
+            "bc70283c-4093-4574-aa3f-f5ef1fcdb353",
+            "c3e13154-aeb8-4c3f-a6d3-6fa4f20566df",
+            "ca1e389e-6302-4a19-a086-5c815a836473",
+            "cc0ab115-0758-4fd3-a4ad-b10a68cd0cdb",
+            "cc357a32-647e-4598-9c0c-86c6d62f2427",
+            "d9924692-19d1-4185-9e35-b381953c42a3",
+            "e6e9a725-4058-4af4-83b7-a35fc91af354",
+            "eaa18ae1-41b8-4588-bcdb-96192e5a2da8",
+            "ec503642-d273-4742-bf35-e8b3d509e7e5",
+            "f27226de-570a-4c1e-84b5-dc419fe9c32e",
+            "f2b5a73e-b1e3-45c2-97c1-a09015ad18b6",
+            "f37e014f-c25d-4bcf-a5de-af804d32bd40",
+            "fbcd5b31-5530-43ba-b35b-a32d25479477"
+          ]
+        },
+        {
+          "code": "burn_mark",
+          "kind": "sign",
+          "name": "sign:burn_mark",
+          "prompts": [
+            "burn mark",
+            "scorched plastic",
+            "charred area"
+          ],
+          "targetIds": [
+            "043e30bc-6493-4f96-82b6-e6a2f26e4bf2",
+            "1746c918-2fb7-41ac-a111-5c3e807616bf",
+            "199c79fa-7e5d-424f-bb45-f2fd9242024f",
+            "1c1b61c3-be55-4d27-8a32-46410e2a2017",
+            "215bc4ef-6d9d-49ec-841f-4a9fb91868f5",
+            "2f246a0e-3617-4083-83da-2713460741cb",
+            "2fe406ed-6aae-4f00-b90f-b262e69645e5",
+            "31a46f93-b19d-46e0-89ec-de97705944e4",
+            "34f7d2f7-e63f-4081-b968-2b8275cab527",
+            "36d41107-3c4a-4a4e-9aa1-22cba07aed57",
+            "3d946ff9-d116-4d07-9f38-c175669f74ed",
+            "42c03e7a-0da1-446a-ae1e-db7783716016",
+            "44c6d84b-0c8c-44f0-855b-36aff9d8222a",
+            "470acb27-41b1-4d36-9ee3-84b9bbc857de",
+            "481e60aa-a20b-466e-8ae0-c581284e67ee",
+            "484e7b6f-469e-4b22-acd8-bae2b7ea60a1",
+            "492a7d40-96f6-4b1a-8146-34956f8a95f8",
+            "521d7ce8-9e72-492e-b0cd-4eb88508f58d",
+            "56725529-2a0c-4bdf-a437-4f18d98b5939",
+            "56d03ad1-b3a0-469a-bf79-ec9e83d23e08",
+            "5e8f3e42-a1e4-47e3-8e76-8c774d04d5ea",
+            "65f531cd-165d-4feb-b69f-922398fde6db",
+            "667cd41a-d6ab-42fa-808c-08898ba947dc",
+            "72afafec-8d91-4ed9-b153-238d314ddfdf",
+            "79d5736c-c8e1-4514-a9ce-e01899beffa9",
+            "812864e5-2682-4d13-bbd4-5c22aba656cd",
+            "82430f58-a332-4d4f-aa99-5c27f888a0e7",
+            "863b2a1d-05f2-4792-beaa-4073e6197141",
+            "8c5b11b7-adfe-4c5d-a3b6-fd7afbf53636",
+            "8e1a07e4-134d-4214-8841-ad2969a584fa",
+            "8e1b308f-a8cd-4de8-9a30-6db52cfdb32c",
+            "93797cd8-e539-456e-a38f-f76316e84107",
+            "9a3f2d63-e61b-4d6c-8ff0-15e179c15d02",
+            "9b5276c6-9692-46be-a8ad-f3e1afdac569",
+            "9e70ad4f-39e3-44f9-90d6-cb70c8ce9fbe",
+            "a265bdb4-3c9f-4d0a-bcba-1f0722c8b420",
+            "a289a9b0-6cb9-4d94-b3a3-3ff6dd55e1f7",
+            "a9f91e3c-16d5-484d-92bf-68c526ac9606",
+            "aa15b0ce-a9e6-4faf-9c87-1d5102d339f5",
+            "ac770808-e06b-4f11-8c0d-ea2c5ca4ab55",
+            "b45c19d2-93d2-43ac-8330-87d223d941b4",
+            "b5e21dc2-ed41-4aaa-9f0f-8f5f5aaf025c",
+            "bc70283c-4093-4574-aa3f-f5ef1fcdb353",
+            "c3e13154-aeb8-4c3f-a6d3-6fa4f20566df",
+            "ca1e389e-6302-4a19-a086-5c815a836473",
+            "cc357a32-647e-4598-9c0c-86c6d62f2427",
+            "eaa18ae1-41b8-4588-bcdb-96192e5a2da8",
+            "ec503642-d273-4742-bf35-e8b3d509e7e5",
+            "f2b5a73e-b1e3-45c2-97c1-a09015ad18b6",
+            "f37e014f-c25d-4bcf-a5de-af804d32bd40"
+          ]
+        },
+        {
+          "code": "crack",
+          "kind": "sign",
+          "name": "sign:crack",
+          "prompts": [
+            "crack",
+            "cracked surface"
+          ],
+          "targetIds": [
+            "199c79fa-7e5d-424f-bb45-f2fd9242024f",
+            "1c1b61c3-be55-4d27-8a32-46410e2a2017",
+            "215bc4ef-6d9d-49ec-841f-4a9fb91868f5",
+            "2f246a0e-3617-4083-83da-2713460741cb",
+            "2fe406ed-6aae-4f00-b90f-b262e69645e5",
+            "31a46f93-b19d-46e0-89ec-de97705944e4",
+            "34f7d2f7-e63f-4081-b968-2b8275cab527",
+            "36d41107-3c4a-4a4e-9aa1-22cba07aed57",
+            "3a9061ae-55b0-4130-b48c-7b6f1c281247",
+            "42c03e7a-0da1-446a-ae1e-db7783716016",
+            "44c6d84b-0c8c-44f0-855b-36aff9d8222a",
+            "470acb27-41b1-4d36-9ee3-84b9bbc857de",
+            "47c02e77-5604-49ae-8ca7-a38f619acd0d",
+            "481e60aa-a20b-466e-8ae0-c581284e67ee",
+            "484e7b6f-469e-4b22-acd8-bae2b7ea60a1",
+            "492a7d40-96f6-4b1a-8146-34956f8a95f8",
+            "4f2dd034-f575-49b6-a913-cea3a620b618",
+            "520cae18-9d24-4109-850f-1752f26f05ee",
+            "56725529-2a0c-4bdf-a437-4f18d98b5939",
+            "56d03ad1-b3a0-469a-bf79-ec9e83d23e08",
+            "65f531cd-165d-4feb-b69f-922398fde6db",
+            "667cd41a-d6ab-42fa-808c-08898ba947dc",
+            "72afafec-8d91-4ed9-b153-238d314ddfdf",
+            "78e95d0e-4ea5-43d1-b0fe-9b3d9be8b3c3",
+            "79d5736c-c8e1-4514-a9ce-e01899beffa9",
+            "812864e5-2682-4d13-bbd4-5c22aba656cd",
+            "82430f58-a332-4d4f-aa99-5c27f888a0e7",
+            "863b2a1d-05f2-4792-beaa-4073e6197141",
+            "8c5b11b7-adfe-4c5d-a3b6-fd7afbf53636",
+            "8e1b308f-a8cd-4de8-9a30-6db52cfdb32c",
+            "93797cd8-e539-456e-a38f-f76316e84107",
+            "9a3f2d63-e61b-4d6c-8ff0-15e179c15d02",
+            "9b5276c6-9692-46be-a8ad-f3e1afdac569",
+            "9e70ad4f-39e3-44f9-90d6-cb70c8ce9fbe",
+            "a265bdb4-3c9f-4d0a-bcba-1f0722c8b420",
+            "a289a9b0-6cb9-4d94-b3a3-3ff6dd55e1f7",
+            "a9f91e3c-16d5-484d-92bf-68c526ac9606",
+            "aa15b0ce-a9e6-4faf-9c87-1d5102d339f5",
+            "ac770808-e06b-4f11-8c0d-ea2c5ca4ab55",
+            "b45c19d2-93d2-43ac-8330-87d223d941b4",
+            "b5e21dc2-ed41-4aaa-9f0f-8f5f5aaf025c",
+            "bc70283c-4093-4574-aa3f-f5ef1fcdb353",
+            "c3e13154-aeb8-4c3f-a6d3-6fa4f20566df",
+            "ca1e389e-6302-4a19-a086-5c815a836473",
+            "cc357a32-647e-4598-9c0c-86c6d62f2427",
+            "d9924692-19d1-4185-9e35-b381953c42a3",
+            "ec503642-d273-4742-bf35-e8b3d509e7e5",
+            "f27226de-570a-4c1e-84b5-dc419fe9c32e",
+            "f2b5a73e-b1e3-45c2-97c1-a09015ad18b6",
+            "f37e014f-c25d-4bcf-a5de-af804d32bd40"
+          ]
+        },
+        {
+          "code": "leaf_debris",
+          "kind": "sign",
+          "name": "sign:leaf_debris",
+          "prompts": [
+            "fallen leaves",
+            "leaf debris"
+          ],
+          "targetIds": [
+            "059da690-c6be-46a8-83d5-d96e250cbe4f",
+            "07174301-9fd2-4a3e-b3da-2b43303663e6",
+            "2e1b524a-80c8-409d-aa30-e4c8ca71bfbd",
+            "32acffd8-6255-49b1-8035-eb34a5dff180",
+            "349b1f3b-5664-4ba4-a3c4-567c16c58ca0",
+            "5ef7b978-d4dc-4287-b119-19926b473bac",
+            "8ea8b042-3418-4ec9-8cd7-5c71b899a183",
+            "cc0ab115-0758-4fd3-a4ad-b10a68cd0cdb",
+            "cf864eb2-ba2a-4dd8-8b8f-d13602981783",
+            "e6e9a725-4058-4af4-83b7-a35fc91af354",
+            "ee850727-ccde-4173-8b16-41e7be8065ca",
+            "fbcd5b31-5530-43ba-b35b-a32d25479477"
+          ]
+        },
+        {
+          "code": "stain_or_discoloration",
+          "kind": "sign",
+          "name": "sign:stain_or_discoloration",
+          "prompts": [
+            "surface stain",
+            "discolored patch"
+          ],
+          "targetIds": [
+            "059da690-c6be-46a8-83d5-d96e250cbe4f",
+            "07174301-9fd2-4a3e-b3da-2b43303663e6",
+            "2e1b524a-80c8-409d-aa30-e4c8ca71bfbd",
+            "32acffd8-6255-49b1-8035-eb34a5dff180",
+            "349b1f3b-5664-4ba4-a3c4-567c16c58ca0",
+            "5ef7b978-d4dc-4287-b119-19926b473bac",
+            "8ea8b042-3418-4ec9-8cd7-5c71b899a183",
+            "cc0ab115-0758-4fd3-a4ad-b10a68cd0cdb",
+            "cf864eb2-ba2a-4dd8-8b8f-d13602981783",
+            "e6e9a725-4058-4af4-83b7-a35fc91af354",
+            "ee850727-ccde-4173-8b16-41e7be8065ca",
+            "fbcd5b31-5530-43ba-b35b-a32d25479477"
+          ]
+        },
+        {
+          "code": "surface_soiling",
+          "kind": "sign",
+          "name": "sign:surface_soiling",
+          "prompts": [
+            "dirt buildup",
+            "dust buildup"
+          ],
+          "targetIds": [
+            "043e30bc-6493-4f96-82b6-e6a2f26e4bf2",
+            "059da690-c6be-46a8-83d5-d96e250cbe4f",
+            "07174301-9fd2-4a3e-b3da-2b43303663e6",
+            "1746c918-2fb7-41ac-a111-5c3e807616bf",
+            "2e1b524a-80c8-409d-aa30-e4c8ca71bfbd",
+            "31a46f93-b19d-46e0-89ec-de97705944e4",
+            "32acffd8-6255-49b1-8035-eb34a5dff180",
+            "349b1f3b-5664-4ba4-a3c4-567c16c58ca0",
+            "3d946ff9-d116-4d07-9f38-c175669f74ed",
+            "42c03e7a-0da1-446a-ae1e-db7783716016",
+            "44c6d84b-0c8c-44f0-855b-36aff9d8222a",
+            "521d7ce8-9e72-492e-b0cd-4eb88508f58d",
+            "5e8f3e42-a1e4-47e3-8e76-8c774d04d5ea",
+            "5ef7b978-d4dc-4287-b119-19926b473bac",
+            "65f531cd-165d-4feb-b69f-922398fde6db",
+            "79d5736c-c8e1-4514-a9ce-e01899beffa9",
+            "812864e5-2682-4d13-bbd4-5c22aba656cd",
+            "82430f58-a332-4d4f-aa99-5c27f888a0e7",
+            "863b2a1d-05f2-4792-beaa-4073e6197141",
+            "8c5b11b7-adfe-4c5d-a3b6-fd7afbf53636",
+            "8e1a07e4-134d-4214-8841-ad2969a584fa",
+            "8ea8b042-3418-4ec9-8cd7-5c71b899a183",
+            "a265bdb4-3c9f-4d0a-bcba-1f0722c8b420",
+            "a289a9b0-6cb9-4d94-b3a3-3ff6dd55e1f7",
+            "a9f91e3c-16d5-484d-92bf-68c526ac9606",
+            "ac770808-e06b-4f11-8c0d-ea2c5ca4ab55",
+            "c3e13154-aeb8-4c3f-a6d3-6fa4f20566df",
+            "cc0ab115-0758-4fd3-a4ad-b10a68cd0cdb",
+            "cf864eb2-ba2a-4dd8-8b8f-d13602981783",
+            "e6e9a725-4058-4af4-83b7-a35fc91af354",
+            "eaa18ae1-41b8-4588-bcdb-96192e5a2da8",
+            "ee850727-ccde-4173-8b16-41e7be8065ca",
+            "f37e014f-c25d-4bcf-a5de-af804d32bd40",
+            "fbcd5b31-5530-43ba-b35b-a32d25479477"
+          ]
+        },
+        {
+          "code": "water_dripping",
+          "kind": "sign",
+          "name": "sign:water_dripping",
+          "prompts": [
+            "water droplets",
+            "dripping water"
+          ],
+          "targetIds": [
+            "3a9061ae-55b0-4130-b48c-7b6f1c281247",
+            "47c02e77-5604-49ae-8ca7-a38f619acd0d",
+            "4f2dd034-f575-49b6-a913-cea3a620b618",
+            "520cae18-9d24-4109-850f-1752f26f05ee",
+            "78e95d0e-4ea5-43d1-b0fe-9b3d9be8b3c3",
+            "d9924692-19d1-4185-9e35-b381953c42a3",
+            "f27226de-570a-4c1e-84b5-dc419fe9c32e"
+          ]
+        },
+        {
+          "code": "water_spray",
+          "kind": "sign",
+          "name": "sign:water_spray",
+          "prompts": [
+            "spraying water",
+            "water jet"
+          ],
+          "targetIds": [
+            "3a9061ae-55b0-4130-b48c-7b6f1c281247",
+            "47c02e77-5604-49ae-8ca7-a38f619acd0d",
+            "4f2dd034-f575-49b6-a913-cea3a620b618",
+            "520cae18-9d24-4109-850f-1752f26f05ee",
+            "78e95d0e-4ea5-43d1-b0fe-9b3d9be8b3c3",
+            "d9924692-19d1-4185-9e35-b381953c42a3",
+            "f27226de-570a-4c1e-84b5-dc419fe9c32e"
+          ]
+        },
+        {
+          "code": "wet_surface",
+          "kind": "sign",
+          "name": "sign:wet_surface",
+          "prompts": [
+            "wet surface",
+            "puddle of water"
+          ],
+          "targetIds": [
+            "043e30bc-6493-4f96-82b6-e6a2f26e4bf2",
+            "07174301-9fd2-4a3e-b3da-2b43303663e6",
+            "1746c918-2fb7-41ac-a111-5c3e807616bf",
+            "2e1b524a-80c8-409d-aa30-e4c8ca71bfbd",
+            "31a46f93-b19d-46e0-89ec-de97705944e4",
+            "349b1f3b-5664-4ba4-a3c4-567c16c58ca0",
+            "3a9061ae-55b0-4130-b48c-7b6f1c281247",
+            "3d946ff9-d116-4d07-9f38-c175669f74ed",
+            "42c03e7a-0da1-446a-ae1e-db7783716016",
+            "44c6d84b-0c8c-44f0-855b-36aff9d8222a",
+            "47c02e77-5604-49ae-8ca7-a38f619acd0d",
+            "4f2dd034-f575-49b6-a913-cea3a620b618",
+            "520cae18-9d24-4109-850f-1752f26f05ee",
+            "521d7ce8-9e72-492e-b0cd-4eb88508f58d",
+            "5e8f3e42-a1e4-47e3-8e76-8c774d04d5ea",
+            "5ef7b978-d4dc-4287-b119-19926b473bac",
+            "65f531cd-165d-4feb-b69f-922398fde6db",
+            "78e95d0e-4ea5-43d1-b0fe-9b3d9be8b3c3",
+            "79d5736c-c8e1-4514-a9ce-e01899beffa9",
+            "812864e5-2682-4d13-bbd4-5c22aba656cd",
+            "82430f58-a332-4d4f-aa99-5c27f888a0e7",
+            "863b2a1d-05f2-4792-beaa-4073e6197141",
+            "8c5b11b7-adfe-4c5d-a3b6-fd7afbf53636",
+            "8e1a07e4-134d-4214-8841-ad2969a584fa",
+            "8ea8b042-3418-4ec9-8cd7-5c71b899a183",
+            "a265bdb4-3c9f-4d0a-bcba-1f0722c8b420",
+            "a289a9b0-6cb9-4d94-b3a3-3ff6dd55e1f7",
+            "a9f91e3c-16d5-484d-92bf-68c526ac9606",
+            "ac770808-e06b-4f11-8c0d-ea2c5ca4ab55",
+            "c3e13154-aeb8-4c3f-a6d3-6fa4f20566df",
+            "cf864eb2-ba2a-4dd8-8b8f-d13602981783",
+            "d9924692-19d1-4185-9e35-b381953c42a3",
+            "eaa18ae1-41b8-4588-bcdb-96192e5a2da8",
+            "ee850727-ccde-4173-8b16-41e7be8065ca",
+            "f27226de-570a-4c1e-84b5-dc419fe9c32e",
+            "f37e014f-c25d-4bcf-a5de-af804d32bd40"
+          ]
+        }
+      ],
+      "device": "cpu",
+      "explicitTarget": false,
+      "files": {
+        "README.md": "cf46f74c7b6850f1d5cbe406028324d8798148726016d46a69a365b4a2d3e89f",
+        "added_tokens.json": "909e96cb32d92ce728a01bc99850cbba26196d74115c17ebeb019275412588f2",
+        "config.json": "eec82c5ab66e16df12a9a212e68ac011779927c2536cf9078658e35d85f0c67a",
+        "model.safetensors": "1a2412ef99bd74bcd3c2a246fa1e48581f8889a1300c9051974741314fc042f3",
+        "preprocessor_config.json": "8454179ba95e2ad22947835aad7b45862a601fc0055ab88bf1ee70892d3aea60",
+        "special_tokens_map.json": "b6d346be366a7d1d48332dbc9fdf3bf8960b5d879522b7799ddba59e76237ee3",
+        "tokenizer.json": "d241a60d5e8f04cc1b2b3e9ef7a4921b27bf526d9f6050ab90f9267a1f9e5c66",
+        "tokenizer_config.json": "d40ab645b68211910b9170d22433d43186a6ec8ee6fd10ba170524b25bf4fb56",
+        "vocab.txt": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3"
+      },
+      "longestEdge": 1024,
+      "manifestPath": "/tmp/fixgo-hybrid-smoke-nyxittyx/grounding-scopes/0d7233b7a69e82520a32c56b44d526500c55e7eb1e3018f63ab5dcf1553502bc.json",
+      "manifestSha256": "5bf3d64b03027416364b0da0635a2299fa64bee43e18c59af6c6e821ac5e87d4",
+      "maxUnscopedObjects": 8,
+      "maximumSignObjectAreaRatio": 0.8,
+      "modelDirectory": "/home/vanvi/.cache/huggingface/hub/models--IDEA-Research--grounding-dino-tiny/snapshots/a2bb814dd30d776dcf7e30523b00659f4f141c71",
+      "nestedObjectContainment": 0.95,
+      "nmsIou": 0.5,
+      "objectDetector": {
+        "confidence": 0.25,
+        "path": "/home/vanvi/Work/datasetai/03-experiments/ai01-task04a-strict-v2/training/weights/best.pt",
+        "sha256": "898293e8446b7ad08d52132a8a95525ea967474f1ce7d49dce40b97a0bdda9fd"
+      },
+      "objectThreshold": 0.3,
+      "path": "/home/vanvi/.cache/huggingface/hub/models--IDEA-Research--grounding-dino-tiny/snapshots/a2bb814dd30d776dcf7e30523b00659f4f141c71/model.safetensors",
+      "promptCatalogSha256": "ae965905126ed062873898169c3c2e4f80eefc1c86dc58b7e3cb67ec579bfe21",
+      "repository": "IDEA-Research/grounding-dino-tiny",
+      "revision": "a2bb814dd30d776dcf7e30523b00659f4f141c71",
+      "schema": "fixgo.studio.grounding-dino.v1",
+      "scopeApproval": "Search hints only; no approved fault/service diagnosis rules.",
+      "scopeBuilderSha256": "cf0ddfc588e27b17771902d8f73f8adb29d2977fbe2e9addc9ffc17ba4198205",
+      "scopeMode": "catalog-adaptive",
+      "sha256": "1a2412ef99bd74bcd3c2a246fa1e48581f8889a1300c9051974741314fc042f3",
+      "shortestEdge": 640,
+      "signThreshold": 0.3,
+      "task": "detect",
+      "textThreshold": 0.2,
+      "unsupportedTargetIds": [
+        "53a59ef2-9ffe-4206-940f-bc364951b917"
+      ],
+      "warning": "Open-vocabulary observable-sign proposals; no approved fault or service diagnosis."
+    }
+  },
+  "progress": {
+    "cacheHits": 0,
+    "cpuThreads": 2,
+    "elapsedSeconds": 16.264,
+    "errors": [],
+    "exactDuplicateReuse": 0,
+    "failed": 0,
+    "finishedAt": "2026-11-25T11:52:18.160166+00:00",
+    "groundTruthCreated": 0,
+    "lastImageId": "zip-35238263b8d8ad54",
+    "peakRssMiB": 2560.43,
+    "processed": 1,
+    "profileHash": "957950aab7b0607315d47ca2ca53bbfe5d0d14acc5f1689e3bae9fd64df9d6d5",
+    "requested": 1,
+    "rssLimitMiB": 3072,
+    "runId": "auto-f9ec8835c9284744",
+    "startedAt": "2026-11-25T11:52:01.896203+00:00",
+    "status": "COMPLETED",
+    "succeeded": 1,
+    "summary": {
+      "duplicateOrGroupCandidates": 0,
+      "failed": 0,
+      "hasSignModel": true,
+      "humanVerifiedCreated": 0,
+      "needsReview": 1,
+      "proposed": 0,
+      "requested": 1
+    }
+  },
+  "boxes": [
+    {
+      "annotationSource": "AI",
+      "id": "grounding-0",
+      "kind": "object",
+      "label": "ca1e389e-6302-4a19-a086-5c815a836473",
+      "model": "existing strict-v2 YOLO",
+      "modelVersion": "898293e8446b7ad08d52132a8a95525ea967474f1ce7d49dce40b97a0bdda9fd",
+      "objectId": null,
+      "score": 0.42970991134643555,
+      "scoreType": "YOLO confidence, not calibrated probability",
+      "xyxy": [
+        0.3457133173942566,
+        0.17046813666820526,
+        0.6856526136398315,
+        0.9286826252937317
+      ]
+    },
+    {
+      "annotationSource": "AI",
+      "id": "grounding-2",
+      "kind": "sign",
+      "label": "broken_part",
+      "modelVersion": "1a2412ef99bd74bcd3c2a246fa1e48581f8889a1300c9051974741314fc042f3",
+      "objectId": "grounding-0",
+      "prompt": "broken part. broken component.",
+      "score": 0.35942187905311584,
+      "scoreType": "Grounding DINO text score, not calibrated defect probability",
+      "xyxy": [
+        0.4103181111878453,
+        0.5211779627791207,
+        0.5846956790481483,
+        0.7508794457872928
+      ]
+    },
+    {
+      "annotationSource": "AI",
+      "id": "grounding-4",
+      "kind": "sign",
+      "label": "burn_mark",
+      "modelVersion": "1a2412ef99bd74bcd3c2a246fa1e48581f8889a1300c9051974741314fc042f3",
+      "objectId": "grounding-0",
+      "prompt": "burn mark. scorched plastic. charred area.",
+      "score": 0.4057827591896057,
+      "scoreType": "Grounding DINO text score, not calibrated defect probability",
+      "xyxy": [
+        0.41038669143592454,
+        0.5194553775681975,
+        0.5872995787562586,
+        0.7525015421774286
+      ]
+    }
+  ],
+  "signIssues": [
+    "SIGN_OBJECT_ASSOCIATION_UNCERTAIN"
+  ],
+  "searchScope": {
+    "objectCountAfterSuppression": 1,
+    "scopeWarnings": [
+      "TARGET_SCOPE_USES_OBJECT_DETECTOR"
+    ],
+    "signCodesSearched": [
+      "broken_part",
+      "burn_mark",
+      "crack"
+    ],
+    "targetIdsSearched": [
+      "ca1e389e-6302-4a19-a086-5c815a836473"
+    ]
+  },
+  "limitations": [
+    "One development image; no independent accuracy measurement",
+    "broken_part overlaps burn_mark and needs review",
+    "Other candidates failed association; not all sign proposals accepted",
+    "No human revisions or raw source files changed"
+  ]
+}

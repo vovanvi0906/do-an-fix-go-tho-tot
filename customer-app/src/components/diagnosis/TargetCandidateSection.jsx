@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, TextInput } from 'react-native';
+
+const searchable = value => String(value || '').toLocaleLowerCase('vi').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd');
 
 export default function TargetCandidateSection({ result, onSelectTarget, onSelectCategory, busy }) {
   const [showPicker, setShowPicker] = useState(false);
+  const [query, setQuery] = useState('');
+  const available = (result?.availableTargets || []).filter(t => searchable(`${t.name} ${t.slug || ''}`).includes(searchable(query.trim())));
   const target = (result?.suggestedTargetName ? {
     targetId: result.suggestedTargetId, targetName: result.suggestedTargetName,
   } : null);
@@ -22,7 +26,7 @@ export default function TargetCandidateSection({ result, onSelectTarget, onSelec
               <Text style={{ color: '#FFFFFF', fontWeight: '600' }}>Đúng thiết bị này</Text>
             </Pressable>
             <Pressable nativeID="btn-change-target" disabled={busy}
-              onPress={() => setShowPicker(true)}
+              onPress={() => { setQuery(''); setShowPicker(true); }}
               style={{ padding: 10, backgroundColor: '#E2E8F0', borderRadius: 6 }}>
               <Text style={{ color: '#475569' }}>Không đúng thiết bị</Text>
             </Pressable>
@@ -32,12 +36,26 @@ export default function TargetCandidateSection({ result, onSelectTarget, onSelec
 
       {(showPicker || !target) && (
         <View style={{ marginTop: 8 }}>
+          {!target && !!result?.aiTargetOptions?.length && <View nativeID="ai-target-options" style={{ marginBottom: 10 }}>
+            <Text style={{ fontWeight: '600', marginBottom: 6 }}>AI chưa chắc chắn. Ảnh có thể là một trong các thiết bị sau:</Text>
+            {result.aiTargetOptions.map((t) => (
+              <Pressable key={t.id} nativeID={`ai-target-option-${t.id}`} disabled={busy}
+                onPress={() => { setShowPicker(false); onSelectTarget(t.id); }}
+                style={{ padding: 12, marginVertical: 3, backgroundColor: '#F0F9FF', borderColor: '#BAE6FD', borderWidth: 1, borderRadius: 6 }}>
+                <Text style={{ color: '#0C4A6E', fontSize: 16, fontWeight: '600' }}>{t.name}</Text>
+              </Pressable>
+            ))}
+            <Text style={{ marginTop: 4 }}>Không đúng? Tìm thiết bị khác bên dưới.</Text>
+          </View>}
           <Text style={{ fontWeight: '600', marginBottom: 6 }}>Chọn thiết bị chính xác:</Text>
-          {result?.availableTargets?.map((t) => (
+          <TextInput accessibilityLabel="Tìm thiết bị" placeholder="Gõ tên thiết bị, có hoặc không dấu" value={query} onChangeText={setQuery} editable={!busy}
+            style={{ fontSize: 16, padding: 12, borderWidth: 1, borderColor: '#CBD5E1', borderRadius: 8, marginBottom: 8 }} />
+          {!available.length && <Text>Không tìm thấy thiết bị phù hợp. Bạn có thể đổi danh mục bên dưới.</Text>}
+          {available.map((t) => (
             <Pressable key={t.id} nativeID={`target-choice-${t.id}`} disabled={busy}
               onPress={() => { setShowPicker(false); onSelectTarget(t.id); }}
               style={{ padding: 10, marginVertical: 3, backgroundColor: '#F1F5F9', borderRadius: 6 }}>
-              <Text style={{ color: '#1E293B' }}>{t.name}</Text>
+              <Text style={{ color: '#1E293B', fontSize: 16 }}>{t.name}</Text>
             </Pressable>
           ))}
         </View>

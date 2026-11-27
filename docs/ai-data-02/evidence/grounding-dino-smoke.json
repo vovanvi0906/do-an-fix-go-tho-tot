@@ -1,0 +1,356 @@
+{
+  "kind": "real_grounding_dino_development_smoke_not_accuracy",
+  "repository": "IDEA-Research/grounding-dino-tiny",
+  "revision": "a2bb814dd30d776dcf7e30523b00659f4f141c71",
+  "state": "/tmp/fixgo-grounding-smoke-r1ukrcli",
+  "runId": "auto-3c18a31c0f734eec",
+  "manifest": "/home/vanvi/.local/share/fixgo-models/grounding-dino-tiny/manifest.json",
+  "profileHash": "0e90bfa0d1b5f85d36cdfffeeeafb23a1a490762811e78d5cef4845f1e9fc179",
+  "modelProfile": {
+    "adapterSha256": "04b0d3d6b41ec3fa2f8642bef248114a849045b67b04619d598f1f45d0c6c136",
+    "adapterVersion": "grounding-dino-v1",
+    "catalogSha256": "aa8d65afc97b6a11e2676c950d52fd5a4ca1de9cdb862570ee545974d239b277",
+    "cpuThreads": 2,
+    "groundingAdapterSha256": "e41fd84f301db2d3363c265fd415f96ce0e95a0e65d725c63fb6534fa7c478a7",
+    "models": {
+      "groundingDino": {
+        "path": "/home/vanvi/.cache/huggingface/hub/models--IDEA-Research--grounding-dino-tiny/snapshots/a2bb814dd30d776dcf7e30523b00659f4f141c71/model.safetensors",
+        "sha256": "1a2412ef99bd74bcd3c2a246fa1e48581f8889a1300c9051974741314fc042f3"
+      }
+    },
+    "ontologySha256": "5c9817cd3e3594aa9ae2c104390f078fbc59df28d6038410f62c10b94f3c2e78",
+    "packageVersions": {
+      "torch": "2.14.1",
+      "transformers": "5.20.2"
+    },
+    "profileHash": "0e90bfa0d1b5f85d36cdfffeeeafb23a1a490762811e78d5cef4845f1e9fc179",
+    "runtimeEngine": "grounding-dino",
+    "schema": "fixgo.studio.model-profile.v1",
+    "signDetector": {
+      "backend": "grounding-dino",
+      "classes": [
+        {
+          "kind": "object",
+          "name": "object:o-cam-dien",
+          "prompts": [
+            "electrical outlet",
+            "wall socket"
+          ],
+          "targetId": "ca1e389e-6302-4a19-a086-5c815a836473"
+        },
+        {
+          "code": "burn_mark",
+          "kind": "sign",
+          "name": "sign:burn_mark",
+          "prompts": [
+            "burn mark",
+            "scorched plastic",
+            "charred area"
+          ],
+          "targetId": "ca1e389e-6302-4a19-a086-5c815a836473"
+        }
+      ],
+      "device": "cpu",
+      "files": {
+        "README.md": "cf46f74c7b6850f1d5cbe406028324d8798148726016d46a69a365b4a2d3e89f",
+        "added_tokens.json": "909e96cb32d92ce728a01bc99850cbba26196d74115c17ebeb019275412588f2",
+        "config.json": "eec82c5ab66e16df12a9a212e68ac011779927c2536cf9078658e35d85f0c67a",
+        "model.safetensors": "1a2412ef99bd74bcd3c2a246fa1e48581f8889a1300c9051974741314fc042f3",
+        "preprocessor_config.json": "8454179ba95e2ad22947835aad7b45862a601fc0055ab88bf1ee70892d3aea60",
+        "special_tokens_map.json": "b6d346be366a7d1d48332dbc9fdf3bf8960b5d879522b7799ddba59e76237ee3",
+        "tokenizer.json": "d241a60d5e8f04cc1b2b3e9ef7a4921b27bf526d9f6050ab90f9267a1f9e5c66",
+        "tokenizer_config.json": "d40ab645b68211910b9170d22433d43186a6ec8ee6fd10ba170524b25bf4fb56",
+        "vocab.txt": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3"
+      },
+      "longestEdge": 1024,
+      "manifestPath": "/home/vanvi/.local/share/fixgo-models/grounding-dino-tiny/manifest.json",
+      "manifestSha256": "b1910985c2b4836cd108f231dae8ece822850cb045535e11ebb9c358118fc78b",
+      "maximumSignObjectAreaRatio": 0.8,
+      "modelDirectory": "/home/vanvi/.cache/huggingface/hub/models--IDEA-Research--grounding-dino-tiny/snapshots/a2bb814dd30d776dcf7e30523b00659f4f141c71",
+      "nestedObjectContainment": 0.95,
+      "nmsIou": 0.5,
+      "objectThreshold": 0.3,
+      "path": "/home/vanvi/.cache/huggingface/hub/models--IDEA-Research--grounding-dino-tiny/snapshots/a2bb814dd30d776dcf7e30523b00659f4f141c71/model.safetensors",
+      "repository": "IDEA-Research/grounding-dino-tiny",
+      "revision": "a2bb814dd30d776dcf7e30523b00659f4f141c71",
+      "schema": "fixgo.studio.grounding-dino.v1",
+      "sha256": "1a2412ef99bd74bcd3c2a246fa1e48581f8889a1300c9051974741314fc042f3",
+      "shortestEdge": 640,
+      "signThreshold": 0.3,
+      "task": "detect",
+      "textThreshold": 0.2,
+      "warning": "Open-vocabulary proposals only; burn localization is unvalidated, not human ground truth."
+    }
+  },
+  "firstRun": {
+    "cacheHits": 0,
+    "cpuThreads": 2,
+    "elapsedSeconds": 28.516,
+    "errors": [],
+    "exactDuplicateReuse": 0,
+    "failed": 0,
+    "finishedAt": "2026-11-25T10:48:01.935972+00:00",
+    "groundTruthCreated": 0,
+    "lastImageId": "img-10576",
+    "peakRssMiB": 2511.89,
+    "processed": 3,
+    "profileHash": "0e90bfa0d1b5f85d36cdfffeeeafb23a1a490762811e78d5cef4845f1e9fc179",
+    "requested": 3,
+    "rssLimitMiB": 3072,
+    "runId": "auto-3c18a31c0f734eec",
+    "startedAt": "2026-11-25T10:47:33.419384+00:00",
+    "status": "COMPLETED",
+    "succeeded": 3,
+    "summary": {
+      "duplicateOrGroupCandidates": 0,
+      "failed": 0,
+      "hasSignModel": true,
+      "humanVerifiedCreated": 0,
+      "needsReview": 1,
+      "proposed": 2,
+      "requested": 3
+    }
+  },
+  "summary": {
+    "duplicateOrGroupCandidates": 0,
+    "failed": 0,
+    "hasSignModel": true,
+    "humanVerifiedCreated": 0,
+    "needsReview": 1,
+    "proposed": 2,
+    "requested": 3
+  },
+  "records": [
+    {
+      "boxes": [
+        {
+          "annotationSource": "AI",
+          "id": "grounding-0",
+          "kind": "object",
+          "label": "ca1e389e-6302-4a19-a086-5c815a836473",
+          "objectId": null,
+          "xyxy": [
+            0.3156818790330413,
+            0.08915832688136655,
+            0.7031172020000648,
+            0.914966112561867
+          ]
+        },
+        {
+          "annotationSource": "AI",
+          "id": "grounding-2",
+          "kind": "sign",
+          "label": "burn_mark",
+          "objectId": "grounding-0",
+          "xyxy": [
+            0.42559738580693196,
+            0.27623042041645085,
+            0.6072881709146236,
+            0.48891357646682204
+          ]
+        }
+      ],
+      "bucket": "PROPOSED",
+      "cacheHash": "3bf7508de3b06e3d5ac6adb400256e3b76cc65a490f1fcaa0f6b7c297b2f3019",
+      "contentHash": "a0b4e222c6a04c1a90e77134afc185dd59f5235d23578dfc71b0d75f382f04a2",
+      "duplicateCandidate": false,
+      "group": {
+        "component": "zip-5194ae4f64c71765",
+        "splitReason": "prior_train_exposure_or_synthetic"
+      },
+      "humanVerified": false,
+      "imageId": "zip-5194ae4f64c71765",
+      "issues": [],
+      "modelProfileHash": "0e90bfa0d1b5f85d36cdfffeeeafb23a1a490762811e78d5cef4845f1e9fc179",
+      "outcome": "UNKNOWN",
+      "representativeId": "zip-5194ae4f64c71765",
+      "reviewStatus": "AI_PROPOSED",
+      "signCoverage": "MODEL_PROPOSED_NOT_VERIFIED",
+      "sourcePath": "/home/vanvi/Downloads/fixgo_suadien_outlet_burnmark_20.zip!/fixgo_suadien_outlet_burnmark_20/images/outlet_burn_005.jpg",
+      "split": "train",
+      "targetCandidates": [
+        {
+          "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+          "confidence": 0.6611769199371338,
+          "model": "Grounding DINO Tiny",
+          "modelVersion": "1a2412ef99bd74bcd3c2a246fa1e48581f8889a1300c9051974741314fc042f3",
+          "provenance": "REAL_OFFLINE_GROUNDING_DINO",
+          "scoreType": "Grounding DINO text score, not calibrated defect probability",
+          "targetId": "ca1e389e-6302-4a19-a086-5c815a836473",
+          "targetName": "Ổ cắm điện"
+        }
+      ],
+      "technicalStatus": "SUCCESS",
+      "warnings": [
+        "SIGN_SPANS_WHOLE_OBJECT",
+        "SYNTHETIC_DEVELOPMENT_ONLY"
+      ]
+    },
+    {
+      "boxes": [
+        {
+          "annotationSource": "AI",
+          "id": "grounding-0",
+          "kind": "object",
+          "label": "ca1e389e-6302-4a19-a086-5c815a836473",
+          "objectId": null,
+          "xyxy": [
+            0.3124476058707053,
+            0.04850220724144474,
+            0.726684486009798,
+            0.9112830961167703
+          ]
+        },
+        {
+          "annotationSource": "AI",
+          "id": "grounding-2",
+          "kind": "sign",
+          "label": "burn_mark",
+          "objectId": "grounding-0",
+          "xyxy": [
+            0.4207798235982821,
+            0.515261149538156,
+            0.6376613385110929,
+            0.7738158505265884
+          ]
+        }
+      ],
+      "bucket": "PROPOSED",
+      "cacheHash": "9f1ffd453e84172ef545bf2e9ede5b415b638b0ae1b52c3e31925870c8bf3503",
+      "contentHash": "ac6b2e6a72539362e37eacb528920059a604d36ee36b0a39c435ec13f55b9735",
+      "duplicateCandidate": false,
+      "group": {
+        "component": "zip-153932400520357e",
+        "splitReason": "prior_train_exposure_or_synthetic"
+      },
+      "humanVerified": false,
+      "imageId": "zip-153932400520357e",
+      "issues": [],
+      "modelProfileHash": "0e90bfa0d1b5f85d36cdfffeeeafb23a1a490762811e78d5cef4845f1e9fc179",
+      "outcome": "UNKNOWN",
+      "representativeId": "zip-153932400520357e",
+      "reviewStatus": "AI_PROPOSED",
+      "signCoverage": "MODEL_PROPOSED_NOT_VERIFIED",
+      "sourcePath": "/home/vanvi/Downloads/fixgo_suadien_outlet_burnmark_20.zip!/fixgo_suadien_outlet_burnmark_20/images/outlet_burn_004.jpg",
+      "split": "train",
+      "targetCandidates": [
+        {
+          "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+          "confidence": 0.6281613111495972,
+          "model": "Grounding DINO Tiny",
+          "modelVersion": "1a2412ef99bd74bcd3c2a246fa1e48581f8889a1300c9051974741314fc042f3",
+          "provenance": "REAL_OFFLINE_GROUNDING_DINO",
+          "scoreType": "Grounding DINO text score, not calibrated defect probability",
+          "targetId": "ca1e389e-6302-4a19-a086-5c815a836473",
+          "targetName": "Ổ cắm điện"
+        }
+      ],
+      "technicalStatus": "SUCCESS",
+      "warnings": [
+        "SIGN_SPANS_WHOLE_OBJECT",
+        "SYNTHETIC_DEVELOPMENT_ONLY"
+      ]
+    },
+    {
+      "boxes": [
+        {
+          "annotationSource": "AI",
+          "id": "grounding-0",
+          "kind": "object",
+          "label": "ca1e389e-6302-4a19-a086-5c815a836473",
+          "objectId": null,
+          "xyxy": [
+            0.17424462391779974,
+            0.24064093369704026,
+            0.29805766619168794,
+            0.48506410305316633
+          ]
+        }
+      ],
+      "bucket": "NEEDS_REVIEW",
+      "cacheHash": "a0b089a6c61281339dcf33ae086c37cbd73a9abde6214b85eae29801e681a1f6",
+      "contentHash": "e62b43bd302c339bf8e7ed0f30c5f8fb29ffaefe975d9c4d852335bd79c836d1",
+      "duplicateCandidate": false,
+      "group": {
+        "component": "img-10576",
+        "splitReason": "prior_evaluation_exposure_development_only"
+      },
+      "humanVerified": false,
+      "imageId": "img-10576",
+      "issues": [
+        "SIGN_OBJECT_ASSOCIATION_UNCERTAIN"
+      ],
+      "modelProfileHash": "0e90bfa0d1b5f85d36cdfffeeeafb23a1a490762811e78d5cef4845f1e9fc179",
+      "outcome": "UNKNOWN",
+      "representativeId": "img-10576",
+      "reviewStatus": "AI_PROPOSED",
+      "signCoverage": "MODEL_PROPOSED_NOT_VERIFIED",
+      "sourcePath": "/home/vanvi/Work/datasetai/01-raw/suadien/train/images/3_outlet01911_png_jpg.rf.e409bccc7da89e86d0e0a9d0717b65fa.jpg",
+      "split": "val",
+      "targetCandidates": [
+        {
+          "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+          "confidence": 0.6924407482147217,
+          "model": "Grounding DINO Tiny",
+          "modelVersion": "1a2412ef99bd74bcd3c2a246fa1e48581f8889a1300c9051974741314fc042f3",
+          "provenance": "REAL_OFFLINE_GROUNDING_DINO",
+          "scoreType": "Grounding DINO text score, not calibrated defect probability",
+          "targetId": "ca1e389e-6302-4a19-a086-5c815a836473",
+          "targetName": "Ổ cắm điện"
+        }
+      ],
+      "technicalStatus": "SUCCESS",
+      "warnings": [
+        "SIGN_SPANS_WHOLE_OBJECT",
+        "NO_SIGN_DETECTED_NOT_A_NORMAL_LABEL"
+      ]
+    }
+  ],
+  "limitations": [
+    "Two synthetic burn examples and one existing dark pilot image; not independent test",
+    "Prompt/threshold and nested-box suppression developed using these examples",
+    "Whole-object sign guesses rejected; uncertain associations retained in review queue",
+    "No source images, human review events, production weights or database changed",
+    "No precision/recall, mAP, or generalization claim"
+  ],
+  "cacheResume": {
+    "cacheHits": 3,
+    "cpuThreads": 2,
+    "elapsedSeconds": 0.002,
+    "errors": [],
+    "exactDuplicateReuse": 0,
+    "failed": 0,
+    "finishedAt": "2026-11-25T10:52:26.221484+00:00",
+    "groundTruthCreated": 0,
+    "lastImageId": "img-10576",
+    "peakRssMiB": 399.67,
+    "processed": 3,
+    "profileHash": "0e90bfa0d1b5f85d36cdfffeeeafb23a1a490762811e78d5cef4845f1e9fc179",
+    "requested": 3,
+    "rssLimitMiB": 3072,
+    "runId": "auto-3c18a31c0f734eec",
+    "startedAt": "2026-11-25T10:52:26.218822+00:00",
+    "status": "COMPLETED",
+    "succeeded": 3,
+    "summary": {
+      "duplicateOrGroupCandidates": 0,
+      "failed": 0,
+      "hasSignModel": true,
+      "humanVerifiedCreated": 0,
+      "needsReview": 1,
+      "proposed": 2,
+      "requested": 3
+    }
+  },
+  "artifactsVerifiedAfterSmoke": {
+    "README.md": true,
+    "added_tokens.json": true,
+    "config.json": true,
+    "model.safetensors": true,
+    "preprocessor_config.json": true,
+    "special_tokens_map.json": true,
+    "tokenizer.json": true,
+    "tokenizer_config.json": true,
+    "vocab.txt": true
+  }
+}

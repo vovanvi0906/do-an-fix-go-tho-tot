@@ -48,6 +48,20 @@ export interface AiDiagnosisResponse {
   confidence: number | null;
   detectedLabels: string[];
   observableSigns?: string[];
+  observableAnalysis?: {
+    status: 'disabled' | 'unavailable' | 'no_detection' | 'proposed';
+    labelStatus: 'AI_UNVERIFIED';
+    modelVersion?: string | null;
+    contextStatus?: 'unsupported_category' | 'category_scoped' | 'unscoped' | null;
+    releaseSha256?: string | null;
+    degradedModels?: string[];
+    unavailableSigns?: Array<{ code: string; name: string; reason: 'insufficient_development_quality' }>;
+    evaluationStatus?: 'development_only' | 'limited_scope_evaluated';
+    evaluationSampleCount?: number;
+    absenceMeans: 'NOT_DETECTED_DOES_NOT_MEAN_NORMAL';
+    coverage?: Array<{ categorySlug: string; status: 'experimental_sign_proposals' | 'no_domain_dataset'; signCodes: string[] }>;
+    proposals: Array<{ code: string; name: string; definition: string; confidence: number; xyxy: number[]; objectId: null; modelId?: string; geometryType?: 'visible_region' | 'device_context'; relatedServiceGroups?: string[] }>;
+  };
   reportedSymptoms?: string[];
   needsMoreInfo?: boolean;
   decisionSource?: string;
@@ -58,10 +72,11 @@ export interface AiDiagnosisResponse {
   notes: string;
   imageUrl: string;
   requiresManualSelection: boolean;
-  questions: Array<{ id: string; label: string; options: Array<{ value: string; label: string }> }>;
+  questions: Array<{ id: string; label: string; options: Array<{ value: string; label: string; code?: string; kind?: 'VISUAL_OBSERVABLE' | 'USER_REPORTED' | 'REQUIRES_TECHNICIAN_CHECK' }> }>;
   categoryCandidates?: CandidateItem[];
   targetCandidates?: TargetCandidateItem[];
   availableCategories: Array<{ id: string; name: string; basePrice: number }>;
+  aiTargetOptions?: Array<{ id: string; name: string; slug?: string }>;
   availableTargets?: Array<{ id: string; name: string; slug?: string; categoryId: string }>;
   availableServices: Array<{ id: string; name: string; basePrice: number; unit?: string }>;
   suggestedServices?: SuggestedServiceItem[];

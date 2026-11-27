@@ -1,0 +1,77 @@
+{
+  "updatedAtUtc": "2026-11-26T12:40:21.011833+00:00",
+  "modelVersion": "fixgo-multiservice-observer-v2-tested",
+  "releaseSha256": "3720bb9532cb3d9ad3d4b623b76eb7ca398720a3ef6701c4446cb4a99bfaa4c7",
+  "retainedModel": "v2",
+  "candidateV3Promoted": false,
+  "operationalBehaviorUnchanged": true,
+  "metadataOnlyUpdate": true,
+  "productionValidated": false,
+  "cases": 91,
+  "suiteCounts": {
+    "clean": 27,
+    "watermarked_diagnostic_only": 5,
+    "reserved_crack_source_mask": 59
+  },
+  "reservedCrackMetrics": {
+    "TP": 50,
+    "FP": 22,
+    "FN": 9,
+    "precision": 0.6944444444444444,
+    "recall": 0.847457627118644,
+    "F1": 0.7633587786259542,
+    "F0_5": 0.7204610951008645,
+    "negativeScopeImages": 0,
+    "negativeScopeImagesWithAlerts": 0
+  },
+  "cleanScopedMetrics": {
+    "TP": 3,
+    "FP": 4,
+    "FN": 19,
+    "precision": 0.42857142857142855,
+    "recall": 0.13636363636363635,
+    "F1": 0.20689655172413793,
+    "F0_5": 0.3,
+    "negativeScopeImages": 50,
+    "negativeScopeImagesWithAlerts": 1
+  },
+  "sourceReport": "/home/vanvi/Work/datasetai/04-training/multiservice-challenge-v1/report.json",
+  "sourceReportSha256": "b8ac2c5062cdd454f5561c29a3b66376d0d6d9565e30cee8b6b1334a37a7174a",
+  "predictionsSha256": "ca3a79c24c1f120ecd171cf89e967c1fa8c90b34cb2452fa0f4b17be734a18e2",
+  "testExposed": true,
+  "limitations": [
+    "AI review of source-only images before observer inference, not expert ground truth.",
+    "Some boxes are native aggregate region/device envelopes; localization proxy.",
+    "CLIP source screening may previously have seen these images; this is not fully externally independent data.",
+    "Stock-watermarked images are diagnostic-only and never training data or primary clean test.",
+    "Unannotated classes are not treated as negatives.",
+    "All test images become exposed after this evaluation; do not tune thresholds using their scores.",
+    "Reserved test has crack positives only, no independently collected normal images.",
+    "Same-source/family duplicate screening can miss related scenes.",
+    "Very few clean positives for some signs; separate watermarked diagnostic scores."
+  ],
+  "observedAtUtc": "2026-11-26T12:46:50.548803+00:00",
+  "activeDefault": "fixgo-multiservice-observer-v2-tested",
+  "aiService": "http://127.0.0.1:8000",
+  "tests": {
+    "qualityScoring": 5,
+    "aiServiceRegression": 37,
+    "backend": 72,
+    "customerUI": 14,
+    "backendBuild": "194 files compiled",
+    "developmentASGISmoke": 5,
+    "developmentLiveSmokes": 5,
+    "backendReplayLiveResponses": 5
+  },
+  "mainCategoryAndDeviceWeightsUnchanged": true,
+  "reservedDataBytesUnchanged": true,
+  "reservedTestUnexposed": false,
+  "qualityScoringNote": "All 91 predictions completed once. Fixed summary handling of zero counters and summarized the saved journal without re-inference.",
+  "evidence": {
+    "qualityReport": "/home/vanvi/Work/datasetai/04-training/multiservice-challenge-v1/report.json",
+    "perSignCSV": "/home/vanvi/Work/datasetai/04-training/multiservice-challenge-v1/per-sign-results.csv",
+    "figure": "/home/vanvi/Work/datasetai/04-training/multiservice-challenge-v1/quality-comparison.png",
+    "liveSmoke": "/home/vanvi/Work/datasetai/04-training/multiservice-observer-v2-tested/live-smoke.json",
+    "backendReplay": "/home/vanvi/Work/datasetai/04-training/multiservice-observer-v2-tested/backend-live-smoke.json"
+  }
+}

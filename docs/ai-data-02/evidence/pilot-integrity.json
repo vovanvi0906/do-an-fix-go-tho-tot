@@ -1,0 +1,21 @@
+{
+  "images": 50,
+  "distinctComponents": 50,
+  "rehashedSourceImagesUnchanged": 50,
+  "modelHashesMatchAfterInference": {
+    "classifier": true,
+    "clip": true,
+    "detector": true
+  },
+  "humanVerified": 0,
+  "independentTest": false,
+  "reviewRoleCounts": {
+    "GENERAL_OBJECT_REVIEW": 27,
+    "HARD_OR_SCOPE_REVIEW_CANDIDATE": 16,
+    "NORMAL_APPEARANCE_CANDIDATE_NOT_VERIFIED": 3,
+    "SOURCE_FAULT_CANDIDATE_NOT_VERIFIED": 9
+  },
+  "uncertain": 14,
+  "objectBoxes": 59,
+  "imagesWithTargetCandidates": 47
+}

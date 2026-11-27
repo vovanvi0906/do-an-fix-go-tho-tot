@@ -1,0 +1,11 @@
+{
+  "selected_entries": 22680,
+  "raw_entries": 21437,
+  "raw_ids_unique": 21437,
+  "all_image_hashes_rechecked_after": true,
+  "source_images_changed": [],
+  "ground_truth_approved": false,
+  "independent_test_released": 0,
+  "normalization_policy": "Conservative metadata only, no source geometry rewrite",
+  "practical_object_bbox_candidates": 11665
+}

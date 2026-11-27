@@ -1,0 +1,39 @@
+[
+  {
+    "path": "/home/vanvi/Work/datasetai/06-benchmarks/ai01-pilot-v1/reviews/events.jsonl",
+    "events": 1,
+    "sha256": "2b9a105f275f17a3d51ebcd09e232a460fa9ebce60d063410632ae785d3170bf",
+    "kinds": {
+      "register": 1
+    },
+    "statusesOfEventsNotUniqueImages": {
+      "not_declared": 1
+    },
+    "caveat": "Counts events, not unique reviewed/exportable images; no account identities included"
+  },
+  {
+    "path": "/home/vanvi/Work/datasetai/06-benchmarks/ai01-admin-v1/reviews/bbox-quality-v1/events.jsonl",
+    "events": 6,
+    "sha256": "d38b93e9a932e9d1235317ef016fb3af932e1eb2393a9c789475bed58155f6ce",
+    "kinds": {
+      "bbox_revision": 6
+    },
+    "statusesOfEventsNotUniqueImages": {
+      "draft": 5,
+      "confirmed": 1
+    },
+    "caveat": "Counts events, not unique reviewed/exportable images; no account identities included"
+  },
+  {
+    "path": "/home/vanvi/Work/datasetai/06-benchmarks/ai01-admin-v1/reviews/fast-label-development/events.jsonl",
+    "events": 2,
+    "sha256": "f5f882da04ba031538ad302d69c74b8f048fbd1d02c17ae20cd747a9c73271a2",
+    "kinds": {
+      "null": 2
+    },
+    "statusesOfEventsNotUniqueImages": {
+      "rejected": 2
+    },
+    "caveat": "Counts events, not unique reviewed/exportable images; no account identities included"
+  }
+]

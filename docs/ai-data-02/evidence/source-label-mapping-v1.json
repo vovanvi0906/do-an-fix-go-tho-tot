@@ -1,0 +1,537 @@
+{
+  "catalogCapturedAt": "2026-11-27T07:12:19.255Z",
+  "source": "local PostgreSQL read-only",
+  "counts": {
+    "categories": 6,
+    "targets": 70,
+    "services": 693
+  },
+  "results": [
+    {
+      "sourceLabel": "Bathtub",
+      "status": "unsupported",
+      "services": [],
+      "targets": [],
+      "question": null,
+      "requiresCustomerConfirmation": true,
+      "mappingVersion": "fixgo.source-label-service-mapping.v1"
+    },
+    {
+      "sourceLabel": "Clogged Drain",
+      "status": "confirm_context",
+      "services": [
+        {
+          "id": "326dd83f-f690-4f85-9229-96c52d543e37",
+          "name": "Thông tắc phễu thoát sàn",
+          "slug": "thong-tac-pheu-thoat-san",
+          "targetId": "3a9061ae-55b0-4130-b48c-7b6f1c281247",
+          "categoryId": "2a367f64-e8b2-4b94-8227-f5058c842af8",
+          "basePrice": "150000",
+          "unit": "điểm"
+        },
+        {
+          "id": "67d739f0-012e-42f0-bceb-b8e19ca44883",
+          "name": "Thông tắc ống thoát nước",
+          "slug": "thong-tac-ong-thoat-nuoc",
+          "targetId": "f27226de-570a-4c1e-84b5-dc419fe9c32e",
+          "categoryId": "2a367f64-e8b2-4b94-8227-f5058c842af8",
+          "basePrice": "150000",
+          "unit": "điểm"
+        },
+        {
+          "id": "824ceac4-511d-426e-b47c-df1bc0a46a3b",
+          "name": "Thông tắc đường cống",
+          "slug": "thong-tac-duong-cong",
+          "targetId": "d9924692-19d1-4185-9e35-b381953c42a3",
+          "categoryId": "2a367f64-e8b2-4b94-8227-f5058c842af8",
+          "basePrice": "150000",
+          "unit": "điểm"
+        },
+        {
+          "id": "e3dfe74b-78b9-40f8-8ef3-502f999df5ed",
+          "name": "Thông tắc lavabo / chậu rửa",
+          "slug": "thong-tac-lavabo-chau-rua",
+          "targetId": "4f2dd034-f575-49b6-a913-cea3a620b618",
+          "categoryId": "2a367f64-e8b2-4b94-8227-f5058c842af8",
+          "basePrice": "150000",
+          "unit": "điểm"
+        }
+      ],
+      "targets": [
+        {
+          "id": "3a9061ae-55b0-4130-b48c-7b6f1c281247",
+          "name": "Phễu thoát sàn / Khu vực phòng tắm"
+        },
+        {
+          "id": "4f2dd034-f575-49b6-a913-cea3a620b618",
+          "name": "Lavabo / Chậu rửa / Bồn rửa"
+        },
+        {
+          "id": "d9924692-19d1-4185-9e35-b381953c42a3",
+          "name": "Bể tự hoại / Hố ga / Cống thoát"
+        },
+        {
+          "id": "f27226de-570a-4c1e-84b5-dc419fe9c32e",
+          "name": "Đường ống cấp / thoát nước"
+        }
+      ],
+      "question": "Chỗ thoát nước bị tắc là phễu sàn, chậu rửa, ống thoát hay cống?",
+      "requiresCustomerConfirmation": true,
+      "mappingVersion": "fixgo.source-label-service-mapping.v1"
+    },
+    {
+      "sourceLabel": "Clogged Toilet",
+      "status": "suggest",
+      "services": [
+        {
+          "id": "ffc8c9d2-30f6-4201-9536-a86a685eae76",
+          "name": "Thông tắc bồn cầu",
+          "slug": "thong-tac-bon-cau",
+          "targetId": "78e95d0e-4ea5-43d1-b0fe-9b3d9be8b3c3",
+          "categoryId": "2a367f64-e8b2-4b94-8227-f5058c842af8",
+          "basePrice": "150000",
+          "unit": "điểm"
+        }
+      ],
+      "targets": [
+        {
+          "id": "78e95d0e-4ea5-43d1-b0fe-9b3d9be8b3c3",
+          "name": "Bồn cầu / Két nước"
+        }
+      ],
+      "question": null,
+      "requiresCustomerConfirmation": true,
+      "mappingVersion": "fixgo.source-label-service-mapping.v1"
+    },
+    {
+      "sourceLabel": "Dirty Air Filter",
+      "status": "confirm_context",
+      "services": [
+        {
+          "id": "538c4c37-07b7-4faa-beea-2b63dc30dfd6",
+          "name": "Vệ sinh máy lạnh âm trần",
+          "slug": "ve-sinh-may-lanh-am-tran",
+          "targetId": "3d946ff9-d116-4d07-9f38-c175669f74ed",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        },
+        {
+          "id": "ec3baa05-0022-4ee2-a0c5-aff4b4bfc95c",
+          "name": "Vệ sinh máy lạnh treo tường",
+          "slug": "ve-sinh-may-lanh-treo-tuong",
+          "targetId": "3d946ff9-d116-4d07-9f38-c175669f74ed",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        }
+      ],
+      "targets": [
+        {
+          "id": "3d946ff9-d116-4d07-9f38-c175669f74ed",
+          "name": "Máy lạnh / Điều hòa"
+        }
+      ],
+      "question": "Bộ lọc này thuộc thiết bị nào? Nếu là máy lạnh, đó là loại treo tường hay âm trần?",
+      "requiresCustomerConfirmation": true,
+      "mappingVersion": "fixgo.source-label-service-mapping.v1"
+    },
+    {
+      "sourceLabel": "Improper wiring for water heater",
+      "status": "confirm_context",
+      "services": [
+        {
+          "id": "a3e271f7-9c70-4575-acd2-020db254137f",
+          "name": "Kiểm tra an toàn điện và tiếp địa",
+          "slug": "kiem-tra-an-toan-dien-va-tiep-dia",
+          "targetId": "8c5b11b7-adfe-4c5d-a3b6-fd7afbf53636",
+          "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+          "basePrice": "120000",
+          "unit": "máy"
+        }
+      ],
+      "targets": [
+        {
+          "id": "8c5b11b7-adfe-4c5d-a3b6-fd7afbf53636",
+          "name": "Bình nóng lạnh điện"
+        }
+      ],
+      "question": "Bạn muốn đặt kiểm tra an toàn điện và tiếp địa cho bình nóng lạnh điện?",
+      "requiresCustomerConfirmation": true,
+      "mappingVersion": "fixgo.source-label-service-mapping.v1"
+    },
+    {
+      "sourceLabel": "Improper wiring on panel box",
+      "status": "confirm_context",
+      "services": [
+        {
+          "id": "3f8a3563-ea71-4611-bc0f-65ae335dea67",
+          "name": "Bảo trì tủ điện",
+          "slug": "bao-tri-tu-dien",
+          "targetId": "470acb27-41b1-4d36-9ee3-84b9bbc857de",
+          "categoryId": "4d397d29-ec22-4eae-88ea-8e411e04bdb3",
+          "basePrice": "100000",
+          "unit": "điểm"
+        }
+      ],
+      "targets": [
+        {
+          "id": "470acb27-41b1-4d36-9ee3-84b9bbc857de",
+          "name": "Tủ điện / Bảng điện"
+        }
+      ],
+      "question": "Bạn muốn đặt bảo trì và kiểm tra tủ điện?",
+      "requiresCustomerConfirmation": true,
+      "mappingVersion": "fixgo.source-label-service-mapping.v1"
+    },
+    {
+      "sourceLabel": "Laundry Units",
+      "status": "choose_need",
+      "services": [
+        {
+          "id": "0bc77866-2219-49c7-8d2c-4e91e924ab2a",
+          "name": "Bảo dưỡng máy sấy",
+          "slug": "bao-duong-may-say",
+          "targetId": "1746c918-2fb7-41ac-a111-5c3e807616bf",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        },
+        {
+          "id": "249acb3c-1e2a-4f6c-9f32-267abb790a9f",
+          "name": "Sửa cửa / khóa cửa máy giặt",
+          "slug": "sua-cua-khoa-cua-may-giat",
+          "targetId": "eaa18ae1-41b8-4588-bcdb-96192e5a2da8",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        },
+        {
+          "id": "29088e59-3a7b-4e32-af4a-fc4fba4dbf97",
+          "name": "Sửa cửa / công tắc cửa",
+          "slug": "sua-cua-cong-tac-cua",
+          "targetId": "1746c918-2fb7-41ac-a111-5c3e807616bf",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        },
+        {
+          "id": "2f89aec2-8460-4ed3-a4c5-5a9d5c690584",
+          "name": "Sửa máy giặt không quay lồng",
+          "slug": "sua-may-giat-khong-quay-long",
+          "targetId": "eaa18ae1-41b8-4588-bcdb-96192e5a2da8",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        },
+        {
+          "id": "3a5f14fa-c059-4819-ae5b-a907c5158d3f",
+          "name": "Kiểm tra dây đai / con lăn",
+          "slug": "kiem-tra-day-dai-con-lan",
+          "targetId": "1746c918-2fb7-41ac-a111-5c3e807616bf",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        },
+        {
+          "id": "3ef99885-8979-410b-85c6-fdb5d98a5e84",
+          "name": "Sửa máy sấy không nóng",
+          "slug": "sua-may-say-khong-nong",
+          "targetId": "1746c918-2fb7-41ac-a111-5c3e807616bf",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        },
+        {
+          "id": "493a632b-7047-468c-b836-dbbe3051327d",
+          "name": "Sửa chức năng sấy của máy giặt sấy",
+          "slug": "sua-chuc-nang-say-cua-may-giat-say",
+          "targetId": "eaa18ae1-41b8-4588-bcdb-96192e5a2da8",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        },
+        {
+          "id": "4c0a9108-53d1-4867-b103-74ea9b9826ee",
+          "name": "Sửa bơm xả",
+          "slug": "sua-bom-xa",
+          "targetId": "eaa18ae1-41b8-4588-bcdb-96192e5a2da8",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        },
+        {
+          "id": "5d0c416f-ef63-4d3d-bd89-aacc6315ca4e",
+          "name": "Vệ sinh lồng giặt cửa trên",
+          "slug": "ve-sinh-long-giat-cua-tren",
+          "targetId": "eaa18ae1-41b8-4588-bcdb-96192e5a2da8",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        },
+        {
+          "id": "66edd4d7-5f36-4e4f-b4fd-4f6a26b27ef6",
+          "name": "Sửa máy giặt rò nước",
+          "slug": "sua-may-giat-ro-nuoc",
+          "targetId": "eaa18ae1-41b8-4588-bcdb-96192e5a2da8",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        },
+        {
+          "id": "71cf0b05-5caf-468d-9c84-c8f6c7811068",
+          "name": "Lắp đặt / di dời máy giặt",
+          "slug": "lap-dat-di-doi-may-giat",
+          "targetId": "eaa18ae1-41b8-4588-bcdb-96192e5a2da8",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        },
+        {
+          "id": "733ec47b-5d49-449a-87eb-17c335853ce9",
+          "name": "Sửa máy giặt không lên nguồn",
+          "slug": "sua-may-giat-khong-len-nguon",
+          "targetId": "eaa18ae1-41b8-4588-bcdb-96192e5a2da8",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        },
+        {
+          "id": "73af86e3-ca59-4c61-a0d9-80bee5634af8",
+          "name": "Sửa máy giặt không vắt",
+          "slug": "sua-may-giat-khong-vat",
+          "targetId": "eaa18ae1-41b8-4588-bcdb-96192e5a2da8",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        },
+        {
+          "id": "75c06ae8-58e9-4126-9de8-02104327b388",
+          "name": "Lắp đặt / di dời máy sấy",
+          "slug": "lap-dat-di-doi-may-say",
+          "targetId": "1746c918-2fb7-41ac-a111-5c3e807616bf",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        },
+        {
+          "id": "78318797-f596-42ce-ae25-cf6ecf9240c0",
+          "name": "Sửa van cấp nước",
+          "slug": "sua-van-cap-nuoc",
+          "targetId": "eaa18ae1-41b8-4588-bcdb-96192e5a2da8",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        },
+        {
+          "id": "7abe4c00-a5a1-411d-b2a3-1a46b842de56",
+          "name": "Sửa máy sấy báo lỗi",
+          "slug": "sua-may-say-bao-loi",
+          "targetId": "1746c918-2fb7-41ac-a111-5c3e807616bf",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        },
+        {
+          "id": "831ddae7-ba82-40c2-b121-74d751c4f20e",
+          "name": "Khử mùi máy giặt",
+          "slug": "khu-mui-may-giat",
+          "targetId": "eaa18ae1-41b8-4588-bcdb-96192e5a2da8",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        },
+        {
+          "id": "87138ef1-4a89-4b6b-a618-56cb5d7a99bf",
+          "name": "Sửa máy sấy kêu to",
+          "slug": "sua-may-say-keu-to",
+          "targetId": "1746c918-2fb7-41ac-a111-5c3e807616bf",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        },
+        {
+          "id": "8c3aaa1c-0be1-4b9a-ad34-f00728444420",
+          "name": "Bảo dưỡng máy giặt",
+          "slug": "bao-duong-may-giat",
+          "targetId": "eaa18ae1-41b8-4588-bcdb-96192e5a2da8",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        },
+        {
+          "id": "a1e36e47-6d1f-4c52-9f63-32e6e4179c8d",
+          "name": "Sửa máy sấy sấy lâu / không khô",
+          "slug": "sua-may-say-say-lau-khong-kho",
+          "targetId": "1746c918-2fb7-41ac-a111-5c3e807616bf",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        },
+        {
+          "id": "c837c2a3-5fe1-4514-9261-0fe3a8551407",
+          "name": "Sửa máy sấy không quay",
+          "slug": "sua-may-say-khong-quay",
+          "targetId": "1746c918-2fb7-41ac-a111-5c3e807616bf",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        },
+        {
+          "id": "d08ac3e6-1c95-4ee7-ba99-f42912da3043",
+          "name": "Vệ sinh lồng giặt cửa ngang",
+          "slug": "ve-sinh-long-giat-cua-ngang",
+          "targetId": "eaa18ae1-41b8-4588-bcdb-96192e5a2da8",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        },
+        {
+          "id": "dcc074b3-3a7f-42e9-a13c-bf504cfc833d",
+          "name": "Sửa máy sấy không lên nguồn",
+          "slug": "sua-may-say-khong-len-nguon",
+          "targetId": "1746c918-2fb7-41ac-a111-5c3e807616bf",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        },
+        {
+          "id": "dec74387-53c0-4de0-b7c1-e0ca187e6c88",
+          "name": "Sửa máy giặt không cấp nước",
+          "slug": "sua-may-giat-khong-cap-nuoc",
+          "targetId": "eaa18ae1-41b8-4588-bcdb-96192e5a2da8",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        },
+        {
+          "id": "e2439802-889c-4c78-a36f-958b2b97d2d8",
+          "name": "Sửa bảng điều khiển / bo mạch",
+          "slug": "sua-bang-dieu-khien-bo-mach",
+          "targetId": "eaa18ae1-41b8-4588-bcdb-96192e5a2da8",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        },
+        {
+          "id": "e71c8a8a-7301-44ba-a7f2-69419f2222b2",
+          "name": "Sửa máy giặt rung lắc hoặc kêu to",
+          "slug": "sua-may-giat-rung-lac-hoac-keu-to",
+          "targetId": "eaa18ae1-41b8-4588-bcdb-96192e5a2da8",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        },
+        {
+          "id": "eccedb1e-5c58-49e2-be69-db457d2d45a6",
+          "name": "Sửa máy giặt không xả nước",
+          "slug": "sua-may-giat-khong-xa-nuoc",
+          "targetId": "eaa18ae1-41b8-4588-bcdb-96192e5a2da8",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        },
+        {
+          "id": "eed47ab5-d557-4a82-a539-0dc73287ecae",
+          "name": "Vệ sinh lọc xơ vải / đường thoát khí",
+          "slug": "ve-sinh-loc-xo-vai-duong-thoat-khi",
+          "targetId": "1746c918-2fb7-41ac-a111-5c3e807616bf",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        },
+        {
+          "id": "f32b429b-d191-48d9-bdbd-64e14a5462bf",
+          "name": "Sửa dây curoa / bộ truyền động",
+          "slug": "sua-day-curoa-bo-truyen-dong",
+          "targetId": "eaa18ae1-41b8-4588-bcdb-96192e5a2da8",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        },
+        {
+          "id": "f8017e3d-6473-4fb7-b8cd-94fdae7fbfbc",
+          "name": "Kiểm tra máy giặt báo mã lỗi",
+          "slug": "kiem-tra-may-giat-bao-ma-loi",
+          "targetId": "eaa18ae1-41b8-4588-bcdb-96192e5a2da8",
+          "categoryId": "8ba77998-c7aa-4b53-875f-b14b8fba78f7",
+          "basePrice": "180000",
+          "unit": "máy"
+        }
+      ],
+      "targets": [
+        {
+          "id": "1746c918-2fb7-41ac-a111-5c3e807616bf",
+          "name": "Máy sấy quần áo"
+        },
+        {
+          "id": "eaa18ae1-41b8-4588-bcdb-96192e5a2da8",
+          "name": "Máy giặt / Máy giặt sấy"
+        }
+      ],
+      "question": "Đây là máy giặt hay máy sấy, và bạn cần dịch vụ gì?",
+      "requiresCustomerConfirmation": true,
+      "mappingVersion": "fixgo.source-label-service-mapping.v1"
+    },
+    {
+      "sourceLabel": "Opossum",
+      "status": "unsupported",
+      "services": [],
+      "targets": [],
+      "question": null,
+      "requiresCustomerConfirmation": true,
+      "mappingVersion": "fixgo.source-label-service-mapping.v1"
+    },
+    {
+      "sourceLabel": "Scorpion",
+      "status": "unsupported",
+      "services": [],
+      "targets": [],
+      "question": null,
+      "requiresCustomerConfirmation": true,
+      "mappingVersion": "fixgo.source-label-service-mapping.v1"
+    },
+    {
+      "sourceLabel": "Spider",
+      "status": "unsupported",
+      "services": [],
+      "targets": [],
+      "question": null,
+      "requiresCustomerConfirmation": true,
+      "mappingVersion": "fixgo.source-label-service-mapping.v1"
+    },
+    {
+      "sourceLabel": "Termites",
+      "status": "unsupported",
+      "services": [],
+      "targets": [],
+      "question": null,
+      "requiresCustomerConfirmation": true,
+      "mappingVersion": "fixgo.source-label-service-mapping.v1"
+    },
+    {
+      "sourceLabel": "Water Heater Thermostat",
+      "status": "confirm_need",
+      "services": [
+        {
+          "id": "a449dbb5-556d-4b74-ae4c-b6e4f06d4f7d",
+          "name": "Sửa bộ điều nhiệt",
+          "slug": "sua-bo-dieu-nhiet",
+          "targetId": "8c5b11b7-adfe-4c5d-a3b6-fd7afbf53636",
+          "categoryId": "0666ad90-ac9d-4d34-b04a-8925e7d1605d",
+          "basePrice": "120000",
+          "unit": "máy"
+        }
+      ],
+      "targets": [
+        {
+          "id": "8c5b11b7-adfe-4c5d-a3b6-fd7afbf53636",
+          "name": "Bình nóng lạnh điện"
+        }
+      ],
+      "question": "Đây có phải bộ điều nhiệt của bình nóng lạnh điện và bạn muốn sửa bộ phận này?",
+      "requiresCustomerConfirmation": true,
+      "mappingVersion": "fixgo.source-label-service-mapping.v1"
+    }
+  ]
+}

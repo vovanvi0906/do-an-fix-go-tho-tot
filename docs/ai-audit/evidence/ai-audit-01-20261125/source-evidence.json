@@ -1,0 +1,394 @@
+{
+  "mobile": {
+    "file": "customer-app/src/services/api/aiService.ts",
+    "line": 76,
+    "symbol": "diagnoseIssueImage",
+    "sha256": "2bf0bb74c118c0f08c8a7af648500cc70fc930a52ce00f569f003765f091120c",
+    "citation": "[customer-app/src/services/api/aiService.ts:76 — diagnoseIssueImage](/home/vanvi/Work/do-an-fix-go-tho-tot/customer-app/src/services/api/aiService.ts:76)"
+  },
+  "scan": {
+    "file": "customer-app/src/features/home/components/AiScanModal.tsx",
+    "line": 198,
+    "symbol": "AiScanModal image analysis",
+    "sha256": "77206ca2a0a50280dd61d59500f692876354e36f72f0f170b7b93d48a352516f",
+    "citation": "[customer-app/src/features/home/components/AiScanModal.tsx:198 — AiScanModal image analysis](/home/vanvi/Work/do-an-fix-go-tho-tot/customer-app/src/features/home/components/AiScanModal.tsx:198)"
+  },
+  "choices": {
+    "file": "customer-app/src/components/diagnosis/DiagnosisChoices.jsx",
+    "line": 10,
+    "symbol": "DiagnosisChoices",
+    "sha256": "114f5b83bd71d35222bbd61fac787c04caff4c24d2b4c9e194cbd7415bf3415d",
+    "citation": "[customer-app/src/components/diagnosis/DiagnosisChoices.jsx:10 — DiagnosisChoices](/home/vanvi/Work/do-an-fix-go-tho-tot/customer-app/src/components/diagnosis/DiagnosisChoices.jsx:10)"
+  },
+  "upload": {
+    "file": "server/src/modules/orders/diagnosis/diagnosis-upload.interceptor.js",
+    "line": 64,
+    "symbol": "DiagnosisImageStorage",
+    "sha256": "b8ba2bdbd365ddeaf32eb594f91d92ebac076ae621d5c430301f6917b10cdd26",
+    "citation": "[server/src/modules/orders/diagnosis/diagnosis-upload.interceptor.js:64 — DiagnosisImageStorage](/home/vanvi/Work/do-an-fix-go-tho-tot/server/src/modules/orders/diagnosis/diagnosis-upload.interceptor.js:64)"
+  },
+  "controller": {
+    "file": "server/src/modules/orders/orders.controller.js",
+    "line": 83,
+    "symbol": "OrdersController.diagnoseUpload",
+    "sha256": "2205171087cd52334d256b4dd6bda5eb2b238291cd9eb81736512795a50e86f0",
+    "citation": "[server/src/modules/orders/orders.controller.js:83 — OrdersController.diagnoseUpload](/home/vanvi/Work/do-an-fix-go-tho-tot/server/src/modules/orders/orders.controller.js:83)"
+  },
+  "order": {
+    "file": "server/src/modules/orders/orders.service.js",
+    "line": 82,
+    "symbol": "OrdersService.diagnose",
+    "sha256": "a9ab34e92cc10f0cc3891dedc0e09ea8a395b416811f0b1bdf3341c466f4360b",
+    "citation": "[server/src/modules/orders/orders.service.js:82 — OrdersService.diagnose](/home/vanvi/Work/do-an-fix-go-tho-tot/server/src/modules/orders/orders.service.js:82)"
+  },
+  "transport": {
+    "file": "server/src/infrastructure/external/ai/fastapi-ai.client.js",
+    "line": 30,
+    "symbol": "FastApiAiClient.diagnoseIncident",
+    "sha256": "4c26313942142ee8c668bdeffa007ac417c46fcada2824198595808b9e375705",
+    "citation": "[server/src/infrastructure/external/ai/fastapi-ai.client.js:30 — FastApiAiClient.diagnoseIncident](/home/vanvi/Work/do-an-fix-go-tho-tot/server/src/infrastructure/external/ai/fastapi-ai.client.js:30)"
+  },
+  "startup": {
+    "file": "ai-service/main.py",
+    "line": 191,
+    "symbol": "lifespan",
+    "sha256": "1e4a75743e34cf884ed2a37cb9fda33df9c4ed9f2fe560d29ca0adde1db59582",
+    "citation": "[ai-service/main.py:191 — lifespan](/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/main.py:191)"
+  },
+  "v2": {
+    "file": "ai-service/recommendation/router.py",
+    "line": 35,
+    "symbol": "diagnose_v2",
+    "sha256": "07c9ec89906d4f0261d155ff3bb93511cf9f1be5359f2b964e912bca87aef671",
+    "citation": "[ai-service/recommendation/router.py:35 — diagnose_v2](/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/recommendation/router.py:35)"
+  },
+  "decode": {
+    "file": "ai-service/recommendation/image_utils.py",
+    "line": 12,
+    "symbol": "decode_image_to_cv2",
+    "sha256": "314062dd327690c2690f8ec0c7462d19ce5aa48f88752371122fe97a37b63d5c",
+    "citation": "[ai-service/recommendation/image_utils.py:12 — decode_image_to_cv2](/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/recommendation/image_utils.py:12)"
+  },
+  "clip": {
+    "file": "ai-service/clip_classifier.py",
+    "line": 92,
+    "symbol": "load_clip",
+    "sha256": "f83b189d8ee8ffdc2205c47ec069e2bbaca68de9ec03665b8d5421026f6fd638",
+    "citation": "[ai-service/clip_classifier.py:92 — load_clip](/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/clip_classifier.py:92)"
+  },
+  "imagefeat": {
+    "file": "ai-service/clip_classifier.py",
+    "line": 132,
+    "symbol": "_encode_image",
+    "sha256": "f83b189d8ee8ffdc2205c47ec069e2bbaca68de9ec03665b8d5421026f6fd638",
+    "citation": "[ai-service/clip_classifier.py:132 — _encode_image](/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/clip_classifier.py:132)"
+  },
+  "clipfull": {
+    "file": "ai-service/clip_classifier.py",
+    "line": 251,
+    "symbol": "predict_clip_full",
+    "sha256": "f83b189d8ee8ffdc2205c47ec069e2bbaca68de9ec03665b8d5421026f6fd638",
+    "citation": "[ai-service/clip_classifier.py:251 — predict_clip_full](/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/clip_classifier.py:251)"
+  },
+  "dyn": {
+    "file": "ai-service/clip_classifier.py",
+    "line": 39,
+    "symbol": "fetch_targets_from_backend",
+    "sha256": "f83b189d8ee8ffdc2205c47ec069e2bbaca68de9ec03665b8d5421026f6fd638",
+    "citation": "[ai-service/clip_classifier.py:39 — fetch_targets_from_backend](/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/clip_classifier.py:39)"
+  },
+  "fusion": {
+    "file": "ai-service/recommendation/category_classifier.py",
+    "line": 17,
+    "symbol": "fuse_category_scores/evaluate_categories",
+    "sha256": "e81163bdf6fe97b414253ab890f59c34a1ad039bc2bd15e617c4a90c7bc06865",
+    "citation": "[ai-service/recommendation/category_classifier.py:17 — fuse_category_scores/evaluate_categories](/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/recommendation/category_classifier.py:17)"
+  },
+  "target": {
+    "file": "ai-service/recommendation/target_matcher.py",
+    "line": 8,
+    "symbol": "match_targets",
+    "sha256": "342f502dac152bf6e4d2a67b14d4b72dc4fe27d07f43abf14945b321e6ad85a7",
+    "citation": "[ai-service/recommendation/target_matcher.py:8 — match_targets](/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/recommendation/target_matcher.py:8)"
+  },
+  "catalog": {
+    "file": "ai-service/recommendation/catalog_manager.py",
+    "line": 87,
+    "symbol": "publish_catalog_snapshot",
+    "sha256": "9a7a0cc7d66082cd7fa35068b3df056201d0c0997e9af77b1f49848ca52bf903",
+    "citation": "[ai-service/recommendation/catalog_manager.py:87 — publish_catalog_snapshot](/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/recommendation/catalog_manager.py:87)"
+  },
+  "visual": {
+    "file": "ai-service/recommendation/visual_detector.py",
+    "line": 26,
+    "symbol": "VisualDetector.predict/load_visual_detector",
+    "sha256": "52ddf11a03c8b3952ca4b007e803894679f7f8c7fc07a93b067bdfdf854ba734",
+    "citation": "[ai-service/recommendation/visual_detector.py:26 — VisualDetector.predict/load_visual_detector](/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/recommendation/visual_detector.py:26)"
+  },
+  "resolver": {
+    "file": "server/src/modules/orders/diagnosis/diagnosis-resolver.js",
+    "line": 19,
+    "symbol": "resolveCategory",
+    "sha256": "81494a25f92517b215aadfae508a979929d079013ea15e180d7332e076dd218c",
+    "citation": "[server/src/modules/orders/diagnosis/diagnosis-resolver.js:19 — resolveCategory](/home/vanvi/Work/do-an-fix-go-tho-tot/server/src/modules/orders/diagnosis/diagnosis-resolver.js:19)"
+  },
+  "resolve": {
+    "file": "server/src/modules/orders/diagnosis/diagnosis-resolver.js",
+    "line": 106,
+    "symbol": "resolveDiagnosis",
+    "sha256": "81494a25f92517b215aadfae508a979929d079013ea15e180d7332e076dd218c",
+    "citation": "[server/src/modules/orders/diagnosis/diagnosis-resolver.js:106 — resolveDiagnosis](/home/vanvi/Work/do-an-fix-go-tho-tot/server/src/modules/orders/diagnosis/diagnosis-resolver.js:106)"
+  },
+  "service": {
+    "file": "server/src/modules/orders/diagnosis/diagnosis-resolver.js",
+    "line": 70,
+    "symbol": "resolveService",
+    "sha256": "81494a25f92517b215aadfae508a979929d079013ea15e180d7332e076dd218c",
+    "citation": "[server/src/modules/orders/diagnosis/diagnosis-resolver.js:70 — resolveService](/home/vanvi/Work/do-an-fix-go-tho-tot/server/src/modules/orders/diagnosis/diagnosis-resolver.js:70)"
+  },
+  "vr": {
+    "file": "server/src/modules/orders/diagnosis/visual-service-resolver.js",
+    "line": 10,
+    "symbol": "resolveVisualServices",
+    "sha256": "012afb27b899d40c297c154f16ff59b27477bc1fc8fb4e8a19d1c264169f0877",
+    "citation": "[server/src/modules/orders/diagnosis/visual-service-resolver.js:10 — resolveVisualServices](/home/vanvi/Work/do-an-fix-go-tho-tot/server/src/modules/orders/diagnosis/visual-service-resolver.js:10)"
+  },
+  "symptoms": {
+    "file": "server/src/modules/symptoms/symptom-catalog.js",
+    "line": 94,
+    "symbol": "recommendServices",
+    "sha256": "c71c84c3b265596583a997d23f795d8ec910af28523e730eccb1b3687cab48c3",
+    "citation": "[server/src/modules/symptoms/symptom-catalog.js:94 — recommendServices](/home/vanvi/Work/do-an-fix-go-tho-tot/server/src/modules/symptoms/symptom-catalog.js:94)"
+  },
+  "legacyrules": {
+    "file": "server/src/modules/orders/diagnosis/symptom-taxonomy.js",
+    "line": 2,
+    "symbol": "SYMPTOM_RULES/buildSymptomOptions",
+    "sha256": "b81664d89075366ccea24259c2af8ac87afa58938eff3ed2596b16c193f18799",
+    "citation": "[server/src/modules/orders/diagnosis/symptom-taxonomy.js:2 — SYMPTOM_RULES/buildSymptomOptions](/home/vanvi/Work/do-an-fix-go-tho-tot/server/src/modules/orders/diagnosis/symptom-taxonomy.js:2)"
+  },
+  "ranking": {
+    "file": "server/src/modules/orders/diagnosis/service-ranker.js",
+    "line": 18,
+    "symbol": "rankServices",
+    "sha256": "7080eebd8d142486b9a61787865447bdf8573d3c467188e97ccbe750a5376c88",
+    "citation": "[server/src/modules/orders/diagnosis/service-ranker.js:18 — rankServices](/home/vanvi/Work/do-an-fix-go-tho-tot/server/src/modules/orders/diagnosis/service-ranker.js:18)"
+  },
+  "legacy": {
+    "file": "ai-service/main.py",
+    "line": 392,
+    "symbol": "diagnose (V1)",
+    "sha256": "1e4a75743e34cf884ed2a37cb9fda33df9c4ed9f2fe560d29ca0adde1db59582",
+    "citation": "[ai-service/main.py:392 — diagnose (V1)](/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/main.py:392)"
+  },
+  "hardscore": {
+    "file": "ai-service/main.py",
+    "line": 536,
+    "symbol": "V1 keyword target confidence constant",
+    "sha256": "1e4a75743e34cf884ed2a37cb9fda33df9c4ed9f2fe560d29ca0adde1db59582",
+    "citation": "[ai-service/main.py:536 — V1 keyword target confidence constant](/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/main.py:536)"
+  },
+  "firstservice": {
+    "file": "ai-service/main.py",
+    "line": 543,
+    "symbol": "V1 first-service fallback",
+    "sha256": "1e4a75743e34cf884ed2a37cb9fda33df9c4ed9f2fe560d29ca0adde1db59582",
+    "citation": "[ai-service/main.py:543 — V1 first-service fallback](/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/main.py:543)"
+  },
+  "compare": {
+    "file": "ai-service/main.py",
+    "line": 586,
+    "symbol": "analyze_before_after_opencv",
+    "sha256": "1e4a75743e34cf884ed2a37cb9fda33df9c4ed9f2fe560d29ca0adde1db59582",
+    "citation": "[ai-service/main.py:586 — analyze_before_after_opencv](/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/main.py:586)"
+  },
+  "comparefallback": {
+    "file": "ai-service/main.py",
+    "line": 810,
+    "symbol": "compare_before_after heuristic fallback",
+    "sha256": "1e4a75743e34cf884ed2a37cb9fda33df9c4ed9f2fe560d29ca0adde1db59582",
+    "citation": "[ai-service/main.py:810 — compare_before_after heuristic fallback](/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/main.py:810)"
+  },
+  "backendfallback": {
+    "file": "server/src/infrastructure/external/ai/aiFallbackHelper.js",
+    "line": 10,
+    "symbol": "getFallbackCompare",
+    "sha256": "2238f4132b163ab6a6442e6d62c44e453f72f12d5659d57a4a532858ab73044b",
+    "citation": "[server/src/infrastructure/external/ai/aiFallbackHelper.js:10 — getFallbackCompare](/home/vanvi/Work/do-an-fix-go-tho-tot/server/src/infrastructure/external/ai/aiFallbackHelper.js:10)"
+  },
+  "webmock": {
+    "file": "client/src/features/customer/hooks/useHomeData.ts",
+    "line": 443,
+    "symbol": "useHomeData.triggerAiDiagnosis",
+    "sha256": "430a5c4bc3fb1d56988749566d61de2db2c70f99b54d5a94e2d920b58f48266d",
+    "citation": "[client/src/features/customer/hooks/useHomeData.ts:443 — useHomeData.triggerAiDiagnosis](/home/vanvi/Work/do-an-fix-go-tho-tot/client/src/features/customer/hooks/useHomeData.ts:443)"
+  },
+  "webcall": {
+    "file": "client/src/features/customer/views/HomeMobileView.tsx",
+    "line": 198,
+    "symbol": "HomeMobileView → mock hook",
+    "sha256": "94ce6ec383af6f5a1f4919e4d3fa29dcddc67b3b3d0790d246f40402c8305fd8",
+    "citation": "[client/src/features/customer/views/HomeMobileView.tsx:198 — HomeMobileView → mock hook](/home/vanvi/Work/do-an-fix-go-tho-tot/client/src/features/customer/views/HomeMobileView.tsx:198)"
+  },
+  "webroute": {
+    "file": "client/src/routers/routes.jsx",
+    "line": 99,
+    "symbol": "web customer route",
+    "sha256": "c6ddca529a28dd388a62255f0d1bc8194c5ce9c02c2e409336662958ec119e38",
+    "citation": "[client/src/routers/routes.jsx:99 — web customer route](/home/vanvi/Work/do-an-fix-go-tho-tot/client/src/routers/routes.jsx:99)"
+  },
+  "worker": {
+    "file": "worker-app/src/services/api/aiService.ts",
+    "line": 24,
+    "symbol": "Worker diagnoseIssueImage",
+    "sha256": "040beb26c417c16dde8eaf61553455a3f433ef2528b66ffb8e06cf8706524509",
+    "citation": "[worker-app/src/services/api/aiService.ts:24 — Worker diagnoseIssueImage](/home/vanvi/Work/do-an-fix-go-tho-tot/worker-app/src/services/api/aiService.ts:24)"
+  },
+  "prepare": {
+    "file": "ai-service/training/prepare_dataset.py",
+    "line": 70,
+    "symbol": "generate_class_images",
+    "sha256": "0cd2c96ba622898e6667ff02af77c7554168194063b080cbae5d94f36cb2888b",
+    "citation": "[ai-service/training/prepare_dataset.py:70 — generate_class_images](/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/training/prepare_dataset.py:70)"
+  },
+  "train": {
+    "file": "ai-service/training/train.py",
+    "line": 27,
+    "symbol": "train_model",
+    "sha256": "3a3587cf299e6c114d559f1030478c118e18ecf38e0a866c99f332e03dd147dc",
+    "citation": "[ai-service/training/train.py:27 — train_model](/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/training/train.py:27)"
+  },
+  "trial": {
+    "file": "ai-service/training/visual_service_training.py",
+    "line": 38,
+    "symbol": "audit/prepare_trial",
+    "sha256": "b91a9c2f7c06be3a3fcffc36206afa7b09809fbe68d16ad5a07d3a7fc7f590bc",
+    "citation": "[ai-service/training/visual_service_training.py:38 — audit/prepare_trial](/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/training/visual_service_training.py:38)"
+  },
+  "quality": {
+    "file": "server/scripts/ai01/quality_review.py",
+    "line": 68,
+    "symbol": "QualityReview.blockers/export",
+    "sha256": "19a97386c1773fa21842922707b48b2f81c15067a8015a64c843d728b02dfda6",
+    "citation": "[server/scripts/ai01/quality_review.py:68 — QualityReview.blockers/export](/home/vanvi/Work/do-an-fix-go-tho-tot/server/scripts/ai01/quality_review.py:68)"
+  },
+  "prepared": {
+    "file": "server/scripts/ai01/prepare_dataset.py",
+    "line": 23,
+    "symbol": "prepared dataset pipeline",
+    "sha256": "9183db5cfb6c15d4b575db468859f9d86776189eaaf314549fe807f4b05407c8",
+    "citation": "[server/scripts/ai01/prepare_dataset.py:23 — prepared dataset pipeline](/home/vanvi/Work/do-an-fix-go-tho-tot/server/scripts/ai01/prepare_dataset.py:23)"
+  },
+  "annotate": {
+    "file": "ai-service/eval/ai01/annotation.py",
+    "line": 10,
+    "symbol": "Labels/Provenance/Review/Sample",
+    "sha256": "3864c4f2dc2709f9273b79eb6109b0be1d31d1ef5ee7f1ca8ac915849e906bae",
+    "citation": "[ai-service/eval/ai01/annotation.py:10 — Labels/Provenance/Review/Sample](/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/eval/ai01/annotation.py:10)"
+  },
+  "metrics": {
+    "file": "ai-service/eval/ai01/metrics.py",
+    "line": 33,
+    "symbol": "summarize",
+    "sha256": "ffd80156598d25a55091a30ed48b5bac071f36b60e0b634843b092c205d27b3a",
+    "citation": "[ai-service/eval/ai01/metrics.py:33 — summarize](/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/eval/ai01/metrics.py:33)"
+  },
+  "runner": {
+    "file": "ai-service/eval/ai01/runner.py",
+    "line": 44,
+    "symbol": "Resolver/run_case/setup_models",
+    "sha256": "a47e45e61b8522965e61a8b00995735e91a28e6691e78645da934cf98438c107",
+    "citation": "[ai-service/eval/ai01/runner.py:44 — Resolver/run_case/setup_models](/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/eval/ai01/runner.py:44)"
+  },
+  "fakebench": {
+    "file": "ai-service/eval/benchmark_recommendation.py",
+    "line": 42,
+    "symbol": "run_benchmark: fixture ranks and simulated latency",
+    "sha256": "becbffda38766d912d294f378388c89b4b29fc156ec71d54493a046a189e81f5",
+    "citation": "[ai-service/eval/benchmark_recommendation.py:42 — run_benchmark: fixture ranks and simulated latency](/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/eval/benchmark_recommendation.py:42)"
+  },
+  "schema": {
+    "file": "server/prisma/schema.prisma",
+    "line": 151,
+    "symbol": "Service → categoryId/targetId",
+    "sha256": "6331ecca9f25e5d00d9d76a1bd8f121e2abb81c5567b00aae44eba70a58168ba",
+    "citation": "[server/prisma/schema.prisma:151 — Service → categoryId/targetId](/home/vanvi/Work/do-an-fix-go-tho-tot/server/prisma/schema.prisma:151)"
+  },
+  "symptomschema": {
+    "file": "server/prisma/schema.prisma",
+    "line": 681,
+    "symbol": "Symptom/SymptomService review gate",
+    "sha256": "6331ecca9f25e5d00d9d76a1bd8f121e2abb81c5567b00aae44eba70a58168ba",
+    "citation": "[server/prisma/schema.prisma:681 — Symptom/SymptomService review gate](/home/vanvi/Work/do-an-fix-go-tho-tot/server/prisma/schema.prisma:681)"
+  },
+  "dbapi": {
+    "file": "server/src/modules/services/services.service.js",
+    "line": 43,
+    "symbol": "ServicesService.getTargets",
+    "sha256": "70a7200bc14e5a627a0b10919e651e5aa1abbebd7ad60fb8779635678e8f7b04",
+    "citation": "[server/src/modules/services/services.service.js:43 — ServicesService.getTargets](/home/vanvi/Work/do-an-fix-go-tho-tot/server/src/modules/services/services.service.js:43)"
+  },
+  "face": {
+    "file": "ai-service/face_models.py",
+    "line": 20,
+    "symbol": "load_face_models",
+    "sha256": "834691c0885bd87a8439ded5056573a057b0081e2c6ff55b069f154a326d9d0d",
+    "citation": "[ai-service/face_models.py:20 — load_face_models](/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/face_models.py:20)"
+  },
+  "facecore": {
+    "file": "ai-service/face_core.py",
+    "line": 18,
+    "symbol": "FacePolicy/extract_embedding",
+    "sha256": "ec75d8dd36ab8d0a76684b958701c7f0a8452259a766675121c277993b4ae0cc",
+    "citation": "[ai-service/face_core.py:18 — FacePolicy/extract_embedding](/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/face_core.py:18)"
+  },
+  "pad": {
+    "file": "ai-service/face_pad.py",
+    "line": 72,
+    "symbol": "configured_pad",
+    "sha256": "7b31bae28c04f450a944a59084d7dadf342bccb6c6f9a3712ed8404b345ad0a5",
+    "citation": "[ai-service/face_pad.py:72 — configured_pad](/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/face_pad.py:72)"
+  },
+  "mn3": {
+    "file": "ai-service/pad_mn3.py",
+    "line": 40,
+    "symbol": "ExperimentalMn3Pad",
+    "sha256": "e3fad5c4501bf1ccb001bcd311db664cd0f8905739cfdd2f56b02ae064ccf428",
+    "citation": "[ai-service/pad_mn3.py:40 — ExperimentalMn3Pad](/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/pad_mn3.py:40)"
+  },
+  "blaze": {
+    "file": "worker-app/src/features/face-verification/components/LiveFaceCamera.web.jsx",
+    "line": 88,
+    "symbol": "LiveFaceCamera.web local BlazeFace",
+    "sha256": "f6fc482a472ed3c1ad05191ad41a0f17bf0c3fcf56d1fc17ebc726b89f1f1e71",
+    "citation": "[worker-app/src/features/face-verification/components/LiveFaceCamera.web.jsx:88 — LiveFaceCamera.web local BlazeFace](/home/vanvi/Work/do-an-fix-go-tho-tot/worker-app/src/features/face-verification/components/LiveFaceCamera.web.jsx:88)"
+  },
+  "faceplay": {
+    "file": "ai-service/face_test_app.py",
+    "line": 38,
+    "symbol": "Face test-only app",
+    "sha256": "3f9368ed4bad0199bca457d5adcbe26974a422ec67b60a7b47c65cf617b119ef",
+    "citation": "[ai-service/face_test_app.py:38 — Face test-only app](/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/face_test_app.py:38)"
+  },
+  "package": {
+    "file": "server/scripts/ai01/dataset_package.py",
+    "line": 8,
+    "symbol": "fixgo.dataset.v1 rules",
+    "sha256": "6684fc243bb44197a6ab76eca16edc7fb8ac2106fde011671d4ac4d4344482d1",
+    "citation": "[server/scripts/ai01/dataset_package.py:8 — fixgo.dataset.v1 rules](/home/vanvi/Work/do-an-fix-go-tho-tot/server/scripts/ai01/dataset_package.py:8)"
+  },
+  "import": {
+    "file": "server/scripts/ai01/uploaded_dataset.py",
+    "line": 166,
+    "symbol": "UploadedDataset synthetic train-only policy",
+    "sha256": "06f58afb08865192ba318be10644a08bd5b5aba1ce8ced4bfe927561f6ac5f6d",
+    "citation": "[server/scripts/ai01/uploaded_dataset.py:166 — UploadedDataset synthetic train-only policy](/home/vanvi/Work/do-an-fix-go-tho-tot/server/scripts/ai01/uploaded_dataset.py:166)"
+  },
+  "cloud": {
+    "file": "server/src/config/cloudinary.config.js",
+    "line": 29,
+    "symbol": "incidentStorage: Cloudinary limit 1200px",
+    "sha256": "f4fa2566c4943fd30ad4cfb4c2d28fe922cab26d677fa10fd104c6dd42245690",
+    "citation": "[server/src/config/cloudinary.config.js:29 — incidentStorage: Cloudinary limit 1200px](/home/vanvi/Work/do-an-fix-go-tho-tot/server/src/config/cloudinary.config.js:29)"
+  }
+}

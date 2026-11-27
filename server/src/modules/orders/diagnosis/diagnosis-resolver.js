@@ -13,6 +13,7 @@ import { createInitialResult } from './diagnosis-payload-builder';
 import { buildSymptomOptions, SYMPTOM_RULES } from './symptom-taxonomy';
 import { resolveVisualServices } from './visual-service-resolver';
 import { rankServices, formatPriceRange } from './service-ranker';
+import { observableEvidenceFromAI } from './observable-evidence';
 
 export { SYMPTOM_RULES };
 
@@ -24,6 +25,7 @@ async function resolveCategory(prisma, aiClient, input, result, categories) {
     return { category, ai: null };
   }
   const ai = await aiClient.diagnoseIncident(imageUrl, description, result.requestId);
+  result.observableAnalysis = observableEvidenceFromAI(ai);
   const score =
     typeof ai.confidence === 'number' &&
     Number.isFinite(ai.confidence) &&
@@ -138,6 +140,15 @@ export async function resolveDiagnosis(prisma, aiClient, input) {
         (t) => t.id === ai.suggestedTargetId || t.slug === ai.suggestedTargetId,
       )
     : null;
+  // When the AI is unsure between targets it returns options instead of a pick;
+  // publish only those that map to active targets of this category.
+  const aiTargetOptions = aiTarget || answers.targetId
+    ? []
+    : (Array.isArray(ai?.targetCandidates) ? ai.targetCandidates : [])
+        .slice(0, 3)
+        .map((c) => targets.find((t) => t.id === c?.targetId || t.slug === c?.targetId))
+        .filter((t, i, all) => t && all.indexOf(t) === i)
+        .map((t) => ({ id: t.id, name: t.name, slug: t.slug }));
   const target = answers.targetId
     ? targets.find((t) => t.id === answers.targetId)
     : null;
@@ -156,7 +167,7 @@ export async function resolveDiagnosis(prisma, aiClient, input) {
       ? await listTargetSymptoms(prisma, target.id, category.id)
       : [];
   const symptomOptions = useCatalog
-    ? catalogSymptoms.map((s) => ({ value: s.id, label: s.name, kind: s.kind }))
+    ? catalogSymptoms.map((s) => ({ value: s.id, label: s.name, kind: s.kind, code: s.code }))
     : target || !targets.length
       ? buildSymptomOptions(category.slug, scopedServices, target)
       : [];
@@ -177,6 +188,7 @@ export async function resolveDiagnosis(prisma, aiClient, input) {
       REASON_CODES.CATEGORY_DETECTED,
       REASON_CODES.SYMPTOM_REQUIRED,
     ],
+    aiTargetOptions,
     availableTargets: targets.map((t) => ({
       id: t.id,
       name: t.name,

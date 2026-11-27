@@ -1,0 +1,131 @@
+{
+  "kind": "real_offline_smoke_not_accuracy_benchmark",
+  "state": "/tmp/fixgo-auto-real-dd2qzpk6",
+  "runId": "auto-2bb63c509a8a4ae9",
+  "summary": {
+    "duplicateOrGroupCandidates": 0,
+    "failed": 0,
+    "hasSignModel": false,
+    "humanVerifiedCreated": 0,
+    "needsReview": 3,
+    "proposed": 0,
+    "requested": 3
+  },
+  "firstRun": {
+    "cacheHits": 0,
+    "cpuThreads": 2,
+    "elapsedSeconds": 7.461,
+    "errors": [],
+    "exactDuplicateReuse": 0,
+    "failed": 0,
+    "finishedAt": "2026-11-25T09:51:44.271328+00:00",
+    "groundTruthCreated": 0,
+    "lastImageId": "img-10576",
+    "peakRssMiB": 1856.52,
+    "processed": 3,
+    "profileHash": "4dc1f5f9b1c12af4b8443894f0ee3c4d42e01fa177ff750b4ad6ce4a3a318f00",
+    "requested": 3,
+    "rssLimitMiB": 3072,
+    "runId": "auto-2bb63c509a8a4ae9",
+    "startedAt": "2026-11-25T09:51:36.809838+00:00",
+    "status": "COMPLETED",
+    "succeeded": 3,
+    "summary": {
+      "duplicateOrGroupCandidates": 0,
+      "failed": 0,
+      "hasSignModel": false,
+      "humanVerifiedCreated": 0,
+      "needsReview": 3,
+      "proposed": 0,
+      "requested": 3
+    }
+  },
+  "models": {
+    "classifier": {
+      "bytes": 2974408,
+      "path": "/home/vanvi/Work/do-an-fix-go-tho-tot/ai-service/weights/yolov8n-cls-fixgo.pt",
+      "sha256": "959d3e9823c55ae0948ce08d75261dca630678d22228404ae03dd4ee7dc7532d"
+    },
+    "clip": {
+      "bytes": 605247071,
+      "path": "/home/vanvi/.cache/huggingface/hub/models--openai--clip-vit-base-patch32/snapshots/3d74acf9a28c67741b2f4f2ea7635f0aaf6f0268/pytorch_model.bin",
+      "sha256": "a63082132ba4f97a80bea76823f544493bffa8082296d62d71581a4feff1576f"
+    },
+    "detector": {
+      "bytes": 6463082,
+      "path": "/home/vanvi/Work/datasetai/03-experiments/ai01-task04a-strict-v2/training/weights/best.pt",
+      "sha256": "898293e8446b7ad08d52132a8a95525ea967474f1ce7d49dce40b97a0bdda9fd"
+    }
+  },
+  "profileHash": "4dc1f5f9b1c12af4b8443894f0ee3c4d42e01fa177ff750b4ad6ce4a3a318f00",
+  "records": [
+    {
+      "imageId": "img-09584",
+      "bucket": "NEEDS_REVIEW",
+      "issues": [
+        "CLASSIFIER_DETECTOR_DISAGREE"
+      ],
+      "signCoverage": "UNAVAILABLE",
+      "boxes": 1
+    },
+    {
+      "imageId": "img-08895",
+      "bucket": "NEEDS_REVIEW",
+      "issues": [
+        "CLASSIFIER_DETECTOR_DISAGREE"
+      ],
+      "signCoverage": "UNAVAILABLE",
+      "boxes": 1
+    },
+    {
+      "imageId": "img-10576",
+      "bucket": "NEEDS_REVIEW",
+      "issues": [
+        "MODEL_UNCERTAIN"
+      ],
+      "signCoverage": "UNAVAILABLE",
+      "boxes": 1
+    }
+  ],
+  "limitations": [
+    "Three development/model-exposed pilot images only",
+    "No sign model, no defect accuracy claim",
+    "No real dataset export, training, human approval or production mutation"
+  ],
+  "automationCodeSha256": "39234828690ed390cedc843aaa9936ecb3d9215f05faffe69cdb9ead28962aad",
+  "cacheResume": {
+    "cacheHits": 3,
+    "cpuThreads": 2,
+    "elapsedSeconds": 0.001,
+    "errors": [],
+    "exactDuplicateReuse": 0,
+    "failed": 0,
+    "finishedAt": "2026-11-25T09:54:03.717686+00:00",
+    "groundTruthCreated": 0,
+    "lastImageId": "img-10576",
+    "peakRssMiB": 407.06,
+    "processed": 3,
+    "profileHash": "4dc1f5f9b1c12af4b8443894f0ee3c4d42e01fa177ff750b4ad6ce4a3a318f00",
+    "requested": 3,
+    "rssLimitMiB": 3072,
+    "runId": "auto-2bb63c509a8a4ae9",
+    "startedAt": "2026-11-25T09:54:03.716565+00:00",
+    "status": "COMPLETED",
+    "succeeded": 3,
+    "summary": {
+      "duplicateOrGroupCandidates": 0,
+      "failed": 0,
+      "hasSignModel": false,
+      "humanVerifiedCreated": 0,
+      "needsReview": 3,
+      "proposed": 0,
+      "requested": 3
+    }
+  },
+  "artifactIntegrityAfterSmoke": {
+    "classifier": true,
+    "clip": true,
+    "detector": true
+  },
+  "batchAdapterHashVerified": true
+}

@@ -1,0 +1,238 @@
+{
+  "schema": "fixgo.ai-data-01.audit.v1",
+  "audit_client_date": "2026-11-25",
+  "catalog_captured_at": "2026-11-25T04:12:13.127Z",
+  "counts_by_corpus": {
+    "raw_source": 21437,
+    "classification_fixture": 1200,
+    "user_synthetic_zip": 40,
+    "admin_upload": 3
+  },
+  "selected_entries": 22680,
+  "unique_sha256": 22090,
+  "duplicates": {
+    "sha256": {
+      "groups": 288,
+      "entries": 878,
+      "largest": 11
+    },
+    "pixels": {
+      "groups": 288,
+      "entries": 878,
+      "largest": 11
+    },
+    "phash_component": {
+      "groups": 1269,
+      "entries": 4196,
+      "largest": 200
+    }
+  },
+  "leakage": {
+    "admin_upload": {
+      "sha256": {
+        "cross_original_split_groups": 0,
+        "involved_entries": 0
+      },
+      "pixels": {
+        "cross_original_split_groups": 0,
+        "involved_entries": 0
+      },
+      "phash_component": {
+        "cross_original_split_groups": 0,
+        "involved_entries": 0
+      },
+      "combined_source": {
+        "cross_original_split_groups": 0,
+        "involved_entries": 0
+      }
+    },
+    "classification_fixture": {
+      "sha256": {
+        "cross_original_split_groups": 210,
+        "involved_entries": 703
+      },
+      "pixels": {
+        "cross_original_split_groups": 210,
+        "involved_entries": 703
+      },
+      "phash_component": {
+        "cross_original_split_groups": 87,
+        "involved_entries": 993
+      },
+      "combined_source": {
+        "cross_original_split_groups": 87,
+        "involved_entries": 993
+      }
+    },
+    "raw_source": {
+      "sha256": {
+        "cross_original_split_groups": 5,
+        "involved_entries": 10
+      },
+      "pixels": {
+        "cross_original_split_groups": 5,
+        "involved_entries": 10
+      },
+      "phash_component": {
+        "cross_original_split_groups": 418,
+        "involved_entries": 1291
+      },
+      "combined_source": {
+        "cross_original_split_groups": 1035,
+        "involved_entries": 8724
+      }
+    },
+    "user_synthetic_zip": {
+      "sha256": {
+        "cross_original_split_groups": 0,
+        "involved_entries": 0
+      },
+      "pixels": {
+        "cross_original_split_groups": 0,
+        "involved_entries": 0
+      },
+      "phash_component": {
+        "cross_original_split_groups": 0,
+        "involved_entries": 0
+      },
+      "combined_source": {
+        "cross_original_split_groups": 0,
+        "involved_entries": 0
+      }
+    }
+  },
+  "phash_algorithm": "OpenCV gray DCT32 top8x8 excluding DC; 63-bit median; exact BKTree Hamming<=6",
+  "hash_value_edges": 3375,
+  "grouping_caveat": "Transitive near components are conservative candidates, NOT identity equivalence; do not auto-delete/confirm labels",
+  "raw_annotation_status": {
+    "PARSED_SOURCE_UNVERIFIED": 21289,
+    "EMPTY_UNREVIEWED": 148
+  },
+  "raw_decode_errors": 0,
+  "raw_image_hash_mismatches": 0,
+  "raw_label_hash_mismatches": 0,
+  "raw_hash_algorithm_mismatches": 0,
+  "task_buckets": {
+    "Object Recognition": 22246,
+    "Out-of-scope": 716,
+    "Unknown/Needs Review": 22680,
+    "Object Detection": 11666,
+    "Duplicate": 4196,
+    "Defect Classification": 1017,
+    "Defect Detection": 1017
+  },
+  "targets_with_raw_candidate": 14,
+  "targets_with_direct_object_candidate": 8,
+  "targets_without_raw_candidate": [
+    "cua-kinh-cua-so-ban-cong",
+    "khu-vuc-bep-thiet-bi-bep-ben-ngoai",
+    "nha-ve-sinh-phong-tam",
+    "nha-o-can-ho",
+    "van-phong-cua-hang",
+    "he-thong-tuoi-san-vuon-tong-the",
+    "tham-co-bai-co",
+    "be-tu-hoai-ho-ga-cong-thoat",
+    "bon-nuoc-may-bom-phao-nuoc",
+    "pheu-thoat-san-khu-vuc-phong-tam",
+    "aptomat-cb-mcb",
+    "bong-den-den-led",
+    "bo-sac-xe-dien-o-cam-sac",
+    "chuong-cua-nut-nhan",
+    "cong-tac-thong-minh-relay",
+    "cong-tac-dien",
+    "cam-bien-thiet-bi-tu-dong",
+    "day-dien-cap-dien",
+    "he-thong-dien-phong",
+    "he-thong-dien-toan-nha",
+    "hop-noi-dien-hop-ky-thuat",
+    "kiem-tra-khao-sat-su-co-dien",
+    "may-bom-nuoc-phan-dien",
+    "nguon-cap-cho-thiet-bi-co-dinh",
+    "nguon-dien-adapter-bo-nguon",
+    "quat-thong-gio-quat-hut",
+    "quat-tran-quat-treo-tuong",
+    "thiet-bi-chong-ro-chong-giat",
+    "thiet-bi-do-dien-cong-to-dien",
+    "tiep-dia-chong-set",
+    "tu-dien-bang-dien",
+    "dien-cua-cuon-cong-tu-dong",
+    "den-ngoai-troi-san-vuon",
+    "den-su-co-den-thoat-hiem",
+    "den-trang-tri-den-chum",
+    "o-cam-thong-minh-hen-gio",
+    "on-ap-ups-bo-luu-dien",
+    "ban-ui-ban-la-hoi-nuoc",
+    "binh-nong-lanh-dien",
+    "bep-gas-bep-gas-am",
+    "bep-tu-bep-hong-ngoai",
+    "lo-nuong-noi-chien-khong-dau",
+    "lo-vi-song",
+    "may-hut-bui-robot-hut-bui",
+    "may-hut-mui",
+    "may-loc-khong-khi-may-hut-am",
+    "may-loc-nuoc-ro-nano",
+    "may-pha-ca-phe-am-sieu-toc",
+    "may-rua-chen-may-rua-bat",
+    "may-xay-may-ep-may-danh-trung",
+    "noi-com-dien-noi-ap-suat-dien",
+    "quat-dien-quat-dung-quat-ban",
+    "may-lam-mat-quat-dieu-hoa",
+    "may-nuoc-uong-nong-lanh",
+    "may-say-quan-ao",
+    "tu-dong-tu-mat"
+  ],
+  "source_components": 7272,
+  "largest_source_component": 390,
+  "pilot_review_queue": 50,
+  "independent_test_released": 0,
+  "exposure_files": [
+    {
+      "path": "/home/vanvi/Work/datasetai/03-experiments/ai01-task04a-strict-v2/selection.jsonl",
+      "sha256": "527a2c63e919ce2d5d13142941ddf2bd86d7fe402ac4dcf13bd8314f31617e8c"
+    },
+    {
+      "path": "/home/vanvi/Work/datasetai/03-experiments/ai01-task04a-v1/selection.jsonl",
+      "sha256": "7711252908b153dcc8089593a232f94aa570cbee5bd6ab4f5ffae9198688ce08"
+    }
+  ],
+  "source_yaml_hashes": {
+    "/home/vanvi/Work/datasetai/01-raw/dienlanh/data.yaml": "f2548074acb244dfa8776ff12b5f45ba525caf0477e951dd8e01071c048451d7",
+    "/home/vanvi/Work/datasetai/01-raw/giupviec/data.yaml": "ef238352451b40227c8d175c646a4bd90fb518c963c393d664f1dbbfaa887caf",
+    "/home/vanvi/Work/datasetai/01-raw/lamvuon/data.yaml": "adf709ec8540c04b169ba6de6db867bb2a966c07aa63316c62f30ce4da3110c1",
+    "/home/vanvi/Work/datasetai/01-raw/suadien/data.yaml": "ed948417c213afb6dd015a9d23e185874315b3d476323a5fbad36ae56eeefc55",
+    "/home/vanvi/Work/datasetai/01-raw/suanuoc/data.yaml": "8da74e746665ea984d834e15e6b165fa5282fad69fcdab0e7c717b6663b3a440",
+    "/home/vanvi/Work/datasetai/01-raw/thietbigiadinh/data.yaml": "f0acac263e88b2004787b0aac6e4033304fbed0a9268efbfcfae70eac0c80bc3"
+  },
+  "normal_negative_verified": "NOT_ASSESSED",
+  "source_rights_verified": "NOT_ASSESSED",
+  "task_buckets_before_semantic_policy": {
+    "Object Recognition": 22246,
+    "Out-of-scope": 716,
+    "Unknown/Needs Review": 22680,
+    "Object Detection": 13086,
+    "Duplicate": 4196,
+    "Defect Classification": 1016,
+    "Defect Detection": 1016
+  },
+  "raw_task_buckets": {
+    "Object Recognition": 21203,
+    "Out-of-scope": 516,
+    "Unknown/Needs Review": 21437,
+    "Object Detection": 11665,
+    "Duplicate": 3157,
+    "Defect Classification": 1016,
+    "Defect Detection": 1016
+  },
+  "practical_bbox_target_count": 5,
+  "practical_bbox_image_count": 11665,
+  "fresh_groups_cross_prepared_development_splits": {
+    "sha256": 0,
+    "pixel_sha256": 0,
+    "phash_component_id": 0,
+    "proposed_source_component": 0
+  },
+  "partial_source_object_box_images": 11955,
+  "partial_source_object_boxes": 12030,
+  "pilot_source_components": 50,
+  "pilot_component_uniqueness_policy": "GLOBAL_ACROSS_ALL_FIVE_TARGETS"
+}

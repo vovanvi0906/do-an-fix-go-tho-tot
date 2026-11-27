@@ -1,0 +1,14 @@
+{
+  "journal_pins": [
+    {
+      "path": "/home/vanvi/Work/datasetai/06-benchmarks/ai01-admin-v1/reviews/bbox-quality-v1/events.jsonl",
+      "sha256": "d38b93e9a932e9d1235317ef016fb3af932e1eb2393a9c789475bed58155f6ce"
+    },
+    {
+      "path": "/home/vanvi/Work/datasetai/06-benchmarks/ai01-admin-v1/reviews/uploaded-dataset-v1/events.jsonl",
+      "sha256": "158e9f9c6b7611ee01b16b681cdf437e710e099243d55899387d634bc257f407"
+    }
+  ],
+  "latest_bbox_image_records": 1,
+  "scope": "Existing statuses/boxes copied as separate overlay; no identities, no automatic rights/GT approval"
+}

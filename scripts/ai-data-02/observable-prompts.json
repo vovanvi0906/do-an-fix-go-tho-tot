@@ -1,0 +1,361 @@
+{
+  "schema": "fixgo.studio.observable-search.v1",
+  "objects": {
+    "may-nuoc-uong-nong-lanh": [
+      "water dispenser"
+    ],
+    "hang-rao-cay-bon-hoa-vuon-rau": [
+      "hedge",
+      "flower bed",
+      "vegetable garden"
+    ],
+    "khu-vuc-bep-thiet-bi-bep-ben-ngoai": [
+      "kitchen counter",
+      "kitchen appliance"
+    ],
+    "may-say-quan-ao": [
+      "clothes dryer"
+    ],
+    "nguon-dien-adapter-bo-nguon": [
+      "power adapter",
+      "power supply"
+    ],
+    "cong-tac-thong-minh-relay": [
+      "electrical switch",
+      "relay"
+    ],
+    "o-cam-thong-minh-hen-gio": [
+      "smart power plug",
+      "electrical outlet"
+    ],
+    "sofa-nem-tham-rem": [
+      "sofa",
+      "mattress",
+      "carpet",
+      "curtain"
+    ],
+    "den-ngoai-troi-san-vuon": [
+      "outdoor light",
+      "garden lamp"
+    ],
+    "dien-cua-cuon-cong-tu-dong": [
+      "roller shutter",
+      "automatic gate"
+    ],
+    "may-loc-khong-khi-may-hut-am": [
+      "air purifier",
+      "dehumidifier"
+    ],
+    "tham-co-bai-co": [
+      "lawn",
+      "grass"
+    ],
+    "van-phong-cua-hang": [
+      "office interior",
+      "shop interior"
+    ],
+    "bo-sac-xe-dien-o-cam-sac": [
+      "electric vehicle charger",
+      "charging socket"
+    ],
+    "day-dien-cap-dien": [
+      "electrical cable",
+      "electrical wire"
+    ],
+    "pheu-thoat-san-khu-vuc-phong-tam": [
+      "floor drain",
+      "shower floor"
+    ],
+    "may-lanh-dieu-hoa": [
+      "air conditioner"
+    ],
+    "may-hut-mui": [
+      "kitchen range hood"
+    ],
+    "may-rua-chen-may-rua-bat": [
+      "dishwasher"
+    ],
+    "tu-dien-bang-dien": [
+      "electrical panel",
+      "electrical cabinet"
+    ],
+    "bon-nuoc-may-bom-phao-nuoc": [
+      "water tank",
+      "water pump",
+      "float valve"
+    ],
+    "he-thong-dien-toan-nha": [
+      "electrical wiring",
+      "electrical panel"
+    ],
+    "aptomat-cb-mcb": [
+      "circuit breaker"
+    ],
+    "quat-tran-quat-treo-tuong": [
+      "ceiling fan",
+      "wall fan"
+    ],
+    "lavabo-chau-rua-bon-rua": [
+      "sink",
+      "wash basin"
+    ],
+    "voi-nuoc-voi-sen": [
+      "water faucet",
+      "shower head"
+    ],
+    "tu-lanh-tu-lanh-side-by-side": [
+      "refrigerator"
+    ],
+    "cam-bien-thiet-bi-tu-dong": [
+      "motion sensor",
+      "electrical sensor"
+    ],
+    "hop-noi-dien-hop-ky-thuat": [
+      "electrical junction box"
+    ],
+    "tu-dong-tu-mat": [
+      "freezer",
+      "refrigerated cabinet"
+    ],
+    "nha-ve-sinh-phong-tam": [
+      "bathroom",
+      "toilet"
+    ],
+    "noi-com-dien-noi-ap-suat-dien": [
+      "rice cooker",
+      "electric pressure cooker"
+    ],
+    "den-trang-tri-den-chum": [
+      "chandelier",
+      "decorative lamp"
+    ],
+    "dien-mat-troi-inverter": [
+      "solar panel",
+      "solar inverter"
+    ],
+    "bon-cau-ket-nuoc": [
+      "toilet",
+      "toilet tank"
+    ],
+    "bep-tu-bep-hong-ngoai": [
+      "induction cooktop",
+      "electric stove"
+    ],
+    "may-xay-may-ep-may-danh-trung": [
+      "blender",
+      "juicer",
+      "electric mixer"
+    ],
+    "may-loc-nuoc-ro-nano": [
+      "water purifier",
+      "water filter"
+    ],
+    "bep-gas-bep-gas-am": [
+      "gas stove"
+    ],
+    "binh-nong-lanh-dien": [
+      "electric water heater"
+    ],
+    "may-lam-mat-quat-dieu-hoa": [
+      "evaporative air cooler"
+    ],
+    "den-su-co-den-thoat-hiem": [
+      "emergency light",
+      "exit sign"
+    ],
+    "cua-kinh-cua-so-ban-cong": [
+      "glass door",
+      "window",
+      "balcony"
+    ],
+    "thiet-bi-do-dien-cong-to-dien": [
+      "electric meter"
+    ],
+    "thiet-bi-chong-ro-chong-giat": [
+      "residual current circuit breaker"
+    ],
+    "quat-thong-gio-quat-hut": [
+      "exhaust fan",
+      "ventilation fan"
+    ],
+    "nguon-cap-cho-thiet-bi-co-dinh": [
+      "power supply",
+      "electrical cable"
+    ],
+    "ban-ui-ban-la-hoi-nuoc": [
+      "clothes iron",
+      "steam iron"
+    ],
+    "lo-nuong-noi-chien-khong-dau": [
+      "oven",
+      "air fryer"
+    ],
+    "quat-dien-quat-dung-quat-ban": [
+      "electric fan",
+      "pedestal fan",
+      "table fan"
+    ],
+    "tiep-dia-chong-set": [
+      "grounding rod",
+      "lightning rod"
+    ],
+    "may-hut-bui-robot-hut-bui": [
+      "vacuum cleaner",
+      "robot vacuum cleaner"
+    ],
+    "bong-den-den-led": [
+      "light bulb",
+      "led light"
+    ],
+    "chuong-cua-nut-nhan": [
+      "doorbell",
+      "push button"
+    ],
+    "may-bom-nuoc-phan-dien": [
+      "water pump"
+    ],
+    "lo-vi-song": [
+      "microwave oven"
+    ],
+    "o-cam-dien": [
+      "electrical outlet",
+      "wall socket"
+    ],
+    "he-thong-tuoi-san-vuon-tong-the": [
+      "garden sprinkler",
+      "irrigation pipe"
+    ],
+    "he-thong-dien-phong": [
+      "electrical wiring",
+      "electrical panel"
+    ],
+    "nha-o-can-ho": [
+      "room interior"
+    ],
+    "be-tu-hoai-ho-ga-cong-thoat": [
+      "manhole",
+      "drain"
+    ],
+    "cay-bong-mat-cay-lon": [
+      "tree"
+    ],
+    "may-giat-may-giat-say": [
+      "washing machine"
+    ],
+    "on-ap-ups-bo-luu-dien": [
+      "voltage stabilizer",
+      "uninterruptible power supply"
+    ],
+    "san-nha-tuong-tran-noi-that": [
+      "floor",
+      "wall",
+      "ceiling"
+    ],
+    "duong-ong-cap-thoat-nuoc": [
+      "water pipe",
+      "drain pipe"
+    ],
+    "cong-tac-dien": [
+      "electrical switch"
+    ],
+    "may-pha-ca-phe-am-sieu-toc": [
+      "coffee machine",
+      "electric kettle"
+    ],
+    "cay-canh-chau-cay": [
+      "potted plant"
+    ]
+  },
+  "signPrompts": {
+    "burn_mark": [
+      "burn mark",
+      "scorched plastic",
+      "charred area"
+    ],
+    "crack": [
+      "crack",
+      "cracked surface"
+    ],
+    "broken_part": [
+      "broken part",
+      "broken component"
+    ],
+    "wet_surface": [
+      "wet surface",
+      "puddle of water"
+    ],
+    "water_dripping": [
+      "water droplets",
+      "dripping water"
+    ],
+    "water_spray": [
+      "spraying water",
+      "water jet"
+    ],
+    "stain_or_discoloration": [
+      "surface stain",
+      "discolored patch"
+    ],
+    "surface_soiling": [
+      "dirt buildup",
+      "dust buildup"
+    ],
+    "bird_droppings": [
+      "bird droppings"
+    ],
+    "leaf_debris": [
+      "fallen leaves",
+      "leaf debris"
+    ]
+  },
+  "categorySigns": {
+    "sua-dien": [
+      "burn_mark",
+      "crack",
+      "broken_part"
+    ],
+    "sua-nuoc": [
+      "water_dripping",
+      "wet_surface",
+      "water_spray",
+      "crack",
+      "broken_part"
+    ],
+    "dien-lanh": [
+      "wet_surface",
+      "burn_mark",
+      "broken_part",
+      "surface_soiling"
+    ],
+    "thiet-bi": [
+      "burn_mark",
+      "crack",
+      "broken_part",
+      "wet_surface",
+      "surface_soiling"
+    ],
+    "giup-viec": [
+      "surface_soiling",
+      "stain_or_discoloration",
+      "wet_surface",
+      "bird_droppings",
+      "leaf_debris"
+    ],
+    "lam-vuon": [
+      "leaf_debris",
+      "stain_or_discoloration",
+      "broken_part",
+      "surface_soiling"
+    ]
+  },
+  "nonVisualTargets": {
+    "kiem-tra-khao-sat-su-co-dien": "Khảo sát là tác vụ dịch vụ, không phải đối tượng nhìn thấy; cần chọn thiết bị cụ thể."
+  },
+  "broadSceneTargets": [
+    "he-thong-dien-toan-nha",
+    "he-thong-dien-phong",
+    "nguon-cap-cho-thiet-bi-co-dinh",
+    "he-thong-tuoi-san-vuon-tong-the"
+  ],
+  "approval": "Prompt search hints only; not approved target-defect/service diagnosis rules."
+}

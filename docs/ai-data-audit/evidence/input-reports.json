@@ -1,0 +1,127 @@
+[
+  {
+    "path": "docs/ai-audit/00-executive-summary.md",
+    "sha256": "d48102a9949f53661edb4c9ac1ce7febf1f79b9fbadb7e6dfc9f777c948d2203",
+    "lines": 38
+  },
+  {
+    "path": "docs/ai-audit/01-ai-service-inventory.md",
+    "sha256": "43e73af92a94ffae09c5119654b4a5df62aa1306ea63eb9defe6fb3b7ddb46f5",
+    "lines": 45
+  },
+  {
+    "path": "docs/ai-audit/01-current-ai-architecture.md",
+    "sha256": "ed84746c96cc30266a9c226f806c2aa8ecf45d33897d5f3858bd724427d0f7cd",
+    "lines": 30
+  },
+  {
+    "path": "docs/ai-audit/02-current-architecture.md",
+    "sha256": "fdebd7f7837bf5db569c830de45203912d43fd50e7988b456548e1cfba8e2d9a",
+    "lines": 28
+  },
+  {
+    "path": "docs/ai-audit/02-model-inventory.md",
+    "sha256": "7b279d19f9289fe55318157f339df553ec92f3a313d4a6449f6457763b93ca84",
+    "lines": 36
+  },
+  {
+    "path": "docs/ai-audit/03-ai-inference-pipeline.md",
+    "sha256": "8e6997fd6418d5b7377752f5bc7c5d931b8a84d98cdf5856e7ebd836be4a886d",
+    "lines": 47
+  },
+  {
+    "path": "docs/ai-audit/03-image-diagnosis-pipeline.md",
+    "sha256": "59b7d5256c68ebc11e6293a04928526e4d310055be4b071b345ae022c8a04f54",
+    "lines": 65
+  },
+  {
+    "path": "docs/ai-audit/04-object-recognition-audit.md",
+    "sha256": "7bb81b307c286467127dd0ea26fa4cd953991ab6bbd5709fff0b3f93c1402abf",
+    "lines": 31
+  },
+  {
+    "path": "docs/ai-audit/04-service-recommendation-algorithm.md",
+    "sha256": "a0a52dff6830624bd11b46ec9806130e1aa7e1232863a640b6d3646ac2c69416",
+    "lines": 69
+  },
+  {
+    "path": "docs/ai-audit/05-catalog-coverage-matrix.md",
+    "sha256": "17d7d61ac8df49d559180edaeba4a9437c97c6b81d35c9890c93dbb1af26f070",
+    "lines": 87
+  },
+  {
+    "path": "docs/ai-audit/05-dataset-training-audit.md",
+    "sha256": "0cd8d344b4e1cbc90d1d926e0cd4da58c1fa602aa8d8f2adbe757af366df5219",
+    "lines": 29
+  },
+  {
+    "path": "docs/ai-audit/06-defect-diagnosis-audit.md",
+    "sha256": "cf6888e3772c63ee37ccec87938b73f9ccb7d08b457b0c2ec65aa1b125860e17",
+    "lines": 35
+  },
+  {
+    "path": "docs/ai-audit/06-model-evaluation-plan.md",
+    "sha256": "913188a50e8d0c80ea3b70ab5cea6b3de889c5d2ed2e2e3e9b20127b72bcfb36",
+    "lines": 28
+  },
+  {
+    "path": "docs/ai-audit/07-architecture-recommendations.md",
+    "sha256": "066a46bfa5652442e1706a82833cec7cfc4a328fb644c7496427e8c41b3b9e9e",
+    "lines": 34
+  },
+  {
+    "path": "docs/ai-audit/07-service-recommendation-audit.md",
+    "sha256": "dbc372947e91470a89da38df40a9660e4d8a369f0f00af043fdda12985aba6f0",
+    "lines": 33
+  },
+  {
+    "path": "docs/ai-audit/08-dataset-inventory.md",
+    "sha256": "5d8c00ea0d4f808784a1462f993591de64aadb62ddf3a7ea2cb5af41af174313",
+    "lines": 128
+  },
+  {
+    "path": "docs/ai-audit/08-training-guide.md",
+    "sha256": "d4a37fc9ac3b5f34d6f7775f7406b11e09c4a8323b94609e4148220176eb4c6c",
+    "lines": 41
+  },
+  {
+    "path": "docs/ai-audit/09-evidence-index.md",
+    "sha256": "e10a05e7db4153a877bd428e4e23c3dd2caaf42b16716fac1ce5e672477b431b",
+    "lines": 113
+  },
+  {
+    "path": "docs/ai-audit/09-model-evaluation-report.md",
+    "sha256": "fad26baaabdde67f4eb01af0d0e8b5b31009c419a22e61b57e3d21ce02901b0e",
+    "lines": 73
+  },
+  {
+    "path": "docs/ai-audit/10-gap-analysis.md",
+    "sha256": "0326a6b5e826e0c6a138d6a747bd1428743ffc2707413877fd6728216d3b34c5",
+    "lines": 30
+  },
+  {
+    "path": "docs/ai-audit/11-dataset-requirements.md",
+    "sha256": "9f699dc8b96f48171b6c7917b81b9fcf1c4c1a3bb2d84dd1f3c0933eaad59d8c",
+    "lines": 39
+  },
+  {
+    "path": "docs/ai-audit/12-ai-improvement-roadmap.md",
+    "sha256": "c8192c4cd6542de2f6280e63e0d0eaa55b2c17ff9576da50aa2175bdba53c9d8",
+    "lines": 24
+  },
+  {
+    "path": "docs/ai-audit/13-evidence-index.md",
+    "sha256": "073c5b2eff98fa7c45e38edf698ebea9c6e1408b284058416e2e622e4d1ac7b6",
+    "lines": 108
+  },
+  {
+    "path": "docs/ai-audit/README.md",
+    "sha256": "3ec192f42657af0d91ba4f43f4ef71074f896e59a551dc3ab0ccbebcfb23e509",
+    "lines": 30
+  },
+  {
+    "path": "docs/ai-audit/evidence/ai-audit-01-20261125/previous-executive-summary.md",
+    "sha256": "b466982570a94ce02d072f2406036c665790a275a51fbdf852fb929e742f6fdb",
+    "lines": 24
+  }
+]

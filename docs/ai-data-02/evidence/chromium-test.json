@@ -1,0 +1,21 @@
+{
+  "browser": "Chromium",
+  "checks": [
+    "full inventory 22680 paginated with 24 lazy image cards",
+    "real pilot pagination 24/24/2",
+    "UI starts real offline batch and resumes 50 cached images",
+    "real pilot image and AI provenance render",
+    "draw bbox + undo/redo",
+    "move and resize bbox",
+    "multiple linked signs and save",
+    "verify blocked without explicit checks",
+    "explicit per-image human verification fixture",
+    "session restore and saved bbox history",
+    "history restore to NEEDS_REVIEW",
+    "bulk queue without human verification",
+    "official export blocked for incomplete review/rights",
+    "NON-GT review manifest export"
+  ],
+  "consolePageErrors": [],
+  "passed": true
+}

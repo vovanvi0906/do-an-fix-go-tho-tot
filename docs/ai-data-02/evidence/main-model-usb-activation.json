@@ -1,0 +1,298 @@
+{
+  "health": {
+    "status": "online",
+    "service": "FixGo Pro AI Service",
+    "version": "2.0.0",
+    "clip": true,
+    "classifier_mode": "clip",
+    "engine": "model",
+    "models_loaded": {
+      "yolo_cls": true,
+      "yolo_detect": true,
+      "visual_service": false,
+      "face_detector": true,
+      "face_recognizer": true,
+      "opencv_cv": true,
+      "observable_candidate": false,
+      "multiservice_observer": true,
+      "clip": true
+    },
+    "weights_available": [
+      "blaze_face_short_range.tflite",
+      "face_detection_yunet_2023mar.onnx",
+      "yolov8n-cls-fixgo.pt",
+      "face_recognition_sface_2021dec.onnx",
+      "yolov8n.pt"
+    ],
+    "observableModel": {
+      "enabled": true,
+      "loaded": true,
+      "modelVersion": "fixgo-multiservice-observer-v2-gated",
+      "releaseSha256": "2bbe78ba3306d0ff8222d08a118dac50d1a24757706c66a7f8ad23858e747734",
+      "enabledSigns": [
+        "crack"
+      ]
+    }
+  },
+  "liveSmoke": {
+    "httpStatus": 200,
+    "imageSha256": "fffc794fa353e60f4a65c63d62c4916066e4327c45703cd31514f6ea5d7c694f",
+    "response": {
+      "suggestedCategoryId": "sua-nuoc",
+      "suggestedCategoryName": "Sửa nước",
+      "suggestedTargetId": null,
+      "suggestedTargetName": null,
+      "categoryCandidates": [
+        {
+          "id": "sua-nuoc",
+          "slug": "sua-nuoc",
+          "name": "Sửa nước",
+          "confidence": 0.5062,
+          "provenance": "clip"
+        },
+        {
+          "id": "dien-lanh",
+          "slug": "dien-lanh",
+          "name": "Điện lạnh",
+          "confidence": 0.2424,
+          "provenance": "clip"
+        },
+        {
+          "id": "sua-dien",
+          "slug": "sua-dien",
+          "name": "Sửa điện",
+          "confidence": 0.1078,
+          "provenance": "clip"
+        }
+      ],
+      "targetCandidates": [
+        {
+          "targetId": "duong-ong-cap-thoat-nuoc",
+          "targetName": "Đường ống cấp / thoát nước",
+          "targetCategory": "sua-nuoc",
+          "similarity": 0.2799,
+          "confidence": 0.64,
+          "provenance": "clip_target_similarity"
+        },
+        {
+          "targetId": "bon-cau-ket-nuoc",
+          "targetName": "Bồn cầu / Két nước",
+          "targetCategory": "sua-nuoc",
+          "similarity": 0.2706,
+          "confidence": 0.6353,
+          "provenance": "clip_target_similarity"
+        },
+        {
+          "targetId": "voi-nuoc-voi-sen",
+          "targetName": "Vòi nước / Vòi sen",
+          "targetCategory": "sua-nuoc",
+          "similarity": 0.2665,
+          "confidence": 0.6332,
+          "provenance": "clip_target_similarity"
+        }
+      ],
+      "confidence": 0.5062,
+      "detectedLabels": [
+        "sua-nuoc"
+      ],
+      "observableSigns": [
+        "Nhận diện danh mục: Sửa nước"
+      ],
+      "visualAnalysis": {
+        "status": "disabled",
+        "modelVersion": null,
+        "weightsSha256": null,
+        "detections": []
+      },
+      "observableAnalysis": {
+        "status": "proposed",
+        "labelStatus": "AI_UNVERIFIED",
+        "modelSha256": null,
+        "proposals": [
+          {
+            "code": "crack",
+            "name": "Vết nứt",
+            "definition": "Đường nứt trên vật liệu, phân biệt mạch ghép và họa tiết.",
+            "confidence": 0.7332768440246582,
+            "xyxy": [
+              0.3314656615257263,
+              0.007254674099385738,
+              0.9643061757087708,
+              1.0
+            ],
+            "objectId": null,
+            "modelId": "crack",
+            "geometryType": "visible_region",
+            "relatedServiceGroups": [
+              "thiet-bi"
+            ]
+          }
+        ],
+        "absenceMeans": "NOT_DETECTED_DOES_NOT_MEAN_NORMAL",
+        "scoreType": "UNCALIBRATED_DETECTOR_SCORE",
+        "modelVersion": "fixgo-multiservice-observer-v2-gated",
+        "releaseSha256": "2bbe78ba3306d0ff8222d08a118dac50d1a24757706c66a7f8ad23858e747734",
+        "models": [
+          {
+            "id": "general",
+            "weightsSha256": "69494714549dd0511415798106ce738054c0e0e656c9c637f9d2ffb922ca5d5c"
+          },
+          {
+            "id": "crack",
+            "weightsSha256": "09752b4af514bc59a6c365ca3c63a546ac9e18f182dd6c4349453c298137e86e"
+          }
+        ],
+        "coverage": [
+          {
+            "categorySlug": "sua-dien",
+            "status": "experimental_sign_proposals",
+            "signCodes": [
+              "scorched_outlet",
+              "socket_damage_or_displacement",
+              "exposed_conductor"
+            ],
+            "availableSignCodes": [],
+            "unavailableSignCodes": [
+              "scorched_outlet",
+              "socket_damage_or_displacement",
+              "exposed_conductor"
+            ]
+          },
+          {
+            "categorySlug": "sua-nuoc",
+            "status": "experimental_sign_proposals",
+            "signCodes": [
+              "visible_water",
+              "stain_or_discoloration"
+            ],
+            "availableSignCodes": [],
+            "unavailableSignCodes": [
+              "visible_water",
+              "stain_or_discoloration"
+            ]
+          },
+          {
+            "categorySlug": "dien-lanh",
+            "status": "experimental_sign_proposals",
+            "signCodes": [
+              "surface_soiling",
+              "stain_or_discoloration"
+            ],
+            "availableSignCodes": [],
+            "unavailableSignCodes": [
+              "surface_soiling",
+              "stain_or_discoloration"
+            ]
+          },
+          {
+            "categorySlug": "thiet-bi",
+            "status": "experimental_sign_proposals",
+            "signCodes": [
+              "broken_part",
+              "surface_soiling",
+              "peeling_surface",
+              "crack"
+            ],
+            "availableSignCodes": [
+              "crack"
+            ],
+            "unavailableSignCodes": [
+              "broken_part",
+              "surface_soiling",
+              "peeling_surface"
+            ]
+          },
+          {
+            "categorySlug": "giup-viec",
+            "status": "experimental_sign_proposals",
+            "signCodes": [
+              "surface_soiling",
+              "stain_or_discoloration",
+              "mold_like_growth"
+            ],
+            "availableSignCodes": [],
+            "unavailableSignCodes": [
+              "surface_soiling",
+              "stain_or_discoloration",
+              "mold_like_growth"
+            ]
+          },
+          {
+            "categorySlug": "lam-vuon",
+            "status": "no_domain_dataset",
+            "signCodes": [],
+            "availableSignCodes": [],
+            "unavailableSignCodes": []
+          }
+        ],
+        "degradedModels": [],
+        "qualityStatus": "PILOT_AI_UNVERIFIED",
+        "contextStatus": "category_scoped",
+        "suppressedCount": 0,
+        "unavailableSigns": [
+          {
+            "code": "broken_part",
+            "name": "Phần gãy/vỡ nhìn thấy",
+            "reason": "insufficient_development_quality"
+          },
+          {
+            "code": "exposed_conductor",
+            "name": "Lõi dây điện nhìn thấy",
+            "reason": "insufficient_development_quality"
+          },
+          {
+            "code": "mold_like_growth",
+            "name": "Mảng bám nghi nấm/rêu",
+            "reason": "insufficient_development_quality"
+          },
+          {
+            "code": "peeling_surface",
+            "name": "Bong/tróc bề mặt",
+            "reason": "insufficient_development_quality"
+          },
+          {
+            "code": "scorched_outlet",
+            "name": "Ổ cắm có dấu cháy/xém",
+            "reason": "insufficient_development_quality"
+          },
+          {
+            "code": "socket_damage_or_displacement",
+            "name": "Ổ cắm hư hại/lệch khỏi mặt lắp",
+            "reason": "insufficient_development_quality"
+          },
+          {
+            "code": "stain_or_discoloration",
+            "name": "Vết ố/đổi màu",
+            "reason": "insufficient_development_quality"
+          },
+          {
+            "code": "surface_soiling",
+            "name": "Bụi/bẩn bám",
+            "reason": "insufficient_development_quality"
+          },
+          {
+            "code": "visible_water",
+            "name": "Vùng nước nhìn thấy",
+            "reason": "insufficient_development_quality"
+          }
+        ],
+        "evaluationStatus": "limited_scope_evaluated",
+        "evaluationSampleCount": 91
+      },
+      "decision_source": "clip",
+      "engine": "model",
+      "model_version": "fixgo-ai-rec-v2-multiservice",
+      "notes": "Chẩn đoán danh mục và đối tượng thành công."
+    }
+  },
+  "tests": {
+    "python": 9,
+    "backend": 10,
+    "customerUI": 10,
+    "realASGIImages": 5
+  },
+  "limitations": [
+    "12 source classes do not have a trained checkpoint",
+    "Backend and physical device not running during live smoke"
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "observedAtClientDate": "2026-11-25",
+  "baseUrl": "http://127.0.0.1:8000",
+  "health": {
+    "status": "online",
+    "service": "FixGo Pro AI Service",
+    "version": "2.0.0",
+    "clip": true,
+    "classifier_mode": "clip",
+    "engine": "model",
+    "models_loaded": {
+      "yolo_cls": true,
+      "yolo_detect": true,
+      "visual_service": false,
+      "face_detector": true,
+      "face_recognizer": true,
+      "opencv_cv": true,
+      "clip": true
+    },
+    "weights_available": [
+      "blaze_face_short_range.tflite",
+      "face_detection_yunet_2023mar.onnx",
+      "yolov8n-cls-fixgo.pt",
+      "face_recognition_sface_2021dec.onnx",
+      "yolov8n.pt"
+    ]
+  },
+  "catalog": {
+    "source": "backend",
+    "version": "073995e435f1",
+    "updatedAt": 1795567075.0347197,
+    "targetCount": 70
+  },
+  "scope": "read-only GET and pure inference; no sync/train/business order calls"
+}
